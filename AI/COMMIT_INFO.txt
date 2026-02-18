@@ -1,6 +1,9 @@
-Initial scaffold commit to bootstrap DSC-modernization repository.
-Files: README.md, .gitignore, .github/workflows/dotnet.yml, AI/
+pre-scrub-backup branch created before history rewrite (unrelated prior repo).
+Local scaffold commit performed on 2026-02-18.
+Initial scaffold commit message: "chore(init): scaffold DSC-modernization with README, .gitignore, CI, and AI tracking"
 
-Date: 2026-02-18
+Spec Kit subtree import:
+- Upstream: https://github.com/github/spec-kit.git
+- Imported commit (short): 9f3adc7 from branch `main` (imported as subtree at `spec/spec-kit`)
 
-Notes: Repository will be used to host Spec Kit specification and the .NET modernization work.
+Other actions recorded in AI/CHANGES.csv

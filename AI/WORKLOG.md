@@ -8,21 +8,30 @@ Actions:
 - Created repository scaffold: `README.md`, `.gitignore`, `.github/workflows/dotnet.yml`.
 - Added this `AI` folder to track progress and decisions for the modernization effort.
 
-Next steps:
-- Initialize the repository, push to GitHub under `rloisell/DSC-modernization`.
-- Integrate the Spec Kit and scaffold .NET solution.
-
 Repository creation:
 
 - 2026-02-18: Repository `rloisell/DSC-modernization` created on GitHub and initial scaffold pushed by assistant.
 
 Remote: https://github.com/rloisell/DSC-modernization
 
-Spec Kit integration (attempt):
+Spec Kit integration:
 
-- 2026-02-18: Attempted to add Spec Kit as a git subtree under `spec/spec-kit` from `https://github.com/microsoft/spec-kit.git`, but the upstream repository was not found. A local placeholder `spec/README.md` has been added; please provide the correct upstream repo URL if you want the subtree imported, or confirm that we should vendor the Spec Kit contents instead.
+- 2026-02-18: Successfully imported the Spec Kit as a git subtree under `spec/spec-kit` from `https://github.com/github/spec-kit.git`.
+- Imported upstream commit (short SHA): `9f3adc7` (from `spec-upstream/main`).
+- See `spec/SUBTREE_POLICY.md` for subtree management instructions.
 
 License:
 
 - 2026-02-18: Added `LICENSE` (Apache-2.0, Copyright 2026 rloisell).
 
+Notes:
+- The Spec Kit is vendored as a subtree to simplify contributor workflow while keeping an upstream reference for occasional pulls.
+- To update the Spec Kit from upstream, run:
+
+```bash
+git fetch spec-upstream
+git subtree pull --prefix=spec/spec-kit spec-upstream main --squash
+```
+
+AI tracking:
+- This file, `AI/CHANGES.csv`, and `AI/COMMIT_INFO.txt` record actions and upstream commit references.
