@@ -3,3 +3,7 @@ AI/WORKLOG.md,added,initial worklog for repo bootstrap
 README.md,added,project description
 .gitignore,added,ignore .NET artifacts
 .github/workflows/dotnet.yml,added,CI workflow to build .NET
+AI/repo-create,completed,repo created and initial scaffold pushed to GitHub
+LICENSE,added,Apache-2.0 license added
+spec/SUBTREE_POLICY.md,added,policy for managing spec-kit as a subtree
+spec/spec-kit,failed,subtree import failed: upstream repository not found at https://github.com/microsoft/spec-kit.git
