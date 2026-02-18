@@ -1,0 +1,17 @@
+## Visual Studio / .NET
+bin/
+obj/
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Rider
+target/
+
+# Logs
+.log
+
+# OS
+.DS_Store

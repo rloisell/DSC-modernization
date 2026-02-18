@@ -1,0 +1,5 @@
+path,action,notes
+AI/WORKLOG.md,added,initial worklog for repo bootstrap
+README.md,added,project description
+.gitignore,added,ignore .NET artifacts
+.github/workflows/dotnet.yml,added,CI workflow to build .NET
