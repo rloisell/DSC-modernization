@@ -35,3 +35,9 @@ git subtree pull --prefix=spec/spec-kit spec-upstream main --squash
 
 AI tracking:
 - This file, `AI/CHANGES.csv`, and `AI/COMMIT_INFO.txt` record actions and upstream commit references.
+
+Environment setup:
+
+- 2026-02-18: .NET SDK installed locally into `$HOME/.dotnet` using the Microsoft `dotnet-install` script. Installed SDK version: `8.0.418` (commit 5854a779c1). `DOTNET_ROOT` is set to `$HOME/.dotnet`; the install script appended PATH exports to `~/.zshrc`.
+
+Next step: scaffold the .NET solution and projects (I'll generate templates and csproj files next).
