@@ -11,3 +11,38 @@ export async function createWorkItem(item) {
   const res = await axios.post(API_URL, item);
   return res.data;
 }
+
+// Convenience helper to create a work item including legacy Java fields.
+export async function createWorkItemWithLegacy({
+  title,
+  projectId,
+  description,
+  legacyActivityId,
+  date,
+  startTime,
+  endTime,
+  plannedDuration,
+  actualDuration,
+  activityCode,
+  networkNumber,
+  estimatedHours,
+  remainingHours
+}) {
+  const payload = {
+    title,
+    projectId,
+    description,
+    legacyActivityId,
+    date,
+    startTime,
+    endTime,
+    plannedDuration,
+    actualDuration,
+    activityCode,
+    networkNumber,
+    estimatedHours,
+    remainingHours
+  };
+  const res = await axios.post(API_URL, payload);
+  return res.data;
+}

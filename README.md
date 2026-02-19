@@ -144,3 +144,5 @@ API update: The API now exposes legacy Java model fields via DTOs so the fronten
 
 - Frontend: `src/DSC.WebClient/src/pages/Project.jsx` and `src/DSC.WebClient/src/pages/Activity.jsx` were updated to render the legacy `projectNo` and work-item legacy fields respectively.
 
+- Work-item create: Added `src/DSC.WebClient/src/api/WorkItemService.js` helper `createWorkItemWithLegacy` and an enhanced create form in `src/DSC.WebClient/src/pages/Activity.jsx` to post legacy activity fields.
+

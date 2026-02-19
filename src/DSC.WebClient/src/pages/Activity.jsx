@@ -1,11 +1,23 @@
 import React, { useEffect, useState } from 'react';
-import { getWorkItems, createWorkItem } from '../api/WorkItemService';
+import { getWorkItems, createWorkItemWithLegacy } from '../api/WorkItemService';
 
 export default function Activity() {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [title, setTitle] = useState('');
   const [desc, setDesc] = useState('');
+  const [projectId, setProjectId] = useState('');
+  const [legacyActivityId, setLegacyActivityId] = useState('');
+  const [date, setDate] = useState('');
+  const [startTime, setStartTime] = useState('');
+  const [endTime, setEndTime] = useState('');
+  const [plannedDuration, setPlannedDuration] = useState('');
+  const [actualDuration, setActualDuration] = useState('');
+  const [activityCode, setActivityCode] = useState('');
+  const [networkNumber, setNetworkNumber] = useState('');
+  const [estimatedHours, setEstimatedHours] = useState('');
+  const [remainingHours, setRemainingHours] = useState('');
   const [creating, setCreating] = useState(false);
 
   useEffect(() => {
@@ -20,9 +32,37 @@ export default function Activity() {
     setCreating(true);
     setError(null);
     try {
-      const item = await createWorkItem({ description: desc });
+      const payload = {
+        title,
+        projectId: projectId || undefined,
+        description: desc,
+        legacyActivityId: legacyActivityId || undefined,
+        date: date || undefined,
+        startTime: startTime || undefined,
+        endTime: endTime || undefined,
+        plannedDuration: plannedDuration ? Number(plannedDuration) : undefined,
+        actualDuration: actualDuration ? Number(actualDuration) : undefined,
+        activityCode: activityCode || undefined,
+        networkNumber: networkNumber ? Number(networkNumber) : undefined,
+        estimatedHours: estimatedHours ? Number(estimatedHours) : undefined,
+        remainingHours: remainingHours ? Number(remainingHours) : undefined
+      };
+
+      const item = await createWorkItemWithLegacy(payload);
       setItems(i => [...i, item]);
+      setTitle('');
       setDesc('');
+      setProjectId('');
+      setLegacyActivityId('');
+      setDate('');
+      setStartTime('');
+      setEndTime('');
+      setPlannedDuration('');
+      setActualDuration('');
+      setActivityCode('');
+      setNetworkNumber('');
+      setEstimatedHours('');
+      setRemainingHours('');
     } catch (e) {
       setError(e.message);
     } finally {
@@ -55,7 +95,19 @@ export default function Activity() {
       </ul>
       <h2>Add Work Item</h2>
       <form onSubmit={handleCreate}>
-        <input value={desc} onChange={e=>setDesc(e.target.value)} placeholder="Description" required />
+        <input value={title} onChange={e=>setTitle(e.target.value)} placeholder="Title" required />
+        <input value={projectId} onChange={e=>setProjectId(e.target.value)} placeholder="Project Id (GUID)" required />
+        <input value={legacyActivityId} onChange={e=>setLegacyActivityId(e.target.value)} placeholder="Legacy Activity ID" />
+        <input value={date} onChange={e=>setDate(e.target.value)} placeholder="Date (YYYY-MM-DD)" />
+        <input value={startTime} onChange={e=>setStartTime(e.target.value)} placeholder="Start Time (HH:mm)" />
+        <input value={endTime} onChange={e=>setEndTime(e.target.value)} placeholder="End Time (HH:mm)" />
+        <input value={plannedDuration} onChange={e=>setPlannedDuration(e.target.value)} placeholder="Planned Duration (hours)" />
+        <input value={actualDuration} onChange={e=>setActualDuration(e.target.value)} placeholder="Actual Duration (hours)" />
+        <input value={activityCode} onChange={e=>setActivityCode(e.target.value)} placeholder="Activity Code" />
+        <input value={networkNumber} onChange={e=>setNetworkNumber(e.target.value)} placeholder="Network Number" />
+        <input value={estimatedHours} onChange={e=>setEstimatedHours(e.target.value)} placeholder="Estimated Hours" />
+        <input value={remainingHours} onChange={e=>setRemainingHours(e.target.value)} placeholder="Remaining Hours" />
+        <textarea value={desc} onChange={e=>setDesc(e.target.value)} placeholder="Description" />
         <button type="submit" disabled={creating}>Create</button>
       </form>
     </div>
