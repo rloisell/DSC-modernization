@@ -1,3 +1,10 @@
+- Implement OpenID Connect config in `src/DSC.Api` (development Keycloak instance) and add an `ExternalIdentity` mapping table for provider subject IDs.
+
+Update (2026-02-19): Implementation progress
+
+- Added `ExternalIdentity` entity at `src/DSC.Data/Models/ExternalIdentity.cs` and registered it in `ApplicationDbContext`.
+- Added `ItemsController` and wired `ApplicationDbContext` to `DSC.Api` so you have a runnable API that maps to the sample OpenAPI contract.
+- Next: I can map the Java model in `https://github.com/rloisell/DSC/tree/master/src/mts/dsc` into the EF entities here and add any missing fields; shall I proceed with that mapping now?
 # Next Steps — Build the Spec-Kitty Project
 
 This document outlines the high-level steps to build the Spec-Kitty spec for this repository, the data you should prepare, and quick links to relevant documentation and examples.
@@ -99,4 +106,27 @@ Paths to review:
 Next recommended actions:
 - Fill `spec.md` with example JSON and DB seed files under `spec/fixtures/`.
 - When ready, run `spec-kitty orchestrate` in a disposable worktree to validate agent workflows.
+
+Update (2026-02-19): Data model & auth plan
+
+- I scaffolded a baseline EF Core data model under `src/DSC.Data/Models/` and `ApplicationDbContext` to provide a full schema to work backwards from. This should make porting the Java `DSC` model straightforward.
+
+- Authentication plan:
+  - Current approach: local accounts are represented in the `User` entity (with `PasswordHash`).
+  - Migration target: brokered identity using OIDC (Keycloak). Planned changes:
+    1. Introduce an `ExternalIdentity` table mapping provider subject ids to `User` records, or migrate to use `sub`/email as primary identifiers.
+    2. Remove local password storage once all users have been migrated and external auth enforced.
+    3. Integrate Keycloak via OpenID Connect in `DSC.Api` using `Microsoft.AspNetCore.Authentication.OpenIdConnect` or `IdentityModel` for token validation.
+
+- Files added as part of the scaffold:
+  - `src/DSC.Data/ApplicationDbContext.cs`
+  - `src/DSC.Data/Models/*` (User, Project, WorkItem, TimeEntry, ProjectAssignment)
+  - `spec/fixtures/openapi/items-api.yaml`, `spec/fixtures/db/seed.sql`
+
+Recommended next steps to port Java model:
+1. Review the Java `DSC` repo model (https://github.com/rloisell/DSC) and map entities/columns to the EF Core classes. Update or add any missing fields.
+2. Add EF Core migrations: `dotnet ef migrations add InitialSchema` and inspect generated SQL.
+3. Seed production-like test data under `spec/fixtures/db/` and run integration tests against local MariaDB.
+4. Implement OpenID Connect config in `src/DSC.Api` (development Keycloak instance) and add an `ExternalIdentity` mapping table for provider subject IDs.
+
 
