@@ -75,6 +75,20 @@ Scaffold results:
 	- Run `dotnet build` and `dotnet test` to validate compatibility and ensure everything compiles.
 	-  Run `dotnet build` and `dotnet test` to validate compatibility and ensure everything compiles. (Completed: 2026-02-19)
 
+2026-02-19 - Spec-Kitty scaffold
+
+- Actions taken:
+	- Ran `spec-kitty upgrade` to migrate project metadata and templates to the current Spec-Kitty layout.
+	- Created a sample feature scaffold at `kitty-specs/001-modernize-api/` with `spec.md` and `tasks.md` to use as a template while researching.
+
+- Status:
+	- `.kittify/` metadata updated: DONE
+	- `kitty-specs/001-modernize-api` scaffold created: DONE
+
+Next steps:
+	- Populate `kitty-specs/001-modernize-api/spec.md` with detailed acceptance criteria and example payloads as you research.
+	- Add seed data under `spec/fixtures/db/` and OpenAPI examples under `spec/fixtures/openapi/` when available.
+
 Build & Test Results (2026-02-19):
 
 - `dotnet --version`: `10.0.103`

@@ -85,3 +85,18 @@ If you want, I can proceed to run `spec-kitty upgrade` and then `spec-kitty spec
 
 ***
 Generated: 2026-02-19 — tracked in `AI/WORKLOG.md`.
+
+Update (2026-02-19): Scaffolding
+
+- I ran `spec-kitty upgrade` to migrate project metadata to the current Spec-Kitty layout.
+- I added a sample feature scaffold at `kitty-specs/001-modernize-api/` containing `spec.md` and `tasks.md`. Use this directory as a template to populate acceptance criteria, sample requests, and seed data as you research.
+
+Paths to review:
+- Feature scaffold: `kitty-specs/001-modernize-api/spec.md`
+- Tasks: `kitty-specs/001-modernize-api/tasks.md`
+- Project metadata: `.kittify/`
+
+Next recommended actions:
+- Fill `spec.md` with example JSON and DB seed files under `spec/fixtures/`.
+- When ready, run `spec-kitty orchestrate` in a disposable worktree to validate agent workflows.
+
