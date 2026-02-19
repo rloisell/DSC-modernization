@@ -20,6 +20,12 @@
       if (fb) fb.style.display = 'none';
 
       // Show runtime errors in the fallback UI
+        // Ensure react-refresh globals exist as no-ops to avoid preamble errors
+        try {
+          window.$RefreshReg$ = window.$RefreshReg$ || function() {};
+          window.$RefreshSig$ = window.$RefreshSig$ || function() { return function() {}; };
+        } catch (e) {}
+
       function showError(msg) {
         if (!fb) return;
         const err = document.getElementById('errorMsg');
