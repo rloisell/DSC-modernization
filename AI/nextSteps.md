@@ -40,7 +40,39 @@ Next steps (recommended, prioritized):
 4. Implement OIDC/Keycloak integration in `src/DSC.Api` and add `ExternalIdentity` mapping data in the DB for brokered logins.
 5. Run end-to-end smoke tests: start MariaDB, apply migrations, run API and Vite, and verify list/create flows in the UI.
 
-If you want, I will proceed to update the API controllers (step 1) so the new fields are surfaced to the client; say "do it" and I'll continue.
+Spec-Kitty / Migration next steps (explicit)
+
+- Prepare a feature spec for "Map Java Data Model" (example location: `kitty-specs/002-map-java-model/spec.md`): include clear acceptance criteria, example JSON payloads, and DB seed expectations.
+
+- Commands to scaffold & validate:
+
+```bash
+# (from repo root) ensure spec-kitty CLI is installed
+which spec-kitty || pipx install spec-kitty
+
+# migrate project metadata (if not already):
+spec-kitty upgrade
+
+# create a feature skeleton interactively or from a template
+spec-kitty specify --path kitty-specs/002-map-java-model
+
+# run orchestration in a disposable worktree (agentic operations may modify the repo)
+spec-kitty orchestrate --worktree-temp
+```
+
+- Migration checklist for the feature:
+  1. Map entities from Java (`external/DSC-java/src/mts/dsc/orm`) into `src/DSC.Data/Models`.
+  2. Add EF Core migrations per logical group (e.g., Projects+Activities, Users+Auth, Calendar) and run `dotnet ef migrations add` for each.
+  3. Apply migrations to a local MariaDB instance for testing:
+
+```bash
+export DSC_Connection="Server=127.0.0.1;Port=3306;Database=dsc_dev;User=dsc_local;Password=dsc_password;"
+dotnet ef database update --project src/DSC.Data --startup-project src/DSC.Api --context ApplicationDbContext
+```
+
+  4. Seed test data under `spec/fixtures/db/` and validate API responses with `curl` or automated tests.
+
+If you want, I can: (A) update API controllers to surface the new fields now, or (B) scaffold the Spec-Kitty feature and populate `spec.md` with acceptance criteria. Which do you prefer? Reply with "API" or "Spec".
 # Next Steps — Build the Spec-Kitty Project
 
 This document outlines the high-level steps to build the Spec-Kitty spec for this repository, the data you should prepare, and quick links to relevant documentation and examples.

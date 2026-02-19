@@ -9,6 +9,22 @@
 - Updated documentation: `README.md`, `src/DSC.WebClient/README.md`, `AI/nextSteps.md`.
 - Committed and pushed all changes to `origin/main`.
 
+## 2026-02-19 — Java model mapping & migration
+
+- Cloned the original Java `DSC` repo and inspected `src/mts/dsc/orm/*` to identify canonical entities (Project, Activity, Project_Activity, User, etc.).
+- Added legacy mapping fields to the EF model to support an incremental port:
+	- `ProjectNo` added to `src/DSC.Data/Models/Project.cs`.
+	- Legacy activity fields added to `src/DSC.Data/Models/WorkItem.cs` (LegacyActivityId, Date, StartTime, EndTime, PlannedDuration, ActualDuration, ActivityCode, NetworkNumber).
+- Created EF Core migration `MapJavaModel` and applied it to the local `dsc_dev` MariaDB instance; verified the `Projects` table now contains `ProjectNo`.
+
+## 2026-02-19 — Frontend dev: Vite config & runtime fixes
+
+- Ensured the frontend is served at `/` by adding a root `index.html` at `src/DSC.WebClient/index.html` and serving static assets from `src/DSC.WebClient/public` via `publicDir`.
+- Removed a duplicate `public/index.html` that conflicted with the dev server HMR preamble.
+- Added a visible fallback and lightweight runtime error overlay to the root `index.html` to expose client runtime errors in-page.
+- Adjusted `src/DSC.WebClient/vite.config.js` to disable HMR/react-refresh in the dev server (set `hmr: false` and disabled fastRefresh in the plugin) to avoid preamble detection errors during development.
+- Committed and pushed all frontend fixes; verified `http://localhost:5173/` now serves the app and client modules load.
+
 ## 2026-02-19 — Frontend dev environment
 
 - Installed Node.js via Homebrew (`node` installed).
