@@ -45,6 +45,7 @@ Next steps (recommended, prioritized):
 7. Flesh out Admin Users and admin section content to mirror legacy forms. — Completed: `AdminUsers` now includes add/edit form fields; other admin pages include planned actions and back links.
 8. Keep Vite build output out of source control (`dist/`). — Completed: `.gitignore` updated.
 9. Expand admin pages with forms/tables based on intended legacy workflows. — Completed: positions, departments, projects, expenses, and activity options include draft forms and placeholder lists.
+10. Wire Admin Users to a basic API (list/create/update/delete). — Completed: `/api/admin/users` controller + React wiring.
 
 Spec-Kitty / Migration next steps (explicit)
 

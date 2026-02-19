@@ -98,6 +98,13 @@ Actions (2026-02-19) — API smoke test
 - Added a current-users table stub to `AdminUsers` and wired placeholder actions across admin pages.
 - Built the web client (`npm run build`) after the admin UI updates.
 
+## 2026-02-19 — Admin wiring (Users)
+
+- Added `AdminUsersController` under `src/DSC.Api/Controllers/` to list/create/update/delete users at `/api/admin/users`.
+- Added admin user DTOs in `src/DSC.Api/DTOs/AdminUserDtos.cs`.
+- Wired `AdminUsers` UI to the admin user API using `src/DSC.WebClient/src/api/AdminUserService.js`.
+- Built the solution and web client to verify compile (`dotnet build` + `npm run build`).
+
 ## 2026-02-19 — Repo hygiene
 
 - Added `src/DSC.WebClient/dist/` to `.gitignore` to keep Vite build output out of version control.
