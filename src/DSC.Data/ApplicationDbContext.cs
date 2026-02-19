@@ -24,6 +24,7 @@ namespace DSC.Data
             modelBuilder.Entity<User>(b =>
             {
                 b.HasKey(u => u.Id);
+                b.Property(u => u.EmpId);
                 b.HasIndex(u => u.Username).IsUnique();
                 b.Property(u => u.Email).IsRequired();
             });
@@ -52,6 +53,12 @@ namespace DSC.Data
                 b.HasKey("ProjectId", "UserId");
                 b.HasOne(pa => pa.Project).WithMany(p => p.Assignments).HasForeignKey(pa => pa.ProjectId).OnDelete(DeleteBehavior.Cascade);
                 b.HasOne(pa => pa.User).WithMany(u => u.ProjectAssignments).HasForeignKey(pa => pa.UserId).OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<UserAuth>(b =>
+            {
+                b.HasKey(ua => ua.UserName);
+                b.HasOne(ua => ua.User).WithMany().HasForeignKey("EmpId");
             });
 
             modelBuilder.Entity<ExternalIdentity>(b =>
