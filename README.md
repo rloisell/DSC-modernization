@@ -155,6 +155,7 @@ API update: The API now exposes legacy Java model fields via DTOs so the fronten
 - Admin UI scaffolding: `AdminUsers` now mirrors the legacy form fields (employee info, position/department assignment, role) with placeholder actions. Other admin pages include planned action lists and back links.
 - Admin UI build-out: positions, departments, projects, expense, and activity options pages now include draft forms and placeholder tables based on intended legacy workflows.
 - Admin Users wiring: `/api/admin/users` endpoints are available and `AdminUsers` now uses real API calls for list/create/update/delete (other admin pages still use placeholders).
+- Admin catalog wiring: positions, departments, projects, expense categories/options, activity codes, and network numbers are now backed by `/api/admin/*` endpoints and wired in the UI via `AdminCatalogService`.
 
 - Frontend build output: `src/DSC.WebClient/dist/` is ignored in git to avoid committing Vite build artifacts.
 

@@ -1,0 +1,100 @@
+import axios from 'axios';
+
+export const AdminCatalogService = {
+  async getPositions() {
+    const res = await axios.get('/api/admin/positions');
+    return res.data;
+  },
+  async createPosition(payload) {
+    const res = await axios.post('/api/admin/positions', payload);
+    return res.data;
+  },
+  async updatePosition(id, payload) {
+    await axios.put(`/api/admin/positions/${id}`, payload);
+  },
+
+  async getDepartments() {
+    const res = await axios.get('/api/admin/departments');
+    return res.data;
+  },
+  async createDepartment(payload) {
+    const res = await axios.post('/api/admin/departments', payload);
+    return res.data;
+  },
+  async updateDepartment(id, payload) {
+    await axios.put(`/api/admin/departments/${id}`, payload);
+  },
+
+  async getProjects() {
+    const res = await axios.get('/api/admin/projects');
+    return res.data;
+  },
+  async createProject(payload) {
+    const res = await axios.post('/api/admin/projects', payload);
+    return res.data;
+  },
+  async updateProject(id, payload) {
+    await axios.put(`/api/admin/projects/${id}`, payload);
+  },
+
+  async getExpenseCategories() {
+    const res = await axios.get('/api/admin/expense-categories');
+    return res.data;
+  },
+  async createExpenseCategory(payload) {
+    const res = await axios.post('/api/admin/expense-categories', payload);
+    return res.data;
+  },
+  async updateExpenseCategory(id, payload) {
+    await axios.put(`/api/admin/expense-categories/${id}`, payload);
+  },
+
+  async getExpenseOptions(categoryId) {
+    const res = await axios.get('/api/admin/expense-options', {
+      params: categoryId ? { categoryId } : undefined
+    });
+    return res.data;
+  },
+  async createExpenseOption(payload) {
+    const res = await axios.post('/api/admin/expense-options', payload);
+    return res.data;
+  },
+  async updateExpenseOption(id, payload) {
+    await axios.put(`/api/admin/expense-options/${id}`, payload);
+  },
+
+  async getActivityCodes() {
+    const res = await axios.get('/api/admin/activity-codes');
+    return res.data;
+  },
+  async createActivityCode(payload) {
+    const res = await axios.post('/api/admin/activity-codes', payload);
+    return res.data;
+  },
+  async updateActivityCode(id, payload) {
+    await axios.put(`/api/admin/activity-codes/${id}`, payload);
+  },
+
+  async getNetworkNumbers() {
+    const res = await axios.get('/api/admin/network-numbers');
+    return res.data;
+  },
+  async createNetworkNumber(payload) {
+    const res = await axios.post('/api/admin/network-numbers', payload);
+    return res.data;
+  },
+  async updateNetworkNumber(id, payload) {
+    await axios.put(`/api/admin/network-numbers/${id}`, payload);
+  },
+
+  async getProjectActivityOptions(projectId) {
+    const res = await axios.get('/api/admin/project-activity-options', {
+      params: projectId ? { projectId } : undefined
+    });
+    return res.data;
+  },
+  async createProjectActivityOption(payload) {
+    const res = await axios.post('/api/admin/project-activity-options', payload);
+    return res.data;
+  }
+};

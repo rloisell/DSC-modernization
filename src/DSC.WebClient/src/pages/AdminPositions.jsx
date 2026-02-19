@@ -1,16 +1,58 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { AdminCatalogService } from '../api/AdminCatalogService';
 
 export default function AdminPositions() {
   const [message, setMessage] = useState('');
-  const positions = [
-    { id: 1, title: 'Supervisor', description: 'Field supervisor', status: 'Active' },
-    { id: 2, title: 'Technician', description: 'Maintenance technician', status: 'Active' }
-  ];
+  const [positions, setPositions] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [form, setForm] = useState({ title: '', description: '', status: 'active' });
 
-  function handleSubmit(e) {
+  useEffect(() => {
+    AdminCatalogService.getPositions()
+      .then(setPositions)
+      .catch(e => setError(e.message))
+      .finally(() => setLoading(false));
+  }, []);
+
+  function updateForm(field, value) {
+    setForm(prev => ({ ...prev, [field]: value }));
+  }
+
+  async function handleSubmit(e) {
     e.preventDefault();
-    setMessage('Position changes are not wired to the API yet.');
+    setMessage('');
+    setError(null);
+    try {
+      await AdminCatalogService.createPosition({
+        title: form.title,
+        description: form.description
+      });
+      const refreshed = await AdminCatalogService.getPositions();
+      setPositions(refreshed);
+      setForm({ title: '', description: '', status: 'active' });
+      setMessage('Position created.');
+    } catch (e) {
+      setError(e.message);
+    }
+  }
+
+  async function handleDeactivate(position) {
+    setMessage('');
+    setError(null);
+    try {
+      await AdminCatalogService.updatePosition(position.id, {
+        title: position.title,
+        description: position.description,
+        isActive: false
+      });
+      const refreshed = await AdminCatalogService.getPositions();
+      setPositions(refreshed);
+      setMessage('Position deactivated.');
+    } catch (e) {
+      setError(e.message);
+    }
   }
 
   return (
@@ -24,13 +66,24 @@ export default function AdminPositions() {
           <div>
             <label>
               Title
-              <input type="text" name="title" />
+              <input
+                type="text"
+                name="title"
+                value={form.title}
+                onChange={e => updateForm('title', e.target.value)}
+                required
+              />
             </label>
           </div>
           <div>
             <label>
               Description
-              <input type="text" name="description" />
+              <input
+                type="text"
+                name="description"
+                value={form.description}
+                onChange={e => updateForm('description', e.target.value)}
+              />
             </label>
           </div>
           <div>
@@ -61,16 +114,18 @@ export default function AdminPositions() {
               <tr key={position.id}>
                 <td>{position.title}</td>
                 <td>{position.description}</td>
-                <td>{position.status}</td>
+                <td>{position.isActive ? 'Active' : 'Inactive'}</td>
                 <td>
                   <button type="button" onClick={() => setMessage('Edit position is not wired to the API yet.')}>Edit</button>
-                  <button type="button" onClick={() => setMessage('Deactivate position is not wired to the API yet.')}>Deactivate</button>
+                  <button type="button" onClick={() => handleDeactivate(position)}>Deactivate</button>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
       </section>
+      {loading ? <p>Loading...</p> : null}
+      {error ? <p style={{color:'red'}}>Error: {error}</p> : null}
       {message ? <p>{message}</p> : null}
     </div>
   );

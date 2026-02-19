@@ -1,0 +1,167 @@
+using System;
+
+namespace DSC.Api.DTOs
+{
+    public class PositionDto
+    {
+        public Guid Id { get; set; }
+        public string Title { get; set; } = string.Empty;
+        public string? Description { get; set; }
+        public bool IsActive { get; set; }
+    }
+
+    public class PositionCreateRequest
+    {
+        public string Title { get; set; } = string.Empty;
+        public string? Description { get; set; }
+    }
+
+    public class PositionUpdateRequest
+    {
+        public string Title { get; set; } = string.Empty;
+        public string? Description { get; set; }
+        public bool IsActive { get; set; }
+    }
+
+    public class DepartmentDto
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public string? ManagerName { get; set; }
+        public bool IsActive { get; set; }
+    }
+
+    public class DepartmentCreateRequest
+    {
+        public string Name { get; set; } = string.Empty;
+        public string? ManagerName { get; set; }
+    }
+
+    public class DepartmentUpdateRequest
+    {
+        public string Name { get; set; } = string.Empty;
+        public string? ManagerName { get; set; }
+        public bool IsActive { get; set; }
+    }
+
+    public class ExpenseCategoryDto
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public bool IsActive { get; set; }
+    }
+
+    public class ExpenseCategoryCreateRequest
+    {
+        public string Name { get; set; } = string.Empty;
+    }
+
+    public class ExpenseCategoryUpdateRequest
+    {
+        public string Name { get; set; } = string.Empty;
+        public bool IsActive { get; set; }
+    }
+
+    public class ExpenseOptionDto
+    {
+        public Guid Id { get; set; }
+        public Guid ExpenseCategoryId { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public bool IsActive { get; set; }
+    }
+
+    public class ExpenseOptionCreateRequest
+    {
+        public Guid ExpenseCategoryId { get; set; }
+        public string Name { get; set; } = string.Empty;
+    }
+
+    public class ExpenseOptionUpdateRequest
+    {
+        public string Name { get; set; } = string.Empty;
+        public bool IsActive { get; set; }
+    }
+
+    public class ActivityCodeDto
+    {
+        public Guid Id { get; set; }
+        public string Code { get; set; } = string.Empty;
+        public string? Description { get; set; }
+        public bool IsActive { get; set; }
+    }
+
+    public class ActivityCodeCreateRequest
+    {
+        public string Code { get; set; } = string.Empty;
+        public string? Description { get; set; }
+    }
+
+    public class ActivityCodeUpdateRequest
+    {
+        public string Code { get; set; } = string.Empty;
+        public string? Description { get; set; }
+        public bool IsActive { get; set; }
+    }
+
+    public class NetworkNumberDto
+    {
+        public Guid Id { get; set; }
+        public int Number { get; set; }
+        public string? Description { get; set; }
+        public bool IsActive { get; set; }
+    }
+
+    public class NetworkNumberCreateRequest
+    {
+        public int Number { get; set; }
+        public string? Description { get; set; }
+    }
+
+    public class NetworkNumberUpdateRequest
+    {
+        public int Number { get; set; }
+        public string? Description { get; set; }
+        public bool IsActive { get; set; }
+    }
+
+    public class AdminProjectDto
+    {
+        public Guid Id { get; set; }
+        public string? ProjectNo { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public string? Description { get; set; }
+        public decimal? EstimatedHours { get; set; }
+        public bool IsActive { get; set; }
+    }
+
+    public class AdminProjectCreateRequest
+    {
+        public string? ProjectNo { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public string? Description { get; set; }
+        public decimal? EstimatedHours { get; set; }
+    }
+
+    public class AdminProjectUpdateRequest
+    {
+        public string? ProjectNo { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public string? Description { get; set; }
+        public decimal? EstimatedHours { get; set; }
+        public bool IsActive { get; set; }
+    }
+
+    public class ProjectActivityOptionDto
+    {
+        public Guid ProjectId { get; set; }
+        public Guid ActivityCodeId { get; set; }
+        public Guid NetworkNumberId { get; set; }
+    }
+
+    public class ProjectActivityOptionCreateRequest
+    {
+        public Guid ProjectId { get; set; }
+        public Guid ActivityCodeId { get; set; }
+        public Guid NetworkNumberId { get; set; }
+    }
+}

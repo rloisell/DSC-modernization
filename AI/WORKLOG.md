@@ -105,6 +105,14 @@ Actions (2026-02-19) — API smoke test
 - Wired `AdminUsers` UI to the admin user API using `src/DSC.WebClient/src/api/AdminUserService.js`.
 - Built the solution and web client to verify compile (`dotnet build` + `npm run build`).
 
+## 2026-02-19 — Admin wiring (Catalog)
+
+- Added admin entities (Position, Department, ExpenseCategory, ExpenseOption, ActivityCode, NetworkNumber, ProjectActivityOption) and `Project.IsActive`.
+- Added migrations `AdminEntities` and `ProjectIsActive`, applied to local DB.
+- Added admin controllers for positions, departments, projects, expense categories/options, activity codes, network numbers, and project activity assignments.
+- Wired admin pages to real APIs using `AdminCatalogService`.
+- Rebuilt the solution and web client after wiring.
+
 ## 2026-02-19 — Repo hygiene
 
 - Added `src/DSC.WebClient/dist/` to `.gitignore` to keep Vite build output out of version control.

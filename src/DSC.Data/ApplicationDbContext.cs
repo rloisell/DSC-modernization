@@ -16,6 +16,13 @@ namespace DSC.Data
         public DbSet<TimeEntry> TimeEntries => Set<TimeEntry>();
         public DbSet<ProjectAssignment> ProjectAssignments => Set<ProjectAssignment>();
         public DbSet<ExternalIdentity> ExternalIdentities => Set<ExternalIdentity>();
+        public DbSet<Position> Positions => Set<Position>();
+        public DbSet<Department> Departments => Set<Department>();
+        public DbSet<ExpenseCategory> ExpenseCategories => Set<ExpenseCategory>();
+        public DbSet<ExpenseOption> ExpenseOptions => Set<ExpenseOption>();
+        public DbSet<ActivityCode> ActivityCodes => Set<ActivityCode>();
+        public DbSet<NetworkNumber> NetworkNumbers => Set<NetworkNumber>();
+        public DbSet<ProjectActivityOption> ProjectActivityOptions => Set<ProjectActivityOption>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -33,6 +40,7 @@ namespace DSC.Data
             {
                 b.HasKey(p => p.Id);
                 b.Property(p => p.Name).IsRequired();
+                b.Property(p => p.IsActive).HasDefaultValue(true);
             });
 
             modelBuilder.Entity<WorkItem>(b =>
@@ -68,6 +76,51 @@ namespace DSC.Data
                 b.HasKey(e => e.Id);
                 b.HasIndex(e => new { e.Provider, e.Subject }).IsUnique();
                 b.HasOne(e => e.User).WithMany().HasForeignKey(e => e.UserId).OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<Position>(b =>
+            {
+                b.HasKey(p => p.Id);
+                b.HasIndex(p => p.Title).IsUnique();
+            });
+
+            modelBuilder.Entity<Department>(b =>
+            {
+                b.HasKey(d => d.Id);
+                b.HasIndex(d => d.Name).IsUnique();
+            });
+
+            modelBuilder.Entity<ExpenseCategory>(b =>
+            {
+                b.HasKey(c => c.Id);
+                b.HasIndex(c => c.Name).IsUnique();
+            });
+
+            modelBuilder.Entity<ExpenseOption>(b =>
+            {
+                b.HasKey(o => o.Id);
+                b.HasOne(o => o.Category).WithMany(c => c.Options).HasForeignKey(o => o.ExpenseCategoryId).OnDelete(DeleteBehavior.Cascade);
+                b.HasIndex(o => new { o.ExpenseCategoryId, o.Name }).IsUnique();
+            });
+
+            modelBuilder.Entity<ActivityCode>(b =>
+            {
+                b.HasKey(a => a.Id);
+                b.HasIndex(a => a.Code).IsUnique();
+            });
+
+            modelBuilder.Entity<NetworkNumber>(b =>
+            {
+                b.HasKey(n => n.Id);
+                b.HasIndex(n => n.Number).IsUnique();
+            });
+
+            modelBuilder.Entity<ProjectActivityOption>(b =>
+            {
+                b.HasKey(p => new { p.ProjectId, p.ActivityCodeId, p.NetworkNumberId });
+                b.HasOne(p => p.Project).WithMany().HasForeignKey(p => p.ProjectId).OnDelete(DeleteBehavior.Cascade);
+                b.HasOne(p => p.ActivityCode).WithMany().HasForeignKey(p => p.ActivityCodeId).OnDelete(DeleteBehavior.Cascade);
+                b.HasOne(p => p.NetworkNumber).WithMany().HasForeignKey(p => p.NetworkNumberId).OnDelete(DeleteBehavior.Cascade);
             });
         }
     }

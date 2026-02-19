@@ -1,16 +1,58 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { AdminCatalogService } from '../api/AdminCatalogService';
 
 export default function AdminDepartments() {
   const [message, setMessage] = useState('');
-  const departments = [
-    { id: 1, name: 'Operations', manager: 'C. Lopez', status: 'Active' },
-    { id: 2, name: 'Engineering', manager: 'A. Patel', status: 'Active' }
-  ];
+  const [departments, setDepartments] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [form, setForm] = useState({ name: '', manager: '', status: 'active' });
 
-  function handleSubmit(e) {
+  useEffect(() => {
+    AdminCatalogService.getDepartments()
+      .then(setDepartments)
+      .catch(e => setError(e.message))
+      .finally(() => setLoading(false));
+  }, []);
+
+  function updateForm(field, value) {
+    setForm(prev => ({ ...prev, [field]: value }));
+  }
+
+  async function handleSubmit(e) {
     e.preventDefault();
-    setMessage('Department changes are not wired to the API yet.');
+    setMessage('');
+    setError(null);
+    try {
+      await AdminCatalogService.createDepartment({
+        name: form.name,
+        managerName: form.manager
+      });
+      const refreshed = await AdminCatalogService.getDepartments();
+      setDepartments(refreshed);
+      setForm({ name: '', manager: '', status: 'active' });
+      setMessage('Department created.');
+    } catch (e) {
+      setError(e.message);
+    }
+  }
+
+  async function handleDeactivate(dept) {
+    setMessage('');
+    setError(null);
+    try {
+      await AdminCatalogService.updateDepartment(dept.id, {
+        name: dept.name,
+        managerName: dept.managerName,
+        isActive: false
+      });
+      const refreshed = await AdminCatalogService.getDepartments();
+      setDepartments(refreshed);
+      setMessage('Department deactivated.');
+    } catch (e) {
+      setError(e.message);
+    }
   }
 
   return (
@@ -24,13 +66,25 @@ export default function AdminDepartments() {
           <div>
             <label>
               Department Name
-              <input type="text" name="name" />
+              <input
+                type="text"
+                name="name"
+                value={form.name}
+                onChange={e => updateForm('name', e.target.value)}
+                required
+              />
             </label>
           </div>
           <div>
             <label>
               Manager
-              <input type="text" name="manager" placeholder="Select user" />
+              <input
+                type="text"
+                name="manager"
+                placeholder="Select user"
+                value={form.manager}
+                onChange={e => updateForm('manager', e.target.value)}
+              />
             </label>
           </div>
           <div>
@@ -60,17 +114,19 @@ export default function AdminDepartments() {
             {departments.map(dept => (
               <tr key={dept.id}>
                 <td>{dept.name}</td>
-                <td>{dept.manager}</td>
-                <td>{dept.status}</td>
+                <td>{dept.managerName || '-'}</td>
+                <td>{dept.isActive ? 'Active' : 'Inactive'}</td>
                 <td>
                   <button type="button" onClick={() => setMessage('Edit department is not wired to the API yet.')}>Edit</button>
-                  <button type="button" onClick={() => setMessage('Deactivate department is not wired to the API yet.')}>Deactivate</button>
+                  <button type="button" onClick={() => handleDeactivate(dept)}>Deactivate</button>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
       </section>
+      {loading ? <p>Loading...</p> : null}
+      {error ? <p style={{color:'red'}}>Error: {error}</p> : null}
       {message ? <p>{message}</p> : null}
     </div>
   );
