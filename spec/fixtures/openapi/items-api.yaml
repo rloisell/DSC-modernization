@@ -1,0 +1,71 @@
+openapi: 3.0.3
+info:
+  title: DSC Items API (sample)
+  version: "0.1.0"
+  description: Minimal OpenAPI contract for the sample `Items` endpoints used by `001-modernize-api` feature.
+
+paths:
+  /api/items/{id}:
+    get:
+      summary: Get item by id
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Item found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Item'
+        '404':
+          description: Item not found
+
+  /api/items:
+    post:
+      summary: Create new item
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ItemCreate'
+      responses:
+        '201':
+          description: Created
+          headers:
+            Location:
+              description: URL of the created resource
+              schema:
+                type: string
+        '400':
+          description: Validation errors
+
+components:
+  schemas:
+    Item:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        description:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      required: [id, name, createdAt]
+
+    ItemCreate:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+      required: [name]

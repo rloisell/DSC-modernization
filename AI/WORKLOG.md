@@ -85,6 +85,8 @@ Scaffold results:
 	- `.kittify/` metadata updated: DONE
 	- `kitty-specs/001-modernize-api` scaffold created: DONE
 
+	- Added fixtures: `spec/fixtures/openapi/items-api.yaml`, `spec/fixtures/db/seed.sql`, `spec/fixtures/README.md` to support the sample feature.
+
 Next steps:
 	- Populate `kitty-specs/001-modernize-api/spec.md` with detailed acceptance criteria and example payloads as you research.
 	- Add seed data under `spec/fixtures/db/` and OpenAPI examples under `spec/fixtures/openapi/` when available.
