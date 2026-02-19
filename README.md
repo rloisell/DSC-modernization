@@ -1,3 +1,12 @@
+## WebClient (React) Progress — 2026-02-19
+
+- All static assets from legacy `WebContent` (CSS, JS, images, calendar libs) are now in `src/DSC.WebClient/public`.
+- React page stubs for `Activity`, `Project`, `Administrator`, and `Login` are in `src/DSC.WebClient/src/pages/`.
+- Routing matches legacy JSPs; see `src/DSC.WebClient/src/App.jsx`.
+- API service layer (`src/DSC.WebClient/src/api/`) uses `axios` for backend calls. Example: `ProjectService.js`.
+- `Project` page fetches and displays project data from `/api/projects`.
+- All required npm dependencies installed.
+- Docs updated and changes pushed.
 # DSC-modernization
 
 Spec-driven modernization of the DSC Java application to .NET 10, using a Spec-Kitty-driven workflow.
@@ -96,6 +105,8 @@ npm run dev
 ```
 
 If `npm` is not installed on your machine, install Node.js (Homebrew: `brew install node`) and re-run the commands above.
+
+Note: On this machine I installed Node.js via Homebrew and started the Vite dev server for the client. The client is available at `http://localhost:5173` (run `npm run dev` in `src/DSC.WebClient` if you need to restart it).
 ```
 
 Notes
@@ -103,3 +114,27 @@ Notes
 - All AI-driven steps, logs, and commands are tracked under the `AI/` folder; review `AI/WORKLOG.md` and `AI/nextSteps.md` before running agent workflows.
 
 If you'd like, I can scaffold example features with `spec-kitty specify` and run an initial `spec-kitty orchestrate` in a disposable worktree. Stop me if you prefer to author the first feature text yourself.
+
+## Recent mapping update & Local GUI test
+
+- An EF Core migration `MapJavaModel` was created and applied locally to add legacy mapping fields (for example, `ProjectNo`) to support the Java → EF incremental port.
+
+### Local GUI test (quick)
+
+Start the frontend (from repo root):
+
+```bash
+cd src/DSC.WebClient
+npm install    # first time only
+npm run dev -- --host 0.0.0.0 --port 5173
+```
+
+Start the API (from repo root):
+
+```bash
+export ConnectionStrings__DefaultConnection="Server=127.0.0.1;Port=3306;Database=dsc_dev;User=dsc_local;Password=dsc_password;"
+dotnet run --project src/DSC.Api --urls http://localhost:5005
+```
+
+Open the GUI at: http://localhost:5173/ (the API is available at http://localhost:5005/)
+

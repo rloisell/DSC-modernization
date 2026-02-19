@@ -1,3 +1,18 @@
+# WebClient progress (2026-02-19)
+
+- All static assets from legacy `WebContent` (CSS, JS, images, calendar libs) are now in `src/DSC.WebClient/public`.
+- React page stubs for `Activity`, `Project`, `Administrator`, and `Login` are in `src/DSC.WebClient/src/pages/`.
+- Routing matches legacy JSPs; see `src/DSC.WebClient/src/App.jsx`.
+- API service layer (`src/DSC.WebClient/src/api/`) uses `axios` for backend calls. Example: `ProjectService.js`.
+- `Project` page fetches and displays project data from `/api/projects`.
+- All required npm dependencies installed.
+- Docs updated and changes pushed.
+
+Next steps:
+- Port business logic/UI from JSPs into React components.
+- Expand API service layer as new endpoints are needed.
+- Refine data model and connect more pages to backend data.
+- Begin OIDC integration for login flow (Keycloak).
 - Implement OpenID Connect config in `src/DSC.Api` (development Keycloak instance) and add an `ExternalIdentity` mapping table for provider subject IDs.
 
 Update (2026-02-19): Implementation progress
@@ -5,6 +20,27 @@ Update (2026-02-19): Implementation progress
 - Added `ExternalIdentity` entity at `src/DSC.Data/Models/ExternalIdentity.cs` and registered it in `ApplicationDbContext`.
 - Added `ItemsController` and wired `ApplicationDbContext` to `DSC.Api` so you have a runnable API that maps to the sample OpenAPI contract.
 - Next: I can map the Java model in `https://github.com/rloisell/DSC/tree/master/src/mts/dsc` into the EF entities here and add any missing fields; shall I proceed with that mapping now?
+# Update (2026-02-19): Java model mapping — IN PROGRESS / APPLIED
+
+- I cloned the Java `DSC` repo and inspected `src/mts/dsc/orm/*` to identify canonical entities (Project, Activity, Project_Activity, User, etc.).
+- I added `ProjectNo` to `src/DSC.Data/Models/Project.cs` to preserve the legacy `Project.projectNo` identifier.
+- I added legacy `Activity` fields to `src/DSC.Data/Models/WorkItem.cs` (LegacyActivityId, Date, StartTime, EndTime, PlannedDuration, ActualDuration, ActivityCode, NetworkNumber) to ease mapping and support migration of UI logic.
+- An EF Core migration `MapJavaModel` was generated and applied to the local `dsc_dev` MariaDB; the `Projects` table now contains `ProjectNo`.
+
+Local GUI test URL (developer):
+
+- Frontend (React/Vite dev server): http://localhost:5173/
+- Backend API (ASP.NET Core): http://localhost:5005/
+
+Next steps (recommended, prioritized):
+
+1. Update API DTOs/controllers to expose legacy fields (include `ProjectNo` and WorkItem legacy fields). This ensures the front-end can consume the legacy identifiers.
+2. Port additional Java entities into EF as required (User, Department, Calendar) and add migrations for each logical group.
+3. Update frontend services (`src/DSC.WebClient/src/api/*`) and pages to use the new legacy fields (e.g., display `ProjectNo` alongside `Name`).
+4. Implement OIDC/Keycloak integration in `src/DSC.Api` and add `ExternalIdentity` mapping data in the DB for brokered logins.
+5. Run end-to-end smoke tests: start MariaDB, apply migrations, run API and Vite, and verify list/create flows in the UI.
+
+If you want, I will proceed to update the API controllers (step 1) so the new fields are surfaced to the client; say "do it" and I'll continue.
 # Next Steps — Build the Spec-Kitty Project
 
 This document outlines the high-level steps to build the Spec-Kitty spec for this repository, the data you should prepare, and quick links to relevant documentation and examples.

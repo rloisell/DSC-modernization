@@ -1,3 +1,21 @@
+## 2026-02-19 — WebClient asset copy, API service, and data fetch
+
+- Copied all relevant static assets from legacy `WebContent` (CSS, JS, images, calendar libs) into `src/DSC.WebClient/public`.
+- Created React page stubs for `Activity`, `Project`, `Administrator`, and `Login` in `src/DSC.WebClient/src/pages/`.
+- Set up routing in `src/DSC.WebClient/src/App.jsx` to match legacy JSP routes.
+- Added a basic API service layer (`src/DSC.WebClient/src/api/`) using `axios` for REST calls to the .NET backend. Example: `ProjectService.js` with `getProjects()` and `createProject()`.
+- The `Project` page now fetches and displays project data from `/api/projects`.
+- Installed all required npm dependencies (`react-router-dom`, `axios`, etc.).
+- Updated documentation: `README.md`, `src/DSC.WebClient/README.md`, `AI/nextSteps.md`.
+- Committed and pushed all changes to `origin/main`.
+
+## 2026-02-19 — Frontend dev environment
+
+- Installed Node.js via Homebrew (`node` installed).
+- Installed frontend dependencies in `src/DSC.WebClient` (React, Vite, router, axios, plugin).
+- Started Vite dev server (local: `http://localhost:5173`).
+
+Notes: If you see a 404 when loading the client, try refreshing once the server finishes compiling; the API must be running at `http://localhost:5005` for the client proxy to reach backend endpoints.
 ## 2026-02-19 — Local DB & migrations
 
 - Installed `dotnet-ef` global tool and added `Microsoft.EntityFrameworkCore.Design` to the startup project to enable design-time services.

@@ -6,6 +6,9 @@ namespace DSC.Data.Models
     public class Project
     {
         public Guid Id { get; set; }
+        // Legacy project identifier from the Java model (Project.projectNo)
+        public string? ProjectNo { get; set; }
+
         public string Name { get; set; } = null!;
         public string? Description { get; set; }
 

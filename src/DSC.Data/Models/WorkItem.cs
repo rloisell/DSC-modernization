@@ -9,8 +9,21 @@ namespace DSC.Data.Models
         public Guid ProjectId { get; set; }
         public Project Project { get; set; } = null!;
 
+        // Legacy mapping fields from Java `Activity`
+        public int? LegacyActivityId { get; set; }
+        public DateTime? Date { get; set; }
+        public DateTime? StartTime { get; set; }
+        public DateTime? EndTime { get; set; }
+        // Planned duration tracked as a TimeSpan
+        public TimeSpan? PlannedDuration { get; set; }
+        public int? ActualDuration { get; set; }
+
         public string Title { get; set; } = null!;
         public string? Description { get; set; }
+
+        // Optional legacy lookup/code fields
+        public string? ActivityCode { get; set; }
+        public string? NetworkNumber { get; set; }
 
         // Estimated and remaining hours for this work item
         public decimal? EstimatedHours { get; set; }
