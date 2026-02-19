@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { getWorkItems, createWorkItemWithLegacy } from '../api/WorkItemService';
+import { getProjects } from '../api/ProjectService';
 
 export default function Activity() {
   const [items, setItems] = useState([]);
+  const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [title, setTitle] = useState('');
@@ -21,8 +23,11 @@ export default function Activity() {
   const [creating, setCreating] = useState(false);
 
   useEffect(() => {
-    getWorkItems()
-      .then(setItems)
+    Promise.all([getWorkItems(), getProjects()])
+      .then(([workItems, projects]) => {
+        setItems(workItems);
+        setProjects(projects);
+      })
       .catch(e => setError(e.message))
       .finally(() => setLoading(false));
   }, []);
@@ -96,7 +101,12 @@ export default function Activity() {
       <h2>Add Work Item</h2>
       <form onSubmit={handleCreate}>
         <input value={title} onChange={e=>setTitle(e.target.value)} placeholder="Title" required />
-        <input value={projectId} onChange={e=>setProjectId(e.target.value)} placeholder="Project Id (GUID)" required />
+        <select value={projectId} onChange={e=>setProjectId(e.target.value)} required>
+          <option value="">Select project</option>
+          {projects.map(p => (
+            <option key={p.id} value={p.id}>{p.projectNo ? `${p.projectNo} — ${p.name}` : p.name}</option>
+          ))}
+        </select>
         <input value={legacyActivityId} onChange={e=>setLegacyActivityId(e.target.value)} placeholder="Legacy Activity ID" />
         <input value={date} onChange={e=>setDate(e.target.value)} placeholder="Date (YYYY-MM-DD)" />
         <input value={startTime} onChange={e=>setStartTime(e.target.value)} placeholder="Start Time (HH:mm)" />

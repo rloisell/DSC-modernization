@@ -71,6 +71,10 @@ Actions (2026-02-19) — API smoke test
 - Added `createWorkItemWithLegacy` helper in `src/DSC.WebClient/src/api/WorkItemService.js` to post work items including legacy fields.
 - Enhanced `src/DSC.WebClient/src/pages/Activity.jsx` with a more complete create form that collects `title`, `projectId`, and legacy activity fields, then posts using the new helper.
 
+## 2026-02-19 — Frontend: project selector
+
+- Enhanced `src/DSC.WebClient/src/pages/Activity.jsx` to load projects from `/api/projects` and present a project selector in the work-item create form. The selector displays `projectNo` (legacy) where available alongside the project `name` so users can continue using legacy identifiers during incremental porting.
+
 ## 2026-02-19 — API: Swagger response types
 
 - Added explicit OpenAPI/Swagger response metadata to controllers so the DTO response shapes appear in Swagger UI:
