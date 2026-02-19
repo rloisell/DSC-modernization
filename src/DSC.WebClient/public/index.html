@@ -6,24 +6,23 @@
     <title>DSC — Frontend</title>
   </head>
   <body>
-    <div id="root"><!-- React will mount here -->
-      <!-- fallback content visible if JS doesn't mount quickly -->
-      <div id="fallback" style="display:none; padding:16px; background:#fff; color:#111; border:1px solid #eee;">
-        <h1>DSC — Frontend (fallback)</h1>
-        <p>If the React app fails to load, this fallback content is shown.</p>
-        <p>Try refreshing the page or check the browser console for errors.</p>
-      </div>
+    <div id="root"><!-- React will mount here --></div>
+    <!-- fallback content visible if React fails to mount -->
+    <div id="fallback" style="padding:16px; background:#fff; color:#111; border:1px solid #eee;">
+      <h1>DSC — Frontend (fallback)</h1>
+      <p>If the React app fails to load, this fallback content is shown.</p>
+      <p>Try refreshing the page or check the browser console for errors.</p>
     </div>
     <script type="module" src="/src/main.jsx"></script>
     <script>
-      // If React hasn't replaced the root within 1500ms, show fallback content.
+      // If React doesn't mount, fallback remains visible. When React mounts it
+      // should hide the fallback. main.jsx will attempt to hide it after render.
+      // Keep this as a safety: if React hasn't mounted after 3s, ensure fallback
+      // is visible (no-op since it's visible by default).
       setTimeout(() => {
-        const root = document.getElementById('root');
-        if (root && root.children.length === 0) {
-          const fb = document.getElementById('fallback');
-          if (fb) fb.style.display = 'block';
-        }
-      }, 1500);
+        const fb = document.getElementById('fallback');
+        if (fb) fb.style.display = 'block';
+      }, 3000);
     </script>
   </body>
 </html>

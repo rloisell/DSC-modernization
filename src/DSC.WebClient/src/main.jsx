@@ -11,3 +11,11 @@ createRoot(document.getElementById('root')).render(
     </BrowserRouter>
   </React.StrictMode>
 )
+
+// Hide the fallback UI (if present) once React has mounted.
+try {
+  const fb = document.getElementById('fallback');
+  if (fb) fb.style.display = 'none';
+} catch (e) {
+  // ignore
+}
