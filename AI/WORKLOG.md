@@ -1,3 +1,28 @@
+## 2026-02-19 — Local DB & migrations
+
+- Installed `dotnet-ef` global tool and added `Microsoft.EntityFrameworkCore.Design` to the startup project to enable design-time services.
+- Added `DesignTimeDbContextFactory` at `src/DSC.Data/DesignTimeDbContextFactory.cs` to avoid AutoDetect requiring a live DB during migrations.
+- Aligned EF Core / Pomelo package versions and generated the `InitialCreate` migration at `src/DSC.Data/Migrations`.
+- Installed MariaDB via Homebrew (`mariadb@10.11`) and started the service.
+- Created the `dsc_dev` database locally (observed TLS/service quirks). The DB exists at the local MariaDB instance.
+
+Actions (2026-02-19): created local DB user and applied migrations/seed
+
+- Restarted MariaDB cleanly and reset the `root` password using a server `--init-file` (temporary): `root_local_pass`.
+- Created application user `dsc_local`@`127.0.0.1` with password `dsc_password` and granted privileges on `dsc_dev`.
+- Applied EF migrations (`InitialCreate`) to `dsc_dev` using `dotnet ef database update`.
+- Applied sample SQL seed: `spec/fixtures/db/seed.sql`.
+
+Actions (2026-02-19) — API smoke test
+
+- Started `DSC.Api` locally on `http://localhost:5005` with `ConnectionStrings:DefaultConnection` pointing to the local `dsc_dev` database.
+- Inserted a `Project` and a `WorkItem` for smoke-testing (one item inserted via SQL, id `44444444-4444-4444-4444-444444444444`).
+- Successfully GET /api/items/44444444-4444-4444-4444-444444444444 returned the seeded WorkItem JSON (200 OK).
+
+Next: run integration tests or create controllers for other resources (Projects, Users) as needed.
+
+Notes: The `root` password reset was performed non-interactively to allow scripting the setup; if you want a different root password or to re-run the secure setup, run `mysql_secure_installation` and change credentials.
+
 # AI Worklog — DSC-modernization
 
 Date: 2026-02-18
@@ -124,4 +149,27 @@ Build & Test Results (2026-02-19):
 - `dotnet test tests/DSC.Tests/DSC.Tests.csproj`: 1 test discovered and passed.
 
 All changes remain committed and pushed to `origin/main`.
+
+## 2026-02-19 — Frontend scaffold
+
+- Added a minimal React/Vite frontend scaffold at `src/DSC.WebClient` to start porting the legacy Java `WebContent` JSP pages into React components.
+
+- Files added:
+	- `src/DSC.WebClient/package.json`
+	- `src/DSC.WebClient/README.md`
+	- `src/DSC.WebClient/public/index.html`
+	- `src/DSC.WebClient/public/assets/css/main.css` (trimmed)
+	- `src/DSC.WebClient/public/assets/js/calendar.js` (placeholder)
+	- `src/DSC.WebClient/src/*` (React entry, App, pages)
+
+- Attempted to run `npm install` in the automation environment but `npm` was not available (zsh: command not found). To finish locally, run:
+
+```
+cd src/DSC.WebClient
+npm install
+npm run dev
+```
+
+This will start the Vite dev server for the client. After installing dependencies, copy static assets from the legacy `WebContent` (css, js, images) into `src/DSC.WebClient/public` and begin porting JSPs to React components.
+
 	- When ready, use Spec-Kitty CLI to build the Spec; I will pause after this step per your instructions.

@@ -89,6 +89,32 @@ spec-kitty merge
 - If you plan to run autonomous agents (`orchestrate`), ensure you understand the permissions they will require — run in a throwaway branch/worktree first.
 
 If you want, I can proceed to run `spec-kitty upgrade` and then `spec-kitty specify` interactively to scaffold a sample feature — tell me whether you prefer to author the initial feature text or have me draft it.
+# Frontend port next steps (2026-02-19)
+
+- Copy the legacy static assets into the client public folder:
+
+  - `WebContent/css/*` -> `src/DSC.WebClient/public/assets/css/`
+  - `WebContent/js/*` -> `src/DSC.WebClient/public/assets/js/`
+  - `WebContent/html/*` and `WebContent/includes/*` -> `src/DSC.WebClient/public/` (or converted into React components)
+  - `WebContent/html/images/*` -> `src/DSC.WebClient/public/assets/images/`
+
+- Implement React routes and components that mirror the JSP pages. Start with:
+  - `activity.jsp` -> `src/DSC.WebClient/src/pages/Activity.jsx`
+  - `project.jsp` -> `src/DSC.WebClient/src/pages/Project.jsx`
+  - `administrator.jsp` -> `src/DSC.WebClient/src/pages/Administrator.jsx`
+  - `login.jsp` -> `src/DSC.WebClient/src/pages/Login.jsx`
+
+- Implement client API services to call the `DSC.Api` endpoints (use `fetch` or `axios`) and move server-side logic into API endpoints where necessary.
+
+- After assets are copied & pages scaffolded, run the client locally:
+
+```
+cd src/DSC.WebClient
+npm install
+npm run dev
+```
+
+If `npm` is not present locally, install Node.js / npm (recommended via Homebrew on macOS: `brew install node`).
 
 ***
 Generated: 2026-02-19 — tracked in `AI/WORKLOG.md`.
@@ -128,5 +154,38 @@ Recommended next steps to port Java model:
 2. Add EF Core migrations: `dotnet ef migrations add InitialSchema` and inspect generated SQL.
 3. Seed production-like test data under `spec/fixtures/db/` and run integration tests against local MariaDB.
 4. Implement OpenID Connect config in `src/DSC.Api` (development Keycloak instance) and add an `ExternalIdentity` mapping table for provider subject IDs.
+
+---
+
+Local DB & Run Instructions (macOS)
+
+- Homebrew MariaDB (installed in this session):
+  - Install: `brew install mariadb@10.11`
+  - Start: `brew services start mariadb@10.11`
+  - Create DB (example):
+    `/opt/homebrew/opt/mariadb@10.11/bin/mysql -h 127.0.0.1 -P 3306 -u root -e "CREATE DATABASE dsc_dev;"`
+  - Note: root access and SSL behavior can vary by install; if you encounter permission/SSL issues use the Docker option below.
+
+- Docker (recommended for isolated local DB):
+  - Start container (example):
+    `docker run --name dsc-mariadb -e MYSQL_ROOT_PASSWORD=localpass -e MYSQL_DATABASE=dsc_dev -p 3306:3306 -d mariadb:10.11`
+  - Connect: `mysql -h 127.0.0.1 -P 3306 -u root -plocalpass`
+  - Create a local user for the app (optional):
+    `CREATE USER 'dsc_local'@'127.0.0.1' IDENTIFIED BY 'dsc_password'; GRANT ALL ON dsc_dev.* TO 'dsc_local'@'127.0.0.1';`
+
+Apply migrations & seed data (example):
+
+```bash
+# Set connection string env var used by the design-time factory
+export DSC_Connection="Server=127.0.0.1;Port=3306;Database=dsc_dev;User=dsc_local;Password=dsc_password;"
+
+# Apply EF migrations to the running DB
+dotnet ef database update --project src/DSC.Data --startup-project src/DSC.Api --context ApplicationDbContext
+
+# Apply SQL seed (items fixture)
+mysql -h 127.0.0.1 -P 3306 -u dsc_local -pdsc_password dsc_dev < spec/fixtures/db/seed.sql
+```
+
+If you'd like, I can try the Docker path now (will pull an image and start a container), create the `dsc_local` user, apply migrations, and seed the DB.
 
 

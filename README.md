@@ -53,6 +53,49 @@ dotnet test tests/DSC.Tests/DSC.Tests.csproj
 spec-kitty verify-setup
 spec-kitty upgrade    # adds metadata scaffolding
 spec-kitty specify    # create feature specs interactively
+
+Run locally (webserver + DB)
+
+- Webserver: the API runs on ASP.NET Core (Kestrel) and can be started with:
+
+```bash
+# Run the API (development)
+dotnet run --project src/DSC.Api
+# or with hot reload
+dotnet watch run --project src/DSC.Api
+```
+
+- Database (two common options on macOS):
+	- Homebrew MariaDB: `brew install mariadb@10.11` and `brew services start mariadb@10.11` (then create `dsc_dev` DB)
+	- Docker MariaDB (recommended for isolated environment):
+		```bash
+		docker run --name dsc-mariadb -e MYSQL_ROOT_PASSWORD=localpass -e MYSQL_DATABASE=dsc_dev -p 3306:3306 -d mariadb:10.11
+		```
+
+After the DB is available, set a connection string (env var used by the design-time factory):
+
+```bash
+export DSC_Connection="Server=127.0.0.1;Port=3306;Database=dsc_dev;User=dsc_local;Password=dsc_password;"
+```
+
+Then apply migrations and seed data (examples):
+
+```bash
+dotnet ef database update --project src/DSC.Data --startup-project src/DSC.Api --context ApplicationDbContext
+mysql -h 127.0.0.1 -P 3306 -u dsc_local -pdsc_password dsc_dev < spec/fixtures/db/seed.sql
+```
+
+Frontend (React/Vite scaffold)
+
+A minimal React client has been added at `src/DSC.WebClient`. To run it locally you will need Node.js and npm installed. Example:
+
+```bash
+cd src/DSC.WebClient
+npm install
+npm run dev
+```
+
+If `npm` is not installed on your machine, install Node.js (Homebrew: `brew install node`) and re-run the commands above.
 ```
 
 Notes

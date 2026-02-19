@@ -58,7 +58,9 @@ namespace DSC.Data
             modelBuilder.Entity<UserAuth>(b =>
             {
                 b.HasKey(ua => ua.UserName);
-                b.HasOne(ua => ua.User).WithMany().HasForeignKey("EmpId");
+                // Legacy mapping: do not enforce FK to User.Id here because legacy EmpId
+                // is a numeric employee identifier that doesn't match the User primary key (Guid).
+                b.Property(ua => ua.EmpId);
             });
 
             modelBuilder.Entity<ExternalIdentity>(b =>
