@@ -44,6 +44,8 @@ namespace DSC.Api.Controllers
         }
 
         [HttpPost]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Post([FromBody] Project dto)
         {
             if (string.IsNullOrWhiteSpace(dto.Name)) return BadRequest(new { error = "Missing required field: Name" });

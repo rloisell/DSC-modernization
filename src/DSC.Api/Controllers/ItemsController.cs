@@ -48,6 +48,8 @@ namespace DSC.Api.Controllers
         }
 
         [HttpPost]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Post([FromBody] WorkItem dto)
         {
             // Basic server-side validation

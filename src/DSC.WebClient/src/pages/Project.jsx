@@ -7,6 +7,7 @@ export default function Project() {
   const [error, setError] = useState(null);
   const [name, setName] = useState('');
   const [desc, setDesc] = useState('');
+  const [projectNo, setProjectNo] = useState('');
   const [creating, setCreating] = useState(false);
 
   useEffect(() => {
@@ -21,10 +22,11 @@ export default function Project() {
     setCreating(true);
     setError(null);
     try {
-      const proj = await createProject({ name, description: desc });
+      const proj = await createProject({ projectNo: projectNo || undefined, name, description: desc });
       setProjects(p => [...p, proj]);
       setName('');
       setDesc('');
+      setProjectNo('');
     } catch (e) {
       setError(e.message);
     } finally {
@@ -47,6 +49,7 @@ export default function Project() {
       </ul>
       <h2>Add Project</h2>
       <form onSubmit={handleCreate}>
+        <input value={projectNo} onChange={e=>setProjectNo(e.target.value)} placeholder="Project No (legacy)" />
         <input value={name} onChange={e=>setName(e.target.value)} placeholder="Name" required />
         <input value={desc} onChange={e=>setDesc(e.target.value)} placeholder="Description" />
         <button type="submit" disabled={creating}>Create</button>
