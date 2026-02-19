@@ -77,19 +77,45 @@ Scaffold results:
 
 2026-02-19 - Spec-Kitty scaffold
 
-- Actions taken:
 	- Ran `spec-kitty upgrade` to migrate project metadata and templates to the current Spec-Kitty layout.
 	- Created a sample feature scaffold at `kitty-specs/001-modernize-api/` with `spec.md` and `tasks.md` to use as a template while researching.
 
-- Status:
 	- `.kittify/` metadata updated: DONE
 	- `kitty-specs/001-modernize-api` scaffold created: DONE
 
 	- Added fixtures: `spec/fixtures/openapi/items-api.yaml`, `spec/fixtures/db/seed.sql`, `spec/fixtures/README.md` to support the sample feature.
 
+2026-02-19 - API scaffold
+
+- Actions taken:
+  - Added `ItemsController` in `src/DSC.Api/Controllers/ItemsController.cs` implementing GET/POST endpoints matching `spec/fixtures/openapi/items-api.yaml`.
+  - Registered `ApplicationDbContext` in `src/DSC.Api/Program.cs` and added a `ProjectReference` from `DSC.Api` to `DSC.Data`.
+
+- Status:
+  - API compiles and is ready to run locally (build succeeded).
+
+
 Next steps:
 	- Populate `kitty-specs/001-modernize-api/spec.md` with detailed acceptance criteria and example payloads as you research.
 	- Add seed data under `spec/fixtures/db/` and OpenAPI examples under `spec/fixtures/openapi/` when available.
+
+2026-02-19 - Data model scaffold
+
+- Actions taken:
+	- Added a baseline EF Core data model in `src/DSC.Data` to support porting the Java application and provide a validated schema to work backwards from. Files added:
+		- `src/DSC.Data/ApplicationDbContext.cs`
+		- `src/DSC.Data/Models/User.cs`
+		- `src/DSC.Data/Models/Project.cs`
+		- `src/DSC.Data/Models/WorkItem.cs`
+		- `src/DSC.Data/Models/TimeEntry.cs`
+		- `src/DSC.Data/Models/ProjectAssignment.cs`
+
+- Status:
+	- EF Core model compiled successfully against `net10.0`: DONE
+
+- Notes:
+	- The `User` entity retains local auth fields (`PasswordHash`) to support an incremental migration path from local accounts to brokered OIDC authentication.
+	- Next steps: map the validated business model from the Java repo into these entities, add any missing fields, and create EF Core migrations.
 
 Build & Test Results (2026-02-19):
 

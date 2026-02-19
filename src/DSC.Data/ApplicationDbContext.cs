@@ -15,6 +15,7 @@ namespace DSC.Data
         public DbSet<WorkItem> WorkItems => Set<WorkItem>();
         public DbSet<TimeEntry> TimeEntries => Set<TimeEntry>();
         public DbSet<ProjectAssignment> ProjectAssignments => Set<ProjectAssignment>();
+        public DbSet<ExternalIdentity> ExternalIdentities => Set<ExternalIdentity>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -51,6 +52,13 @@ namespace DSC.Data
                 b.HasKey("ProjectId", "UserId");
                 b.HasOne(pa => pa.Project).WithMany(p => p.Assignments).HasForeignKey(pa => pa.ProjectId).OnDelete(DeleteBehavior.Cascade);
                 b.HasOne(pa => pa.User).WithMany(u => u.ProjectAssignments).HasForeignKey(pa => pa.UserId).OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<ExternalIdentity>(b =>
+            {
+                b.HasKey(e => e.Id);
+                b.HasIndex(e => new { e.Provider, e.Subject }).IsUnique();
+                b.HasOne(e => e.User).WithMany().HasForeignKey(e => e.UserId).OnDelete(DeleteBehavior.Cascade);
             });
         }
     }
