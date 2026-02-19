@@ -87,6 +87,11 @@ Actions (2026-02-19) — API smoke test
 	- `AdminUsers`, `AdminPositions`, `AdminDepartments`, `AdminProjects`, `AdminExpense`, `AdminActivityOptions`.
 - Updated `src/DSC.WebClient/src/App.jsx` routing and `src/DSC.WebClient/src/pages/Administrator.jsx` links to point at the new routes.
 
+## 2026-02-19 — Admin UI scaffolding
+
+- Built out `AdminUsers` with a form structure that mirrors legacy fields (employee info, position/department assignments, role) and placeholder actions.
+- Added back links and planned actions to `AdminPositions`, `AdminDepartments`, `AdminProjects`, `AdminExpense`, and `AdminActivityOptions`.
+
 ## 2026-02-19 — API: Swagger response types
 
 - Added explicit OpenAPI/Swagger response metadata to controllers so the DTO response shapes appear in Swagger UI:

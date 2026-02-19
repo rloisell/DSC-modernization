@@ -1,0 +1,46 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DSC — Frontend</title>
+    <script type="module" crossorigin src="/assets/index-ClKRFWEv.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-Cgbicf7f.css">
+  </head>
+  <body>
+    <div id="root"></div>
+    <!-- Fallback visible if React fails; will be hidden on successful mount -->
+    <div id="fallback" style="padding:16px; background:#fff; color:#111; border:1px solid #eee; display:none;">
+      <h1>DSC — Frontend (fallback)</h1>
+      <div id="errorMsg"></div>
+      <p>If the React app fails to load, this fallback content is shown.</p>
+      <p>Open the browser console for full error details.</p>
+    </div>
+    <script>
+      // Show fallback immediately if desired; hidden by default.
+      const fb = document.getElementById('fallback');
+      if (fb) fb.style.display = 'none';
+
+      // Show runtime errors in the fallback UI
+        // Ensure react-refresh globals exist as no-ops to avoid preamble errors
+        try {
+          window.$RefreshReg$ = window.$RefreshReg$ || function() {};
+          window.$RefreshSig$ = window.$RefreshSig$ || function() { return function() {}; };
+        } catch (e) {}
+
+      function showError(msg) {
+        if (!fb) return;
+        const err = document.getElementById('errorMsg');
+        if (err) err.textContent = String(msg);
+        fb.style.display = 'block';
+      }
+
+      window.addEventListener('error', (e) => {
+        showError(e.message || String(e));
+      });
+      window.addEventListener('unhandledrejection', (e) => {
+        showError(e.reason && e.reason.message ? e.reason.message : String(e.reason));
+      });
+    </script>
+  </body>
+</html>

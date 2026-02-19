@@ -42,6 +42,7 @@ Next steps (recommended, prioritized):
 4. Implement OIDC/Keycloak integration in `src/DSC.Api` and add `ExternalIdentity` mapping data in the DB for brokered logins.
 5. Run end-to-end smoke tests: start MariaDB, apply migrations, run API and Vite, and verify list/create flows in the UI.
 6. Admin porting: add routes and stub pages for the legacy admin sections (Users, Positions, Departments, Projects, Expense, Activity Options). — Completed: see `src/DSC.WebClient/src/pages/Admin*.jsx` and `src/DSC.WebClient/src/App.jsx`.
+7. Flesh out Admin Users and admin section content to mirror legacy forms. — Completed: `AdminUsers` now includes add/edit form fields; other admin pages include planned actions and back links.
 
 Spec-Kitty / Migration next steps (explicit)
 
