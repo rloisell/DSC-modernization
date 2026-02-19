@@ -92,6 +92,10 @@ Actions (2026-02-19) — API smoke test
 - Built out `AdminUsers` with a form structure that mirrors legacy fields (employee info, position/department assignments, role) and placeholder actions.
 - Added back links and planned actions to `AdminPositions`, `AdminDepartments`, `AdminProjects`, `AdminExpense`, and `AdminActivityOptions`.
 
+## 2026-02-19 — Repo hygiene
+
+- Added `src/DSC.WebClient/dist/` to `.gitignore` to keep Vite build output out of version control.
+
 ## 2026-02-19 — API: Swagger response types
 
 - Added explicit OpenAPI/Swagger response metadata to controllers so the DTO response shapes appear in Swagger UI:

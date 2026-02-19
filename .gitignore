@@ -34,3 +34,6 @@ target/
 # Node modules for the web client
 src/DSC.WebClient/node_modules/
 **/node_modules/
+
+# Vite build output
+src/DSC.WebClient/dist/

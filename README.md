@@ -154,3 +154,5 @@ API update: The API now exposes legacy Java model fields via DTOs so the fronten
 
 - Admin UI scaffolding: `AdminUsers` now mirrors the legacy form fields (employee info, position/department assignment, role) with placeholder actions. Other admin pages include planned action lists and back links.
 
+- Frontend build output: `src/DSC.WebClient/dist/` is ignored in git to avoid committing Vite build artifacts.
+
