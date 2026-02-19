@@ -2,11 +2,11 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
 export default defineConfig({
-  plugins: [react()],
-  // The public/index.html is not in the project root, set `root` so Vite
-  // serves the app from the `public` directory during dev.
-  root: 'public',
+  plugins: [react({ fastRefresh: false })],
+  // Serve static assets from `public` while using the project root for index.html
+  publicDir: 'public',
   server: {
+    hmr: false,
     port: 5173,
     proxy: {
       // Proxy API calls to the backend during local development
