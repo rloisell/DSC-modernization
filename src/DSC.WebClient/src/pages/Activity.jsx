@@ -37,7 +37,20 @@ export default function Activity() {
       {error ? <p style={{color:'red'}}>Error: {error}</p> : null}
       <ul>
         {items.map(i => (
-          <li key={i.id}>{i.description}</li>
+          <li key={i.id}>
+            {i.title ? <strong>{i.title}</strong> : null}
+            {i.legacyActivityId ? <span> (Legacy ID: {i.legacyActivityId})</span> : null}
+            <div>{i.description}</div>
+            <div style={{fontSize:'0.9em',color:'#666'}}>
+              {i.date ? <span>Date: {i.date} </span> : null}
+              {i.startTime ? <span>Start: {i.startTime} </span> : null}
+              {i.endTime ? <span>End: {i.endTime} </span> : null}
+              {i.plannedDuration ? <span>Planned: {i.plannedDuration}h </span> : null}
+              {i.actualDuration ? <span>Actual: {i.actualDuration}h </span> : null}
+              {i.activityCode ? <span>Code: {i.activityCode} </span> : null}
+              {i.networkNumber ? <span>Network: {i.networkNumber}</span> : null}
+            </div>
+          </li>
         ))}
       </ul>
       <h2>Add Work Item</h2>

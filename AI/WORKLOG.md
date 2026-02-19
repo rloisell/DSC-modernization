@@ -61,6 +61,16 @@ Actions (2026-02-19) — API smoke test
 - Updated controllers to return DTOs so the client can consume legacy identifiers and activity fields: `src/DSC.Api/Controllers/ProjectsController.cs` and `src/DSC.Api/Controllers/ItemsController.cs`.
 - Built the solution and verified endpoints: `GET /api/projects` and `GET /api/items/{id}` return DTOs (fields may be null if not set in the DB).
 
+## 2026-02-19 — Frontend: consume legacy DTO fields
+
+- Updated `src/DSC.WebClient/src/pages/Project.jsx` to display `projectNo` (legacy `Project.projectNo`) alongside the project name.
+- Updated `src/DSC.WebClient/src/pages/Activity.jsx` to surface legacy work-item fields from `WorkItemDto` (legacyActivityId, date, startTime, endTime, plannedDuration, actualDuration, activityCode, networkNumber).
+
+## 2026-02-19 — API: Swagger response types
+
+- Added explicit OpenAPI/Swagger response metadata to controllers so the DTO response shapes appear in Swagger UI:
+	- `src/DSC.Api/Controllers/ProjectsController.cs` now returns typed `ActionResult<T>` and annotates 200/404 responses.
+	- `src/DSC.Api/Controllers/ItemsController.cs` now annotates 200/404 responses for `WorkItemDto`.
 Next: run integration tests or create controllers for other resources (Projects, Users) as needed.
 
 Notes: The `root` password reset was performed non-interactively to allow scripting the setup; if you want a different root password or to re-run the secure setup, run `mysql_secure_installation` and change credentials.

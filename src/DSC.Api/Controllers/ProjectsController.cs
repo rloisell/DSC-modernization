@@ -1,6 +1,8 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Collections.Generic;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using DSC.Data;
@@ -21,7 +23,8 @@ namespace DSC.Api.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAll()
+        [ProducesResponseType(typeof(IEnumerable<ProjectDto>), StatusCodes.Status200OK)]
+        public async Task<ActionResult<IEnumerable<ProjectDto>>> GetAll()
         {
             var projects = await _db.Projects.AsNoTracking()
                 .Select(p => new ProjectDto { Id = p.Id, ProjectNo = p.ProjectNo, Name = p.Name, Description = p.Description, EstimatedHours = p.EstimatedHours })
@@ -30,7 +33,9 @@ namespace DSC.Api.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> Get(Guid id)
+        [ProducesResponseType(typeof(ProjectDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<ProjectDto>> Get(Guid id)
         {
             var project = await _db.Projects.AsNoTracking().FirstOrDefaultAsync(p => p.Id == id);
             if (project == null) return NotFound();

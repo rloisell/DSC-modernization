@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using DSC.Data;
@@ -20,7 +21,9 @@ namespace DSC.Api.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> Get(Guid id)
+        [ProducesResponseType(typeof(WorkItemDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<WorkItemDto>> Get(Guid id)
         {
             var item = await _db.WorkItems.AsNoTracking().FirstOrDefaultAsync(w => w.Id == id);
             if (item == null) return NotFound();

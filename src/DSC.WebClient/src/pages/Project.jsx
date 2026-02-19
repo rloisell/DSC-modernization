@@ -39,7 +39,10 @@ export default function Project() {
       {error ? <p style={{color:'red'}}>Error: {error}</p> : null}
       <ul>
         {projects.map(p => (
-          <li key={p.id}><b>{p.name}</b>: {p.description}</li>
+          <li key={p.id}>
+            <b>{p.projectNo ? `${p.projectNo} — ${p.name}` : p.name}</b>
+            : {p.description}
+          </li>
         ))}
       </ul>
       <h2>Add Project</h2>
