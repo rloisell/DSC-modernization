@@ -3,6 +3,9 @@ import react from '@vitejs/plugin-react'
 
 export default defineConfig({
   plugins: [react()],
+  // The public/index.html is not in the project root, set `root` so Vite
+  // serves the app from the `public` directory during dev.
+  root: 'public',
   server: {
     port: 5173,
     proxy: {
