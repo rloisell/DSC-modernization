@@ -92,6 +92,12 @@ Actions (2026-02-19) — API smoke test
 - Built out `AdminUsers` with a form structure that mirrors legacy fields (employee info, position/department assignments, role) and placeholder actions.
 - Added back links and planned actions to `AdminPositions`, `AdminDepartments`, `AdminProjects`, `AdminExpense`, and `AdminActivityOptions`.
 
+## 2026-02-19 — Admin UI build-out
+
+- Expanded admin pages to include forms and tables for positions, departments, projects, expenses, and activity options (based on legacy names and intended workflows).
+- Added a current-users table stub to `AdminUsers` and wired placeholder actions across admin pages.
+- Built the web client (`npm run build`) after the admin UI updates.
+
 ## 2026-02-19 — Repo hygiene
 
 - Added `src/DSC.WebClient/dist/` to `.gitignore` to keep Vite build output out of version control.

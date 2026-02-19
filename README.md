@@ -153,6 +153,7 @@ API update: The API now exposes legacy Java model fields via DTOs so the fronten
 - Admin UI routing: React stubs exist for the legacy admin pages (Users, Positions, Departments, Projects, Expense, Activity Options) under `src/DSC.WebClient/src/pages/`. The Admin landing page links to these routes.
 
 - Admin UI scaffolding: `AdminUsers` now mirrors the legacy form fields (employee info, position/department assignment, role) with placeholder actions. Other admin pages include planned action lists and back links.
+- Admin UI build-out: positions, departments, projects, expense, and activity options pages now include draft forms and placeholder tables based on intended legacy workflows.
 
 - Frontend build output: `src/DSC.WebClient/dist/` is ignored in git to avoid committing Vite build artifacts.
 

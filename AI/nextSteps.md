@@ -44,6 +44,7 @@ Next steps (recommended, prioritized):
 6. Admin porting: add routes and stub pages for the legacy admin sections (Users, Positions, Departments, Projects, Expense, Activity Options). — Completed: see `src/DSC.WebClient/src/pages/Admin*.jsx` and `src/DSC.WebClient/src/App.jsx`.
 7. Flesh out Admin Users and admin section content to mirror legacy forms. — Completed: `AdminUsers` now includes add/edit form fields; other admin pages include planned actions and back links.
 8. Keep Vite build output out of source control (`dist/`). — Completed: `.gitignore` updated.
+9. Expand admin pages with forms/tables based on intended legacy workflows. — Completed: positions, departments, projects, expenses, and activity options include draft forms and placeholder lists.
 
 Spec-Kitty / Migration next steps (explicit)
 

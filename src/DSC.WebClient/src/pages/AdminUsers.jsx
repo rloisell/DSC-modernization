@@ -190,6 +190,27 @@ export default function AdminUsers() {
           </div>
         </form>
       </section>
+      <section>
+        <h2>Current Users</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Employee ID</th>
+              <th>Name</th>
+              <th>Role</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>10001</td>
+              <td>Jordan Lee</td>
+              <td>Manager</td>
+              <td>Active</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
 
       {message ? <p>{message}</p> : null}
     </div>
