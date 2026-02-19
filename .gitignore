@@ -30,3 +30,7 @@ target/
 .roo/
 .amazonq/
 .github/copilot/
+
+# Node modules for the web client
+src/DSC.WebClient/node_modules/
+**/node_modules/
