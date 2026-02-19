@@ -73,4 +73,13 @@ Scaffold results:
 	- If root requires a password, run `mysql_secure_installation` and create DB/user manually. See `AI/COMMANDS.sh` for the exact commands to run.
 	- Optionally add `global.json` to pin the 10.x SDK patch version.
 	- Run `dotnet build` and `dotnet test` to validate compatibility and ensure everything compiles.
+	-  Run `dotnet build` and `dotnet test` to validate compatibility and ensure everything compiles. (Completed: 2026-02-19)
+
+Build & Test Results (2026-02-19):
+
+- `dotnet --version`: `10.0.103`
+- `dotnet build DSC.Modernization.sln`: Build succeeded (all projects targeted `net10.0`).
+- `dotnet test tests/DSC.Tests/DSC.Tests.csproj`: 1 test discovered and passed.
+
+All changes remain committed and pushed to `origin/main`.
 	- When ready, use Spec-Kitty CLI to build the Spec; I will pause after this step per your instructions.
