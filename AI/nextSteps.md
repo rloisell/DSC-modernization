@@ -41,6 +41,7 @@ Next steps (recommended, prioritized):
 3.c Add Swagger examples for WorkItem endpoints (request/response examples). — Completed: `WorkItemExamplesOperationFilter` registered in `src/DSC.Api/Program.cs`.
 4. Implement OIDC/Keycloak integration in `src/DSC.Api` and add `ExternalIdentity` mapping data in the DB for brokered logins.
 5. Run end-to-end smoke tests: start MariaDB, apply migrations, run API and Vite, and verify list/create flows in the UI.
+6. Admin porting: add routes and stub pages for the legacy admin sections (Users, Positions, Departments, Projects, Expense, Activity Options). — Completed: see `src/DSC.WebClient/src/pages/Admin*.jsx` and `src/DSC.WebClient/src/App.jsx`.
 
 Spec-Kitty / Migration next steps (explicit)
 

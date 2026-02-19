@@ -81,6 +81,12 @@ Actions (2026-02-19) — API smoke test
 - Ran a local build (`dotnet build DSC.Modernization.sln`) successfully.
 - Smoke-tested `GET /api/projects` and `GET /api/items/{id}` against the running API instance (port `5005` already in use).
 
+## 2026-02-19 — Admin UI routes (React)
+
+- Added admin subpage routes and stubs for the legacy admin screens in `src/DSC.WebClient/src/pages`:
+	- `AdminUsers`, `AdminPositions`, `AdminDepartments`, `AdminProjects`, `AdminExpense`, `AdminActivityOptions`.
+- Updated `src/DSC.WebClient/src/App.jsx` routing and `src/DSC.WebClient/src/pages/Administrator.jsx` links to point at the new routes.
+
 ## 2026-02-19 — API: Swagger response types
 
 - Added explicit OpenAPI/Swagger response metadata to controllers so the DTO response shapes appear in Swagger UI:
