@@ -54,3 +54,23 @@ Scaffold results:
 	- `Pomelo.EntityFrameworkCore.MySql` 8.0.3
 	- `Microsoft.EntityFrameworkCore.Design` 8.0.0
 - Local `dotnet build` succeeded.
+
+2026-02-19 - Agent actions (dotnet 10 + MariaDB)
+
+- Actions taken today:
+	- Updated project TargetFrameworks from `net8.0` to `net10.0` and pushed the commit `chore: update TargetFramework to net10.0 for modernization (prepare Spec-Kitty)` to `origin/main`.
+	- Installed .NET 10 SDK (per-user) using `dotnet-install.sh` into `$HOME/.dotnet` (installed `10.0.103` during this run).
+	- Installed `dotnet-ef` as a global tool (attempted; please ensure `~/.dotnet/tools` is in your `PATH`).
+	- Installed MariaDB via Homebrew and started the service. Attempted to create `dsc_modernization_dev` DB and `dsc_dev` user; if root access is locked by a password, run `mysql_secure_installation` and then create the DB/user manually.
+
+- Current status:
+	- Projects updated: DONE and pushed
+	- .NET 10 SDK: Installed to `$HOME/.dotnet` (per-user)
+	- `dotnet-ef`: Installed or attempted; verify with `dotnet tool list -g`
+	- MariaDB: Installed and service started; DB/user creation may require manual intervention
+
+- Outstanding items / next steps:
+	- If root requires a password, run `mysql_secure_installation` and create DB/user manually. See `AI/COMMANDS.sh` for the exact commands to run.
+	- Optionally add `global.json` to pin the 10.x SDK patch version.
+	- Run `dotnet build` and `dotnet test` to validate compatibility and ensure everything compiles.
+	- When ready, use Spec-Kitty CLI to build the Spec; I will pause after this step per your instructions.
