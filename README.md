@@ -148,3 +148,5 @@ API update: The API now exposes legacy Java model fields via DTOs so the fronten
 
 - Project selector: `src/DSC.WebClient/src/pages/Activity.jsx` now fetches projects from `/api/projects` and shows a project dropdown (displays `projectNo` when available next to the project name).
 
+- Swagger examples: `src/DSC.Api/Swagger/WorkItemExamplesOperationFilter.cs` injects example request/response payloads for WorkItem endpoints in Swagger UI.
+

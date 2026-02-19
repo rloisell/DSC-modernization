@@ -38,6 +38,7 @@ Next steps (recommended, prioritized):
 2. Port additional Java entities into EF as required (User, Department, Calendar) and add migrations for each logical group.
 3. Update frontend services (`src/DSC.WebClient/src/api/*`) and pages to use the new legacy fields (e.g., display `ProjectNo` alongside `Name`). — Completed: `Project.jsx` and `Activity.jsx` now render legacy DTO fields.
  3.b Add a project selector to the Activity create form (fetch projects and show `projectNo` + `name`). — Completed: `src/DSC.WebClient/src/pages/Activity.jsx` now loads projects and renders a project dropdown.
+3.c Add Swagger examples for WorkItem endpoints (request/response examples). — Completed: `WorkItemExamplesOperationFilter` registered in `src/DSC.Api/Program.cs`.
 4. Implement OIDC/Keycloak integration in `src/DSC.Api` and add `ExternalIdentity` mapping data in the DB for brokered logins.
 5. Run end-to-end smoke tests: start MariaDB, apply migrations, run API and Vite, and verify list/create flows in the UI.
 

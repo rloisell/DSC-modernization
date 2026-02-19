@@ -75,6 +75,12 @@ Actions (2026-02-19) — API smoke test
 
 - Enhanced `src/DSC.WebClient/src/pages/Activity.jsx` to load projects from `/api/projects` and present a project selector in the work-item create form. The selector displays `projectNo` (legacy) where available alongside the project `name` so users can continue using legacy identifiers during incremental porting.
 
+## 2026-02-19 — API: Swagger examples + smoke test
+
+- Added `src/DSC.Api/Swagger/WorkItemExamplesOperationFilter.cs` and registered it in `src/DSC.Api/Program.cs` to include example request/response payloads for WorkItem endpoints in Swagger UI.
+- Ran a local build (`dotnet build DSC.Modernization.sln`) successfully.
+- Smoke-tested `GET /api/projects` and `GET /api/items/{id}` against the running API instance (port `5005` already in use).
+
 ## 2026-02-19 — API: Swagger response types
 
 - Added explicit OpenAPI/Swagger response metadata to controllers so the DTO response shapes appear in Swagger UI:

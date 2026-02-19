@@ -6,7 +6,10 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.OperationFilter<DSC.Api.Swagger.WorkItemExamplesOperationFilter>();
+});
 
 // Register ApplicationDbContext - connection string from configuration
 var conn = builder.Configuration.GetConnectionString("DefaultConnection") ?? "Server=localhost;Database=dsc_modernization_dev;User=root;Password=;";
