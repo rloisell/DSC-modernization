@@ -41,3 +41,16 @@ Environment setup:
 - 2026-02-18: .NET SDK installed locally into `$HOME/.dotnet` using the Microsoft `dotnet-install` script. Installed SDK version: `8.0.418` (commit 5854a779c1). `DOTNET_ROOT` is set to `$HOME/.dotnet`; the install script appended PATH exports to `~/.zshrc`.
 
 Next step: scaffold the .NET solution and projects (I'll generate templates and csproj files next).
+ 
+Scaffold results:
+
+- 2026-02-18: Scaffolded solution `DSC.Modernization.sln` with projects:
+	- `src/DSC.Api` (ASP.NET Core Web API)
+	- `src/DSC.Web` (ASP.NET Core Web App)
+	- `src/DSC.Data` (Class Library, EF Core data access)
+	- `tests/DSC.Tests` (xUnit tests)
+- Added EF Core packages and MySQL provider:
+	- `Microsoft.EntityFrameworkCore` 8.0.13
+	- `Pomelo.EntityFrameworkCore.MySql` 8.0.3
+	- `Microsoft.EntityFrameworkCore.Design` 8.0.0
+- Local `dotnet build` succeeded.
