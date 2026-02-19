@@ -138,3 +138,5 @@ dotnet run --project src/DSC.Api --urls http://localhost:5005
 
 Open the GUI at: http://localhost:5173/ (the API is available at http://localhost:5005/)
 
+API update: The API now exposes legacy Java model fields via DTOs so the frontend can consume them (e.g. `ProjectDto.ProjectNo`, and legacy activity fields on `WorkItemDto`). See `src/DSC.Api/DTOs` and `src/DSC.Api/Controllers` for details.
+

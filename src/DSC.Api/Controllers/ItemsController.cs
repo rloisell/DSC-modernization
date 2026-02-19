@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using DSC.Data;
 using DSC.Data.Models;
+using DSC.Api.DTOs;
 
 namespace DSC.Api.Controllers
 {
@@ -23,14 +24,24 @@ namespace DSC.Api.Controllers
         {
             var item = await _db.WorkItems.AsNoTracking().FirstOrDefaultAsync(w => w.Id == id);
             if (item == null) return NotFound();
-            return Ok(new {
-                id = item.Id,
-                title = item.Title,
-                description = item.Description,
-                projectId = item.ProjectId,
-                estimatedHours = item.EstimatedHours,
-                remainingHours = item.RemainingHours
-            });
+            var dto = new WorkItemDto
+            {
+                Id = item.Id,
+                ProjectId = item.ProjectId,
+                LegacyActivityId = item.LegacyActivityId,
+                Date = item.Date,
+                StartTime = item.StartTime,
+                EndTime = item.EndTime,
+                PlannedDuration = item.PlannedDuration,
+                ActualDuration = item.ActualDuration,
+                ActivityCode = item.ActivityCode,
+                NetworkNumber = item.NetworkNumber,
+                Title = item.Title,
+                Description = item.Description,
+                EstimatedHours = item.EstimatedHours,
+                RemainingHours = item.RemainingHours
+            };
+            return Ok(dto);
         }
 
         [HttpPost]

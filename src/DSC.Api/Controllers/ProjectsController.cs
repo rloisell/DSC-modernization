@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using DSC.Data;
 using DSC.Data.Models;
+using DSC.Api.DTOs;
 
 namespace DSC.Api.Controllers
 {
@@ -23,7 +24,7 @@ namespace DSC.Api.Controllers
         public async Task<IActionResult> GetAll()
         {
             var projects = await _db.Projects.AsNoTracking()
-                .Select(p => new { id = p.Id, name = p.Name, description = p.Description, estimatedHours = p.EstimatedHours })
+                .Select(p => new ProjectDto { Id = p.Id, ProjectNo = p.ProjectNo, Name = p.Name, Description = p.Description, EstimatedHours = p.EstimatedHours })
                 .ToListAsync();
             return Ok(projects);
         }
@@ -33,7 +34,8 @@ namespace DSC.Api.Controllers
         {
             var project = await _db.Projects.AsNoTracking().FirstOrDefaultAsync(p => p.Id == id);
             if (project == null) return NotFound();
-            return Ok(new { id = project.Id, name = project.Name, description = project.Description, estimatedHours = project.EstimatedHours });
+            var dto = new ProjectDto { Id = project.Id, ProjectNo = project.ProjectNo, Name = project.Name, Description = project.Description, EstimatedHours = project.EstimatedHours };
+            return Ok(dto);
         }
 
         [HttpPost]

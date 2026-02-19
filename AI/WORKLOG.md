@@ -53,6 +53,14 @@ Actions (2026-02-19) — API smoke test
 - Inserted a `Project` and a `WorkItem` for smoke-testing (one item inserted via SQL, id `44444444-4444-4444-4444-444444444444`).
 - Successfully GET /api/items/44444444-4444-4444-4444-444444444444 returned the seeded WorkItem JSON (200 OK).
 
+## 2026-02-19 — API: expose legacy fields
+
+- Added API DTOs to surface legacy Java model fields to the frontend:
+	- `src/DSC.Api/DTOs/ProjectDto.cs` (includes `ProjectNo`)
+	- `src/DSC.Api/DTOs/WorkItemDto.cs` (includes `LegacyActivityId`, `Date`, `StartTime`, `EndTime`, `PlannedDuration`, `ActualDuration`, `ActivityCode`, `NetworkNumber`)
+- Updated controllers to return DTOs so the client can consume legacy identifiers and activity fields: `src/DSC.Api/Controllers/ProjectsController.cs` and `src/DSC.Api/Controllers/ItemsController.cs`.
+- Built the solution and verified endpoints: `GET /api/projects` and `GET /api/items/{id}` return DTOs (fields may be null if not set in the DB).
+
 Next: run integration tests or create controllers for other resources (Projects, Users) as needed.
 
 Notes: The `root` password reset was performed non-interactively to allow scripting the setup; if you want a different root password or to re-run the secure setup, run `mysql_secure_installation` and change credentials.
