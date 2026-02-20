@@ -163,7 +163,227 @@ mysql> SELECT u.Username, COUNT(w.Id) FROM WorkItems w
 
 ## ToDo: Remaining Work
 
-### 1. Admin UI for New Catalogs
+### 1. Director Reporting Dashboard (HIGH PRIORITY)
+
+**Objective**: Create a comprehensive management reporting interface for directors to monitor project status, budget allocation, and resource utilization.
+
+**Foundation Complete**:
+- ✅ RemainingHours calculation logic implemented (EstimatedHours - ActualDuration)
+- ✅ SQL reporting queries documented (Project Status, Network Tracking, Workload Analysis)
+- ✅ Database schema supports full reporting (WorkItems, Projects, Networks, Budgets)
+- ✅ Comprehensive seed data for testing reporting features
+
+**Features to Implement**:
+
+#### A. Management Portal Pages
+- **Executive Dashboard**
+  - Project completion overview (% complete across all projects)
+  - Budget utilization (CAPEX vs OPEX spending)
+  - Resource allocation summary (users, hours logged)
+  - Critical activities requiring attention (over budget, near deadline)
+
+- **Project Status Reports**
+  - Detailed project breakdown (estimated vs actual hours)
+  - Activity-level drill-down (network numbers, activity codes)
+  - Completion percentages and burndown visualization
+  - Timeline and milestone tracking
+
+- **Resource Management**
+  - User workload distribution (hours remaining per user)
+  - Capacity planning (available hours vs committed hours)
+  - Team performance metrics (velocity, efficiency)
+  - Project assignment matrix (users × projects)
+
+- **Budget Analysis**
+  - CAPEX vs OPEX spending trends
+  - Expense category breakdown (Hardware, Software, Travel, etc.)
+  - Over-budget alerts and variances
+  - Forecast vs actual spending comparison
+
+- **Network & Activity Analytics**
+  - Network number usage and allocation
+  - Activity code distribution (Development, Testing, etc.)
+  - CPC code tracking for operational categorization
+  - Director code routing and approval status
+
+#### B. Technology Recommendations
+
+**Frontend Framework** (Choose one):
+1. **React with Material-UI (Recommended)**
+   - Pros: Consistent with existing DSC.WebClient, component reuse, large ecosystem
+   - Cons: Requires additional charting libraries
+   - Libraries:
+     - `@mui/material` - Professional UI components
+     - `recharts` or `nivo` - React-first charting libraries
+     - `@tanstack/react-table` - Advanced data tables with sorting/filtering
+     - `react-router-dom` - Multi-page navigation
+
+2. **Next.js with Tailwind CSS**
+   - Pros: Server-side rendering for performance, built-in routing, modern design
+   - Cons: Different stack from current frontend
+   - Libraries:
+     - `tailwindcss` + `shadcn/ui` - Beautiful, accessible components
+     - `tremor` - Purpose-built dashboard components for React
+     - `recharts` - Charts optimized for SSR
+
+3. **Vue.js with Element Plus**
+   - Pros: Gentle learning curve, excellent documentation, built-in admin templates
+   - Cons: Different from React (current frontend)
+   - Libraries:
+     - `element-plus` - Enterprise-grade component library
+     - `vue-chartjs` - Chart.js wrapper for Vue
+     - `pinia` - State management
+
+**Charting & Visualization Libraries**:
+1. **Recharts** (Recommended for React)
+   - Composable React components
+   - Responsive and customizable
+   - Supports: bar charts, line charts, pie charts, area charts
+
+2. **Apache ECharts**
+   - Feature-rich, excellent performance
+   - Highly customizable
+   - Supports: complex visualizations, real-time updates
+
+3. **Chart.js**
+   - Simple, lightweight
+   - Good for basic charts
+   - Large plugin ecosystem
+
+4. **D3.js**
+   - Ultimate flexibility
+   - Steep learning curve
+   - Best for custom, unique visualizations
+
+**Data Table Libraries**:
+1. **AG-Grid** (Recommended for complex data)
+   - Enterprise-grade features (sorting, filtering, grouping, export)
+   - Excellent performance with large datasets
+   - Row virtualization for thousands of rows
+
+2. **@tanstack/react-table**
+   - Headless UI (full styling control)
+   - Framework-agnostic core
+   - Lightweight, flexible
+
+3. **Material-React-Table**
+   - Built on @tanstack/react-table + Material-UI
+   - Drop-in solution with beautiful defaults
+
+**Dashboard Layout**:
+1. **react-grid-layout**
+   - Drag-and-drop grid layouts
+   - Responsive breakpoints
+   - Persist user customizations
+
+2. **react-mosaic**
+   - Window manager for complex dashboards
+   - Split panes and tabs
+   - Advanced workspace customization
+
+**Reporting & Export**:
+1. **react-to-print** - Print-friendly reports
+2. **jspdf** + **html2canvas** - PDF generation
+3. **xlsx** - Excel export for data tables
+4. **papaparse** - CSV import/export
+
+**Date Range Selection**:
+1. **react-date-range** - Advanced date range picker
+2. **date-fns** - Modern date manipulation (lightweight moment.js alternative)
+
+#### C. Backend API Endpoints (New)
+
+Create dedicated reporting endpoints:
+
+```
+GET /api/reports/director/dashboard
+  - Summary metrics for executive dashboard
+  - Returns: { totalProjects, totalHours, budgetUtilization, criticalActivities }
+
+GET /api/reports/director/projects
+  - Project status with completion percentages
+  - Query params: startDate, endDate, projectId (optional)
+  - Returns: [{ projectId, name, estimatedHours, actualHours, remainingHours, percentComplete }]
+
+GET /api/reports/director/resources
+  - User workload and capacity
+  - Returns: [{ userId, username, assignedHours, completedHours, remainingHours, utilization }]
+
+GET /api/reports/director/budget
+  - Budget analysis by category and type
+  - Query params: budgetType (CAPEX/OPEX), startDate, endDate
+  - Returns: { budgets: [], categories: [], spending: [] }
+
+GET /api/reports/director/network-analysis
+  - Network number usage and activity distribution
+  - Returns: [{ networkNumber, activityCount, totalHours, remainingHours }]
+
+GET /api/reports/director/export
+  - Export data in CSV/Excel format
+  - Query params: reportType, format (csv|xlsx), startDate, endDate
+```
+
+#### D. Authentication & Authorization
+
+**Add Director Role**:
+- Create "Director" role in addition to "Admin" and "User"
+- Directors can view all data but cannot modify work items (read-only)
+- Role-based route protection in frontend
+- JWT claims including role for authorization
+
+**Security Considerations**:
+- Implement row-level security if needed (filter by department/project)
+- Audit logging for sensitive reports
+- Rate limiting on reporting endpoints (prevent data scraping)
+
+#### E. Implementation Phases
+
+**Phase 1: Foundation** (Week 1-2)
+- Create ReportsController with basic endpoints
+- Implement SQL aggregation queries from SEED_DATA.md documentation
+- Build basic React dashboard layout (shell pages)
+- Add director role and authentication
+
+**Phase 2: Core Visualizations** (Week 3-4)
+- Project Status Dashboard with charts
+- Resource Management page with workload visualization
+- Budget Analysis with pie/bar charts
+- Integrate charting library (Recharts recommended)
+
+**Phase 3: Advanced Features** (Week 5-6)
+- Drill-down functionality (project → activity → work item)
+- Date range filtering across all reports
+- Export capabilities (PDF, Excel, CSV)
+- Dashboard customization (save user preferences)
+
+**Phase 4: Polish & Performance** (Week 7-8)
+- Real-time updates (SignalR or polling)
+- Caching for expensive queries (Redis or in-memory)
+- Responsive design for tablets
+- Print-friendly report layouts
+- End-to-end testing
+
+#### F. Success Metrics
+
+**User Impact**:
+- Directors can generate status reports in <5 minutes (vs hours manually)
+- 90% of director questions answerable from dashboard
+- Reduce status meeting time by 50%
+
+**Technical**:
+- Report pages load in <2 seconds
+- Support 1000+ work items without performance degradation
+- 100% test coverage for reporting logic
+- Mobile-friendly (responsive down to tablet)
+
+**Business**:
+- Improved project visibility (identify at-risk projects early)
+- Better resource allocation (balance workloads)
+- Faster budget decisions (real-time spending data)
+
+---
+
+### 2. Admin UI for New Catalogs
 - Create AdminActivityCategories page for Activity Category CRUD
 - Create AdminCalendarCategories page for Calendar Category CRUD
 - Create AdminCpcCodes page for CPC Code CRUD
