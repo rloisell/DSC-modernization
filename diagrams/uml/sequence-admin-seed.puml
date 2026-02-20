@@ -1,0 +1,99 @@
+@startuml Admin Seed Test Data Sequence
+!theme plain
+autonumber
+
+actor "Administrator" as Admin
+participant "Browser" as Browser
+participant "AdminTokenAuth\nHandler" as Auth
+participant "AdminSeed\nController" as Controller
+participant "TestData\nSeeder" as Seeder
+participant "ApplicationDbContext" as DbContext
+database "MariaDB\n(dsc_dev)" as DB
+
+Admin -> Browser : POST /api/admin/seed/test-data
+activate Browser
+
+Browser -> Auth : X-Admin-Token header\n(or bypass if Dev)
+activate Auth
+
+alt Admin:RequireToken=true
+    Auth -> Auth : Validate X-Admin-Token\nvs Admin:Token config
+    alt Token invalid
+        Auth --> Browser : 401 Unauthorized
+        Browser --> Admin : Authentication failed
+    end
+else Admin:RequireToken=false (Dev only)
+    Auth -> Auth : Check environment
+    alt Not Development
+        Auth --> Browser : 403 Forbidden\n"Bypass only allowed in Development"
+        Browser --> Admin : Bypass rejected
+    else Development
+        Auth -> Auth : Bypass authentication
+    end
+end
+
+Auth --> Controller : Authenticated
+deactivate Auth
+
+activate Controller
+Controller -> Seeder : SeedAsync(ct)
+activate Seeder
+
+Seeder -> DbContext : BeginTransactionAsync()
+activate DbContext
+
+loop for each user seed (4 users)
+    Seeder -> DbContext : Users.FirstOrDefaultAsync(u => u.Username == seed.Username)
+    DbContext -> DB : SELECT * FROM Users WHERE Username = ?
+    DB --> DbContext : User or null
+    alt User not found
+        Seeder -> Seeder : Create new User\nwith PasswordHasher
+        Seeder -> DbContext : Users.Add(user)
+    else User exists
+        Seeder -> Seeder : Update missing fields
+    end
+end
+
+loop for each UserAuth seed (3 entries)
+    Seeder -> DbContext : Set<UserAuth>().FirstOrDefaultAsync(ua => ua.UserName == seed.UserName)
+    DbContext -> DB : SELECT * FROM UserAuth WHERE UserName = ?
+    DB --> DbContext : UserAuth or null
+    alt UserAuth not found
+        Seeder -> DbContext : Set<UserAuth>().Add(userAuth)
+    else UserAuth exists and UpdatePassword=true
+        Seeder -> Seeder : Update password
+    end
+end
+
+Seeder -> DbContext : Projects.FirstOrDefaultAsync(p => p.ProjectNo == "P99999")
+DbContext -> DB : SELECT * FROM Projects WHERE ProjectNo = ?
+DB --> DbContext : Project or null
+alt Project not found
+    Seeder -> DbContext : Projects.Add(project)
+end
+
+Seeder -> DbContext : Departments.FirstOrDefaultAsync(d => d.Name == "OSS Operations")
+DbContext -> DB : SELECT * FROM Departments WHERE Name = ?
+DB --> DbContext : Department or null
+alt Department not found
+    Seeder -> DbContext : Departments.Add(department)
+end
+
+Seeder -> DbContext : SaveChangesAsync(ct)
+DbContext -> DB : INSERT / UPDATE statements
+DB --> DbContext : Success
+
+Seeder -> DbContext : CommitAsync(ct)
+DbContext --> DB : COMMIT
+deactivate DbContext
+
+Seeder --> Controller : TestSeedResult\n(usersCreated=4, userAuthCreated=3,\nprojectsCreated=1, departmentsCreated=1)
+deactivate Seeder
+
+Controller --> Browser : 200 OK\n{ usersCreated: 4, ... }
+deactivate Controller
+
+Browser --> Admin : Seed completed\n4 users, 1 project, 1 dept
+deactivate Browser
+
+@enduml

@@ -190,3 +190,32 @@ API update: The API now exposes legacy Java model fields via DTOs so the fronten
 
 - Frontend build output: `src/DSC.WebClient/dist/` is ignored in git to avoid committing Vite build artifacts.
 
+Architecture Documentation
+
+Comprehensive UML diagrams documenting the application architecture are available in `diagrams/uml/`:
+
+- **Domain Model** ([diagrams/uml/domain-model.puml](diagrams/uml/domain-model.puml)): Entity relationships, properties, and cardinalities
+- **API Architecture** ([diagrams/uml/api-architecture.puml](diagrams/uml/api-architecture.puml)): Middleware pipeline, controllers, security, DTOs
+- **Use Cases** ([diagrams/uml/use-cases.puml](diagrams/uml/use-cases.puml)): User and admin workflows
+- **Deployment** ([diagrams/uml/deployment.puml](diagrams/uml/deployment.puml)): Development and production environments
+- **Sequence Diagrams**: Admin seed and time entry workflows
+- **Component Diagram** ([diagrams/uml/component-diagram.puml](diagrams/uml/component-diagram.puml)): Package structure and dependencies
+
+See [diagrams/README.md](diagrams/README.md) for detailed guidance on using these diagrams with the Spec-Kitty workflow.
+
+**Rendering UML Diagrams:**
+
+1. Install PlantUML tools:
+   ```bash
+   brew install plantuml graphviz
+   ```
+
+2. Render diagrams from command line:
+   ```bash
+   plantuml diagrams/uml/*.puml -o ../output
+   ```
+
+3. Or install the VS Code PlantUML extension for in-editor preview:
+   - Extension ID: `jebbs.plantuml`
+   - Preview `.puml` files directly in VS Code
+

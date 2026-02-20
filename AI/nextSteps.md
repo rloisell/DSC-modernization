@@ -52,6 +52,8 @@ Next steps (recommended, prioritized):
 14. Refresh admin landing page copy to reflect wired sections. — Completed.
 15. Add a dev-only admin token bypass switch with guardrails for non-dev environments. — Completed.
 16. Execute legacy test data seed in local dev and verify admin users response. — Completed.
+17. Generate comprehensive UML documentation for architecture and domain model. — Completed.
+18. Install PlantUML tooling (Homebrew + VS Code extension) for diagram rendering. — Completed.
 
 Spec-Kitty / Migration next steps (explicit)
 

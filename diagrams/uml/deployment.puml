@@ -1,0 +1,90 @@
+@startuml DSC Deployment Architecture
+!theme plain
+
+node "Developer Workstation (macOS)" {
+    node "Frontend (localhost:5173)" {
+        component "Vite Dev Server" as Vite
+        component "React SPA" as React
+        Vite --> React
+    }
+
+    node "Backend (localhost:5005)" {
+        component "Kestrel / ASP.NET Core" as API
+        component "EF Core" as EF
+        API --> EF
+    }
+
+    node "Database (localhost:3306)" {
+        database "MariaDB 10.11" as DB {
+            [dsc_dev]
+        }
+        EF --> dsc_dev : Pomelo.MySQL
+    }
+}
+
+node "Production Environment (Future)" {
+    node "Web Tier" {
+        component "NGINX / Reverse Proxy" as Proxy
+        component "Static Assets / React Build" as StaticAssets
+    }
+
+    node "Application Tier" {
+        component "ASP.NET Core (Kestrel)" as ProdAPI
+        component "EF Core" as ProdEF
+    }
+
+    node "Database Tier" {
+        database "MariaDB / MySQL" as ProdDB {
+            [dsc_production]
+        }
+    }
+
+    node "Identity Provider" {
+        component "Keycloak / OIDC" as Keycloak
+    }
+}
+
+cloud "Browser" as Browser
+
+Browser --> Vite : http://localhost:5173
+Vite ..> API : proxy /api
+
+Browser --> Proxy : HTTPS
+Proxy --> StaticAssets
+Proxy --> ProdAPI : /api
+
+ProdAPI --> ProdEF
+ProdEF --> dsc_production
+ProdAPI ..> Keycloak : OIDC authentication
+
+note right of API
+  Development:
+  - Admin:RequireToken=false
+  - Local DB connection
+  - No HTTPS enforcement
+end note
+
+note right of ProdAPI
+  Production:
+  - Admin:RequireToken=true (enforced)
+  - Secure DB connection
+  - HTTPS enforced
+  - OIDC authentication
+  - Rate limiting
+end note
+
+note bottom of DB
+  Local dev credentials:
+  User: dsc_local
+  Password: dsc_password
+  (not committed to source)
+end note
+
+note bottom of ProdDB
+  Production credentials:
+  - Managed via secrets/env vars
+  - No default fallback
+  - Encrypted connections
+end note
+
+@enduml

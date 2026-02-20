@@ -11,6 +11,19 @@
 - Added an admin-token bypass switch (`Admin:RequireToken=false`) that only works when `ASPNETCORE_ENVIRONMENT=Development`.
 - Guardrails prevent the bypass from being used in Test/Production environments.
 
+## 2026-02-19 — UML documentation and PlantUML setup
+
+- Created comprehensive UML documentation suite in `diagrams/uml/` including:
+  - Domain model with all entities and relationships
+  - API architecture showing middleware, controllers, security, and data flow
+  - Use case diagrams for end-user and admin workflows
+  - Deployment architecture (dev and planned production)
+  - Sequence diagrams for admin seed and time entry workflows
+  - Component diagram showing all packages and dependencies
+- Added `diagrams/README.md` with guidance on using UML diagrams with Spec-Kitty workflow
+- Installed PlantUML and Graphviz via Homebrew (`brew install plantuml graphviz`)
+- Installed PlantUML VS Code extension (`jebbs.plantuml`) for in-editor diagram preview
+
 - Copied all relevant static assets from legacy `WebContent` (CSS, JS, images, calendar libs) into `src/DSC.WebClient/public`.
 - Created React page stubs for `Activity`, `Project`, `Administrator`, and `Login` in `src/DSC.WebClient/src/pages/`.
 - Set up routing in `src/DSC.WebClient/src/App.jsx` to match legacy JSP routes.

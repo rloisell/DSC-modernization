@@ -1,0 +1,147 @@
+@startuml DSC API Architecture
+!theme plain
+
+package "Presentation Layer" {
+    interface "React SPA" as WebClient {
+        + Vite Dev Server (port 5173)
+        + B.C. Design System Components
+        + Axios API Client
+    }
+}
+
+package "API Layer (ASP.NET Core)" {
+    component "Kestrel" {
+        port "5005" as APIPort
+    }
+
+    component "Middleware Pipeline" {
+        [CORS]
+        [Routing]
+        [Rate Limiter]
+        [Authentication]
+        [Authorization]
+    }
+
+    package "Controllers" {
+        [ProjectsController] <<Public>>
+        [ItemsController] <<Public>>
+        [AdminUsersController] <<Admin>>
+        [AdminProjectsController] <<Admin>>
+        [AdminDepartmentsController] <<Admin>>
+        [AdminPositionsController] <<Admin>>
+        [AdminExpenseCategoriesController] <<Admin>>
+        [AdminExpenseOptionsController] <<Admin>>
+        [AdminActivityCodesController] <<Admin>>
+        [AdminNetworkNumbersController] <<Admin>>
+        [AdminProjectActivityOptionsController] <<Admin>>
+        [AdminSeedController] <<Admin>>
+    }
+
+    package "Security" {
+        [AdminTokenAuthenticationHandler]
+        note right of AdminTokenAuthenticationHandler
+          X-Admin-Token header authentication
+          Dev bypass: Admin:RequireToken=false
+          (enforced only in Development)
+        end note
+    }
+
+    package "DTOs" {
+        [ProjectDto]
+        [WorkItemDto]
+        [AdminUserDto]
+        [AdminCatalogDtos]
+    }
+
+    package "Services" {
+        [TestDataSeeder]
+    }
+}
+
+package "Data Layer" {
+    component "EF Core" {
+        [ApplicationDbContext]
+        [Migrations]
+    }
+
+    package "Models" {
+        [User]
+        [UserAuth]
+        [Project]
+        [WorkItem]
+        [TimeEntry]
+        [ProjectAssignment]
+        [ExternalIdentity]
+        [Position]
+        [Department]
+        [ExpenseCategory]
+        [ExpenseOption]
+        [ActivityCode]
+        [NetworkNumber]
+        [ProjectActivityOption]
+    }
+}
+
+database "MariaDB" {
+    [dsc_dev]
+}
+
+' Connections
+WebClient -down-> APIPort : HTTP/REST
+APIPort -down-> [CORS]
+[CORS] -down-> [Routing]
+[Routing] -down-> [Rate Limiter]
+[Rate Limiter] -down-> [Authentication]
+[Authentication] -down-> [Authorization]
+
+[Authorization] -down-> ProjectsController
+[Authorization] -down-> ItemsController
+[Authorization] -down-> AdminUsersController
+[Authorization] -down-> AdminProjectsController
+[Authorization] -down-> AdminDepartmentsController
+[Authorization] -down-> AdminPositionsController
+[Authorization] -down-> AdminExpenseCategoriesController
+[Authorization] -down-> AdminExpenseOptionsController
+[Authorization] -down-> AdminActivityCodesController
+[Authorization] -down-> AdminNetworkNumbersController
+[Authorization] -down-> AdminProjectActivityOptionsController
+[Authorization] -down-> AdminSeedController
+
+AdminUsersController ..> AdminTokenAuthenticationHandler : requires
+AdminProjectsController ..> AdminTokenAuthenticationHandler : requires
+AdminDepartmentsController ..> AdminTokenAuthenticationHandler : requires
+AdminPositionsController ..> AdminTokenAuthenticationHandler : requires
+AdminExpenseCategoriesController ..> AdminTokenAuthenticationHandler : requires
+AdminExpenseOptionsController ..> AdminTokenAuthenticationHandler : requires
+AdminActivityCodesController ..> AdminTokenAuthenticationHandler : requires
+AdminNetworkNumbersController ..> AdminTokenAuthenticationHandler : requires
+AdminProjectActivityOptionsController ..> AdminTokenAuthenticationHandler : requires
+AdminSeedController ..> AdminTokenAuthenticationHandler : requires
+
+ProjectsController ..> ProjectDto : returns
+ItemsController ..> WorkItemDto : returns
+AdminUsersController ..> AdminUserDto : returns
+AdminProjectsController ..> AdminCatalogDtos : returns
+
+AdminSeedController ..> TestDataSeeder : uses
+
+ProjectsController -down-> ApplicationDbContext : queries
+ItemsController -down-> ApplicationDbContext : queries
+AdminUsersController -down-> ApplicationDbContext : CRUD
+AdminProjectsController -down-> ApplicationDbContext : CRUD
+TestDataSeeder -down-> ApplicationDbContext : seeds
+
+ApplicationDbContext -down-> [User]
+ApplicationDbContext -down-> [Project]
+ApplicationDbContext -down-> [WorkItem]
+ApplicationDbContext -down-> [TimeEntry]
+
+ApplicationDbContext -down-> dsc_dev : Pomelo.MySQL
+
+note right of "Middleware Pipeline"
+  Rate Limiting: 60 req/min for admin
+  Auth: AdminToken scheme
+  Dev bypass available via config
+end note
+
+@enduml

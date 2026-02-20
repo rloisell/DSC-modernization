@@ -1,0 +1,80 @@
+@startuml Time Entry Creation Sequence
+!theme plain
+autonumber
+
+actor "User" as User
+participant "React SPA" as SPA
+participant "Activity Page" as ActivityPage
+participant "WorkItemService" as Service
+participant "ItemsController" as Controller
+participant "ApplicationDbContext" as DbContext
+database "MariaDB" as DB
+
+User -> SPA : Navigate to /activity
+activate SPA
+SPA -> ActivityPage : Render Activity page
+activate ActivityPage
+
+ActivityPage -> Service : getProjects()
+activate Service
+Service -> Controller : GET /api/projects
+activate Controller
+Controller -> DbContext : Projects.AsNoTracking().ToArrayAsync()
+activate DbContext
+DbContext -> DB : SELECT * FROM Projects
+DB --> DbContext : Project records
+DbContext --> Controller : Project[]
+deactivate DbContext
+Controller --> Service : 200 OK\nProjectDto[]
+deactivate Controller
+Service --> ActivityPage : Projects list
+deactivate Service
+
+ActivityPage --> User : Show project selector\nand work item form
+deactivate ActivityPage
+
+User -> ActivityPage : Fill work item form\n(title, project, legacy fields)
+activate ActivityPage
+
+User -> ActivityPage : Submit create
+ActivityPage -> Service : createWorkItemWithLegacy(payload)
+activate Service
+
+Service -> Controller : POST /api/items\n{ title, projectId, legacyActivityId,\ndate, startTime, endTime, ... }
+activate Controller
+
+Controller -> Controller : Validate request\n(title, projectId required)
+
+Controller -> DbContext : Projects.AnyAsync(p => p.Id == request.ProjectId)
+activate DbContext
+DbContext -> DB : SELECT COUNT(*) FROM Projects WHERE Id = ?
+DB --> DbContext : count > 0
+DbContext --> Controller : true
+deactivate DbContext
+
+alt Project not found
+    Controller --> Service : 400 Bad Request\n{ error: "Project not found." }
+    Service --> ActivityPage : Error message
+    ActivityPage --> User : Display error
+else Project valid
+    Controller -> Controller : Create WorkItem entity\nwith legacy fields
+    Controller -> DbContext : WorkItems.AddAsync(workItem)
+    Controller -> DbContext : SaveChangesAsync()
+    activate DbContext
+    DbContext -> DB : INSERT INTO WorkItems (...) VALUES (...)
+    DB --> DbContext : Success
+    DbContext --> Controller : Changes saved
+    deactivate DbContext
+
+    Controller --> Service : 201 Created\n{ id: workItem.Id }
+    deactivate Controller
+
+    Service --> ActivityPage : Work item created
+    deactivate Service
+
+    ActivityPage -> ActivityPage : Refresh work items list
+    ActivityPage --> User : Show success message\nand updated list
+    deactivate ActivityPage
+end
+
+@enduml

@@ -1,0 +1,144 @@
+@startuml DSC Component Diagram
+!theme plain
+
+package "Frontend (React SPA)" {
+    component "Pages" {
+        [Home]
+        [Activity]
+        [Project]
+        [Administrator]
+        [Admin Users]
+        [Admin Positions]
+        [Admin Departments]
+        [Admin Projects]
+        [Admin Expense]
+        [Admin Activity Options]
+        [Login]
+    }
+
+    component "Services" {
+        [ProjectService]
+        [WorkItemService]
+        [AdminUserService]
+        [AdminCatalogService]
+    }
+
+    component "UI Components" {
+        [B.C. Design System]
+        [Header]
+        [Footer]
+        [Button]
+        [Form]
+        [TextField]
+        [Select]
+        [InlineAlert]
+    }
+
+    [Pages] ..> [Services] : uses
+    [Pages] ..> [UI Components] : renders
+}
+
+package "Backend API (.NET 10)" {
+    component "Public Controllers" {
+        [ProjectsController]
+        [ItemsController]
+    }
+
+    component "Admin Controllers" {
+        [AdminUsersController]
+        [AdminProjectsController]
+        [AdminDepartmentsController]
+        [AdminPositionsController]
+        [AdminExpenseCategoriesController]
+        [AdminExpenseOptionsController]
+        [AdminActivityCodesController]
+        [AdminNetworkNumbersController]
+        [AdminProjectActivityOptionsController]
+        [AdminSeedController]
+    }
+
+    component "Security" {
+        [AdminTokenAuthenticationHandler]
+        [AuthorizationPolicy]
+        [RateLimitingPolicy]
+    }
+
+    component "Data Services" {
+        [ApplicationDbContext]
+        [TestDataSeeder]
+        [PasswordHasher]
+    }
+
+    component "DTOs" {
+        [ProjectDto]
+        [WorkItemDto]
+        [AdminUserDto]
+        [AdminCatalogDtos]
+    }
+
+    [Admin Controllers] ..> [Security] : protected by
+    [AdminUsersController] ..> [PasswordHasher] : uses
+    [AdminSeedController] ..> [TestDataSeeder] : uses
+    [Public Controllers] ..> [ApplicationDbContext] : queries
+    [Admin Controllers] ..> [ApplicationDbContext] : CRUD
+    [TestDataSeeder] ..> [ApplicationDbContext] : seeds
+    [Public Controllers] ..> [DTOs] : returns
+    [Admin Controllers] ..> [DTOs] : returns
+}
+
+package "Data Layer (EF Core)" {
+    component "Entities" {
+        [User]
+        [UserAuth]
+        [Project]
+        [WorkItem]
+        [TimeEntry]
+        [ProjectAssignment]
+        [ExternalIdentity]
+        [Position]
+        [Department]
+        [ExpenseCategory]
+        [ExpenseOption]
+        [ActivityCode]
+        [NetworkNumber]
+        [ProjectActivityOption]
+    }
+
+    component "Migrations" {
+        [InitialCreate]
+        [MapJavaModel]
+        [AdminEntities]
+        [ProjectIsActive]
+    }
+
+    [ApplicationDbContext] ..> [Entities] : maps
+    [Migrations] ..> [Entities] : schema
+}
+
+database "MariaDB" {
+    [dsc_dev]
+}
+
+' Frontend to Backend
+[ProjectService] -down-> [ProjectsController] : HTTP GET/POST
+[WorkItemService] -down-> [ItemsController] : HTTP GET/POST
+[AdminUserService] -down-> [AdminUsersController] : HTTP GET/POST/PUT/DELETE
+[AdminCatalogService] -down-> [Admin Controllers] : HTTP GET/POST/PUT
+
+' Backend to Data
+[ApplicationDbContext] -down-> [dsc_dev] : Pomelo.MySQL
+
+note right of [Security]
+  Admin endpoints require:
+  - X-Admin-Token header
+  - Rate limiting (60 req/min)
+  - Dev bypass available
+end note
+
+note bottom of [B.C. Design System]
+  @bcgov/design-system-react-components
+  @bcgov/design-tokens
+  @bcgov/bc-sans
+end note
+
+@enduml
