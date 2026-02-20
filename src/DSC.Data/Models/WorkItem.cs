@@ -6,10 +6,12 @@ namespace DSC.Data.Models
     public class WorkItem
     {
         public Guid Id { get; set; }
-        public Guid ProjectId { get; set; }
-        public Project Project { get; set; } = null!;
+        public Guid? ProjectId { get; set; }
+        public Project? Project { get; set; }
         public Guid? BudgetId { get; set; }
         public Budget? Budget { get; set; }
+
+        public string ActivityType { get; set; } = "Project";
 
         // Legacy mapping fields from Java `Activity`
         public int? LegacyActivityId { get; set; }
@@ -26,6 +28,9 @@ namespace DSC.Data.Models
         // Optional legacy lookup/code fields
         public string? ActivityCode { get; set; }
         public string? NetworkNumber { get; set; }
+        public string? DirectorCode { get; set; }
+        public string? ReasonCode { get; set; }
+        public string? CpcCode { get; set; }
 
         // Estimated and remaining hours for this work item
         public decimal? EstimatedHours { get; set; }

@@ -16,3 +16,18 @@ export async function getBudgets() {
   const res = await axios.get(`${CATALOG_URL}/budgets`);
   return res.data;
 }
+
+export async function getDirectorCodes() {
+  const res = await axios.get(`${CATALOG_URL}/director-codes`);
+  return res.data;
+}
+
+export async function getReasonCodes() {
+  const res = await axios.get(`${CATALOG_URL}/reason-codes`);
+  return res.data;
+}
+
+export async function getCpcCodes() {
+  const res = await axios.get(`${CATALOG_URL}/cpc-codes`);
+  return res.data;
+}

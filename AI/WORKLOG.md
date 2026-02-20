@@ -1,3 +1,50 @@
+## 2026-02-20 — Activity Type Split (Project vs Expense) (COMPLETED ✓)
+
+**Problem Statement**:
+1. Activity form should change fields based on budget selection (Project vs Expense)
+2. Expense activities need distinct fields for director/reason/CPC codes
+3. Work items should store the activity type and expense codes for reporting
+
+**Implementation & Resolution**:
+
+### Backend Changes
+
+#### 1. Work Item Model Updates
+- ✅ Project is optional for expense activities
+- ✅ Added `ActivityType`, `DirectorCode`, `ReasonCode`, `CpcCode` fields
+- ✅ Added catalog mappings for `Director_Code`, `Reason_Code`, `CPC_Code`
+
+#### 2. API Validation & Catalog Endpoints
+- ✅ Validation enforces project fields for project budgets and expense fields for expense budgets
+- ✅ Added public catalog endpoints for director/reason/CPC codes
+
+### Frontend Changes
+
+#### 1. Budget-Driven Field Switching
+- ✅ Budget selection toggles project vs expense inputs
+- ✅ Expense mode shows director/reason/CPC selects
+- ✅ Project mode shows project/activity/network selects
+
+**Files Modified**:
+- `src/DSC.Data/Models/WorkItem.cs`
+- `src/DSC.Data/Models/DirectorCode.cs`
+- `src/DSC.Data/Models/ReasonCode.cs`
+- `src/DSC.Data/Models/CpcCode.cs`
+- `src/DSC.Data/ApplicationDbContext.cs`
+- `src/DSC.Data/Migrations/20260220113112_AddExpenseActivityFields.cs`
+- `src/DSC.Data/Migrations/20260220113112_AddExpenseActivityFields.Designer.cs`
+- `src/DSC.Api/DTOs/WorkItemDto.cs`
+- `src/DSC.Api/DTOs/AdminCatalogDtos.cs`
+- `src/DSC.Api/Controllers/ItemsController.cs`
+- `src/DSC.Api/Controllers/CatalogController.cs`
+- `src/DSC.WebClient/src/api/CatalogService.js`
+- `src/DSC.WebClient/src/api/WorkItemService.js`
+- `src/DSC.WebClient/src/pages/Activity.jsx`
+
+**Commit**: Pending - feat: split project and expense activities
+
+---
+
 ## 2026-02-20 — Admin Expense Options Fixes (COMPLETED ✓)
 
 **Problem Statement**:

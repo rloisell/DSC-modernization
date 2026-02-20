@@ -34,6 +34,7 @@ namespace DSC.Api.Controllers
                     ProjectId = w.ProjectId,
                     BudgetId = w.BudgetId,
                     BudgetDescription = w.Budget != null ? w.Budget.Description : null,
+                    ActivityType = w.ActivityType,
                     LegacyActivityId = w.LegacyActivityId,
                     Date = w.Date,
                     StartTime = w.StartTime,
@@ -42,6 +43,9 @@ namespace DSC.Api.Controllers
                     ActualDuration = w.ActualDuration,
                     ActivityCode = w.ActivityCode,
                     NetworkNumber = w.NetworkNumber != null ? int.Parse(w.NetworkNumber) : null,
+                    DirectorCode = w.DirectorCode,
+                    ReasonCode = w.ReasonCode,
+                    CpcCode = w.CpcCode,
                     Title = w.Title,
                     Description = w.Description,
                     EstimatedHours = w.EstimatedHours,
@@ -114,9 +118,10 @@ namespace DSC.Api.Controllers
                     ProjectId = w.ProjectId,
                     BudgetId = w.BudgetId,
                     BudgetDescription = w.Budget != null ? w.Budget.Description : null,
-                    ProjectNo = w.Project.ProjectNo,
-                    ProjectName = w.Project.Name,
-                    ProjectEstimatedHours = w.Project.EstimatedHours,
+                    ActivityType = w.ActivityType,
+                    ProjectNo = w.Project != null ? w.Project.ProjectNo : null,
+                    ProjectName = w.Project != null ? w.Project.Name : null,
+                    ProjectEstimatedHours = w.Project != null ? w.Project.EstimatedHours : null,
                     LegacyActivityId = w.LegacyActivityId,
                     Date = w.Date,
                     StartTime = w.StartTime,
@@ -125,6 +130,9 @@ namespace DSC.Api.Controllers
                     ActualDuration = w.ActualDuration,
                     ActivityCode = w.ActivityCode,
                     NetworkNumber = w.NetworkNumber != null ? int.Parse(w.NetworkNumber) : null,
+                    DirectorCode = w.DirectorCode,
+                    ReasonCode = w.ReasonCode,
+                    CpcCode = w.CpcCode,
                     Title = w.Title,
                     Description = w.Description,
                     EstimatedHours = w.EstimatedHours,
@@ -148,6 +156,7 @@ namespace DSC.Api.Controllers
                 ProjectId = item.ProjectId,
                 BudgetId = item.BudgetId,
                 BudgetDescription = item.Budget != null ? item.Budget.Description : null,
+                ActivityType = item.ActivityType,
                 LegacyActivityId = item.LegacyActivityId,
                 Date = item.Date,
                 StartTime = item.StartTime,
@@ -156,6 +165,9 @@ namespace DSC.Api.Controllers
                 ActualDuration = item.ActualDuration,
                 ActivityCode = item.ActivityCode,
                 NetworkNumber = item.NetworkNumber != null ? int.Parse(item.NetworkNumber) : null,
+                DirectorCode = item.DirectorCode,
+                ReasonCode = item.ReasonCode,
+                CpcCode = item.CpcCode,
                 Title = item.Title,
                 Description = item.Description,
                 EstimatedHours = item.EstimatedHours,
@@ -170,22 +182,44 @@ namespace DSC.Api.Controllers
         public async Task<IActionResult> Post([FromBody] WorkItemCreateRequest request)
         {
             // Basic server-side validation
-            if (string.IsNullOrWhiteSpace(request.Title) || request.ProjectId == Guid.Empty || request.BudgetId == null || request.BudgetId == Guid.Empty)
+            if (string.IsNullOrWhiteSpace(request.Title) || request.BudgetId == null || request.BudgetId == Guid.Empty)
             {
-                return BadRequest(new { error = "Missing required fields: Title, ProjectId, and BudgetId" });
+                return BadRequest(new { error = "Missing required fields: Title and BudgetId" });
             }
 
-            // Verify project exists
-            var projectExists = await _db.Projects.AnyAsync(p => p.Id == request.ProjectId);
-            if (!projectExists)
-            {
-                return BadRequest(new { error = "Project not found" });
-            }
-
-            var budgetExists = await _db.Budgets.AnyAsync(b => b.Id == request.BudgetId);
-            if (!budgetExists)
+            var budget = await _db.Budgets.AsNoTracking().FirstOrDefaultAsync(b => b.Id == request.BudgetId);
+            if (budget == null)
             {
                 return BadRequest(new { error = "Budget not found" });
+            }
+
+            var isExpense = IsExpenseBudget(budget.Description);
+            if (isExpense)
+            {
+                if (string.IsNullOrWhiteSpace(request.DirectorCode)
+                    || string.IsNullOrWhiteSpace(request.ReasonCode)
+                    || string.IsNullOrWhiteSpace(request.CpcCode))
+                {
+                    return BadRequest(new { error = "Missing required fields: DirectorCode, ReasonCode, and CpcCode" });
+                }
+            }
+            else
+            {
+                if (request.ProjectId == null || request.ProjectId == Guid.Empty)
+                {
+                    return BadRequest(new { error = "Missing required field: ProjectId" });
+                }
+
+                if (string.IsNullOrWhiteSpace(request.ActivityCode) || request.NetworkNumber == null)
+                {
+                    return BadRequest(new { error = "Missing required fields: ActivityCode and NetworkNumber" });
+                }
+
+                var projectExists = await _db.Projects.AnyAsync(p => p.Id == request.ProjectId);
+                if (!projectExists)
+                {
+                    return BadRequest(new { error = "Project not found" });
+                }
             }
 
             var workItem = new WorkItem
@@ -193,6 +227,7 @@ namespace DSC.Api.Controllers
                 Id = Guid.NewGuid(),
                 ProjectId = request.ProjectId,
                 BudgetId = request.BudgetId,
+                ActivityType = isExpense ? "Expense" : "Project",
                 Title = request.Title,
                 Description = request.Description,
                 LegacyActivityId = request.LegacyActivityId,
@@ -203,6 +238,9 @@ namespace DSC.Api.Controllers
                 ActualDuration = request.ActualDuration,
                 ActivityCode = request.ActivityCode,
                 NetworkNumber = request.NetworkNumber?.ToString(),
+                DirectorCode = request.DirectorCode?.Trim(),
+                ReasonCode = request.ReasonCode?.Trim(),
+                CpcCode = request.CpcCode?.Trim(),
                 EstimatedHours = request.EstimatedHours,
                 RemainingHours = request.RemainingHours
             };
@@ -221,6 +259,7 @@ namespace DSC.Api.Controllers
                 ProjectId = workItem.ProjectId,
                 BudgetId = workItem.BudgetId,
                 BudgetDescription = budgetDescription,
+                ActivityType = workItem.ActivityType,
                 Title = workItem.Title,
                 Description = workItem.Description,
                 LegacyActivityId = workItem.LegacyActivityId,
@@ -231,11 +270,25 @@ namespace DSC.Api.Controllers
                 ActualDuration = workItem.ActualDuration,
                 ActivityCode = workItem.ActivityCode,
                 NetworkNumber = workItem.NetworkNumber != null ? int.Parse(workItem.NetworkNumber) : null,
+                DirectorCode = workItem.DirectorCode,
+                ReasonCode = workItem.ReasonCode,
+                CpcCode = workItem.CpcCode,
                 EstimatedHours = workItem.EstimatedHours,
                 RemainingHours = workItem.RemainingHours
             };
 
             return CreatedAtAction(nameof(Get), new { id = workItem.Id }, responseDto);
+        }
+
+        private static bool IsExpenseBudget(string? description)
+        {
+            if (string.IsNullOrWhiteSpace(description))
+            {
+                return false;
+            }
+
+            var normalized = description.Trim().ToLowerInvariant();
+            return normalized.Contains("opex") || normalized.Contains("expense");
         }
     }
 }

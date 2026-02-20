@@ -23,6 +23,9 @@ namespace DSC.Data
         public DbSet<ExpenseCategory> ExpenseCategories => Set<ExpenseCategory>();
         public DbSet<ExpenseOption> ExpenseOptions => Set<ExpenseOption>();
         public DbSet<ActivityCode> ActivityCodes => Set<ActivityCode>();
+        public DbSet<DirectorCode> DirectorCodes => Set<DirectorCode>();
+        public DbSet<ReasonCode> ReasonCodes => Set<ReasonCode>();
+        public DbSet<CpcCode> CpcCodes => Set<CpcCode>();
         public DbSet<NetworkNumber> NetworkNumbers => Set<NetworkNumber>();
         public DbSet<ProjectActivityOption> ProjectActivityOptions => Set<ProjectActivityOption>();
 
@@ -58,8 +61,14 @@ namespace DSC.Data
             modelBuilder.Entity<WorkItem>(b =>
             {
                 b.HasKey(w => w.Id);
-                b.HasOne(w => w.Project).WithMany(p => p.WorkItems).HasForeignKey(w => w.ProjectId).OnDelete(DeleteBehavior.Cascade);
+                b.HasOne(w => w.Project).WithMany(p => p.WorkItems).HasForeignKey(w => w.ProjectId).OnDelete(DeleteBehavior.SetNull);
                 b.HasOne(w => w.Budget).WithMany(bu => bu.WorkItems).HasForeignKey(w => w.BudgetId).OnDelete(DeleteBehavior.SetNull);
+                b.Property(w => w.ActivityType).HasMaxLength(20).HasDefaultValue("Project");
+                b.Property(w => w.ActivityCode).HasMaxLength(50);
+                b.Property(w => w.NetworkNumber).HasMaxLength(50);
+                b.Property(w => w.DirectorCode).HasMaxLength(50);
+                b.Property(w => w.ReasonCode).HasMaxLength(50);
+                b.Property(w => w.CpcCode).HasMaxLength(50);
             });
 
             modelBuilder.Entity<TimeEntry>(b =>
@@ -127,6 +136,30 @@ namespace DSC.Data
             {
                 b.HasKey(a => a.Id);
                 b.HasIndex(a => a.Code).IsUnique();
+            });
+
+            modelBuilder.Entity<DirectorCode>(b =>
+            {
+                b.ToTable("Director_Code");
+                b.HasKey(d => d.Code);
+                b.Property(d => d.Code).HasColumnName("directorCode");
+                b.Property(d => d.Description).HasColumnName("description").HasMaxLength(255);
+            });
+
+            modelBuilder.Entity<ReasonCode>(b =>
+            {
+                b.ToTable("Reason_Code");
+                b.HasKey(r => r.Code);
+                b.Property(r => r.Code).HasColumnName("reasonCode");
+                b.Property(r => r.Description).HasColumnName("description").HasMaxLength(255);
+            });
+
+            modelBuilder.Entity<CpcCode>(b =>
+            {
+                b.ToTable("CPC_Code");
+                b.HasKey(c => c.Code);
+                b.Property(c => c.Code).HasColumnName("cpcCode");
+                b.Property(c => c.Description).HasColumnName("description").HasMaxLength(255);
             });
 
             modelBuilder.Entity<NetworkNumber>(b =>

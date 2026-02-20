@@ -13,7 +13,14 @@ import {
 } from '@bcgov/design-system-react-components';
 import { getWorkItems, createWorkItemWithLegacy, getDetailedWorkItems } from '../api/WorkItemService';
 import { getProjects } from '../api/ProjectService';
-import { getActivityCodes, getNetworkNumbers, getBudgets } from '../api/CatalogService';
+import {
+  getActivityCodes,
+  getNetworkNumbers,
+  getBudgets,
+  getDirectorCodes,
+  getReasonCodes,
+  getCpcCodes
+} from '../api/CatalogService';
 import axios from 'axios';
 
 export default function Activity() {
@@ -24,6 +31,9 @@ export default function Activity() {
   const [budgets, setBudgets] = useState([]);
   const [activityCodes, setActivityCodes] = useState([]);
   const [networkNumbers, setNetworkNumbers] = useState([]);
+  const [directorCodes, setDirectorCodes] = useState([]);
+  const [reasonCodes, setReasonCodes] = useState([]);
+  const [cpcCodes, setCpcCodes] = useState([]);
   const [projectOptions, setProjectOptions] = useState(null);
   const [loading, setLoading] = useState(true);
   const [detailedLoading, setDetailedLoading] = useState(true);
@@ -40,6 +50,9 @@ export default function Activity() {
   const [actualDuration, setActualDuration] = useState('');
   const [activityCode, setActivityCode] = useState('');
   const [networkNumber, setNetworkNumber] = useState('');
+  const [directorCode, setDirectorCode] = useState('');
+  const [reasonCode, setReasonCode] = useState('');
+  const [cpcCode, setCpcCode] = useState('');
   const [estimatedHours, setEstimatedHours] = useState('');
   const [remainingHours, setRemainingHours] = useState('');
   const [creating, setCreating] = useState(false);
@@ -62,6 +75,13 @@ export default function Activity() {
     label: budget.description
   }));
 
+  const selectedBudget = budgets.find(b => b.id === budgetId);
+  const isExpenseBudget = selectedBudget
+    ? selectedBudget.description.toLowerCase().includes('opex')
+      || selectedBudget.description.toLowerCase().includes('expense')
+    : false;
+  const isProjectBudget = selectedBudget ? !isExpenseBudget : false;
+
   // Use project-specific options if a project is selected, otherwise use all codes/numbers
   const availableActivityCodes = projectOptions?.activityCodes || activityCodes;
   const availableNetworkNumbers = projectOptions?.networkNumbers || networkNumbers;
@@ -76,20 +96,41 @@ export default function Activity() {
     label: nn.description ? `${nn.number} — ${nn.description}` : String(nn.number)
   }));
 
+  const directorCodeItems = directorCodes.map(code => ({
+    id: code.code,
+    label: code.description ? `${code.code} — ${code.description}` : code.code
+  }));
+
+  const reasonCodeItems = reasonCodes.map(code => ({
+    id: code.code,
+    label: code.description ? `${code.code} — ${code.description}` : code.code
+  }));
+
+  const cpcCodeItems = cpcCodes.map(code => ({
+    id: code.code,
+    label: code.description ? `${code.code} — ${code.description}` : code.code
+  }));
+
   useEffect(() => {
     Promise.all([
       getWorkItems(),
       getProjects(),
       getBudgets(),
       getActivityCodes(),
-      getNetworkNumbers()
+      getNetworkNumbers(),
+      getDirectorCodes(),
+      getReasonCodes(),
+      getCpcCodes()
     ])
-      .then(([workItems, projects, budgets, codes, numbers]) => {
+      .then(([workItems, projects, budgets, codes, numbers, directors, reasons, cpcs]) => {
         setItems(workItems);
         setProjects(projects);
         setBudgets(budgets);
         setActivityCodes(codes);
         setNetworkNumbers(numbers);
+        setDirectorCodes(directors);
+        setReasonCodes(reasons);
+        setCpcCodes(cpcs);
       })
       .catch(e => setError(e.message))
       .finally(() => setLoading(false));
@@ -106,7 +147,7 @@ export default function Activity() {
 
   // When project changes, load project-specific options
   useEffect(() => {
-    if (projectId) {
+    if (projectId && isProjectBudget) {
       axios.get(`/api/catalog/project-options/${projectId}`)
         .then(res => {
           setProjectOptions(res.data);
@@ -129,7 +170,23 @@ export default function Activity() {
       setActivityCode('');
       setNetworkNumber('');
     }
-  }, [projectId]);
+  }, [projectId, isProjectBudget]);
+
+  useEffect(() => {
+    if (!budgetId) {
+      return;
+    }
+
+    if (isExpenseBudget) {
+      setProjectId('');
+      setActivityCode('');
+      setNetworkNumber('');
+    } else if (isProjectBudget) {
+      setDirectorCode('');
+      setReasonCode('');
+      setCpcCode('');
+    }
+  }, [budgetId, isExpenseBudget, isProjectBudget]);
 
   async function handleCreate(e) {
     e.preventDefault();
@@ -149,6 +206,9 @@ export default function Activity() {
         actualDuration: actualDuration ? Number(actualDuration) : undefined,
         activityCode: activityCode || undefined,
         networkNumber: networkNumber ? Number(networkNumber) : undefined,
+        directorCode: directorCode || undefined,
+        reasonCode: reasonCode || undefined,
+        cpcCode: cpcCode || undefined,
         estimatedHours: estimatedHours ? Number(estimatedHours) : undefined,
         remainingHours: remainingHours ? Number(remainingHours) : undefined
       };
@@ -169,6 +229,9 @@ export default function Activity() {
       setActualDuration('');
       setActivityCode('');
       setNetworkNumber('');
+      setDirectorCode('');
+      setReasonCode('');
+      setCpcCode('');
       setEstimatedHours('');
       setRemainingHours('');
     } catch (e) {
@@ -263,7 +326,8 @@ export default function Activity() {
             items={projectItems}
             selectedKey={projectId || null}
             onSelectionChange={key => setProjectId(key ? String(key) : '')}
-            isRequired
+            isRequired={isProjectBudget}
+            isDisabled={!isProjectBudget}
           />
           <Select
             label="Budget"
@@ -273,6 +337,34 @@ export default function Activity() {
             onSelectionChange={key => setBudgetId(key ? String(key) : '')}
             isRequired
           />
+          {isExpenseBudget ? (
+            <div className="form-columns">
+              <Select
+                label="Director Code"
+                placeholder="Select director code"
+                items={directorCodeItems}
+                selectedKey={directorCode || null}
+                onSelectionChange={key => setDirectorCode(key ? String(key) : '')}
+                isRequired
+              />
+              <Select
+                label="Reason Code"
+                placeholder="Select reason code"
+                items={reasonCodeItems}
+                selectedKey={reasonCode || null}
+                onSelectionChange={key => setReasonCode(key ? String(key) : '')}
+                isRequired
+              />
+              <Select
+                label="CPC Code"
+                placeholder="Select CPC code"
+                items={cpcCodeItems}
+                selectedKey={cpcCode || null}
+                onSelectionChange={key => setCpcCode(key ? String(key) : '')}
+                isRequired
+              />
+            </div>
+          ) : null}
           <TextField label="Legacy Activity ID" value={legacyActivityId} onChange={setLegacyActivityId} />
           <div className="form-columns">
             <TextField label="Date" type="date" value={date} onChange={setDate} />
@@ -291,50 +383,54 @@ export default function Activity() {
               onChange={value => setActualDuration(value == null ? '' : String(value))}
             />
           </div>
-          <div className="form-columns">
-            <Select
-              label="Activity Code"
-              placeholder={projectId ? "Select activity code" : "Select a project first"}
-              items={activityCodeItems}
-              selectedKey={activityCode || null}
-              onSelectionChange={key => {
-                const newCode = key ? String(key) : '';
-                setActivityCode(newCode);
-                // If filtering is active and an activity code is selected, filter network numbers
-                if (projectOptions && newCode && networkNumber) {
-                  const validPairs = projectOptions.validPairs
-                    .filter(p => p.activityCode === newCode)
-                    .map(p => String(p.networkNumber));
-                  if (!validPairs.includes(networkNumber)) {
-                    setNetworkNumber('');
+          {isProjectBudget ? (
+            <div className="form-columns">
+              <Select
+                label="Activity Code"
+                placeholder={projectId ? "Select activity code" : "Select a project first"}
+                items={activityCodeItems}
+                selectedKey={activityCode || null}
+                onSelectionChange={key => {
+                  const newCode = key ? String(key) : '';
+                  setActivityCode(newCode);
+                  // If filtering is active and an activity code is selected, filter network numbers
+                  if (projectOptions && newCode && networkNumber) {
+                    const validPairs = projectOptions.validPairs
+                      .filter(p => p.activityCode === newCode)
+                      .map(p => String(p.networkNumber));
+                    if (!validPairs.includes(networkNumber)) {
+                      setNetworkNumber('');
+                    }
                   }
-                }
-              }}
-              description={projectId ? "Select an activity code for this work item" : "Select a project to see available codes"}
-              isDisabled={!projectId}
-            />
-            <Select
-              label="Network Number"
-              placeholder={projectId ? "Select network number" : "Select a project first"}
-              items={networkNumberItems}
-              selectedKey={networkNumber || null}
-              onSelectionChange={key => {
-                const newNumber = key ? String(key) : '';
-                setNetworkNumber(newNumber);
-                // If filtering is active and a network number is selected, filter activity codes
-                if (projectOptions && newNumber && activityCode) {
-                  const validPairs = projectOptions.validPairs
-                    .filter(p => String(p.networkNumber) === newNumber)
-                    .map(p => p.activityCode);
-                  if (!validPairs.includes(activityCode)) {
-                    setActivityCode('');
+                }}
+                description={projectId ? "Select an activity code for this work item" : "Select a project to see available codes"}
+                isDisabled={!projectId}
+                isRequired
+              />
+              <Select
+                label="Network Number"
+                placeholder={projectId ? "Select network number" : "Select a project first"}
+                items={networkNumberItems}
+                selectedKey={networkNumber || null}
+                onSelectionChange={key => {
+                  const newNumber = key ? String(key) : '';
+                  setNetworkNumber(newNumber);
+                  // If filtering is active and a network number is selected, filter activity codes
+                  if (projectOptions && newNumber && activityCode) {
+                    const validPairs = projectOptions.validPairs
+                      .filter(p => String(p.networkNumber) === newNumber)
+                      .map(p => p.activityCode);
+                    if (!validPairs.includes(activityCode)) {
+                      setActivityCode('');
+                    }
                   }
-                }
-              }}
-              description={projectId ? "Select a network number for this work item" : "Select a project to see available numbers"}
-              isDisabled={!projectId}
-            />
-          </div>
+                }}
+                description={projectId ? "Select a network number for this work item" : "Select a project to see available numbers"}
+                isDisabled={!projectId}
+                isRequired
+              />
+            </div>
+          ) : null}
           <div className="form-columns">
             <NumberField
               label="Estimated Hours"
@@ -353,7 +449,7 @@ export default function Activity() {
           </ButtonGroup>
         </Form>
       </section>
-      {projectId && projectOptions && projectOptions.validPairs && projectOptions.validPairs.length > 0 ? (
+      {isProjectBudget && projectId && projectOptions && projectOptions.validPairs && projectOptions.validPairs.length > 0 ? (
         <section className="section stack">
           <Heading level={2}>Available Options for Selected Project</Heading>
           <Text elementType="p">Valid activity code and network number combinations for this project:</Text>

@@ -1,5 +1,16 @@
 # Remaining Work (2026-02-21)
 
+## ToDo: Remaining Legacy Models
+- Activity category (`Category`)
+- Calendar (`Calendar`)
+- Calendar category (`Calendar_Category`)
+- Union (`Union`)
+- Department user (`Department_User`)
+- User position (`User_Position`)
+- User user (`User_User`)
+- Project activity (`Project_Activity`)
+- Expense activity (`Expense_Activity`)
+
 ## ✅ COMPLETED: Budget Classification (CAPEX/OPEX) Port (2026-02-20)
 
 **Status**: COMPLETE ✅
@@ -46,6 +57,45 @@
 - `src/DSC.WebClient/src/pages/AdminExpense.jsx`
 
 **Commit**: Current - feat: port CAPEX/OPEX budget classification
+
+---
+
+## ✅ COMPLETED: Activity Type Split (Project vs Expense) (2026-02-20)
+
+**Status**: COMPLETE ✅
+
+### Changes Made
+
+#### 1. Work Item Model Updates ✅
+- **Project optional** for expense activities
+- **Added**: `ActivityType`, `DirectorCode`, `ReasonCode`, `CpcCode` fields
+
+#### 2. API Validation & Catalog Endpoints ✅
+- **Validation** enforces project vs expense requirements based on budget selection
+- **Catalog**: `/api/catalog/director-codes`, `/api/catalog/reason-codes`, `/api/catalog/cpc-codes`
+
+#### 3. Activity Page UX ✅
+- Budget selection toggles project inputs vs expense inputs
+- Project mode requires project/activity/network selections
+- Expense mode requires director/reason/CPC selections
+
+**Files Modified**:
+- `src/DSC.Data/Models/WorkItem.cs`
+- `src/DSC.Data/Models/DirectorCode.cs`
+- `src/DSC.Data/Models/ReasonCode.cs`
+- `src/DSC.Data/Models/CpcCode.cs`
+- `src/DSC.Data/ApplicationDbContext.cs`
+- `src/DSC.Data/Migrations/20260220113112_AddExpenseActivityFields.cs`
+- `src/DSC.Data/Migrations/20260220113112_AddExpenseActivityFields.Designer.cs`
+- `src/DSC.Api/DTOs/WorkItemDto.cs`
+- `src/DSC.Api/DTOs/AdminCatalogDtos.cs`
+- `src/DSC.Api/Controllers/ItemsController.cs`
+- `src/DSC.Api/Controllers/CatalogController.cs`
+- `src/DSC.WebClient/src/api/CatalogService.js`
+- `src/DSC.WebClient/src/api/WorkItemService.js`
+- `src/DSC.WebClient/src/pages/Activity.jsx`
+
+**Commit**: Pending - feat: split project and expense activities
 
 ---
 

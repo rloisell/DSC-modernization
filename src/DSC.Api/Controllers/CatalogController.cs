@@ -76,6 +76,54 @@ namespace DSC.Api.Controllers
             return Ok(budgets);
         }
 
+        [HttpGet("director-codes")]
+        [ProducesResponseType(typeof(DirectorCodeDto[]), StatusCodes.Status200OK)]
+        public async Task<ActionResult<DirectorCodeDto[]>> GetDirectorCodes()
+        {
+            var codes = await _db.DirectorCodes.AsNoTracking()
+                .OrderBy(c => c.Code)
+                .Select(c => new DirectorCodeDto
+                {
+                    Code = c.Code,
+                    Description = c.Description
+                })
+                .ToArrayAsync();
+
+            return Ok(codes);
+        }
+
+        [HttpGet("reason-codes")]
+        [ProducesResponseType(typeof(ReasonCodeDto[]), StatusCodes.Status200OK)]
+        public async Task<ActionResult<ReasonCodeDto[]>> GetReasonCodes()
+        {
+            var codes = await _db.ReasonCodes.AsNoTracking()
+                .OrderBy(c => c.Code)
+                .Select(c => new ReasonCodeDto
+                {
+                    Code = c.Code,
+                    Description = c.Description
+                })
+                .ToArrayAsync();
+
+            return Ok(codes);
+        }
+
+        [HttpGet("cpc-codes")]
+        [ProducesResponseType(typeof(CpcCodeDto[]), StatusCodes.Status200OK)]
+        public async Task<ActionResult<CpcCodeDto[]>> GetCpcCodes()
+        {
+            var codes = await _db.CpcCodes.AsNoTracking()
+                .OrderBy(c => c.Code)
+                .Select(c => new CpcCodeDto
+                {
+                    Code = c.Code,
+                    Description = c.Description
+                })
+                .ToArrayAsync();
+
+            return Ok(codes);
+        }
+
         [HttpGet("project-options/{projectId}")]
         [ProducesResponseType(typeof(ProjectActivityOptionsResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
