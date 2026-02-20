@@ -37,6 +37,9 @@ export async function createWorkItemWithLegacy({
   actualDuration,
   activityCode,
   networkNumber,
+  directorCode,
+  reasonCode,
+  cpcCode,
   estimatedHours,
   remainingHours
 }) {
@@ -53,6 +56,9 @@ export async function createWorkItemWithLegacy({
     actualDuration,
     activityCode,
     networkNumber,
+    directorCode,
+    reasonCode,
+    cpcCode,
     estimatedHours,
     remainingHours
   };

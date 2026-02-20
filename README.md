@@ -69,7 +69,13 @@ See [tests/howto.md](tests/howto.md) for comprehensive testing documentation, in
   - Activity create form requires a budget selection
   - Activity table displays the budget classification for each work item
   - Uses `/api/catalog/budgets` for lookup
+- ✅ **Project vs Expense Activity Split** (NEW 2026-02-20):
+  - Budget selection toggles project fields vs expense fields
+  - Project budgets require Project/Activity Code/Network Number
+  - Expense budgets require Director/Reason/CPC codes
+  - Budget dropdown labels show the budget description and type
 - ✅ **Catalog Service**: New public `/api/catalog` endpoints for activity codes and network numbers
+- ✅ **Expense Catalogs**: Director/Reason/CPC codes exposed via `/api/catalog/director-codes`, `/api/catalog/reason-codes`, `/api/catalog/cpc-codes`
 - ✅ **Test Data Seeding**: Activity Codes and Network Numbers automatically seeded with test data
 - ✅ **Legacy Activity ID**: Optional integer field for backward compatibility with Java system Activity IDs
 - ✅ **Project-Specific Filtering** (NEW 2026-02-21):
@@ -99,6 +105,7 @@ See [tests/howto.md](tests/howto.md) for comprehensive testing documentation, in
 3. Start WebClient: `cd src/DSC.WebClient && npm run dev`
 4. Navigate to Activity page and create a work item:
    - Project dropdown: loads from `/api/projects`
+  - Budget dropdown: shows budget description + type (Project/Expense)
    - Activity Code dropdown: loads DEV, TEST, DOC, ADMIN, MEET, TRAIN from `/api/catalog/activity-codes`
    - Network Number dropdown: loads 101, 102, 103, 201, 202, 203 from `/api/catalog/network-numbers`
    - (Optional) Legacy Activity ID: enter an ID if linking to original system

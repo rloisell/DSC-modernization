@@ -1,37 +1,54 @@
-## 2026-02-20 — Union Catalog Port (COMPLETED ✓)
+## 2026-02-20 — Activity Type Split (Project vs Expense) (COMPLETED ✓)
 
 **Problem Statement**:
-1. Port the legacy `Union` catalog table from the Java system
-2. Provide admin endpoints for managing unions
+1. Activity form should change fields based on budget selection (Project vs Expense)
+2. Expense activities need distinct fields for director/reason/CPC codes
+3. Work items should store the activity type and expense codes for reporting
 
 **Implementation & Resolution**:
 
 ### Backend Changes
 
-#### 1. Union Domain Model
-- ✅ Added `Union` entity mapped to legacy `Union` (`unionId`, `unionName`)
-- ✅ Added EF Core migration `AddUnionModel`
+#### 1. Work Item Model Updates
+- ✅ Project is optional for expense activities
+- ✅ Added `ActivityType`, `DirectorCode`, `ReasonCode`, `CpcCode` fields
+- ✅ Added catalog mappings for `Director_Code`, `Reason_Code`, `CPC_Code`
 
-#### 2. Admin API Endpoints & DTOs
-- ✅ Added `AdminUnionsController` for admin CRUD
-- ✅ Added DTOs: `UnionDto`, `UnionCreateRequest`, `UnionUpdateRequest`
+#### 2. API Validation & Catalog Endpoints
+- ✅ Validation enforces project fields for project budgets and expense fields for expense budgets
+- ✅ Added public catalog endpoints for director/reason/CPC codes
 
-### Frontend Support
+### Frontend Changes
 
-#### 1. Admin Catalog Service
-- ✅ Added `getUnions`, `createUnion`, `updateUnion` API helpers
+#### 1. Budget-Driven Field Switching
+- ✅ Budget selection toggles project vs expense inputs
+- ✅ Expense mode shows director/reason/CPC selects
+- ✅ Project mode shows project/activity/network selects
+- ✅ Budget dropdown labels show the budget description and type
+
+### Operational Steps
+
+#### 1. Migration + Seed
+- ✅ Step 1: `AddExpenseActivityFields` marked as applied (schema already aligned)
+- ✅ Step 2: test data seed executed (no new rows created)
 
 **Files Modified**:
-- `src/DSC.Data/Models/Union.cs`
+- `src/DSC.Data/Models/WorkItem.cs`
+- `src/DSC.Data/Models/DirectorCode.cs`
+- `src/DSC.Data/Models/ReasonCode.cs`
+- `src/DSC.Data/Models/CpcCode.cs`
 - `src/DSC.Data/ApplicationDbContext.cs`
-- `src/DSC.Data/Migrations/20260220114900_AddUnionModel.cs`
-- `src/DSC.Data/Migrations/20260220114900_AddUnionModel.Designer.cs`
-- `src/DSC.Data/Migrations/ApplicationDbContextModelSnapshot.cs`
-- `src/DSC.Api/Controllers/AdminUnionsController.cs`
+- `src/DSC.Data/Migrations/20260220113112_AddExpenseActivityFields.cs`
+- `src/DSC.Data/Migrations/20260220113112_AddExpenseActivityFields.Designer.cs`
+- `src/DSC.Api/DTOs/WorkItemDto.cs`
 - `src/DSC.Api/DTOs/AdminCatalogDtos.cs`
-- `src/DSC.WebClient/src/api/AdminCatalogService.js`
+- `src/DSC.Api/Controllers/ItemsController.cs`
+- `src/DSC.Api/Controllers/CatalogController.cs`
+- `src/DSC.WebClient/src/api/CatalogService.js`
+- `src/DSC.WebClient/src/api/WorkItemService.js`
+- `src/DSC.WebClient/src/pages/Activity.jsx`
 
-**Commit**: Current - feat: port union catalog
+**Commit**: Current - feat: split project and expense activities
 
 ---
 
