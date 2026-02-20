@@ -24,6 +24,12 @@
 - Installed PlantUML and Graphviz via Homebrew (`brew install plantuml graphviz`)
 - Installed PlantUML VS Code extension (`jebbs.plantuml`) for in-editor diagram preview
 
+## 2026-02-19 — Diagram migration to Draw.io
+
+- Recreated the full diagram set in Draw.io (`.drawio.svg`) and added the missing ERD.
+- Updated `diagrams/README.md` and `README.md` to reference Draw.io artifacts.
+- Archived PlantUML sources and rendered PNGs under `AI/archive/plantuml/` to preserve prior artifacts.
+
 - Copied all relevant static assets from legacy `WebContent` (CSS, JS, images, calendar libs) into `src/DSC.WebClient/public`.
 - Created React page stubs for `Activity`, `Project`, `Administrator`, and `Login` in `src/DSC.WebClient/src/pages/`.
 - Set up routing in `src/DSC.WebClient/src/App.jsx` to match legacy JSP routes.

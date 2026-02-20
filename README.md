@@ -202,24 +202,6 @@ Comprehensive Draw.io diagrams documenting the application architecture are avai
 - **Admin Seed Sequence** (`diagrams/drawio/sequence-admin-seed.drawio.svg`): Test data seeding flow
 - **Time Entry Sequence** (`diagrams/drawio/sequence-time-entry.drawio.svg`): Work item creation flow
 - **Component Diagram** (`diagrams/drawio/component-diagram.drawio.svg`): Major packages and dependencies
-- **Sequence Diagrams**: Admin seed and time entry workflows
-- **Component Diagram** ([diagrams/uml/component-diagram.puml](diagrams/uml/component-diagram.puml)): Package structure and dependencies
 
 See [diagrams/README.md](diagrams/README.md) for detailed guidance on using these diagrams with the Spec-Kitty workflow.
-
-**Rendering UML Diagrams:**
-
-1. Install PlantUML tools:
-   ```bash
-   brew install plantuml graphviz
-   ```
-
-2. Render diagrams from command line:
-   ```bash
-   plantuml diagrams/uml/*.puml -o ../output
-   ```
-
-3. Or install the VS Code PlantUML extension for in-editor preview:
-   - Extension ID: `jebbs.plantuml`
-   - Preview `.puml` files directly in VS Code
 
