@@ -1,5 +1,78 @@
 # Remaining work (2026-02-21)
 
+## COMPLETED: Unit Tests for Activity Page & Seeding ✅
+
+**Status**: DONE — Comprehensive automated test suite validates all functionality
+
+1. ✅ **Created 16 Unit Tests**:
+   - 14 tests in `ActivityPageTests.cs`
+   - 2 baseline tests in `SimpleActivityPageTest.cs`
+   - All tests passed successfully
+   - Test execution time: ~1 second
+
+2. ✅ **Test Data Seeding Validation** (9 tests):
+   - ✅ TestDataSeeder_CreatesActivityCodes (validates 6 codes created)
+   - ✅ TestDataSeeder_ActivityCodes_HaveCorrectValues (verifies DEV, TEST, DOC, ADMIN, MEET, TRAIN)
+   - ✅ TestDataSeeder_ActivityCodes_AreActive (confirms IsActive = true)
+   - ✅ TestDataSeeder_ActivityCodes_HaveDescriptions (validates descriptions populated)
+   - ✅ TestDataSeeder_CreatesNetworkNumbers (validates 6 numbers created)
+   - ✅ TestDataSeeder_NetworkNumbers_HaveCorrectValues (verifies 101, 102, 103, 201, 202, 203)
+   - ✅ TestDataSeeder_NetworkNumbers_AreActive (confirms IsActive = true)
+   - ✅ TestDataSeeder_NetworkNumbers_HaveDescriptions (validates descriptions populated)
+   - ✅ TestDataSeeder_IsIdempotent (confirms seeding twice creates no duplicates)
+
+3. ✅ **API Endpoint Tests** (4 tests):
+   - ✅ CatalogController_GetActivityCodes_ReturnsSeededData (validates endpoint returns 6 codes)
+   - ✅ CatalogController_GetNetworkNumbers_ReturnsSeededData (validates endpoint returns 6 numbers)
+   - ✅ ItemsController_GetAll_ReturnsWorkItems (validates endpoint returns items when present)
+   - ✅ ItemsController_GetAll_ReturnsEmptyArrayWhenNoItems (validates empty array behavior)
+
+4. ✅ **Integration Test** (1 test):
+   - ✅ ActivityPage_Integration_AllDataSourcesAvailable (validates complete data pipeline)
+
+5. ✅ **Test Infrastructure**:
+   - InMemoryDatabase for test isolation (no real database required)
+   - Transaction warning suppression for InMemory compatibility
+   - Fresh DbContext per test (Guid-based database name)
+   - Password hashing support for user models
+   - Project references configured (DSC.Api, DSC.Web)
+
+**Files Created**:
+- `tests/DSC.Tests/ActivityPageTests.cs` (14 primary tests)
+- `tests/DSC.Tests/SimpleActivityPageTest.cs` (2 simple/baseline tests)
+
+**Files Modified**:
+- `tests/DSC.Tests/DSC.Tests.csproj` (added dependencies)
+
+**Commits**:
+- d3d9d4b - test: add comprehensive unit tests for Activity page functionality
+
+**How to run tests**:
+```bash
+# Run all tests
+dotnet test tests/DSC.Tests/DSC.Tests.csproj
+
+# Run only Activity page tests
+dotnet test tests/DSC.Tests/DSC.Tests.csproj --filter "ActivityPageTests"
+
+# Run with verbose output
+dotnet test tests/DSC.Tests/DSC.Tests.csproj --verbosity detailed
+
+# Run a specific test
+dotnet test tests/DSC.Tests/DSC.Tests.csproj --filter "TestDataSeeder_CreatesActivityCodes"
+```
+
+**Test Coverage**:
+- ✅ TestDataSeeder creates correct quantity and values
+- ✅ All seeded records properly marked as active
+- ✅ All seeded records have descriptions
+- ✅ Seeding is idempotent (safe to run multiple times)
+- ✅ CatalogController endpoints return correct format and data
+- ✅ ItemsController GetAll returns work items or empty array
+- ✅ Full integration: all parts work together correctly
+
+---
+
 ## COMPLETED: Activity Page Catalog Data Seeding ✅
 
 **Status**: DONE — Dropdowns now load real data from database

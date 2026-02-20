@@ -1,3 +1,60 @@
+## 2026-02-21 — Unit Tests for Activity Page & Catalog Functionality (Continued)
+
+**Completed**:
+1. ✅ Created comprehensive unit test suite for Activity page
+   - **Test Files Created**:
+     - `tests/DSC.Tests/ActivityPageTests.cs` - 14 unit tests
+     - `tests/DSC.Tests/SimpleActivityPageTest.cs` - 2 baseline tests
+   - **Project Updates**: 
+     - Updated `DSC.Tests.csproj` with required NuGet packages:
+       - `Microsoft.EntityFrameworkCore.InMemory` v9.0.0
+       - `Microsoft.AspNetCore.Identity` v2.2.0
+       - `Moq` v4.20.70
+     - Added `ProjectReference` to DSC.Api and DSC.Web projects
+
+2. ✅ Test data seeding validation (6 tests)
+   - `TestDataSeeder_CreatesActivityCodes` - validates 6 codes created
+   - `TestDataSeeder_ActivityCodes_HaveCorrectValues` - verifies DEV, TEST, DOC, ADMIN, MEET, TRAIN
+   - `TestDataSeeder_ActivityCodes_AreActive` - confirms IsActive = true
+   - `TestDataSeeder_ActivityCodes_HaveDescriptions` - validates all have descriptions
+   - `TestDataSeeder_CreatesNetworkNumbers` - validates 6 numbers created
+   - `TestDataSeeder_NetworkNumbers_HaveCorrectValues` - verifies 101, 102, 103, 201, 202, 203
+   - `TestDataSeeder_NetworkNumbers_AreActive` - confirms IsActive = true
+   - `TestDataSeeder_NetworkNumbers_HaveDescriptions` - validates all have descriptions
+   - `TestDataSeeder_IsIdempotent` - confirms seeding twice creates no duplicates
+
+3. ✅ CatalogController endpoint tests (2 tests)
+   - `CatalogController_GetActivityCodes_ReturnsSeededData` - validates endpoint returns 6 active codes
+   - `CatalogController_GetNetworkNumbers_ReturnsSeededData` - validates endpoint returns 6 active numbers
+
+4. ✅ ItemsController endpoint tests (2 tests)
+   - `ItemsController_GetAll_ReturnsWorkItems` - validates GetAll returns items when present
+   - `ItemsController_GetAll_ReturnsEmptyArrayWhenNoItems` - validates empty array when no items
+
+5. ✅ Integration test (1 test)
+   - `ActivityPage_Integration_AllDataSourcesAvailable` - validates:
+     - All projects seeded correctly
+     - All activity codes seeded and properly structured
+     - All network numbers seeded and properly structured
+     - All have required descriptions
+
+6. ✅ Test infrastructure setup
+   - **InMemory Database**: Uses EntityFrameworkCore.InMemoryDatabase for test isolation
+   - **Transaction Handling**: Suppressed transaction warning with:
+     ```csharp
+     .ConfigureWarnings(w => w.Ignore(InMemoryEventId.TransactionIgnoredWarning))
+     ```
+   - **Fresh Context per Test**: Creates new database instance for each test via Guid key
+   - **Password Hashing**: Uses PasswordHasher<User> for authentication
+
+**Test Results**:
+- ✅ All 16 tests passed (14 ActivityPageTests + 2 SimpleActivityPageTest)
+- ✅ Build successful with no errors
+- ✅ All tests execute in ~1 second
+- ✅ InMemory database isolation ensures test independence
+
+---
+
 ## 2026-02-21 — Activity Page Fixes & Catalog Data Seeding
 
 **Completed**:
