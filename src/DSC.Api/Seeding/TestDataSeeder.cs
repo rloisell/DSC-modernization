@@ -8,7 +8,30 @@ using DSC.Data.Models;
 
 namespace DSC.Api.Seeding
 {
-public record TestSeedResult(int UsersCreated, int UserAuthCreated, int ProjectsCreated, int DepartmentsCreated, int RolesCreated, int ActivityCodesCreated, int NetworkNumbersCreated, int BudgetsCreated);
+public record TestSeedResult(
+    int UsersCreated, 
+    int UserAuthCreated, 
+    int ProjectsCreated, 
+    int DepartmentsCreated, 
+    int RolesCreated, 
+    int ActivityCodesCreated, 
+    int NetworkNumbersCreated, 
+    int BudgetsCreated,
+    int PositionsCreated,
+    int ExpenseCategoriesCreated,
+    int ExpenseOptionsCreated,
+    int CpcCodesCreated,
+    int DirectorCodesCreated,
+    int ReasonCodesCreated,
+    int UnionsCreated,
+    int ActivityCategoriesCreated,
+    int CalendarCategoriesCreated,
+    int CalendarEntriesCreated,
+    int WorkItemsCreated,
+    int ProjectActivityOptionsCreated,
+    int ProjectAssignmentsCreated,
+    int TimeEntriesCreated
+);
 
     public class TestDataSeeder
     {
@@ -31,6 +54,20 @@ public record TestSeedResult(int UsersCreated, int UserAuthCreated, int Projects
             var activityCodesCreated = 0;
             var networkNumbersCreated = 0;
             var budgetsCreated = 0;
+            var positionsCreated = 0;
+            var expenseCategoriesCreated = 0;
+            var expenseOptionsCreated = 0;
+            var cpcCodesCreated = 0;
+            var directorCodesCreated = 0;
+            var reasonCodesCreated = 0;
+            var unionsCreated = 0;
+            var activityCategoriesCreated = 0;
+            var calendarCategoriesCreated = 0;
+            var calendarEntriesCreated = 0;
+            var workItemsCreated = 0;
+            var projectActivityOptionsCreated = 0;
+            var projectAssignmentsCreated = 0;
+            var timeEntriesCreated = 0;
 
             await using var transaction = await _db.Database.BeginTransactionAsync(ct);
 
@@ -133,8 +170,8 @@ public record TestSeedResult(int UsersCreated, int UserAuthCreated, int Projects
                 }
             }
 
-            var project = await _db.Projects.FirstOrDefaultAsync(p => p.ProjectNo == "P99999", ct);
-            if (project == null)
+            var existingProject = await _db.Projects.FirstOrDefaultAsync(p => p.ProjectNo == "P99999", ct);
+            if (existingProject == null)
             {
                 _db.Projects.Add(new Project
                 {
@@ -354,9 +391,613 @@ public record TestSeedResult(int UsersCreated, int UserAuthCreated, int Projects
             }
 
             await _db.SaveChangesAsync(ct);
+            
+            // Now seed comprehensive catalog data and work items
+            
+            // Seed positions
+            var positionSeeds = new[]
+            {
+                new PositionSeed("Software Developer", "Develops and maintains software applications"),              new PositionSeed("Senior Developer", "Senior software development role"),
+                new PositionSeed("Team Lead", "Leads development teams"),
+                new PositionSeed("Project Manager", "Manages software projects"),
+                new PositionSeed("QA Analyst", "Quality assurance and testing"),
+                new PositionSeed("Systems Analyst", "Analyzes system requirements")
+            };
+
+            foreach (var seed in positionSeeds)
+            {
+                var existing = await _db.Positions.FirstOrDefaultAsync(p => p.Title == seed.Title, ct);
+                if (existing == null)
+                {
+                    _db.Positions.Add(new Position
+                    {
+                        Id = Guid.NewGuid(),
+                        Title = seed.Title,
+                        Description = seed.Description,
+                        IsActive = true
+                    });
+                    positionsCreated++;
+                }
+            }
+
+            // Seed expense categories
+            var capexBudget = await _db.Budgets.FirstOrDefaultAsync(b => b.Description == "CAPEX", ct);
+            var opexBudget = await _db.Budgets.FirstOrDefaultAsync(b => b.Description == "OPEX", ct);
+
+            if (capexBudget != null)
+            {
+                var expenseCategorySeeds = new[]
+                {
+                    new ExpenseCategorySeed("Hardware", capexBudget.Id),
+                    new ExpenseCategorySeed("Software Licenses", capexBudget.Id),
+                    new ExpenseCategorySeed("Infrastructure", capexBudget.Id)
+                };
+
+                foreach (var seed in expenseCategorySeeds)
+                {
+                    var existing = await _db.ExpenseCategories.FirstOrDefaultAsync(ec => ec.Name == seed.Name && ec.BudgetId == seed.BudgetId, ct);
+                    if (existing == null)
+                    {
+                        _db.ExpenseCategories.Add(new ExpenseCategory
+                        {
+                            Id = Guid.NewGuid(),
+                            Name = seed.Name,
+                            BudgetId = seed.BudgetId,
+                            IsActive = true
+                        });
+                        expenseCategoriesCreated++;
+                    }
+                }
+            }
+
+            if (opexBudget != null)
+            {
+                var opexCategorySeeds = new[]
+                {
+                    new ExpenseCategorySeed("Travel", opexBudget.Id),
+                    new ExpenseCategorySeed("Training", opexBudget.Id),
+                    new ExpenseCategorySeed("Supplies", opexBudget.Id),
+                    new ExpenseCategorySeed("Consulting", opexBudget.Id)
+                };
+
+                foreach (var seed in opexCategorySeeds)
+                {
+                    var existing = await _db.ExpenseCategories.FirstOrDefaultAsync(ec => ec.Name == seed.Name && ec.BudgetId == seed.BudgetId, ct);
+                    if (existing == null)
+                    {
+                        _db.ExpenseCategories.Add(new ExpenseCategory
+                        {
+                            Id = Guid.NewGuid(),
+                            Name = seed.Name,
+                            BudgetId = seed.BudgetId,
+                            IsActive = true
+                        });
+                        expenseCategoriesCreated++;
+                    }
+                }
+            }
+
+            await _db.SaveChangesAsync(ct);
+
+            // Seed expense options
+            var travelCategory = await _db.ExpenseCategories.FirstOrDefaultAsync(ec => ec.Name == "Travel", ct);
+            if (travelCategory != null)
+            {
+                var travelOptions = new[] { "Airfare", "Hotel", "Meals", "Ground Transportation" };
+                foreach (var optionName in travelOptions)
+                {
+                    var existing = await _db.ExpenseOptions.FirstOrDefaultAsync(eo => eo.Name == optionName && eo.ExpenseCategoryId == travelCategory.Id, ct);
+                    if (existing == null)
+                    {
+                        _db.ExpenseOptions.Add(new ExpenseOption
+                        {
+                            Id = Guid.NewGuid(),
+                            Name = optionName,
+                            ExpenseCategoryId = travelCategory.Id,
+                            IsActive = true
+                        });
+                        expenseOptionsCreated++;
+                    }
+                }
+            }
+
+            // Seed CPC codes
+            var cpcCodeSeeds = new[]
+            {
+                new CpcCodeSeed("CPC100", "General Operations"),
+                new CpcCodeSeed("CPC200", "IT Services"),
+                new CpcCodeSeed("CPC300", "Sales and Marketing"),
+                new CpcCodeSeed("CPC400", "Research and Development"),
+                new CpcCodeSeed("CPC500", "Customer Support")
+            };
+
+            foreach (var seed in cpcCodeSeeds)
+            {
+                var existing = await _db.Set<CpcCode>().FirstOrDefaultAsync(c => c.Code == seed.Code, ct);
+                if (existing == null)
+                {
+                    _db.Set<CpcCode>().Add(new CpcCode
+                    {
+                        Code = seed.Code,
+                        Description = seed.Description
+                    });
+                    cpcCodesCreated++;
+                }
+            }
+
+            // Seed director codes
+            var directorCodeSeeds = new[]
+            {
+                new DirectorCodeSeed("DIR001", "Engineering Director"),
+                new DirectorCodeSeed("DIR002", "Operations Director"),
+                new DirectorCodeSeed("DIR003", "Product Director"),
+                new DirectorCodeSeed("DIR004", "Finance Director")
+            };
+
+            foreach (var seed in directorCodeSeeds)
+            {
+                var existing = await _db.Set<DirectorCode>().FirstOrDefaultAsync(c => c.Code == seed.Code, ct);
+                if (existing == null)
+                {
+                    _db.Set<DirectorCode>().Add(new DirectorCode
+                    {
+                        Code = seed.Code,
+                        Description = seed.Description
+                    });
+                    directorCodesCreated++;
+                }
+            }
+
+            // Seed reason codes
+            var reasonCodeSeeds = new[]
+            {
+                new ReasonCodeSeed("MAINT", "System Maintenance"),
+                new ReasonCodeSeed("UPGRADE", "System Upgrade"),
+                new ReasonCodeSeed("SUPPORT", "Customer Support"),
+                new ReasonCodeSeed("TRAINING", "Staff Training"),
+                new ReasonCodeSeed("MEETING", "Business Meeting")
+            };
+
+            foreach (var seed in reasonCodeSeeds)
+            {
+                var existing = await _db.Set<ReasonCode>().FirstOrDefaultAsync(c => c.Code == seed.Code, ct);
+                if (existing == null)
+                {
+                    _db.Set<ReasonCode>().Add(new ReasonCode
+                    {
+                        Code = seed.Code,
+                        Description = seed.Description
+                    });
+                    reasonCodesCreated++;
+                }
+            }
+
+            // Seed unions
+            var unionSeeds = new[]
+            {
+                new UnionSeed(1, "IBEW Local 2085"),
+                new UnionSeed(2, "CUPE Local 500"),
+                new UnionSeed(3, "Non-Union")
+            };
+
+            foreach (var seed in unionSeeds)
+            {
+                var existing = await _db.Set<Union>().FirstOrDefaultAsync(u => u.Id == seed.Id, ct);
+                if (existing == null)
+                {
+                    _db.Set<Union>().Add(new Union
+                    {
+                        Id = seed.Id,
+                        Name = seed.Name
+                    });
+                    unionsCreated++;
+                }
+            }
+
+            // Seed activity categories
+            var activityCategorySeeds = new[]
+            {
+                new ActivityCategorySeed("Development"),
+                new ActivityCategorySeed("Testing"),
+                new ActivityCategorySeed("Documentation"),
+                new ActivityCategorySeed("Planning"),
+                new ActivityCategorySeed("Support")
+            };
+
+            foreach (var seed in activityCategorySeeds)
+            {
+                var existing = await _db.Set<ActivityCategory>().FirstOrDefaultAsync(ac => ac.Name == seed.Name, ct);
+                if (existing == null)
+                {
+                    _db.Set<ActivityCategory>().Add(new ActivityCategory
+                    {
+                        Id = 0, // Auto-increment
+                        Name = seed.Name
+                    });
+                    activityCategoriesCreated++;
+                }
+            }
+
+            // Seed calendar categories
+            var calendarCategorySeeds = new[]
+            {
+                new CalendarCategorySeed("Holiday", "Statutory holidays"),
+                new CalendarCategorySeed("Company Event", "Company-wide events"),
+                new CalendarCategorySeed("Maintenance Window", "Scheduled maintenance periods"),
+                new CalendarCategorySeed("Training Day", "Scheduled training days")
+            };
+
+            foreach (var seed in calendarCategorySeeds)
+            {
+                var existing = await _db.Set<CalendarCategory>().FirstOrDefaultAsync(cc => cc.Name == seed.Name, ct);
+                if (existing == null)
+                {
+                    _db.Set<CalendarCategory>().Add(new CalendarCategory
+                    {
+                        Id = 0, // Auto-increment
+                        Name = seed.Name,
+                        Description = seed.Description
+                    });
+                    calendarCategoriesCreated++;
+                }
+            }
+
+            await _db.SaveChangesAsync(ct);
+
+            // Get reference data for work items
+            var users = await _db.Users.ToListAsync(ct);
+            var projects = await _db.Projects.ToListAsync(ct);
+            var budgets = await _db.Budgets.ToListAsync(ct);
+            var activityCodes = await _db.ActivityCodes.ToListAsync(ct);
+            var networkNumbers = await _db.NetworkNumbers.ToListAsync(ct);
+
+            // Create project activity options (link projects to activity codes and network numbers)
+            foreach (var project in projects.Take(3)) // Just first 3 projects
+            {
+                foreach (var activityCode in activityCodes.Take(5)) // First 5 activity codes
+                {
+                    foreach (var networkNumber in networkNumbers.Take(3)) // First 3 network numbers
+                    {
+                        var existing = await _db.ProjectActivityOptions.FirstOrDefaultAsync(
+                            pao => pao.ProjectId == project.Id && pao.ActivityCodeId == activityCode.Id && pao.NetworkNumberId == networkNumber.Id, ct);
+                        
+                        if (existing == null)
+                        {
+                            _db.ProjectActivityOptions.Add(new ProjectActivityOption
+                            {
+                                ProjectId = project.Id,
+                                ActivityCodeId = activityCode.Id,
+                                NetworkNumberId = networkNumber.Id
+                            });
+                            projectActivityOptionsCreated++;
+                        }
+                    }
+                }
+            }
+
+            await _db.SaveChangesAsync(ct);
+
+            // Seed work items with proper user associations
+            if (users.Any() && projects.Any() && budgets.Any())
+            {
+                var capex = budgets.FirstOrDefault(b => b.Description == "CAPEX");
+                var opex = budgets.FirstOrDefault(b => b.Description == "OPEX");
+
+                // Create work items for each user
+                foreach (var user in users)
+                {
+                    // Create 2-3 work items per user
+                    var userProject = projects.FirstOrDefault();
+                    var userActivityCode = activityCodes.FirstOrDefault();
+                    var userNetworkNumber = networkNumbers.FirstOrDefault();
+
+                    if (userProject != null && capex != null && userActivityCode != null && userNetworkNumber != null)
+                    {
+                        // Work item 1: Recent project work
+                        var workItem1 = await _db.WorkItems.FirstOrDefaultAsync(
+                            w => w.UserId == user.Id && w.Title.Contains("Development Sprint"), ct);
+                        
+                        if (workItem1 == null)
+                        {
+                            _db.WorkItems.Add(new WorkItem
+                            {
+                                Id = Guid.NewGuid(),
+                                UserId = user.Id,
+                                ProjectId = userProject.Id,
+                                BudgetId = capex.Id,
+                                Title = $"Development Sprint - Week {DateTime.Now.Day}",
+                                Description = $"Working on development tasks for {userProject.Name}",
+                                Date = DateTime.Now.AddDays(-2),
+                                ActivityType = "Project",
+                                ActivityCode = userActivityCode.Code,
+                                NetworkNumber = userNetworkNumber.Number.ToString(),
+                                PlannedDuration = TimeSpan.FromHours(8),
+                                ActualDuration = 8,
+                                EstimatedHours = 8.0m,
+                                RemainingHours = 0.5m
+                            });
+                            workItemsCreated++;
+                        }
+
+                        // Work item 2: Meeting
+                        var workItem2 = await _db.WorkItems.FirstOrDefaultAsync(
+                            w => w.UserId == user.Id && w.Title.Contains("Team Meeting"), ct);
+                        
+                        if (workItem2 == null)
+                        {
+                            _db.WorkItems.Add(new WorkItem
+                            {
+                                Id = Guid.NewGuid(),
+                                UserId = user.Id,
+                                ProjectId = userProject.Id,
+                                BudgetId = capex.Id,
+                                Title = "Team Meeting - Sprint Planning",
+                                Description = "Sprint planning and task assignments",
+                                Date = DateTime.Now.AddDays(-1),
+                                ActivityType = "Project",
+                                ActivityCode = "MEET",
+                                NetworkNumber = userNetworkNumber.Number.ToString(),
+                                PlannedDuration = TimeSpan.FromHours(2),
+                                ActualDuration = 2,
+                                EstimatedHours = 2.0m,
+                                RemainingHours = 0m
+                            });
+                            workItemsCreated++;
+                        }
+
+                        // Work item 3: Today's work
+                        var workItem3 = await _db.WorkItems.FirstOrDefaultAsync(
+                            w => w.UserId == user.Id && w.Date.HasValue && w.Date.Value.Date == DateTime.Now.Date, ct);
+                        
+                        if (workItem3 == null)
+                        {
+                            _db.WorkItems.Add(new WorkItem
+                            {
+                                Id = Guid.NewGuid(),
+                                UserId = user.Id,
+                                ProjectId = userProject.Id,
+                                BudgetId = capex.Id,
+                                Title = "Current Development Work",
+                                Description = $"Active development on {userProject.Name}",
+                                Date = DateTime.Now,
+                                ActivityType = "Project",
+                                ActivityCode = userActivityCode.Code,
+                                NetworkNumber = userNetworkNumber.Number.ToString(),
+                                PlannedDuration = TimeSpan.FromHours(8),
+                                ActualDuration = 4,
+                                EstimatedHours = 8.0m,
+                                RemainingHours = 4.0m
+                            });
+                            workItemsCreated++;
+                        }
+                    }
+
+                    // Add one expense activity per user
+                    if (opex != null)
+                    {
+                        var directorCode = await _db.Set<DirectorCode>().FirstOrDefaultAsync(ct);
+                        var reasonCode = await _db.Set<ReasonCode>().FirstOrDefaultAsync(ct);
+                        var cpcCode = await _db.Set<CpcCode>().FirstOrDefaultAsync(ct);
+
+                        if (directorCode != null && reasonCode != null && cpcCode != null)
+                        {
+                            var expenseItem = await _db.WorkItems.FirstOrDefaultAsync(
+                                w => w.UserId == user.Id && w.ActivityType == "Expense", ct);
+                            
+                            if (expenseItem == null)
+                            {
+                                _db.WorkItems.Add(new WorkItem
+                                {
+                                    Id = Guid.NewGuid(),
+                                    UserId = user.Id,
+                                    BudgetId = opex.Id,
+                                    Title = "Training Conference",
+                                    Description = "Attended technical training conference",
+                                    Date = DateTime.Now.AddDays(-5),
+                                    ActivityType = "Expense",
+                                    DirectorCode = directorCode.Code,
+                                    ReasonCode = reasonCode.Code,
+                                    CpcCode = cpcCode.Code,
+                                    PlannedDuration = TimeSpan.FromHours(16),
+                                    ActualDuration = 16,
+                                    EstimatedHours = 16.0m,
+                                    RemainingHours = 0m
+                                });
+                                workItemsCreated++;
+                            }
+                        }
+                    }
+                }
+            }
+
+            await _db.SaveChangesAsync(ct);
+
+            // Seed calendar entries
+            var holidayCategory = await _db.Set<CalendarCategory>().FirstOrDefaultAsync(cc => cc.Name == "Holiday", ct);
+            var companyEventCategory = await _db.Set<CalendarCategory>().FirstOrDefaultAsync(cc => cc.Name == "Company Event", ct);
+
+            if (holidayCategory != null)
+            {
+                // Add some holidays for current year
+                var holidays = new[]
+                {
+                    new { Date = new DateTime(2026, 1, 1), CategoryId = holidayCategory.Id }, // New Year
+                    new { Date = new DateTime(2026, 7, 1), CategoryId = holidayCategory.Id }, // Canada Day
+                    new { Date = new DateTime(2026, 12, 25), CategoryId = holidayCategory.Id }, // Christmas
+                    new { Date = new DateTime(2026, 12, 26), CategoryId = holidayCategory.Id }  // Boxing Day
+                };
+
+                foreach (var holiday in holidays)
+                {
+                    var existing = await _db.Set<CalendarEntry>().FirstOrDefaultAsync(ce => ce.Date == holiday.Date, ct);
+                    if (existing == null)
+                    {
+                        _db.Set<CalendarEntry>().Add(new CalendarEntry
+                        {
+                            Date = holiday.Date,
+                            CalendarCategoryId = holiday.CategoryId
+                        });
+                        calendarEntriesCreated++;
+                    }
+                }
+            }
+
+            if (companyEventCategory != null)
+            {
+                // Add a company event
+                var eventDate = new DateTime(2026, 3, 15);
+                var existing = await _db.Set<CalendarEntry>().FirstOrDefaultAsync(ce => ce.Date == eventDate, ct);
+                if (existing == null)
+                {
+                    _db.Set<CalendarEntry>().Add(new CalendarEntry
+                    {
+                        Date = eventDate,
+                        CalendarCategoryId = companyEventCategory.Id
+                    });
+                    calendarEntriesCreated++;
+                }
+            }
+
+            await _db.SaveChangesAsync(ct);
+
+            // Seed project assignments (assign users to projects)
+            if (users.Any() && projects.Any())
+            {
+                // Assign first project to all users
+                var firstProject = projects.First();
+                foreach (var user in users)
+                {
+                    var existing = await _db.ProjectAssignments.FirstOrDefaultAsync(
+                        pa => pa.ProjectId == firstProject.Id && pa.UserId == user.Id, ct);
+                    
+                    if (existing == null)
+                    {
+                        _db.ProjectAssignments.Add(new ProjectAssignment
+                        {
+                            ProjectId = firstProject.Id,
+                            UserId = user.Id
+                        });
+                        projectAssignmentsCreated++;
+                    }
+                }
+
+                // Assign second project to first two users if available
+                if (projects.Count() > 1 && users.Count() >= 2)
+                {
+                    var secondProject = projects.Skip(1).First();
+                    foreach (var user in users.Take(2))
+                    {
+                        var existing = await _db.ProjectAssignments.FirstOrDefaultAsync(
+                            pa => pa.ProjectId == secondProject.Id && pa.UserId == user.Id, ct);
+                        
+                        if (existing == null)
+                        {
+                        _db.ProjectAssignments.Add(new ProjectAssignment
+                        {
+                            ProjectId = secondProject.Id,
+                            UserId = user.Id
+                        });
+                        projectAssignmentsCreated++;
+                        }
+                    }
+                }
+            }
+
+            await _db.SaveChangesAsync(ct);
+
+            // Seed time entries for work items
+            var allWorkItems = await _db.WorkItems.Include(w => w.User).ToListAsync(ct);
+            foreach (var workItem in allWorkItems.Where(w => w.UserId != null).Take(10)) // Limit to first 10 for test data
+            {
+                // Add 1-2 time entries per work item
+                var timeEntry1 = await _db.TimeEntries.FirstOrDefaultAsync(
+                    te => te.WorkItemId == workItem.Id && te.Date == workItem.Date, ct);
+                
+                if (timeEntry1 == null && workItem.UserId.HasValue && workItem.Date.HasValue)
+                {
+                    _db.TimeEntries.Add(new TimeEntry
+                    {
+                        Id = Guid.NewGuid(),
+                        WorkItemId = workItem.Id,
+                        UserId = workItem.UserId.Value,
+                        Date = new DateTimeOffset(workItem.Date.Value),
+                        Hours = workItem.ActualDuration ?? 8,
+                        Notes = $"Time logged for {workItem.Title}"
+                    });
+                    timeEntriesCreated++;
+                }
+            }
+
+            await _db.SaveChangesAsync(ct);
+
+            // Assign positions and departments to users
+            if (users.Any())
+            {
+                var developerPosition = await _db.Positions.FirstOrDefaultAsync(p => p.Title == "Software Developer", ct);
+                var seniorPosition = await _db.Positions.FirstOrDefaultAsync(p => p.Title == "Senior Developer", ct);
+                var engineeringDept = await _db.Departments.FirstOrDefaultAsync(d => d.Name == "Engineering", ct);
+                var ossDept = await _db.Departments.FirstOrDefaultAsync(d => d.Name == "OSS Operations", ct);
+
+                if (developerPosition != null && engineeringDept != null)
+                {
+                    // Assign first user to developer position and engineering department
+                    var firstUser = users.First();
+                    if (!firstUser.PositionId.HasValue)
+                    {
+                        firstUser.PositionId = developerPosition.Id;
+                        firstUser.DepartmentId = engineeringDept.Id;
+                    }
+                }
+
+                if (seniorPosition != null && ossDept != null && users.Count() > 1)
+                {
+                    // Assign second user to senior position and OSS department
+                    var secondUser = users.Skip(1).First();
+                    if (!secondUser.PositionId.HasValue)
+                    {
+                        secondUser.PositionId = seniorPosition.Id;
+                        secondUser.DepartmentId = ossDept.Id;
+                    }
+                }
+
+                // Assign remaining users to available positions/departments
+                if (developerPosition != null && engineeringDept != null)
+                {
+                    foreach (var user in users.Skip(2).Where(u => !u.PositionId.HasValue))
+                    {
+                        user.PositionId = developerPosition.Id;
+                        user.DepartmentId = engineeringDept.Id;
+                    }
+                }
+            }
+
+            await _db.SaveChangesAsync(ct);
             await transaction.CommitAsync(ct);
 
-                return new TestSeedResult(usersCreated, userAuthCreated, projectsCreated, departmentsCreated, rolesCreated, activityCodesCreated, networkNumbersCreated, budgetsCreated);
+            return new TestSeedResult(
+                usersCreated, 
+                userAuthCreated, 
+                projectsCreated, 
+                departmentsCreated, 
+                rolesCreated, 
+                activityCodesCreated, 
+                networkNumbersCreated, 
+                budgetsCreated,
+                positionsCreated,
+                expenseCategoriesCreated,
+                expenseOptionsCreated,
+                cpcCodesCreated,
+                directorCodesCreated,
+                reasonCodesCreated,
+                unionsCreated,
+                activityCategoriesCreated,
+                calendarCategoriesCreated,
+                calendarEntriesCreated,
+                projectAssignmentsCreated,
+                timeEntriesCreated,
+                workItemsCreated,
+                projectActivityOptionsCreated
+            );
         }
 
         private record UserSeed(int EmpId, string Username, string Email, string FirstName, string LastName, string? Password);
@@ -367,5 +1008,13 @@ public record TestSeedResult(int UsersCreated, int UserAuthCreated, int Projects
         private record DepartmentSeed(string Name, string ManagerName);
         private record BudgetSeed(string Description);
         private record ProjectSeed(string ProjectNo, string Name, string? Description);
+        private record PositionSeed(string Title, string? Description);
+        private record ExpenseCategorySeed(string Name, Guid BudgetId);
+        private record CpcCodeSeed(string Code, string? Description);
+        private record DirectorCodeSeed(string Code, string? Description);
+        private record ReasonCodeSeed(string Code, string? Description);
+        private record UnionSeed(int Id, string? Name);
+        private record ActivityCategorySeed(string Name);
+        private record CalendarCategorySeed(string Name, string? Description);
     }
 }

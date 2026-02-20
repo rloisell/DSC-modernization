@@ -43,7 +43,7 @@ namespace DSC.Data.Migrations
                     b.HasIndex("Code")
                         .IsUnique();
 
-                    b.ToTable("ActivityCodes");
+                    b.ToTable("ActivityCodes", (string)null);
                 });
 
             modelBuilder.Entity("DSC.Data.Models.Budget", b =>
@@ -64,23 +64,7 @@ namespace DSC.Data.Migrations
                     b.HasIndex("Description")
                         .IsUnique();
 
-                    b.ToTable("Budgets");
-                });
-
-            modelBuilder.Entity("DSC.Data.Models.CpcCode", b =>
-                {
-                    b.Property<string>("Code")
-                        .HasColumnType("varchar(255)")
-                        .HasColumnName("cpcCode");
-
-                    b.Property<string>("Description")
-                        .HasMaxLength(255)
-                        .HasColumnType("varchar(255)")
-                        .HasColumnName("description");
-
-                    b.HasKey("Code");
-
-                    b.ToTable("CPC_Code", (string)null);
+                    b.ToTable("Budgets", (string)null);
                 });
 
             modelBuilder.Entity("DSC.Data.Models.Department", b =>
@@ -104,23 +88,59 @@ namespace DSC.Data.Migrations
                     b.HasIndex("Name")
                         .IsUnique();
 
-                    b.ToTable("Departments");
+                    b.ToTable("Departments", (string)null);
                 });
 
-            modelBuilder.Entity("DSC.Data.Models.DirectorCode", b =>
+            modelBuilder.Entity("DSC.Data.Models.DepartmentUser", b =>
                 {
-                    b.Property<string>("Code")
-                        .HasColumnType("varchar(255)")
-                        .HasColumnName("directorCode");
+                    b.Property<int>("UserEmpId")
+                        .HasColumnType("int")
+                        .HasColumnName("UserempId");
 
-                    b.Property<string>("Description")
-                        .HasMaxLength(255)
-                        .HasColumnType("varchar(255)")
-                        .HasColumnName("description");
+                    b.Property<int>("DepartmentId")
+                        .HasColumnType("int")
+                        .HasColumnName("DepartmentdeptID");
 
-                    b.HasKey("Code");
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("date")
+                        .HasColumnName("startDate");
 
-                    b.ToTable("Director_Code", (string)null);
+                    b.Property<DateTime?>("EndDate")
+                        .HasColumnType("date")
+                        .HasColumnName("endDate");
+
+                    b.HasKey("UserEmpId", "DepartmentId", "StartDate");
+
+                    b.ToTable("Department_User", (string)null);
+                });
+
+            modelBuilder.Entity("DSC.Data.Models.ExpenseActivity", b =>
+                {
+                    b.Property<int>("ActivityId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("ActivityactivityID");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("ActivityId"));
+
+                    b.Property<string>("CpcCode")
+                        .IsRequired()
+                        .HasColumnType("longtext")
+                        .HasColumnName("CPC_CodecpcCode");
+
+                    b.Property<string>("DirectorCode")
+                        .IsRequired()
+                        .HasColumnType("longtext")
+                        .HasColumnName("Director_CodedirectorCode");
+
+                    b.Property<string>("ReasonCode")
+                        .IsRequired()
+                        .HasColumnType("longtext")
+                        .HasColumnName("Reason_CodereasonCode");
+
+                    b.HasKey("ActivityId");
+
+                    b.ToTable("Expense_Activity", (string)null);
                 });
 
             modelBuilder.Entity("DSC.Data.Models.ExpenseCategory", b =>
@@ -146,7 +166,7 @@ namespace DSC.Data.Migrations
                     b.HasIndex("Name")
                         .IsUnique();
 
-                    b.ToTable("ExpenseCategories");
+                    b.ToTable("ExpenseCategories", (string)null);
                 });
 
             modelBuilder.Entity("DSC.Data.Models.ExpenseOption", b =>
@@ -170,7 +190,7 @@ namespace DSC.Data.Migrations
                     b.HasIndex("ExpenseCategoryId", "Name")
                         .IsUnique();
 
-                    b.ToTable("ExpenseOptions");
+                    b.ToTable("ExpenseOptions", (string)null);
                 });
 
             modelBuilder.Entity("DSC.Data.Models.ExternalIdentity", b =>
@@ -197,7 +217,7 @@ namespace DSC.Data.Migrations
                     b.HasIndex("Provider", "Subject")
                         .IsUnique();
 
-                    b.ToTable("ExternalIdentities");
+                    b.ToTable("ExternalIdentities", (string)null);
                 });
 
             modelBuilder.Entity("DSC.Data.Models.NetworkNumber", b =>
@@ -220,7 +240,7 @@ namespace DSC.Data.Migrations
                     b.HasIndex("Number")
                         .IsUnique();
 
-                    b.ToTable("NetworkNumbers");
+                    b.ToTable("NetworkNumbers", (string)null);
                 });
 
             modelBuilder.Entity("DSC.Data.Models.Position", b =>
@@ -244,7 +264,7 @@ namespace DSC.Data.Migrations
                     b.HasIndex("Title")
                         .IsUnique();
 
-                    b.ToTable("Positions");
+                    b.ToTable("Positions", (string)null);
                 });
 
             modelBuilder.Entity("DSC.Data.Models.Project", b =>
@@ -273,7 +293,34 @@ namespace DSC.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Projects");
+                    b.ToTable("Projects", (string)null);
+                });
+
+            modelBuilder.Entity("DSC.Data.Models.ProjectActivity", b =>
+                {
+                    b.Property<int>("ActivityId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("ActivityactivityID");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("ActivityId"));
+
+                    b.Property<int>("ActivityCode")
+                        .HasColumnType("int")
+                        .HasColumnName("Activity_CodesactivityCode");
+
+                    b.Property<int>("NetworkNumber")
+                        .HasColumnType("int")
+                        .HasColumnName("Network_NumbersnetworkNumber");
+
+                    b.Property<string>("ProjectNo")
+                        .IsRequired()
+                        .HasColumnType("longtext")
+                        .HasColumnName("ProjectprojectNo");
+
+                    b.HasKey("ActivityId");
+
+                    b.ToTable("Project_Activity", (string)null);
                 });
 
             modelBuilder.Entity("DSC.Data.Models.ProjectActivityOption", b =>
@@ -293,7 +340,7 @@ namespace DSC.Data.Migrations
 
                     b.HasIndex("NetworkNumberId");
 
-                    b.ToTable("ProjectActivityOptions");
+                    b.ToTable("ProjectActivityOptions", (string)null);
                 });
 
             modelBuilder.Entity("DSC.Data.Models.ProjectAssignment", b =>
@@ -312,23 +359,7 @@ namespace DSC.Data.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("ProjectAssignments");
-                });
-
-            modelBuilder.Entity("DSC.Data.Models.ReasonCode", b =>
-                {
-                    b.Property<string>("Code")
-                        .HasColumnType("varchar(255)")
-                        .HasColumnName("reasonCode");
-
-                    b.Property<string>("Description")
-                        .HasMaxLength(255)
-                        .HasColumnType("varchar(255)")
-                        .HasColumnName("description");
-
-                    b.HasKey("Code");
-
-                    b.ToTable("Reason_Code", (string)null);
+                    b.ToTable("ProjectAssignments", (string)null);
                 });
 
             modelBuilder.Entity("DSC.Data.Models.Role", b =>
@@ -358,7 +389,7 @@ namespace DSC.Data.Migrations
                     b.HasIndex("Name")
                         .IsUnique();
 
-                    b.ToTable("Roles");
+                    b.ToTable("Roles", (string)null);
                 });
 
             modelBuilder.Entity("DSC.Data.Models.TimeEntry", b =>
@@ -388,23 +419,7 @@ namespace DSC.Data.Migrations
 
                     b.HasIndex("WorkItemId");
 
-                    b.ToTable("TimeEntries");
-                });
-
-            modelBuilder.Entity("DSC.Data.Models.Union", b =>
-                {
-                    b.Property<int>("Id")
-                        .HasColumnType("int")
-                        .HasColumnName("unionId");
-
-                    b.Property<string>("Name")
-                        .HasMaxLength(255)
-                        .HasColumnType("varchar(255)")
-                        .HasColumnName("unionName");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Union", (string)null);
+                    b.ToTable("TimeEntries", (string)null);
                 });
 
             modelBuilder.Entity("DSC.Data.Models.User", b =>
@@ -453,7 +468,7 @@ namespace DSC.Data.Migrations
                     b.HasIndex("Username")
                         .IsUnique();
 
-                    b.ToTable("Users");
+                    b.ToTable("Users", (string)null);
                 });
 
             modelBuilder.Entity("DSC.Data.Models.UserAuth", b =>
@@ -475,7 +490,53 @@ namespace DSC.Data.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("UserAuth");
+                    b.ToTable("UserAuth", (string)null);
+                });
+
+            modelBuilder.Entity("DSC.Data.Models.UserPosition", b =>
+                {
+                    b.Property<int>("UserEmpId")
+                        .HasColumnType("int")
+                        .HasColumnName("UserempId");
+
+                    b.Property<int>("PositionId")
+                        .HasColumnType("int")
+                        .HasColumnName("PositionpositionID");
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("date")
+                        .HasColumnName("startDate");
+
+                    b.Property<DateTime?>("EndDate")
+                        .HasColumnType("date")
+                        .HasColumnName("endDate");
+
+                    b.HasKey("UserEmpId", "PositionId", "StartDate");
+
+                    b.ToTable("User_Position", (string)null);
+                });
+
+            modelBuilder.Entity("DSC.Data.Models.UserUser", b =>
+                {
+                    b.Property<int>("UserEmpId")
+                        .HasColumnType("int")
+                        .HasColumnName("UserempId");
+
+                    b.Property<int>("UserEmpId2")
+                        .HasColumnType("int")
+                        .HasColumnName("UserempId2");
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("date")
+                        .HasColumnName("startDate");
+
+                    b.Property<DateTime?>("EndDate")
+                        .HasColumnType("date")
+                        .HasColumnName("endDate");
+
+                    b.HasKey("UserEmpId", "UserEmpId2", "StartDate");
+
+                    b.ToTable("User_User", (string)null);
                 });
 
             modelBuilder.Entity("DSC.Data.Models.WorkItem", b =>
@@ -485,15 +546,7 @@ namespace DSC.Data.Migrations
                         .HasColumnType("char(36)");
 
                     b.Property<string>("ActivityCode")
-                        .HasMaxLength(50)
-                        .HasColumnType("varchar(50)");
-
-                    b.Property<string>("ActivityType")
-                        .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasMaxLength(20)
-                        .HasColumnType("varchar(20)")
-                        .HasDefaultValue("Project");
+                        .HasColumnType("longtext");
 
                     b.Property<int?>("ActualDuration")
                         .HasColumnType("int");
@@ -501,19 +554,11 @@ namespace DSC.Data.Migrations
                     b.Property<Guid?>("BudgetId")
                         .HasColumnType("char(36)");
 
-                    b.Property<string>("CpcCode")
-                        .HasMaxLength(50)
-                        .HasColumnType("varchar(50)");
-
                     b.Property<DateTime?>("Date")
                         .HasColumnType("datetime(6)");
 
                     b.Property<string>("Description")
                         .HasColumnType("longtext");
-
-                    b.Property<string>("DirectorCode")
-                        .HasMaxLength(50)
-                        .HasColumnType("varchar(50)");
 
                     b.Property<DateTime?>("EndTime")
                         .HasColumnType("datetime(6)");
@@ -525,18 +570,13 @@ namespace DSC.Data.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("NetworkNumber")
-                        .HasMaxLength(50)
-                        .HasColumnType("varchar(50)");
+                        .HasColumnType("longtext");
 
                     b.Property<TimeSpan?>("PlannedDuration")
                         .HasColumnType("time(6)");
 
-                    b.Property<Guid?>("ProjectId")
+                    b.Property<Guid>("ProjectId")
                         .HasColumnType("char(36)");
-
-                    b.Property<string>("ReasonCode")
-                        .HasMaxLength(50)
-                        .HasColumnType("varchar(50)");
 
                     b.Property<decimal?>("RemainingHours")
                         .HasColumnType("decimal(65,30)");
@@ -554,7 +594,7 @@ namespace DSC.Data.Migrations
 
                     b.HasIndex("ProjectId");
 
-                    b.ToTable("WorkItems");
+                    b.ToTable("WorkItems", (string)null);
                 });
 
             modelBuilder.Entity("DSC.Data.Models.ExpenseCategory", b =>
@@ -698,7 +738,8 @@ namespace DSC.Data.Migrations
                     b.HasOne("DSC.Data.Models.Project", "Project")
                         .WithMany("WorkItems")
                         .HasForeignKey("ProjectId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Budget");
 

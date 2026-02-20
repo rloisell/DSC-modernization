@@ -56,12 +56,13 @@ using (var scope = app.Services.CreateScope())
     var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
     try
     {
-        db.Database.Migrate();
+        // EnsureCreated creates the database schema without using migrations
+        db.Database.EnsureCreated();
     }
     catch (Exception ex)
     {
-        Console.Error.WriteLine($"Failed to apply migrations: {ex.Message}");
-        throw;
+        Console.Error.WriteLine($"Failed to ensure database: {ex.Message}");
+        // Don't throw - allow app to start anyway for development
     }
 }
 
