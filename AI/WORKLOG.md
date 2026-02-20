@@ -1,3 +1,35 @@
+## 2026-02-20 — Database Migrations & Role Seeding
+
+**Completed**:
+1. ✅ Added automatic migration execution to API startup (`Program.cs`)
+   - Migrations are now applied automatically when the API starts
+   - Eliminates manual `dotnet ef database update` requirement
+   - Ensures database schema is always in sync with code
+
+2. ✅ Added role seeding to test data initializer (`TestDataSeeder`)
+   - Created 4 system roles: Administrator, Manager, Developer, Viewer
+   - Roles are created with IsActive=true and proper timestamps
+   - Seeding triggered via `POST /api/admin/seed/test-data` endpoint
+   - Updated `TestSeedResult` to track RolesCreated count
+
+**Status**: Ready for testing. API will automatically apply pending migrations on startup and seed test roles when seeding endpoint is called.
+
+**How to test**:
+1. Ensure MariaDB is running (`brew services list | grep maria` should show "started")
+2. Start the API: `cd src/DSC.Api && dotnet run`
+   - API will automatically apply pending migrations
+   - Check console for "Migrations applied successfully" or any errors
+3. Seed test data: `curl -X POST http://localhost:5005/api/admin/seed/test-data -H "X-Admin-Token: local-admin-token"`
+   - Should return JSON with seed counts including RolesCreated
+4. Test AdminRoles page: http://localhost:5173/admin/roles (after WebClient starts)
+5. Test AdminUsers: http://localhost:5173/admin/users
+   - Create a new user and select a seeded role
+
+**Technical notes**:
+- MariaDB client has SSL enforcement issues on macOS, but .NET's MySqlConnector handles the connection string with `SslMode=none;`
+- Migrations use `Database.Migrate()` which is safe and idempotent
+- All test data seeding is optional and only runs when explicitly called
+
 ## 2026-02-20 — Admin User Management & Role System Implementation
 
 **Issue**: AdminUsers component had role, position, and department dropdowns, but:
