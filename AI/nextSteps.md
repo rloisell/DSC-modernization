@@ -215,7 +215,304 @@ mysql> SELECT u.Username, COUNT(w.Id) FROM WorkItems w
 
 ---
 
-## ToDo: Remaining Work
+## Development Best Practices & Branching Strategy (RECOMMENDED)
+
+### Git Workflow for Bug Fixes & Feature Development
+
+**Recommended Approach**: GitHub Flow with feature branches
+
+#### 1. For Bug Fixes (High Priority Issues)
+
+Create a hotfix branch from main:
+```bash
+git checkout main
+git pull origin main
+git checkout -b fix/issue-title-or-number
+# Example: fix/activity-page-estimated-hours or fix/issue-123
+```
+
+**Branch Naming Convention**:
+- `fix/short-description` - Critical bug fixes that need quick deployment
+- `hotfix/issue-number` - Emergency patches for production issues
+
+**Workflow**:
+1. Create branch from `main`
+2. Make minimal, focused changes to fix the issue
+3. Build and verify: `dotnet build`
+4. Test locally with seed data
+5. Push to GitHub and create Pull Request
+6. Get review approval (peer review recommended)
+7. Merge to `main` with detailed commit message
+8. Deploy immediately to address issue
+
+**Commit Message Format**:
+```
+fix: brief description of what was fixed
+
+- Detailed explanation of the problem
+- How the fix addresses the issue
+- Any side effects or considerations
+- Files modified with roles
+
+Fixes: #issue-number (if applicable)
+```
+
+**Duration**: 1-2 hours for bug fixes, then immediate merge and deployment
+
+---
+
+#### 2. For New Features (Mid-Priority Work)
+
+Create a feature branch for development work:
+```bash
+git checkout main
+git pull origin main
+git checkout -b feature/feature-name
+# Example: feature/director-dashboard or feature/project-estimates
+```
+
+**Branch Naming Convention**:
+- `feature/short-description` - New features or enhancements
+- `refactor/short-description` - Code refactoring without behavior change
+- `docs/short-description` - Documentation updates only
+
+**Workflow**:
+1. Create branch from `main`
+2. Develop feature incrementally with multiple commits
+3. Keep branch focused on single feature area
+4. Build frequently: `dotnet build`
+5. Test with seed data at key milestones
+6. When complete, create Pull Request with:
+   - Clear description of what was added
+   - List of files modified
+   - Testing done
+   - Any new dependencies
+7. Get 1-2 approvals from team
+8. Merge to `main` with squash or regular merge (recommended: regular merge to keep history)
+9. Clean up branch after merge
+
+**Commit Messages** (can be more detailed during development):
+```
+feat: add estimated hours auto-population
+
+When user selects a project, the form auto-populates EstimatedHours
+from the project's EstimatedHours value. Users can still override
+if needed for specific work items.
+
+- Added useEffect hook to fetch project data
+- Auto-populate EstimatedHours in form
+- Clear values when switching activity types
+- Test verified with seed data
+```
+
+**Duration**: 1-3 days for typical features, merge iteratively if possible
+
+---
+
+#### 3. For Large Epics (Multi-Week Features)
+
+For significant features spanning multiple days/weeks (like Director Dashboard):
+
+```bash
+# Create feature epic branch from main
+git checkout main
+git pull origin main
+git checkout -b epic/director-reporting-dashboard
+
+# Create task branches from the epic branch
+git checkout epic/director-reporting-dashboard
+git checkout -b epic/director-reporting-dashboard/phase-1-foundation
+```
+
+**Workflow**:
+1. Create **epic branch** for the overall feature (never push to main until complete)
+2. Create **task branches** from the epic for each phase/component
+3. Merge task branches back to **epic branch** as phases complete
+4. Rebase epic branch regularly against `main` to stay up-to-date
+5. When entire epic is complete, create single PR from epic to main with all changes
+6. Get thorough review and testing
+7. Merge epic to main with meaningful commit message
+
+**Epic PR Message**:
+```
+feat: complete director reporting dashboard
+
+Implements comprehensive management reporting interface with executive
+dashboard, project status reports, resource management, and budget analysis.
+
+### Phase 1: Foundation
+- ReportsController with 6 endpoints
+- Director role and authentication
+
+### Phase 2: Core Visualizations  
+- Project status dashboard with charts
+- Resource management views
+- Budget analysis page
+
+### Phase 3: Advanced Features
+- Drill-down functionality
+- Date range filtering
+- Export to Excel/PDF
+
+### Phase 4: Polish
+- Real-time updates with SignalR
+- Query caching for performance
+- Mobile-responsive design
+
+Files: 25+ modified
+Tests: 8+ new test suites
+Build: All passing
+```
+
+**Duration**: 7-8 weeks, merge iteratively by phase if stakeholders want earlier access
+
+---
+
+#### 4. Branch Protection & Review Process
+
+**Recommended Settings for `main` branch**:
+```
+- Require pull request reviews before merging: YES (1 reviewer min)
+- Require status checks to pass: YES
+  - dotnet build
+  - (future) unit tests
+  - (future) integration tests
+- Require branches to be up-to-date: YES
+- Require code review from code owners: YES (if team expands)
+- Restrict who can push: YES (enable for main branch)
+```
+
+**Review Checklist**:
+- [ ] Code follows project conventions (naming, style)
+- [ ] Changes are focused on single issue/feature
+- [ ] Tests added for new functionality
+- [ ] Build succeeds: `dotnet build`
+- [ ] No breaking changes to existing APIs
+- [ ] Seed data updated if database changes
+- [ ] Documentation updated for user-facing changes
+- [ ] Commit messages are clear and detailed
+- [ ] No credential or sensitive data committed
+
+---
+
+#### 5. Release Process
+
+**When Ready to Deploy to Production**:
+
+```bash
+# 1. Create release branch from main
+git checkout main
+git pull origin main
+git checkout -b release/v1.2.0
+
+# 2. Update version numbers and changelog
+# src/DSC.Api/DSC.Api.csproj: <Version>1.2.0</Version>
+# IMPLEMENTATION_SUMMARY.md: Add release notes
+
+git commit -m "chore: prepare v1.2.0 release"
+git push origin release/v1.2.0
+
+# 3. Create PR, get final approval, merge to main
+# After merge:
+
+# 4. Tag the release
+git tag -a v1.2.0 -m "Release version 1.2.0"
+git push origin v1.2.0
+
+# 5. Delete release branch
+git branch -d release/v1.2.0
+git push origin --delete release/v1.2.0
+
+# 6. Create deployment PR from main to production (if separate branch)
+```
+
+---
+
+#### 6. Branch Cleanup
+
+**Keep repository clean**:
+```bash
+# Delete local branches after merge
+git branch -D feature/old-feature
+git branch -D fix/something-fixed
+
+# Delete remote branches
+git push origin --delete feature/old-feature
+
+# List old branches not merged
+git branch --no-merged
+
+# Periodically prune: git gc
+git gc --aggressive
+```
+
+---
+
+#### 7. Reverting Commits (If Needed)
+
+**If a merged commit breaks main**:
+
+```bash
+# Option 1: Revert the commit (recommended - keeps history)
+git revert <commit-hash>
+git push origin main
+
+# Option 2: Reset hard (only if not yet pushed)
+git reset --hard HEAD~1
+git push origin main --force-with-lease
+```
+
+---
+
+#### Recommended Branch Strategy Summary
+
+| Scenario | Branch Type | Duration | Review | Merge |
+|----------|------------|----------|---------|-------|
+| Quick bug fix | `fix/issue` | 1-2 hrs | 1 approval | Direct to main |
+| Form validation | `feature/name` | 3-4 hrs | 1 approval | Direct to main |
+| New page/feature | `feature/name` | 1-3 days | 1-2 approvals | Direct to main |
+| Large epic | `epic/name` | 1-8 weeks | Task phase reviews | Epic → main when complete |
+| Emergency hotfix | `hotfix/issue` | <1 hr | Quick approval | Direct to main, deploy immediately |
+
+---
+
+### Example: Bug Fix Workflow (What We Just Did)
+
+The "Add Work Item Form & Activity Page Fixes" we completed followed this pattern:
+
+```bash
+# Started from main, created focused changes
+# - src/DSC.WebClient/src/pages/Activity.jsx (4 specific fixes)
+# - src/DSC.Api/Seeding/TestDataSeeder.cs (added EstimatedHours)
+# - Documentation updates
+
+# Build verified: 0 errors, 0 warnings
+# Database verified: seed data correct
+# Committed with clear message about all 4 fixes
+# Pushed directly to main (for small bug fixes is appropriate)
+```
+
+**For next bug fix**, would recommend:
+```bash
+git checkout main
+git pull origin main
+git checkout -b fix/issue-title  # Create feature branch
+# Make changes...
+git commit -m "fix: issue title..."
+git push origin fix/issue-title
+# Then open PR on GitHub for team review
+# Approve and merge through GitHub UI
+```
+
+This gives you:
+- Clear change history in GitHub
+- Chance for team feedback
+- Documented reasons for changes
+- Rollback ability if needed
+
+---
+
+
 
 ### 1. Director Reporting Dashboard (HIGH PRIORITY)
 
