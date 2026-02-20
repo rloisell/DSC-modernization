@@ -11,18 +11,21 @@ import {
   TextArea,
   TextField
 } from '@bcgov/design-system-react-components';
-import { getWorkItems, createWorkItemWithLegacy } from '../api/WorkItemService';
+import { getWorkItems, createWorkItemWithLegacy, getDetailedWorkItems } from '../api/WorkItemService';
 import { getProjects } from '../api/ProjectService';
 import { getActivityCodes, getNetworkNumbers } from '../api/CatalogService';
 import axios from 'axios';
 
 export default function Activity() {
   const [items, setItems] = useState([]);
+  const [detailedItems, setDetailedItems] = useState([]);
+  const [timePeriod, setTimePeriod] = useState('month');
   const [projects, setProjects] = useState([]);
   const [activityCodes, setActivityCodes] = useState([]);
   const [networkNumbers, setNetworkNumbers] = useState([]);
   const [projectOptions, setProjectOptions] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [detailedLoading, setDetailedLoading] = useState(true);
   const [error, setError] = useState(null);
   const [title, setTitle] = useState('');
   const [desc, setDesc] = useState('');
@@ -38,6 +41,14 @@ export default function Activity() {
   const [estimatedHours, setEstimatedHours] = useState('');
   const [remainingHours, setRemainingHours] = useState('');
   const [creating, setCreating] = useState(false);
+
+  const timePeriodItems = [
+    { id: 'day', label: 'Today' },
+    { id: 'week', label: 'This Week' },
+    { id: 'month', label: 'This Month' },
+    { id: 'year', label: 'This Year' },
+    { id: 'all', label: 'All Time' }
+  ];
 
   const projectItems = projects.map(project => ({
     id: project.id,
@@ -74,6 +85,15 @@ export default function Activity() {
       .catch(e => setError(e.message))
       .finally(() => setLoading(false));
   }, []);
+
+  // Load detailed work items when time period changes
+  useEffect(() => {
+    setDetailedLoading(true);
+    getDetailedWorkItems(timePeriod)
+      .then(data => setDetailedItems(data))
+      .catch(e => console.error('Failed to load detailed work items:', e))
+      .finally(() => setDetailedLoading(false));
+  }, [timePeriod]);
 
   // When project changes, load project-specific options
   useEffect(() => {
@@ -125,6 +145,8 @@ export default function Activity() {
 
       const item = await createWorkItemWithLegacy(payload);
       setItems(i => [...i, item]);
+      // Refresh detailed items table
+      getDetailedWorkItems(timePeriod).then(data => setDetailedItems(data));
       setTitle('');
       setDesc('');
       setProjectId('');
@@ -149,27 +171,75 @@ export default function Activity() {
     <div className="page">
       <section className="section stack">
         <Heading level={1}>Activity</Heading>
-        {loading ? <Text elementType="p">Loading...</Text> : null}
+        <Text elementType="p">Track your work activities and view planned vs actual hours across projects.</Text>
+        
         {error ? <InlineAlert variant="danger" title="Error" description={error} /> : null}
-        <ul className="inline-list">
-          {items.map(i => (
-            <li key={i.id}>
-              {i.title ? <Text elementType="strong">{i.title}</Text> : null}
-              {i.legacyActivityId ? <Text elementType="span"> (Legacy ID: {i.legacyActivityId})</Text> : null}
-              {i.description ? <Text elementType="p">{i.description}</Text> : null}
-              <Text elementType="p" className="muted">
-                {i.date ? <span>Date: {i.date} </span> : null}
-                {i.startTime ? <span>Start: {i.startTime} </span> : null}
-                {i.endTime ? <span>End: {i.endTime} </span> : null}
-                {i.plannedDuration ? <span>Planned: {i.plannedDuration}h </span> : null}
-                {i.actualDuration ? <span>Actual: {i.actualDuration}h </span> : null}
-                {i.activityCode ? <span>Code: {i.activityCode} </span> : null}
-                {i.networkNumber ? <span>Network: {i.networkNumber}</span> : null}
-              </Text>
-            </li>
-          ))}
-        </ul>
+
+        {/* Time Period Filter */}
+        <div style={{ maxWidth: '300px' }}>
+          <Select
+            label="Time Period"
+            items={timePeriodItems}
+            selectedKey={timePeriod || null}
+            onSelectionChange={key => setTimePeriod(key ? String(key) : 'month')}
+          />
+        </div>
+
+        {/* Activity Tracking Table */}
+        <Heading level={2}>My Activities</Heading>
+        {detailedLoading ? (
+          <Text elementType="p">Loading activities...</Text>
+        ) : detailedItems.length === 0 ? (
+          <Text elementType="p" className="muted">No activities found for the selected time period.</Text>
+        ) : (
+          <table className="bcds-table">
+            <thead>
+              <tr>
+                <th>Project</th>
+                <th>Title</th>
+                <th>Activity Code</th>
+                <th>Network</th>
+                <th>Date</th>
+                <th>Est. Hours</th>
+                <th>Actual Hours</th>
+                <th>Remaining Hours</th>
+              </tr>
+            </thead>
+            <tbody>
+              {detailedItems.map(item => {
+                // Calculate remaining hours
+                let remaining = '—';
+                if (item.remainingHours != null) {
+                  remaining = `${item.remainingHours} hrs`;
+                } else if (item.projectEstimatedHours != null && item.actualDuration != null) {
+                  const calc = item.projectEstimatedHours - item.actualDuration;
+                  remaining = `${calc.toFixed(2)} hrs`;
+                } else if (item.projectEstimatedHours != null) {
+                  remaining = `${item.projectEstimatedHours} hrs`;
+                }
+
+                return (
+                  <tr key={item.id}>
+                    <td>
+                      <strong>
+                        {item.projectNo ? `${item.projectNo} — ${item.projectName}` : item.projectName}
+                      </strong>
+                    </td>
+                    <td>{item.title}</td>
+                    <td>{item.activityCode || '—'}</td>
+                    <td>{item.networkNumber || '—'}</td>
+                    <td>{item.date ? new Date(item.date).toLocaleDateString() : '—'}</td>
+                    <td>{item.projectEstimatedHours != null ? `${item.projectEstimatedHours} hrs` : '—'}</td>
+                    <td>{item.actualDuration != null ? `${item.actualDuration} hrs` : '—'}</td>
+                    <td>{remaining}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        )}
       </section>
+
       <section className="section stack">
         <Heading level={2}>Add Work Item</Heading>
         <Form onSubmit={handleCreate} className="form-grid">

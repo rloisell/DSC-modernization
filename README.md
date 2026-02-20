@@ -53,6 +53,14 @@ See [tests/howto.md](tests/howto.md) for comprehensive testing documentation, in
 ## Activity Page — 2026-02-21 (UPDATED)
 
 **What's working:**
+- ✅ **Activity Tracking Table** (NEW 2026-02-21):
+  - Comprehensive table showing all user activities with time period filtering
+  - Time period options: Today, This Week, This Month, This Year, All Time
+  - Displays: Project, Title, Activity Code, Network, Date, Estimated Hours, Actual Hours, Remaining Hours
+  - Remaining hours calculated as: `projectEstimatedHours - actualDuration`
+  - Auto-refreshes when time period changes or new work item is created
+  - Empty state message when no activities found for selected period
+  - Uses new `/api/items/detailed?period={period}` endpoint
 - ✅ **Fixed 405 Error**: Added `ItemsController.GetAll()` endpoint to list work items (was missing, caused page error)
 - ✅ **Project Dropdown**: Loads all projects from database with "ProjectNo — Name" format
 - ✅ **Activity Code Dropdown**: Selects from 6 test codes (DEV, TEST, DOC, ADMIN, MEET, TRAIN)

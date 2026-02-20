@@ -1,5 +1,69 @@
 # Remaining Work (2026-02-21)
 
+## ✅ COMPLETED: Activity Page Tracking Table Enhancement (2026-02-20)
+
+**Status**: COMPLETE ✅
+
+### Changes Made
+
+#### 1. Activity Tracking Table with Time Period Filter ✅
+- **Enhancement**: Added comprehensive activity tracking table at top of Activity page
+- **Features**:
+  - Time period selector: Today, This Week, This Month, This Year, All Time
+  - 8-column table: Project, Title, Activity Code, Network, Date, Est. Hours, Actual Hours, Remaining Hours
+  - Auto-refreshes when time period changes or new work item created
+  - Loading and empty states
+- **Benefits**:
+  - Users can view all activities at a glance
+  - Filter by relevant time periods for focused analysis
+  - Track progress with estimated vs actual hours
+  - Foundation for future reporting features
+
+#### 2. Backend Date Filtering API ✅
+- **New Endpoint**: `GET /api/items/detailed?period={period}`
+- **Parameters**:
+  - `period`: "day", "week", "month", "year", "all"/"historical"
+  - Optional `startDate` and `endDate` for custom ranges
+- **Response**: WorkItemDetailDto[] with project information included
+- **Time Period Logic**:
+  - Day: Current date (00:00:00 to 23:59:59)
+  - Week: Sunday to Saturday of current week
+  - Month: First to last day of current month
+  - Year: January 1 to December 31 of current year
+  - All: No filtering
+
+#### 3. Remaining Hours Calculation ✅
+- **Logic**:
+  1. Use `item.remainingHours` if set
+  2. Calculate `projectEstimatedHours - actualDuration` if both exist
+  3. Show `projectEstimatedHours` if only estimate exists
+  4. Show "—" if unable to calculate
+- **Display**: Formatted with "hrs" suffix
+
+#### 4. Enhanced DTO ✅
+- **New**: `WorkItemDetailDto` includes:
+  - All WorkItem fields
+  - ProjectNo, ProjectName, ProjectEstimatedHours (from Project entity)
+  - Enables rich display without additional API calls
+
+### Technical Implementation
+- ✅ Backend eager loading: `.Include(w => w.Project)` for efficient queries
+- ✅ Frontend state management: separate `detailedItems` state from create form
+- ✅ Auto-refresh on create: calls `getDetailedWorkItems()` after successful submission
+- ✅ Default period: "month" for most relevant view
+
+**Files Modified**:
+- `src/DSC.Api/DTOs/WorkItemDto.cs`
+- `src/DSC.Api/Controllers/ItemsController.cs`
+- `src/DSC.WebClient/src/api/WorkItemService.js`
+- `src/DSC.WebClient/src/pages/Activity.jsx`
+
+**Commit**: Current - feat: add activity tracking table with time period filtering and remaining hours
+
+---
+
+# Remaining Work (2026-02-21)
+
 ## ✅ COMPLETED: Project Activity Options Assignment & Filtering (2026-02-20)
 
 **Status**: COMPLETE ✅  

@@ -1,3 +1,86 @@
+## 2026-02-20 — Activity Page Tracking Table Enhancement (COMPLETED ✓)
+
+**Problem Statement**:
+1. Activity page had no way to view user's work items - only a create form
+2. No ability to filter activities by time period (day, week, month, year, all time)
+3. No visibility of estimated vs actual hours or remaining hours
+4. Difficult to track progress across projects
+
+**Implementation & Resolution**:
+
+### Backend Changes
+
+#### 1. Work Item Detail DTO
+- ✅ Created `WorkItemDetailDto` that includes project information:
+  - ProjectNo, ProjectName, ProjectEstimatedHours (from Project entity)
+  - All existing WorkItem fields (title, date, activity code, network, etc.)
+  - Allows frontend to display comprehensive activity information
+
+#### 2. Detailed Work Items Endpoint with Date Filtering
+- ✅ Added `GET /api/items/detailed` endpoint with query parameters:
+  - `period` parameter: "day", "week", "month", "year", "all"/"historical"
+  - `startDate` and `endDate` for custom date ranges
+  - Includes Project data via eager loading (`.Include(w => w.Project)`)
+- ✅ Time period logic:
+  - **Day**: Current date (00:00:00 to 23:59:59)
+  - **Week**: Sunday to Saturday of current week
+  - **Month**: First to last day of current month
+  - **Year**: January 1 to December 31 of current year
+  - **All/Historical**: No date filtering, returns all records
+- ✅ Returns WorkItemDetailDto[] ordered by Date descending
+
+### Frontend Changes
+
+#### 1. Activity Tracking Table
+- ✅ Added "My Activities" table at top of Activity page with columns:
+  - **Project**: Shows ProjectNo — ProjectName in bold
+  - **Title**: Work item title
+  - **Activity Code**: Code or "—"
+  - **Network**: Network number or "—"
+  - **Date**: Formatted date (MM/DD/YYYY) or "—"
+  - **Est. Hours**: Project estimated hours or "—"
+  - **Actual Hours**: Work item actual duration or "—"
+  - **Remaining Hours**: Calculated or "—"
+- ✅ Added time period selector with options: Today, This Week, This Month, This Year, All Time
+- ✅ Default period: "This Month"
+- ✅ Table auto-refreshes when time period changes
+- ✅ Empty state message when no activities found for selected period
+
+#### 2. Remaining Hours Calculation
+- ✅ Logic:
+  1. If `item.remainingHours` is set, use that value
+  2. Else if both `projectEstimatedHours` and `actualDuration` exist, calculate: `estimated - actual`
+  3. Else if only `projectEstimatedHours` exists, show project estimate
+  4. Else show "—"
+- ✅ Formatted with "hrs" suffix for clarity
+
+#### 3. User Experience Improvements
+- ✅ Page description: "Track your work activities and view planned vs actual hours across projects."
+- ✅ Table refreshes automatically after creating new work item
+- ✅ Create form moved below activity table for better workflow
+- ✅ Loading states for both initial load and time period changes
+
+#### 4. Service Layer Enhancement
+- ✅ Added `getDetailedWorkItems(period)` to WorkItemService.js
+- ✅ Calls `/api/items/detailed?period={period}` endpoint
+
+**Benefits**:
+- ✅ Users can track all their activities at a glance
+- ✅ Easy filtering by time period for focused views
+- ✅ Visibility of estimated vs actual hours for better planning
+- ✅ Foundation for planned vs actual reporting feature (future)
+- ✅ Clear separation of viewing (table) vs creating (form)
+
+**Files Modified**:
+- `src/DSC.Api/DTOs/WorkItemDto.cs` (added WorkItemDetailDto)
+- `src/DSC.Api/Controllers/ItemsController.cs` (added GetDetailed endpoint)
+- `src/DSC.WebClient/src/api/WorkItemService.js` (added getDetailedWorkItems)
+- `src/DSC.WebClient/src/pages/Activity.jsx` (added tracking table and time period filter)
+
+**Commit**: Current - feat: add activity tracking table with time period filtering and remaining hours
+
+---
+
 ## 2026-02-20 — Project Activity Options & Work Item Creation (COMPLETED ✓)
 
 **Problem Statement**:

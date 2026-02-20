@@ -7,6 +7,13 @@ export async function getWorkItems() {
   return res.data;
 }
 
+export async function getDetailedWorkItems(period = 'all') {
+  const res = await axios.get(`${API_URL}/detailed`, {
+    params: { period }
+  });
+  return res.data;
+}
+
 export async function createWorkItem(item) {
   const res = await axios.post(API_URL, item);
   return res.data;

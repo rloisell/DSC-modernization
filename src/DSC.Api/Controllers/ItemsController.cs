@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -30,6 +31,85 @@ namespace DSC.Api.Controllers
                 {
                     Id = w.Id,
                     ProjectId = w.ProjectId,
+                    LegacyActivityId = w.LegacyActivityId,
+                    Date = w.Date,
+                    StartTime = w.StartTime,
+                    EndTime = w.EndTime,
+                    PlannedDuration = w.PlannedDuration,
+                    ActualDuration = w.ActualDuration,
+                    ActivityCode = w.ActivityCode,
+                    NetworkNumber = w.NetworkNumber != null ? int.Parse(w.NetworkNumber) : null,
+                    Title = w.Title,
+                    Description = w.Description,
+                    EstimatedHours = w.EstimatedHours,
+                    RemainingHours = w.RemainingHours
+                })
+                .ToArrayAsync();
+
+            return Ok(items);
+        }
+
+        [HttpGet("detailed")]
+        [ProducesResponseType(typeof(WorkItemDetailDto[]), StatusCodes.Status200OK)]
+        public async Task<ActionResult<WorkItemDetailDto[]>> GetDetailed(
+            [FromQuery] DateTime? startDate,
+            [FromQuery] DateTime? endDate,
+            [FromQuery] string? period)
+        {
+            var query = _db.WorkItems.AsNoTracking().Include(w => w.Project);
+
+            // Apply date filtering based on period or explicit date range
+            if (!string.IsNullOrWhiteSpace(period))
+            {
+                var now = DateTime.Now;
+                switch (period.ToLower())
+                {
+                    case "day":
+                        startDate = now.Date;
+                        endDate = now.Date.AddDays(1).AddSeconds(-1);
+                        break;
+                    case "week":
+                        // Start of week (Sunday)
+                        var diff = (7 + (now.DayOfWeek - DayOfWeek.Sunday)) % 7;
+                        startDate = now.Date.AddDays(-diff);
+                        endDate = startDate.Value.AddDays(7).AddSeconds(-1);
+                        break;
+                    case "month":
+                        startDate = new DateTime(now.Year, now.Month, 1);
+                        endDate = startDate.Value.AddMonths(1).AddSeconds(-1);
+                        break;
+                    case "year":
+                        startDate = new DateTime(now.Year, 1, 1);
+                        endDate = new DateTime(now.Year, 12, 31, 23, 59, 59);
+                        break;
+                    case "all":
+                    case "historical":
+                        // No filtering, return all
+                        startDate = null;
+                        endDate = null;
+                        break;
+                }
+            }
+
+            if (startDate.HasValue)
+            {
+                query = query.Where(w => w.Date >= startDate.Value);
+            }
+
+            if (endDate.HasValue)
+            {
+                query = query.Where(w => w.Date <= endDate.Value);
+            }
+
+            var items = await query
+                .OrderByDescending(w => w.Date ?? DateTime.MinValue)
+                .Select(w => new WorkItemDetailDto
+                {
+                    Id = w.Id,
+                    ProjectId = w.ProjectId,
+                    ProjectNo = w.Project.ProjectNo,
+                    ProjectName = w.Project.Name,
+                    ProjectEstimatedHours = w.Project.EstimatedHours,
                     LegacyActivityId = w.LegacyActivityId,
                     Date = w.Date,
                     StartTime = w.StartTime,
