@@ -179,21 +179,22 @@ public record TestSeedResult(
                     ProjectNo = "P99999",
                     Name = "ANOTHER TEST PROJECT",
                     Description = "ANOTHER TEST PROJECT",
+                    EstimatedHours = 80.0m,
                     IsActive = true
                 });
                 projectsCreated++;
             }
 
-            // Add supplemental projects
+            // Add supplemental projects with estimated hours
             var projectSeeds = new[]
             {
-                new ProjectSeed("P1001", "Website Modernization", "Migrate legacy website to modern stack"),
-                new ProjectSeed("P1002", "Mobile App Development", "Build iOS and Android applications"),
-                new ProjectSeed("P1003", "Database Migration", "Migrate from Oracle to PostgreSQL"),
-                new ProjectSeed("P1004", "Cloud Infrastructure", "Move on-premises workloads to AWS"),
-                new ProjectSeed("P1005", "Security Hardening", "Implement security best practices"),
-                new ProjectSeed("P2001", "API Gateway Implementation", "Build unified API gateway for microservices"),
-                new ProjectSeed("P2002", "Analytics Platform", "Implement real-time analytics dashboard")
+                new ProjectSeed("P1001", "Website Modernization", "Migrate legacy website to modern stack", 120.0m),
+                new ProjectSeed("P1002", "Mobile App Development", "Build iOS and Android applications", 200.0m),
+                new ProjectSeed("P1003", "Database Migration", "Migrate from Oracle to PostgreSQL", 100.0m),
+                new ProjectSeed("P1004", "Cloud Infrastructure", "Move on-premises workloads to AWS", 150.0m),
+                new ProjectSeed("P1005", "Security Hardening", "Implement security best practices", 90.0m),
+                new ProjectSeed("P2001", "API Gateway Implementation", "Build unified API gateway for microservices", 160.0m),
+                new ProjectSeed("P2002", "Analytics Platform", "Implement real-time analytics dashboard", 140.0m)
             };
 
             foreach (var seed in projectSeeds)
@@ -207,6 +208,7 @@ public record TestSeedResult(
                         ProjectNo = seed.ProjectNo,
                         Name = seed.Name,
                         Description = seed.Description,
+                        EstimatedHours = seed.EstimatedHours,
                         IsActive = true
                     });
                     projectsCreated++;
@@ -1007,7 +1009,7 @@ public record TestSeedResult(
         private record NetworkNumberSeed(int Number, string? Description);
         private record DepartmentSeed(string Name, string ManagerName);
         private record BudgetSeed(string Description);
-        private record ProjectSeed(string ProjectNo, string Name, string? Description);
+        private record ProjectSeed(string ProjectNo, string Name, string? Description, decimal? EstimatedHours = null);
         private record PositionSeed(string Title, string? Description);
         private record ExpenseCategorySeed(string Name, Guid BudgetId);
         private record CpcCodeSeed(string Code, string? Description);

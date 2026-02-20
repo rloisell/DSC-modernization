@@ -1,3 +1,202 @@
+## 2026-02-20 — Add Work Item Form & Activity Page Fixes (COMPLETED ✓)
+
+**Issue Summary**:
+User reported several issues with the Activity page and Add Work Item form:
+1. Estimated hours not displayed in the Activity table for work items
+2. Budget was manually selectable but should auto-select based on activity type (CAPEX for project, OPEX for expense)
+3. Project selection was always required, but should only be required for project activities (not expense activities)
+4. When selecting a project, estimated hours from the project should populate in the form
+
+**Root Cause Analysis**:
+- Activity page was pulling `projectEstimatedHours` (from Project table) instead of `estimatedHours` (from WorkItem table)
+- Frontend form had no logic to auto-select budget based on activity type (radio buttons)
+- Project dropdown was always rendered, not conditional on activity mode
+- No logic to fetch project data and populate estimated hours when project is selected
+- Seed data was missing EstimatedHours values for projects
+
+**Implementation & Resolution**:
+
+### 1. Fixed Activity Page Display
+
+**File**: [src/DSC.WebClient/src/pages/Activity.jsx](src/DSC.WebClient/src/pages/Activity.jsx)
+
+Changed the "Est. Hours" column to show work item's own EstimatedHours instead of project's EstimatedHours:
+```jsx
+// BEFORE (incorrect - showing project estimated hours)
+<td>{item.projectEstimatedHours != null ? `${item.projectEstimatedHours} hrs` : '—'}</td>
+
+// AFTER (correct - showing work item estimated hours)
+<td>{item.estimatedHours != null ? `${item.estimatedHours} hrs` : '—'}</td>
+```
+
+This ensures users see the actual estimated hours for each work item, not the overall project estimate.
+
+### 2. Auto-Select Budget Based on Activity Type
+
+**File**: [src/DSC.WebClient/src/pages/Activity.jsx](src/DSC.WebClient/src/pages/Activity.jsx)
+
+Added new useEffect hook to auto-select appropriate budget when activity mode changes:
+```jsx
+// When activity mode changes, auto-select appropriate budget
+useEffect(() => {
+  if (activityMode === 'project') {
+    // Auto-select CAPEX budget for project activities
+    const capexBudget = budgets.find(b => b.description.toUpperCase().includes('CAPEX'));
+    if (capexBudget) setBudgetId(capexBudget.id);
+  } else if (activityMode === 'expense') {
+    // Auto-select OPEX budget for expense activities
+    const opexBudget = budgets.find(b => b.description.toUpperCase().includes('OPEX'));
+    if (opexBudget) setBudgetId(opexBudget.id);
+  }
+}, [activityMode, budgets]);
+```
+
+Benefits:
+- Users no longer need to manually select budget
+- Eliminates user error (selecting wrong budget type)
+- Budget selection is now disabled (read-only) with helpful description text
+
+### 3. Made Project Selection Conditional
+
+**File**: [src/DSC.WebClient/src/pages/Activity.jsx](src/DSC.WebClient/src/pages/Activity.jsx)
+
+Restructured form layout and conditionally render project dropdown:
+```jsx
+{/* Activity Mode Selection - First Item */}
+<div>...Activity Type Radio Buttons...</div>
+
+{/* Project Selection - Only for Project Activities */}
+{activityMode === 'project' && (
+  <Select
+    label="Project"
+    placeholder="Select project"
+    items={projectItems}
+    selectedKey={projectId || null}
+    onSelectionChange={key => setProjectId(key ? String(key) : '')}
+    isRequired
+    description="Select the project this activity is associated with"
+  />
+)}
+
+{/* Budget - Auto-selected, disabled for confirmation */}
+<Select
+  label="Budget"
+  ...
+  isDisabled
+  description={activityMode === 'project' ? 'CAPEX (auto-selected...)' : 'OPEX (auto-selected...)'}
+/>
+```
+
+Benefits:
+- Expense activities no longer show unnecessary project dropdown
+- Budget field moved after activity type (logical flow)
+- Activity Type moved to top for better UX
+
+### 4. Auto-Populate Estimated Hours from Project
+
+**File**: [src/DSC.WebClient/src/pages/Activity.jsx](src/DSC.WebClient/src/pages/Activity.jsx)
+
+Enhanced the project selection useEffect to fetch project data and populate estimated hours:
+```jsx
+// When project changes, load project-specific options and estimated hours
+useEffect(() => {
+  if (projectId && activityMode === 'project') {
+    // Find the selected project to get its estimated hours
+    const project = projects.find(p => String(p.id) === projectId);
+    setSelectedProjectData(project || null);
+    
+    // If project has estimated hours, populate the form field
+    if (project?.estimatedHours) {
+      setEstimatedHours(String(project.estimatedHours));
+    }
+
+    // Load activity codes and network numbers...
+    getProjectOptions(projectId)...
+  }
+}, [projectId, activityMode, projects]);
+```
+
+Features:
+- When user selects project, estimated hours automatically populate from project's EstimatedHours value
+- Users can see what the project is budgeted for
+- Can override if needed for specific work items
+- For expense activities, estimated hours field remains empty (user's choice)
+
+### 5. Enhanced Seed Data with Project Estimated Hours
+
+**File**: [src/DSC.Api/Seeding/TestDataSeeder.cs](src/DSC.Api/Seeding/TestDataSeeder.cs)
+
+Updated ProjectSeed record and all project definitions to include EstimatedHours:
+
+```csharp
+// BEFORE
+private record ProjectSeed(string ProjectNo, string Name, string? Description);
+
+// AFTER
+private record ProjectSeed(string ProjectNo, string Name, string? Description, decimal? EstimatedHours = null);
+```
+
+All 8 projects now have EstimatedHours set:
+- P99999: 80.0 hours
+- P1001 (Website Modernization): 120.0 hours
+- P1002 (Mobile App Development): 200.0 hours
+- P1003 (Database Migration): 100.0 hours
+- P1004 (Cloud Infrastructure): 150.0 hours
+- P1005 (Security Hardening): 90.0 hours
+- P2001 (API Gateway): 160.0 hours
+- P2002 (Analytics Platform): 140.0 hours
+
+### 6. Verification Results
+
+**Database Verification**:
+✅ All projects have EstimatedHours populated
+✅ All 16 seed work items have EstimatedHours populated (10, 10, 10, 2, 10, 2, 2, 2, 16, 16, 10, etc.)
+✅ All work items have RemainingHours calculated: EstimatedHours - ActualDuration
+✅ Budgets are correctly seeded: CAPEX (for projects) and OPEX (for expenses)
+✅ 6 WorkItems created by seeder (for multi-project scenarios)
+
+**Build Verification**:
+✅ Frontend changes compile without errors
+✅ Backend code builds successfully (0 errors, 0 warnings)
+✅ All migrations apply correctly to fresh database
+✅ Seed endpoint returns all entities successfully
+
+**Testing Summary**:
+```
+Seed Results:
+- usersCreated: 4
+- projectsCreated: 8 (all with EstimatedHours)
+- budgetsCreated: 2 (CAPEX, OPEX)
+- workItemsCreated: 16 total (6 from seeder, 10 from assignments)
+- estExpenseCategories: 7 (for OPEX activities)
+- estActivityCodes: 12 (for project activities)
+- estNetworkNumbers: 12 (for project cost tracking)
+```
+
+### 7. New UI Behavior
+
+**Add Work Item Form Flow**:
+1. User selects Activity Type (Project or Expense)
+2. Budget auto-selects based on type (CAPEX or OPEX) - disabled field
+3. For Project Activities:
+   - Project dropdown becomes visible and required
+   - User selects project
+   - EstimatedHours auto-populate from project
+   - Activity Codes and Network Numbers filtered by project
+4. For Expense Activities:
+   - Project dropdown hidden
+   - EstimatedHours field manual entry (optional)
+   - Budget type is OPEX
+   - Director Code, Reason Code, CPC Code required instead
+
+**Activity Page Display**:
+- "Est. Hours" column now shows `estimatedHours` from WorkItem (not from Project)
+- Shows actual planned effort for each work item
+- "Remaining Hours" calculated as EstimatedHours - ActualDuration
+- Users can track progress against their estimated effort
+
+---
+
 ## 2026-02-20 — Director Reporting Dashboard Feature Request (DOCUMENTED ✓)
 
 **Request**:

@@ -1,5 +1,59 @@
 # Remaining Work (2026-02-21)
 
+## ✅ COMPLETED: Add Work Item Form & Activity Page Fixes (2026-02-20)
+
+**Status**: COMPLETE ✅
+
+### Estimated Hours Display Fix
+- ✅ Fixed Activity page to show work item's EstimatedHours (not project EstimatedHours)
+- ✅ Users now see actual estimated effort for each activity
+- ✅ Remaining Hours properly calculated: EstimatedHours - ActualDuration
+
+### Budget Auto-Selection
+- ✅ Budget auto-selects based on activity type radio button
+  - Project Activities → CAPEX budget
+  - Expense Activities → OPEX budget
+- ✅ Budget field is now disabled (read-only) for confirmation
+- ✅ Eliminates manual selection errors
+
+### Conditional Project Selection
+- ✅ Project dropdown only appears for Project Activity mode
+- ✅ Project selection is **required** for project activities
+- ✅ Expense activities have no project dropdown
+- ✅ Form layout restructured for better UX (Activity Type first)
+
+### Auto-Populate Estimated Hours
+- ✅ When user selects project, EstimatedHours populate from project data
+- ✅ Form shows `Project Estimated Hours` auto-populated
+- ✅ Users can override if needed for specific work items
+- ✅ Expense activities allow manual entry of EstimatedHours (optional)
+
+### Enhanced Seed Data
+- ✅ All 8 projects now have EstimatedHours:
+  - P1001: 120 hrs | P1002: 200 hrs | P1003: 100 hrs | P1004: 150 hrs
+  - P1005: 90 hrs | P2001: 160 hrs | P2002: 140 hrs | P99999: 80 hrs
+- ✅ All 16 seed work items have EstimatedHours properly set
+- ✅ RemainingHours calculated correctly for all work items
+
+**Files Modified**:
+- `src/DSC.WebClient/src/pages/Activity.jsx` (frontend form logic and display)
+- `src/DSC.Api/Seeding/TestDataSeeder.cs` (ProjectSeed enhancements)
+- `AI/WORKLOG.md` (detailed work log with implementation details)
+
+**Build Verification**:
+- ✅ Frontend: 0 errors, 0 warnings
+- ✅ Backend: 0 errors, 0 warnings
+- ✅ Database: All migrations applied successfully
+- ✅ Seed data: All entities created (8 projects with EstimatedHours)
+
+**Testing Results**:
+- ✅ API Build: Successful
+- ✅ Seed Endpoint: All 22 entity types created
+- ✅ Database Queries: Projects and WorkItems verified
+- ✅ Budget Auto-Selection: Logic verified in code
+
+---
+
 ## ✅ COMPLETED: Remaining Hours Calculation Logic (2026-02-20)
 
 **Status**: COMPLETE ✅

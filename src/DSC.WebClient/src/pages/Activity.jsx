@@ -44,6 +44,7 @@ export default function Activity() {
   const [estimatedHours, setEstimatedHours] = useState('');
   const [remainingHours, setRemainingHours] = useState('');
   const [creating, setCreating] = useState(false);
+  const [selectedProjectData, setSelectedProjectData] = useState(null);
 
   const timePeriodItems = [
     { id: 'day', label: 'Today' },
@@ -147,9 +148,35 @@ export default function Activity() {
       .finally(() => setDetailedLoading(false));
   }, [timePeriod, user?.Id]);
 
-  // When project changes, load project-specific options
+  // When activity mode changes, auto-select appropriate budget
   useEffect(() => {
-    if (projectId) {
+    if (activityMode === 'project') {
+      // Auto-select CAPEX budget for project activities
+      const capexBudget = budgets.find(b => b.description.toUpperCase().includes('CAPEX'));
+      if (capexBudget) {
+        setBudgetId(capexBudget.id);
+      }
+    } else if (activityMode === 'expense') {
+      // Auto-select OPEX budget for expense activities
+      const opexBudget = budgets.find(b => b.description.toUpperCase().includes('OPEX'));
+      if (opexBudget) {
+        setBudgetId(opexBudget.id);
+      }
+    }
+  }, [activityMode, budgets]);
+
+  // When project changes, load project-specific options and estimated hours
+  useEffect(() => {
+    if (projectId && activityMode === 'project') {
+      // Find the selected project to get its estimated hours
+      const project = projects.find(p => String(p.id) === projectId);
+      setSelectedProjectData(project || null);
+      
+      // If project has estimated hours, populate the form field
+      if (project?.estimatedHours) {
+        setEstimatedHours(String(project.estimatedHours));
+      }
+
       getProjectOptions(projectId)
         .then(data => {
           setProjectOptions(data);
@@ -170,10 +197,14 @@ export default function Activity() {
         });
     } else {
       setProjectOptions(null);
+      setSelectedProjectData(null);
       setActivityCode('');
       setNetworkNumber('');
+      if (activityMode === 'expense') {
+        setEstimatedHours('');
+      }
     }
-  }, [projectId]);
+  }, [projectId, activityMode, projects]);
 
   async function handleCreate(e) {
     e.preventDefault();
@@ -284,7 +315,7 @@ export default function Activity() {
                     <td>{item.activityCode || '—'}</td>
                     <td>{item.networkNumber || '—'}</td>
                     <td>{item.date ? new Date(item.date).toLocaleDateString() : '—'}</td>
-                    <td>{item.projectEstimatedHours != null ? `${item.projectEstimatedHours} hrs` : '—'}</td>
+                    <td>{item.estimatedHours != null ? `${item.estimatedHours} hrs` : '—'}</td>
                     <td>{item.actualDuration != null ? `${item.actualDuration} hrs` : '—'}</td>
                     <td>{remaining}</td>
                   </tr>
@@ -299,24 +330,8 @@ export default function Activity() {
         <Heading level={2}>Add Work Item</Heading>
         <Form onSubmit={handleCreate} className="form-grid">
           <TextField label="Title" value={title} onChange={setTitle} isRequired />
-          <Select
-            label="Project"
-            placeholder="Select project"
-            items={projectItems}
-            selectedKey={projectId || null}
-            onSelectionChange={key => setProjectId(key ? String(key) : '')}
-            isRequired
-          />
-          <Select
-            label="Budget"
-            placeholder="Select budget"
-            items={budgetItems}
-            selectedKey={budgetId || null}
-            onSelectionChange={key => setBudgetId(key ? String(key) : '')}
-            isRequired
-          />
           
-          {/* Activity Mode Selection */}
+          {/* Activity Mode Selection - First Item */}
           <div style={{ gridColumn: '1 / -1', marginBottom: '1rem' }}>
             <fieldset style={{ border: 'none', padding: 0 }}>
               <legend style={{ marginBottom: '0.5rem', fontWeight: 'bold' }}>Activity Type</legend>
@@ -346,6 +361,31 @@ export default function Activity() {
               </div>
             </fieldset>
           </div>
+          
+          {/* Project Selection - Only for Project Activities */}
+          {activityMode === 'project' && (
+          <Select
+            label="Project"
+            placeholder="Select project"
+            items={projectItems}
+            selectedKey={projectId || null}
+            onSelectionChange={key => setProjectId(key ? String(key) : '')}
+            isRequired
+            description="Select the project this activity is associated with"
+          />
+          )}
+          
+          {/* Budget - Auto-selected based on activity type */}
+          <Select
+            label="Budget"
+            placeholder="Auto-selected"
+            items={budgetItems}
+            selectedKey={budgetId || null}
+            onSelectionChange={key => setBudgetId(key ? String(key) : '')}
+            isRequired
+            description={activityMode === 'project' ? 'CAPEX (auto-selected for project activities)' : 'OPEX (auto-selected for expense activities)'}
+            isDisabled
+          />
           
           <div className="form-columns">
             <TextField label="Date" type="date" value={date} onChange={setDate} />
