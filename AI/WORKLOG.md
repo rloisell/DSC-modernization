@@ -1,3 +1,38 @@
+## 2026-02-21 — Warning Triage and Documentation Updates (COMPLETED ✓)
+
+**Problem Statement**:
+1. Resolve CS0618 obsolete warning for ISystemClock in AdminTokenAuthenticationHandler
+2. Resolve NU1902 security vulnerability for System.Security.Cryptography.Xml 4.5.0
+3. Update documentation to reflect all completed legacy model ports
+
+**Implementation & Resolution**:
+
+### CS0618 - ISystemClock Obsolete
+- ✅ Removed `ISystemClock` injection from `AdminTokenAuthenticationHandler`
+- ✅ Updated constructor from `base(options, logger, encoder, clock)` to `base(options, logger, encoder)`
+- ✅ Warning explanation: `ISystemClock` is obsolete in ASP.NET Core authentication handlers
+
+### NU1902 - Security Vulnerability
+- ✅ Pinned `System.Security.Cryptography.Xml` to version 4.7.1 in `DSC.Tests.csproj`
+- ✅ Advisory: Version 4.5.0 has known security vulnerabilities
+- ✅ Vulnerability resolution: Explicit package reference overrides transitive dependency
+
+### Documentation Updates
+- ✅ Added "DSC Modernization Overview" section to README
+- ✅ Documented tech stack: .NET 10, EF Core, MySQL, xUnit
+- ✅ Documented legacy model preservation strategy for 5 mapping tables
+- ✅ Corrected activity code and network number seed counts from 6 to 12 seeded items
+
+**Files Modified**:
+- `src/DSC.Api/Security/AdminTokenAuthenticationHandler.cs`
+- `tests/DSC.Tests/DSC.Tests.csproj`
+- `README.md`
+
+**Commit**: a0b14bb - fix: resolve ISystemClock obsolete warning and NU1902 vulnerability
+**Pull Request**: #2 - Legacy Model Ports: Department_User, User_Position, User_User, Project_Activity, Expense_Activity
+
+---
+
 ## 2026-02-20 — Expense Activity Mapping Port (COMPLETED ✓)
 
 **Problem Statement**:
