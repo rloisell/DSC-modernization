@@ -165,17 +165,32 @@ export default function Activity() {
     }
   }, [activityMode, budgets]);
 
-  // When project changes, load project-specific options and estimated hours
+  // When project changes, load project-specific options and cumulative remaining hours
   useEffect(() => {
     if (projectId && activityMode === 'project') {
       // Find the selected project to get its estimated hours
       const project = projects.find(p => String(p.id) === projectId);
       setSelectedProjectData(project || null);
       
-      // If project has estimated hours, populate the form field
-      if (project?.estimatedHours) {
-        setEstimatedHours(String(project.estimatedHours));
-      }
+      // Fetch cumulative remaining hours for this user on this project
+      fetch(`/api/items/project/${projectId}/remaining-hours`)
+        .then(res => res.json())
+        .then(data => {
+          // Show the project's estimated hours
+          if (data.estimatedHours) {
+            setEstimatedHours(String(data.estimatedHours));
+          }
+          // Show the cumulative remaining hours (can be negative)
+          if (data.remainingHours !== null && data.remainingHours !== undefined) {
+            setRemainingHours(String(data.remainingHours));
+          } else {
+            setRemainingHours('—');
+          }
+        })
+        .catch(e => {
+          console.error('Failed to load remaining hours:', e);
+          setRemainingHours('');
+        });
 
       getProjectOptions(projectId)
         .then(data => {
@@ -202,6 +217,7 @@ export default function Activity() {
       setNetworkNumber('');
       if (activityMode === 'expense') {
         setEstimatedHours('');
+        setRemainingHours('');
       }
     }
   }, [projectId, activityMode, projects]);
@@ -453,26 +469,43 @@ export default function Activity() {
           </div>
           )}
           
-          {/* Expense Activity Mode: Placeholder for expense-specific fields */}
+          {/* Expense Activity Mode: Estimated Hours and Display Remaining Hours */}
           {activityMode === 'expense' && (
           <div className="form-columns">
-            <Text elementType="p" className="muted" style={{ gridColumn: '1 / -1' }}>
-              Expense activity mode fields will be configured when expense catalog endpoints are available.
-            </Text>
+            <NumberField
+              label="Estimated Hours (Optional)"
+              value={estimatedHours ? Number(estimatedHours) : undefined}
+              onChange={value => setEstimatedHours(value == null ? '' : String(value))}
+              description="Optional: Set estimated hours for this expense activity"
+            />
           </div>
           )}
           
           <div className="form-columns">
-            <NumberField
-              label="Estimated Hours"
-              value={estimatedHours ? Number(estimatedHours) : undefined}
-              onChange={value => setEstimatedHours(value == null ? '' : String(value))}
-            />
-            <NumberField
-              label="Remaining Hours"
-              value={remainingHours ? Number(remainingHours) : undefined}
-              onChange={value => setRemainingHours(value == null ? '' : String(value))}
-            />
+            {activityMode === 'project' && (
+              <>
+                <NumberField
+                  label="Project Estimated Hours"
+                  value={estimatedHours ? Number(estimatedHours) : undefined}
+                  isDisabled
+                  description="Total hours available for this project"
+                />
+                <TextField
+                  label="Cumulative Remaining Hours"
+                  value={remainingHours === '—' ? '—' : (remainingHours ? String(remainingHours) : '')}
+                  isDisabled
+                  description="Project estimated minus all your work on it (can be negative)"
+                />
+              </>
+            )}
+            {activityMode === 'expense' && (
+              <TextField
+                label="Remaining Hours"
+                value={actualDuration ? String(Number(estimatedHours || 0) - Number(actualDuration)) : ''}
+                isDisabled
+                description="Calculated as: Estimated Hours - Actual Duration"
+              />
+            )}
           </div>
           <TextArea label="Description" value={desc} onChange={setDesc} />
           <ButtonGroup alignment="start" ariaLabel="Work item actions">

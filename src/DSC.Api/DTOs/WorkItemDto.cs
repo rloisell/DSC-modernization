@@ -82,4 +82,30 @@ namespace DSC.Api.DTOs
         public decimal? EstimatedHours { get; set; }
         public decimal? RemainingHours { get; set; }
     }
+
+    /// <summary>
+    /// Data transfer object for project remaining hours calculation.
+    /// Represents cumulative remaining hours for a user on a specific project,
+    /// accounting for all work items the user has on that project.
+    /// </summary>
+    public class RemainingHoursDto
+    {
+        /// <summary>Project ID</summary>
+        public Guid ProjectId { get; set; }
+
+        /// <summary>Project number (e.g., "P1001")</summary>
+        public string ProjectNo { get; set; } = string.Empty;
+
+        /// <summary>Project name</summary>
+        public string ProjectName { get; set; } = string.Empty;
+
+        /// <summary>Total estimated hours for the project</summary>
+        public decimal? EstimatedHours { get; set; }
+
+        /// <summary>Total actual hours used by this user on this project (sum of all ActualDuration)</summary>
+        public int ActualHoursUsed { get; set; }
+
+        /// <summary>Remaining hours: EstimatedHours - ActualHoursUsed (can be negative)</summary>
+        public decimal? RemainingHours { get; set; }
+    }
 }

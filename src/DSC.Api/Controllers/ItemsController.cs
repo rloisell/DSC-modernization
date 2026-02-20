@@ -296,6 +296,60 @@ namespace DSC.Api.Controllers
             return CreatedAtAction(nameof(Get), new { id = workItem.Id }, responseDto);
         }
 
+        /// <summary>
+        /// Get cumulative remaining hours for the current user on a specific project.
+        /// This accounts for ALL work items the user has on the project.
+        /// </summary>
+        [HttpGet("project/{projectId}/remaining-hours")]
+        [ProducesResponseType(typeof(RemainingHoursDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<RemainingHoursDto>> GetProjectRemainingHours(Guid projectId)
+        {
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized("User not found in token");
+            }
+
+            // Get the project
+            var project = await _db.Projects.FirstOrDefaultAsync(p => p.Id == projectId);
+            if (project == null)
+            {
+                return NotFound("Project not found");
+            }
+
+            // If project has no estimated hours, return null
+            if (!project.EstimatedHours.HasValue)
+            {
+                return Ok(new RemainingHoursDto
+                {
+                    ProjectId = projectId,
+                    ProjectNo = project.ProjectNo,
+                    ProjectName = project.Name,
+                    EstimatedHours = null,
+                    ActualHoursUsed = 0,
+                    RemainingHours = null
+                });
+            }
+
+            // Sum all actual hours for this user on this project
+            var actualHoursUsed = await _db.WorkItems
+                .Where(w => w.ProjectId == projectId && w.UserId == Guid.Parse(userId))
+                .SumAsync(w => w.ActualDuration ?? 0);
+
+            var remainingHours = project.EstimatedHours.Value - actualHoursUsed;
+
+            return Ok(new RemainingHoursDto
+            {
+                ProjectId = projectId,
+                ProjectNo = project.ProjectNo,
+                ProjectName = project.Name,
+                EstimatedHours = project.EstimatedHours,
+                ActualHoursUsed = actualHoursUsed,
+                RemainingHours = remainingHours
+            });
+        }
+
         private static bool IsExpenseBudget(string? description)
         {
             if (string.IsNullOrWhiteSpace(description))
@@ -324,8 +378,8 @@ namespace DSC.Api.Controllers
             var actual = actualDuration ?? 0;
             var remaining = estimatedHours.Value - actual;
 
-            // Ensure remaining hours doesn't go negative
-            return remaining < 0 ? 0 : remaining;
+            // Don't enforce zero floor for cumulative remaining - allow negative values
+            return remaining;
         }
     }
 }
