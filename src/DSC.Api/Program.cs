@@ -1,5 +1,6 @@
 using System.Threading.RateLimiting;
 using DSC.Api.Security;
+using DSC.Api.Seeding;
 using DSC.Data;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
@@ -23,6 +24,7 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("AdminOnly", policy => policy.RequireAuthenticatedUser());
 });
 builder.Services.AddScoped<IPasswordHasher<DSC.Data.Models.User>, PasswordHasher<DSC.Data.Models.User>>();
+builder.Services.AddScoped<TestDataSeeder>();
 
 builder.Services.AddRateLimiter(options =>
 {

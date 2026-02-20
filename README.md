@@ -94,6 +94,17 @@ dotnet ef database update --project src/DSC.Data --startup-project src/DSC.Api -
 mysql -h 127.0.0.1 -P 3306 -u dsc_local -pdsc_password dsc_dev < spec/fixtures/db/seed.sql
 ```
 
+Seed legacy Java test data (from `FirstTest.java` and `SecondTest.java`) with the admin seed endpoint:
+
+```bash
+curl -X POST http://localhost:5005/api/admin/seed/test-data \
+	-H "X-Admin-Token: local-admin-token"
+```
+
+This seeds four users (`rloisel1`, `dmcgregor`, `kduma`, `mammeter`), legacy user auth entries, the `P99999` project, and the `OSS Operations` department.
+
+If you are running in Development with `Admin__RequireToken=false`, the seed endpoint will accept requests without the header.
+
 Frontend (React/Vite scaffold)
 
 A minimal React client has been added at `src/DSC.WebClient`. To run it locally you will need Node.js and npm installed. Example:
@@ -135,6 +146,22 @@ Start the API (from repo root):
 export ConnectionStrings__DefaultConnection="Server=127.0.0.1;Port=3306;Database=dsc_dev;User=dsc_local;Password=dsc_password;"
 dotnet run --project src/DSC.Api --urls http://localhost:5005
 ```
+
+If you are working on the `hardening-security` branch, admin APIs require an admin token:
+
+```bash
+export Admin__Token="local-admin-token"
+```
+
+Send the token as `X-Admin-Token` in API requests to `/api/admin/*`.
+
+To temporarily disable the admin token requirement in local development, set:
+
+```bash
+export Admin__RequireToken=false
+```
+
+This bypass is enforced only when `ASPNETCORE_ENVIRONMENT=Development`. In Test/Production, the API will reject the bypass even if the setting is present.
 
 Open the GUI at: http://localhost:5173/ (the API is available at http://localhost:5005/)
 

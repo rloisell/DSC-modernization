@@ -18,9 +18,25 @@ public class AdminTokenAuthenticationHandler : AuthenticationHandler<Authenticat
 
     protected override Task<AuthenticateResult> HandleAuthenticateAsync()
     {
-        var expectedToken = Context.RequestServices
-            .GetRequiredService<IConfiguration>()
-            .GetValue<string>("Admin:Token");
+        var config = Context.RequestServices.GetRequiredService<IConfiguration>();
+        var env = Context.RequestServices.GetRequiredService<IHostEnvironment>();
+        var requireToken = config.GetValue("Admin:RequireToken", true);
+        if (!requireToken)
+        {
+            if (!env.IsDevelopment())
+            {
+                return Task.FromResult(AuthenticateResult.Fail("Admin token bypass is only allowed in Development."));
+            }
+
+            var bypassClaims = new[] { new Claim(ClaimTypes.Name, "AdminBypass") };
+            var bypassIdentity = new ClaimsIdentity(bypassClaims, Scheme.Name);
+            var bypassPrincipal = new ClaimsPrincipal(bypassIdentity);
+            var bypassTicket = new AuthenticationTicket(bypassPrincipal, Scheme.Name);
+
+            return Task.FromResult(AuthenticateResult.Success(bypassTicket));
+        }
+
+        var expectedToken = config.GetValue<string>("Admin:Token");
 
         if (string.IsNullOrWhiteSpace(expectedToken))
         {

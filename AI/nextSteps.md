@@ -50,6 +50,8 @@ Next steps (recommended, prioritized):
 12. Add edit workflows for admin catalog pages (create/edit reuse with update/deactivate). — Completed: positions, departments, projects, expense categories/options, activity codes, and network numbers.
 13. Apply the B.C. Design System React component library across the frontend. — Completed: updated layout, navigation, forms, and tables with B.C. design system components and tokens.
 14. Refresh admin landing page copy to reflect wired sections. — Completed.
+15. Add a dev-only admin token bypass switch with guardrails for non-dev environments. — Completed.
+16. Execute legacy test data seed in local dev and verify admin users response. — Completed.
 
 Spec-Kitty / Migration next steps (explicit)
 

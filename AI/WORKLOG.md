@@ -1,5 +1,16 @@
 ## 2026-02-19 — WebClient asset copy, API service, and data fetch
 
+## 2026-02-19 — Legacy test data seeding
+
+- Added `POST /api/admin/seed/test-data` to import representative data from the Java test fixtures (`FirstTest.java`, `SecondTest.java`).
+- Seeded users (`rloisel1`, `dmcgregor`, `kduma`, `mammeter`), legacy user auth entries, project `P99999`, and the `OSS Operations` department.
+- Executed the seed endpoint locally and verified `/api/admin/users` returns the seeded users.
+
+## 2026-02-19 — Admin token dev-only bypass
+
+- Added an admin-token bypass switch (`Admin:RequireToken=false`) that only works when `ASPNETCORE_ENVIRONMENT=Development`.
+- Guardrails prevent the bypass from being used in Test/Production environments.
+
 - Copied all relevant static assets from legacy `WebContent` (CSS, JS, images, calendar libs) into `src/DSC.WebClient/public`.
 - Created React page stubs for `Activity`, `Project`, `Administrator`, and `Login` in `src/DSC.WebClient/src/pages/`.
 - Set up routing in `src/DSC.WebClient/src/App.jsx` to match legacy JSP routes.
