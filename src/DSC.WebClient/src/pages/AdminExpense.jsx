@@ -16,12 +16,15 @@ export default function AdminExpense() {
   const [message, setMessage] = useState('');
   const [budgets, setBudgets] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [options, setOptions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [budgetForm, setBudgetForm] = useState({ description: '', status: 'active' });
   const [categoryForm, setCategoryForm] = useState({ budgetId: '', name: '', status: 'active' });
+  const [optionForm, setOptionForm] = useState({ categoryId: '', name: '', status: 'active' });
   const [editingCategoryId, setEditingCategoryId] = useState('');
   const [editingBudgetId, setEditingBudgetId] = useState('');
+  const [editingOptionId, setEditingOptionId] = useState('');
   const navigate = useNavigate();
 
   const statusItems = [
@@ -32,15 +35,21 @@ export default function AdminExpense() {
     id: budget.id,
     label: budget.description
   }));
+  const categoryItems = categories.map(category => ({
+    id: category.id,
+    label: category.name
+  }));
 
   useEffect(() => {
     Promise.all([
       AdminCatalogService.getBudgets(),
-      AdminCatalogService.getExpenseCategories()
+      AdminCatalogService.getExpenseCategories(),
+      AdminCatalogService.getExpenseOptions()
     ])
-      .then(([budgetData, categoryData]) => {
+      .then(([budgetData, categoryData, optionData]) => {
         setBudgets(budgetData);
         setCategories(categoryData);
+        setOptions(optionData);
       })
       .catch(e => setError(e.message))
       .finally(() => setLoading(false));
@@ -48,6 +57,14 @@ export default function AdminExpense() {
 
   function updateCategoryForm(field, value) {
     setCategoryForm(prev => ({ ...prev, [field]: value }));
+  }
+
+  function updateOptionForm(field, value) {
+    setOptionForm(prev => ({ ...prev, [field]: value }));
+  }
+
+  function getErrorMessage(err) {
+    return err?.response?.data?.error || err?.message || 'Request failed.';
   }
 
 
@@ -78,7 +95,38 @@ export default function AdminExpense() {
       setEditingCategoryId('');
       setMessage(editingCategoryId ? 'Expense category updated.' : 'Expense category created.');
     } catch (e) {
-      setError(e.message);
+      setError(getErrorMessage(e));
+    }
+  }
+
+  async function handleOptionSubmit(e) {
+    e.preventDefault();
+    setMessage('');
+    setError(null);
+    if (!optionForm.categoryId) {
+      setError('Select a category before saving an option.');
+      return;
+    }
+    try {
+      if (editingOptionId) {
+        await AdminCatalogService.updateExpenseOption(editingOptionId, {
+          expenseCategoryId: optionForm.categoryId,
+          name: optionForm.name,
+          isActive: optionForm.status === 'active'
+        });
+      } else {
+        await AdminCatalogService.createExpenseOption({
+          expenseCategoryId: optionForm.categoryId,
+          name: optionForm.name
+        });
+      }
+      const refreshed = await AdminCatalogService.getExpenseOptions();
+      setOptions(refreshed);
+      setOptionForm({ categoryId: optionForm.categoryId, name: '', status: 'active' });
+      setEditingOptionId('');
+      setMessage(editingOptionId ? 'Expense option updated.' : 'Expense option created.');
+    } catch (e) {
+      setError(getErrorMessage(e));
     }
   }
 
@@ -103,7 +151,7 @@ export default function AdminExpense() {
       setEditingBudgetId('');
       setMessage(editingBudgetId ? 'Budget updated.' : 'Budget created.');
     } catch (e) {
-      setError(e.message);
+      setError(getErrorMessage(e));
     }
   }
 
@@ -112,6 +160,7 @@ export default function AdminExpense() {
     setError(null);
     try {
       await AdminCatalogService.updateExpenseCategory(category.id, {
+        budgetId: category.budgetId,
         name: category.name,
         isActive: false
       });
@@ -119,7 +168,7 @@ export default function AdminExpense() {
       setCategories(refreshed);
       setMessage('Expense category deactivated.');
     } catch (e) {
-      setError(e.message);
+      setError(getErrorMessage(e));
     }
   }
 
@@ -135,7 +184,72 @@ export default function AdminExpense() {
       setBudgets(refreshed);
       setMessage('Budget deactivated.');
     } catch (e) {
-      setError(e.message);
+      setError(getErrorMessage(e));
+    }
+  }
+
+  async function handleDeactivateOption(option) {
+    setMessage('');
+    setError(null);
+    try {
+      await AdminCatalogService.updateExpenseOption(option.id, {
+        expenseCategoryId: option.expenseCategoryId,
+        name: option.name,
+        isActive: false
+      });
+      const refreshed = await AdminCatalogService.getExpenseOptions();
+      setOptions(refreshed);
+      setMessage('Expense option deactivated.');
+    } catch (e) {
+      setError(getErrorMessage(e));
+    }
+  }
+
+  async function handleDeleteBudget(budget) {
+    if (!window.confirm(`Delete budget "${budget.description}"? This cannot be undone.`)) {
+      return;
+    }
+    setMessage('');
+    setError(null);
+    try {
+      await AdminCatalogService.deleteBudget(budget.id);
+      const refreshed = await AdminCatalogService.getBudgets();
+      setBudgets(refreshed);
+      setMessage('Budget deleted.');
+    } catch (e) {
+      setError(getErrorMessage(e));
+    }
+  }
+
+  async function handleDeleteCategory(category) {
+    if (!window.confirm(`Delete expense category "${category.name}"? This cannot be undone.`)) {
+      return;
+    }
+    setMessage('');
+    setError(null);
+    try {
+      await AdminCatalogService.deleteExpenseCategory(category.id);
+      const refreshed = await AdminCatalogService.getExpenseCategories();
+      setCategories(refreshed);
+      setMessage('Expense category deleted.');
+    } catch (e) {
+      setError(getErrorMessage(e));
+    }
+  }
+
+  async function handleDeleteOption(option) {
+    if (!window.confirm(`Delete expense option "${option.name}"? This cannot be undone.`)) {
+      return;
+    }
+    setMessage('');
+    setError(null);
+    try {
+      await AdminCatalogService.deleteExpenseOption(option.id);
+      const refreshed = await AdminCatalogService.getExpenseOptions();
+      setOptions(refreshed);
+      setMessage('Expense option deleted.');
+    } catch (e) {
+      setError(getErrorMessage(e));
     }
   }
 
@@ -153,6 +267,15 @@ export default function AdminExpense() {
     setBudgetForm({
       description: budget.description,
       status: budget.isActive ? 'active' : 'inactive'
+    });
+  }
+
+  function handleEditOption(option) {
+    setEditingOptionId(option.id);
+    setOptionForm({
+      categoryId: option.expenseCategoryId || '',
+      name: option.name,
+      status: option.isActive ? 'active' : 'inactive'
     });
   }
 
@@ -220,6 +343,9 @@ export default function AdminExpense() {
                     <Button size="small" variant="tertiary" danger onPress={() => handleDeactivateBudget(budget)}>
                       Deactivate
                     </Button>
+                    <Button size="small" variant="secondary" danger onPress={() => handleDeleteBudget(budget)}>
+                      Delete
+                    </Button>
                   </div>
                 </td>
               </tr>
@@ -260,7 +386,7 @@ export default function AdminExpense() {
                 variant="tertiary"
                 onPress={() => {
                   setEditingCategoryId('');
-                  setCategoryForm({ name: '', status: 'active' });
+                  setCategoryForm({ budgetId: '', name: '', status: 'active' });
                 }}
               >
                 Cancel
@@ -291,6 +417,84 @@ export default function AdminExpense() {
                     <Button size="small" variant="tertiary" onPress={() => handleEditCategory(category)}>Edit</Button>
                     <Button size="small" variant="tertiary" danger onPress={() => handleDeactivateCategory(category)}>
                       Deactivate
+                    </Button>
+                    <Button size="small" variant="secondary" danger onPress={() => handleDeleteCategory(category)}>
+                      Delete
+                    </Button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </section>
+      <section className="section stack">
+        <Heading level={2}>{editingOptionId ? 'Edit Expense Option' : 'Add Expense Option'}</Heading>
+        <Form onSubmit={handleOptionSubmit} className="form-grid">
+          <Select
+            label="Expense Category"
+            placeholder="Select category"
+            items={categoryItems}
+            selectedKey={optionForm.categoryId || null}
+            onSelectionChange={key => updateOptionForm('categoryId', key ? String(key) : '')}
+            isRequired
+          />
+          <TextField
+            label="Option Name"
+            value={optionForm.name}
+            onChange={value => updateOptionForm('name', value)}
+            isRequired
+          />
+          <Select
+            label="Status"
+            items={statusItems}
+            selectedKey={optionForm.status}
+            onSelectionChange={key => updateOptionForm('status', String(key))}
+          />
+          <ButtonGroup alignment="start" ariaLabel="Expense option actions">
+            <Button type="submit" variant="primary">
+              {editingOptionId ? 'Save Option' : 'Create Option'}
+            </Button>
+            {editingOptionId ? (
+              <Button
+                type="button"
+                variant="tertiary"
+                onPress={() => {
+                  setEditingOptionId('');
+                  setOptionForm({ categoryId: '', name: '', status: 'active' });
+                }}
+              >
+                Cancel
+              </Button>
+            ) : null}
+          </ButtonGroup>
+        </Form>
+      </section>
+      <section className="section stack">
+        <Heading level={2}>Expense Options</Heading>
+        <table className="bcds-table">
+          <thead>
+            <tr>
+              <th>Category</th>
+              <th>Name</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {options.map(option => (
+              <tr key={option.id}>
+                <td>{option.expenseCategoryName || categories.find(c => c.id === option.expenseCategoryId)?.name || '—'}</td>
+                <td>{option.name}</td>
+                <td>{option.isActive ? 'Active' : 'Inactive'}</td>
+                <td>
+                  <div className="actions">
+                    <Button size="small" variant="tertiary" onPress={() => handleEditOption(option)}>Edit</Button>
+                    <Button size="small" variant="tertiary" danger onPress={() => handleDeactivateOption(option)}>
+                      Deactivate
+                    </Button>
+                    <Button size="small" variant="secondary" danger onPress={() => handleDeleteOption(option)}>
+                      Delete
                     </Button>
                   </div>
                 </td>

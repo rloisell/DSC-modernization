@@ -131,6 +131,21 @@ export default function AdminProjects() {
     }
   }
 
+  async function handleDelete(project) {
+    if (!window.confirm(`Delete project "${project.name}"? This cannot be undone.`)) {
+      return;
+    }
+    setMessage('');
+    setError(null);
+    try {
+      await AdminCatalogService.deleteProject(project.id);
+      await loadData();
+      setMessage('Project deleted.');
+    } catch (e) {
+      setError(e.message);
+    }
+  }
+
   async function handleAssign(e) {
     e.preventDefault();
     setMessage('');
@@ -246,6 +261,9 @@ export default function AdminProjects() {
                     <Button size="small" variant="tertiary" onPress={() => handleEdit(project)}>Edit</Button>
                     <Button size="small" variant="tertiary" danger onPress={() => handleArchive(project)}>
                       Archive
+                    </Button>
+                    <Button size="small" variant="secondary" danger onPress={() => handleDelete(project)}>
+                      Delete
                     </Button>
                     <Button size="small" variant="secondary" onPress={() => handleAssignAll(project.id)}>
                       Assign All Options

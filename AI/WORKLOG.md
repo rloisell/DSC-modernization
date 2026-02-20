@@ -1,3 +1,34 @@
+## 2026-02-21 — Admin UI Delete Wiring (COMPLETED ✓)
+
+**Problem Statement**:
+1. Wire admin UI pages to the new DELETE endpoints for catalog entities
+2. Add expense options management UI to cover delete flow for options
+
+**Implementation & Resolution**:
+
+### Admin Catalog Service
+- ✅ Added delete helpers for departments, positions, projects, activity codes, network numbers, budgets, expense categories, and expense options
+
+### Admin Pages
+- ✅ Added delete actions and confirmations for departments, positions, projects, activity codes, and network numbers
+- ✅ Added delete actions for budgets, expense categories, and expense options
+- ✅ Added expense options form/table for create/edit/deactivate/delete
+- ✅ Fixed category deactivation to include required budgetId
+
+**Files Modified**:
+- `src/DSC.WebClient/src/api/AdminCatalogService.js`
+- `src/DSC.WebClient/src/pages/AdminDepartments.jsx`
+- `src/DSC.WebClient/src/pages/AdminPositions.jsx`
+- `src/DSC.WebClient/src/pages/AdminProjects.jsx`
+- `src/DSC.WebClient/src/pages/AdminActivityOptions.jsx`
+- `src/DSC.WebClient/src/pages/AdminExpense.jsx`
+- `README.md`
+- `AI/nextSteps.md`
+
+**Commit**: Pending
+
+---
+
 ## 2026-02-21 — NU1904 System.Drawing.Common Remediation (COMPLETED ✓)
 
 **Problem Statement**:

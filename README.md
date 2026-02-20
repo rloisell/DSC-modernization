@@ -135,6 +135,10 @@ See [tests/howto.md](tests/howto.md) for comprehensive testing documentation, in
 
 ## Admin Management — 2026-02-21 (UPDATED)
 
+### Admin Catalog Deletion (NEW 2026-02-21)
+- Delete actions are available for departments, positions, projects, activity codes, network numbers, budgets, expense categories, and expense options
+- Destructive actions prompt for confirmation and refresh the catalog lists after completion
+
 ### Admin Users Page (UPDATED 2026-02-20)
 - **Enhanced Users Table**: Displays comprehensive user information in an easy-to-read format
   - Columns: Employee ID, Name, Email, LAN ID, Role, Position, Department

@@ -130,6 +130,22 @@ export default function AdminDepartments() {
     }
   }
 
+  async function handleDelete(dept) {
+    if (!window.confirm(`Delete department "${dept.name}"? This cannot be undone.`)) {
+      return;
+    }
+    setMessage('');
+    setError(null);
+    try {
+      await AdminCatalogService.deleteDepartment(dept.id);
+      const refreshed = await AdminCatalogService.getDepartments();
+      setDepartments(refreshed);
+      setMessage('Department deleted.');
+    } catch (e) {
+      setError(e.message);
+    }
+  }
+
   return (
     <div className="page">
       <section className="section stack">
@@ -205,6 +221,9 @@ export default function AdminDepartments() {
                     <Button size="small" variant="tertiary" onPress={() => handleEdit(dept)}>Edit</Button>
                     <Button size="small" variant="tertiary" danger onPress={() => handleDeactivate(dept)}>
                       Deactivate
+                    </Button>
+                    <Button size="small" variant="secondary" danger onPress={() => handleDelete(dept)}>
+                      Delete
                     </Button>
                   </div>
                 </td>

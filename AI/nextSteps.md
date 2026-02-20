@@ -2,15 +2,14 @@
 
 ## Next Steps
 
-### 1. Frontend Integration
-- Connect admin UI to delete endpoints for departments, positions, projects, activity codes, network numbers, budgets, expense categories, and expense options
-- Add validation and error handling for admin operations
-- Test full workflow for user/department/position/project management
-
-### 2. End-to-End Verification
+### 1. End-to-End Verification
 - Seed test data and validate admin CRUD from UI
 - Verify activity page filtering and legacy activity ID behavior
 - Re-run `dotnet test` after UI wiring changes
+
+### 2. Admin UX Polish
+- Add inline confirmations or toast messaging for destructive actions if needed
+- Review empty states for expense options and project activity options
 
 ## ✅ COMPLETED: Legacy Model Ports (2026-02-20 - 2026-02-21)
 
@@ -45,6 +44,10 @@
 
 ### Admin Endpoints
 - Added DELETE endpoints for departments, positions, projects, activity codes, network numbers, budgets, expense categories, and expense options
+
+### Admin UI Wiring
+- Admin pages now call delete endpoints for catalog entities
+- Admin Expense page now manages expense options (create/edit/deactivate/delete)
 
 ---
 

@@ -90,6 +90,22 @@ export default function AdminPositions() {
     }
   }
 
+  async function handleDelete(position) {
+    if (!window.confirm(`Delete position "${position.title}"? This cannot be undone.`)) {
+      return;
+    }
+    setMessage('');
+    setError(null);
+    try {
+      await AdminCatalogService.deletePosition(position.id);
+      const refreshed = await AdminCatalogService.getPositions();
+      setPositions(refreshed);
+      setMessage('Position deleted.');
+    } catch (e) {
+      setError(e.message);
+    }
+  }
+
   return (
     <div className="page">
       <section className="section stack">
@@ -160,6 +176,9 @@ export default function AdminPositions() {
                     <Button size="small" variant="tertiary" onPress={() => handleEdit(position)}>Edit</Button>
                     <Button size="small" variant="tertiary" danger onPress={() => handleDeactivate(position)}>
                       Deactivate
+                    </Button>
+                    <Button size="small" variant="secondary" danger onPress={() => handleDelete(position)}>
+                      Delete
                     </Button>
                   </div>
                 </td>

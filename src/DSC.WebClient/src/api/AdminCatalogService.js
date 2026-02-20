@@ -12,6 +12,9 @@ export const AdminCatalogService = {
   async updatePosition(id, payload) {
     await axios.put(`/api/admin/positions/${id}`, payload);
   },
+  async deletePosition(id) {
+    await axios.delete(`/api/admin/positions/${id}`);
+  },
 
   async getDepartments() {
     const res = await axios.get('/api/admin/departments');
@@ -23,6 +26,9 @@ export const AdminCatalogService = {
   },
   async updateDepartment(id, payload) {
     await axios.put(`/api/admin/departments/${id}`, payload);
+  },
+  async deleteDepartment(id) {
+    await axios.delete(`/api/admin/departments/${id}`);
   },
 
   async getRoles() {
@@ -48,6 +54,9 @@ export const AdminCatalogService = {
   async updateProject(id, payload) {
     await axios.put(`/api/admin/projects/${id}`, payload);
   },
+  async deleteProject(id) {
+    await axios.delete(`/api/admin/projects/${id}`);
+  },
 
   async getExpenseCategories() {
     const res = await axios.get('/api/admin/expense-categories');
@@ -60,6 +69,9 @@ export const AdminCatalogService = {
   async updateExpenseCategory(id, payload) {
     await axios.put(`/api/admin/expense-categories/${id}`, payload);
   },
+  async deleteExpenseCategory(id) {
+    await axios.delete(`/api/admin/expense-categories/${id}`);
+  },
 
   async getBudgets() {
     const res = await axios.get('/api/admin/budgets');
@@ -71,6 +83,9 @@ export const AdminCatalogService = {
   },
   async updateBudget(id, payload) {
     await axios.put(`/api/admin/budgets/${id}`, payload);
+  },
+  async deleteBudget(id) {
+    await axios.delete(`/api/admin/budgets/${id}`);
   },
 
   async getExpenseOptions(categoryId) {
@@ -86,6 +101,9 @@ export const AdminCatalogService = {
   async updateExpenseOption(id, payload) {
     await axios.put(`/api/admin/expense-options/${id}`, payload);
   },
+  async deleteExpenseOption(id) {
+    await axios.delete(`/api/admin/expense-options/${id}`);
+  },
 
   async getActivityCodes() {
     const res = await axios.get('/api/admin/activity-codes');
@@ -98,6 +116,9 @@ export const AdminCatalogService = {
   async updateActivityCode(id, payload) {
     await axios.put(`/api/admin/activity-codes/${id}`, payload);
   },
+  async deleteActivityCode(id) {
+    await axios.delete(`/api/admin/activity-codes/${id}`);
+  },
 
   async getNetworkNumbers() {
     const res = await axios.get('/api/admin/network-numbers');
@@ -109,6 +130,9 @@ export const AdminCatalogService = {
   },
   async updateNetworkNumber(id, payload) {
     await axios.put(`/api/admin/network-numbers/${id}`, payload);
+  },
+  async deleteNetworkNumber(id) {
+    await axios.delete(`/api/admin/network-numbers/${id}`);
   },
 
   async getProjectActivityOptions(projectId) {

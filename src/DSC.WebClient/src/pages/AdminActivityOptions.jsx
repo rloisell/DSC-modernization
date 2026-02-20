@@ -116,6 +116,22 @@ export default function AdminActivityOptions() {
     }
   }
 
+  async function handleDeleteCode(code) {
+    if (!window.confirm(`Delete activity code "${code.code}"? This cannot be undone.`)) {
+      return;
+    }
+    setMessage('');
+    setError(null);
+    try {
+      await AdminCatalogService.deleteActivityCode(code.id);
+      const refreshed = await AdminCatalogService.getActivityCodes();
+      setActivityCodes(refreshed);
+      setMessage('Activity code deleted.');
+    } catch (e) {
+      setError(e.message);
+    }
+  }
+
   async function handleDeactivateNetwork(network) {
     setMessage('');
     setError(null);
@@ -128,6 +144,22 @@ export default function AdminActivityOptions() {
       const refreshed = await AdminCatalogService.getNetworkNumbers();
       setNetworkNumbers(refreshed);
       setMessage('Network number deactivated.');
+    } catch (e) {
+      setError(e.message);
+    }
+  }
+
+  async function handleDeleteNetwork(network) {
+    if (!window.confirm(`Delete network number "${network.number}"? This cannot be undone.`)) {
+      return;
+    }
+    setMessage('');
+    setError(null);
+    try {
+      await AdminCatalogService.deleteNetworkNumber(network.id);
+      const refreshed = await AdminCatalogService.getNetworkNumbers();
+      setNetworkNumbers(refreshed);
+      setMessage('Network number deleted.');
     } catch (e) {
       setError(e.message);
     }
@@ -208,6 +240,9 @@ export default function AdminActivityOptions() {
                     <Button size="small" variant="tertiary" danger onPress={() => handleDeactivateCode(code)}>
                       Deactivate
                     </Button>
+                    <Button size="small" variant="secondary" danger onPress={() => handleDeleteCode(code)}>
+                      Delete
+                    </Button>
                   </div>
                 </td>
               </tr>
@@ -268,6 +303,9 @@ export default function AdminActivityOptions() {
                     <Button size="small" variant="tertiary" onPress={() => handleEditNetwork(network)}>Edit</Button>
                     <Button size="small" variant="tertiary" danger onPress={() => handleDeactivateNetwork(network)}>
                       Deactivate
+                    </Button>
+                    <Button size="small" variant="secondary" danger onPress={() => handleDeleteNetwork(network)}>
+                      Delete
                     </Button>
                   </div>
                 </td>
