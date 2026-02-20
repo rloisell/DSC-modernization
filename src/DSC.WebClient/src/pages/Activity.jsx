@@ -22,7 +22,6 @@ export default function Activity() {
   const [detailedItems, setDetailedItems] = useState([]);
   const [timePeriod, setTimePeriod] = useState('month');
   const [activityMode, setActivityMode] = useState('project'); // 'project' or 'expense'
-  const [timePeriod, setTimePeriod] = useState('month');
   const [projects, setProjects] = useState([]);
   const [budgets, setBudgets] = useState([]);
   const [activityCodes, setActivityCodes] = useState([]);
