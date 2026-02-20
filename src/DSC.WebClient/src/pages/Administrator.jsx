@@ -18,7 +18,8 @@ export default function Administrator() {
       <section className="section stack">
         <Heading level={1}>Administrator</Heading>
         <Text elementType="p">
-          Subpages are stubbed for now and will be expanded during the admin port.
+          Admin sections are now wired to the catalog and user APIs. Use the buttons below to manage users,
+          positions, departments, projects, expense options, and activity options.
         </Text>
         <ButtonGroup ariaLabel="Admin sections" alignment="start">
           <AdminLinkButton to="/admin/users">Admin Users</AdminLinkButton>
