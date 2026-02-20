@@ -1,3 +1,52 @@
+## 2026-02-21 — Manager Field Bug Fix in AdminDepartments
+
+**Completed**:
+1. ✅ Fixed Manager field in AdminDepartments component
+   - **Issue**: Manager field was a plain text TextField with no connection to system users
+   - **Solution**: Converted Manager field to a Select dropdown that loads and displays all users
+   - **Implementation**:
+     - Added `getAdminUsers()` call to load users from `/api/admin/users` endpoint
+     - Users display in dropdown with full name (firstName + lastName) and email as description
+     - Bidirectional user ID ↔ name mapping:
+       - On submit: Convert selected user ID to user's full name for API (maintains backward compatibility)
+       - On edit: Match stored manager name back to user ID for dropdown pre-selection
+     - Manager field is optional (can leave unselected)
+     - Users and departments loaded in parallel for better performance
+
+2. ✅ Build verification passed
+   - WebClient build succeeded with no compilation errors
+   - Component properly imports and exports all required functions
+
+3. ✅ Committed and pushed changes
+   - Commit: "fix: convert Manager field to user selection dropdown in AdminDepartments"
+   - Pushed to main branch
+
+**Status**: Ready for testing. The Manager field now provides proper user selection with dropdown UI.
+
+**How to test**:
+1. Start WebClient: `cd src/DSC.WebClient && npm run dev`
+2. Navigate to Admin → Departments
+3. Create a new department:
+   - Enter department name
+   - Click Manager dropdown - should show list of all users with names and emails
+   - Select a user as manager
+   - Submit form
+4. Verify the selected user displays as manager in the table
+5. Edit a department:
+   - Click Edit button
+   - Manager dropdown should pre-select the existing manager user
+   - Can change to different manager or clear selection
+6. Leave Manager unselected:
+   - Create/edit department without selecting a manager
+   - Should save successfully with empty manager field
+
+**Technical details**:
+- Component: `src/DSC.WebClient/src/pages/AdminDepartments.jsx`
+- Service: `AdminUserService.getAdminUsers()` from `src/DSC.WebClient/src/api/AdminUserService.js`
+- No API changes required - uses existing `/api/admin/users` endpoint
+- Data model maintains backward compatibility (manager stored as string name)
+- Component handles cases where users list may not load gracefully
+
 ## 2026-02-20 — Database Migrations & Role Seeding
 
 **Completed**:
