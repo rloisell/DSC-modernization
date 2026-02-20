@@ -13,8 +13,7 @@ import {
 } from '@bcgov/design-system-react-components';
 import { getWorkItems, createWorkItemWithLegacy, getDetailedWorkItems } from '../api/WorkItemService';
 import { getProjects } from '../api/ProjectService';
-import { getActivityCodes, getNetworkNumbers, getBudgets } from '../api/CatalogService';
-import axios from 'axios';
+import { getActivityCodes, getNetworkNumbers, getBudgets, getProjectOptions } from '../api/CatalogService';
 
 export default function Activity() {
   const [items, setItems] = useState([]);
@@ -76,23 +75,65 @@ export default function Activity() {
     label: nn.description ? `${nn.number} — ${nn.description}` : String(nn.number)
   }));
 
+  function getErrorMessage(err) {
+    return err?.response?.data?.error || err?.message || 'Request failed.';
+  }
+
   useEffect(() => {
-    Promise.all([
-      getWorkItems(),
-      getProjects(),
-      getBudgets(),
-      getActivityCodes(),
-      getNetworkNumbers()
-    ])
-      .then(([workItems, projects, budgets, codes, numbers]) => {
-        setItems(workItems);
-        setProjects(projects);
-        setBudgets(budgets);
-        setActivityCodes(codes);
-        setNetworkNumbers(numbers);
-      })
-      .catch(e => setError(e.message))
-      .finally(() => setLoading(false));
+    let isMounted = true;
+    const loadCatalog = async () => {
+      setLoading(true);
+      const results = await Promise.allSettled([
+        getWorkItems(),
+        getProjects(),
+        getBudgets(),
+        getActivityCodes(),
+        getNetworkNumbers()
+      ]);
+
+      if (!isMounted) return;
+
+      const [workItems, projects, budgets, codes, numbers] = results;
+      const errors = [];
+
+      if (workItems.status === 'fulfilled') {
+        setItems(workItems.value);
+      } else {
+        errors.push(`Work items: ${getErrorMessage(workItems.reason)}`);
+      }
+
+      if (projects.status === 'fulfilled') {
+        setProjects(projects.value);
+      } else {
+        errors.push(`Projects: ${getErrorMessage(projects.reason)}`);
+      }
+
+      if (budgets.status === 'fulfilled') {
+        setBudgets(budgets.value);
+      } else {
+        errors.push(`Budgets: ${getErrorMessage(budgets.reason)}`);
+      }
+
+      if (codes.status === 'fulfilled') {
+        setActivityCodes(codes.value);
+      } else {
+        errors.push(`Activity codes: ${getErrorMessage(codes.reason)}`);
+      }
+
+      if (numbers.status === 'fulfilled') {
+        setNetworkNumbers(numbers.value);
+      } else {
+        errors.push(`Network numbers: ${getErrorMessage(numbers.reason)}`);
+      }
+
+      setError(errors.length ? errors.join(' | ') : null);
+      setLoading(false);
+    };
+
+    loadCatalog();
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   // Load detailed work items when time period changes
@@ -107,12 +148,12 @@ export default function Activity() {
   // When project changes, load project-specific options
   useEffect(() => {
     if (projectId) {
-      axios.get(`/api/catalog/project-options/${projectId}`)
-        .then(res => {
-          setProjectOptions(res.data);
+      getProjectOptions(projectId)
+        .then(data => {
+          setProjectOptions(data);
           // Reset selected activity code and network number if they're not in the project options
-          const validCodes = res.data.activityCodes.map(c => c.code);
-          const validNumbers = res.data.networkNumbers.map(n => String(n.number));
+          const validCodes = data.activityCodes.map(c => c.code);
+          const validNumbers = data.networkNumbers.map(n => String(n.number));
           if (activityCode && !validCodes.includes(activityCode)) {
             setActivityCode('');
           }
@@ -123,6 +164,7 @@ export default function Activity() {
         .catch(e => {
           console.error('Failed to load project options:', e);
           setProjectOptions(null);
+          setError(getErrorMessage(e));
         });
     } else {
       setProjectOptions(null);

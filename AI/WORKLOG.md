@@ -1,3 +1,31 @@
+## 2026-02-21 — Activity Dropdown Wiring Verification (COMPLETED ✓)
+
+**Problem Statement**:
+1. Ensure Activity page dropdowns load from database-backed catalog endpoints after budget changes
+2. Verify end-to-end catalog responses and seed data availability
+
+**Implementation & Resolution**:
+
+### Activity Page Resilience
+- ✅ Switched catalog loading to `Promise.allSettled` to avoid one failing endpoint blocking all dropdowns
+- ✅ Added project options helper via `CatalogService.getProjectOptions`
+- ✅ Improved error messaging for catalog fetch failures
+
+### Verification
+- ✅ Seeded test data via `/api/admin/seed/test-data`
+- ✅ Verified activity codes, network numbers, projects, and budgets via `/api/catalog/*` and `/api/projects`
+- ✅ Restarted API to pick up the budgets catalog endpoint
+
+**Files Modified**:
+- `src/DSC.WebClient/src/pages/Activity.jsx`
+- `src/DSC.WebClient/src/api/CatalogService.js`
+- `README.md`
+- `AI/nextSteps.md`
+
+**Commit**: Pending
+
+---
+
 ## 2026-02-21 — Admin UI Delete Wiring (COMPLETED ✓)
 
 **Problem Statement**:

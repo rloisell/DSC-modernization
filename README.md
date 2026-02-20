@@ -93,6 +93,7 @@ See [tests/howto.md](tests/howto.md) for comprehensive testing documentation, in
 - ✅ **Project Dropdown**: Loads all projects from database with "ProjectNo — Name" format
 - ✅ **Activity Code Dropdown**: Selects from 12 seeded test codes (DEV, TEST, DOC, ADMIN, MEET, TRAIN and additional codes)
 - ✅ **Network Number Dropdown**: Selects from 12 seeded test numbers (101, 102, 103, 201, 202, 203 and additional numbers)
+- ✅ **Budget Dropdown**: Loads CAPEX/OPEX budgets from `/api/catalog/budgets`
 - ✅ **Budget Classification (CAPEX/OPEX)** (NEW 2026-02-21):
   - Activity create form requires a budget selection
   - Activity table displays the budget classification for each work item

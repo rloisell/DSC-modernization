@@ -2,12 +2,11 @@
 
 ## Next Steps
 
-### 1. End-to-End Verification
-- Seed test data and validate admin CRUD from UI
-- Verify activity page filtering and legacy activity ID behavior
-- Re-run `dotnet test` after UI wiring changes
+### 1. End-to-End UI Walkthrough
+- Validate admin CRUD flows in the browser after the latest deletes wiring
+- Confirm Activity page dropdowns (projects, budgets, codes, numbers) load from the database
 
-### 2. Admin UX Polish
+### 2. Optional UX Polish
 - Add inline confirmations or toast messaging for destructive actions if needed
 - Review empty states for expense options and project activity options
 

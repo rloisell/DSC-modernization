@@ -16,3 +16,8 @@ export async function getBudgets() {
   const res = await axios.get(`${CATALOG_URL}/budgets`);
   return res.data;
 }
+
+export async function getProjectOptions(projectId) {
+  const res = await axios.get(`${CATALOG_URL}/project-options/${projectId}`);
+  return res.data;
+}
