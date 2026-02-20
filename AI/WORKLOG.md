@@ -207,24 +207,9 @@ Repository creation:
 
 Remote: https://github.com/rloisell/DSC-modernization
 
-Spec Kit integration:
-
-- 2026-02-18: Successfully imported the Spec Kit as a git subtree under `spec/spec-kit` from `https://github.com/github/spec-kit.git`.
-- Imported upstream commit (short SHA): `9f3adc7` (from `spec-upstream/main`).
-- See `spec/SUBTREE_POLICY.md` for subtree management instructions.
-
 License:
 
 - 2026-02-18: Added `LICENSE` (Apache-2.0, Copyright 2026 rloisell).
-
-Notes:
-- The Spec Kit is vendored as a subtree to simplify contributor workflow while keeping an upstream reference for occasional pulls.
-- To update the Spec Kit from upstream, run:
-
-```bash
-git fetch spec-upstream
-git subtree pull --prefix=spec/spec-kit spec-upstream main --squash
-```
 
 AI tracking:
 - This file, `AI/CHANGES.csv`, and `AI/COMMIT_INFO.txt` record actions and upstream commit references.

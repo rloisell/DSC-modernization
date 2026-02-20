@@ -170,9 +170,6 @@ spec-kitty merge
 
 - Spec-Kitty repository (fork we're using): https://github.com/Priivacy-ai/spec-kitty
 - Spec-Kitty README & CLI reference: (see the repo README and `spec-kitty --help` locally)
-- Original GitHub Spec Kit (concepts, examples): https://github.com/github/spec-kit
-- Spec-driven design resources and examples:
-  - Spec-driven development primer: https://github.com/github/spec-kit (examples in `spec-kit` templates)
 
 **Notes & recommendations**
 
