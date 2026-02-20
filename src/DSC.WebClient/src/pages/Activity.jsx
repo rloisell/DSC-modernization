@@ -170,8 +170,16 @@ export default function Activity() {
       
       for (const projectId of uniqueProjectIds) {
         try {
-          const response = await fetch(`/api/items/project/${projectId}/remaining-hours`);
-          if (response.ok) {
+          const response = await fetch(`/api/items/project/${projectId}/remaining-hours`, {
+            credentials: 'include',
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json'
+            }
+          });
+          if (!response.ok) {
+            console.error(`API error loading summary for ${projectId}: ${response.status} ${response.statusText}`);
+          } else {
             const data = await response.json();
             summaries[projectId] = data;
           }
@@ -211,9 +219,24 @@ export default function Activity() {
       setSelectedProjectData(project || null);
       
       // Fetch cumulative remaining hours for this user on this project
-      fetch(`/api/items/project/${projectId}/remaining-hours`)
-        .then(res => res.json())
+      fetch(`/api/items/project/${projectId}/remaining-hours`, {
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        }
+      })
+        .then(async res => {
+          if (!res.ok) {
+            console.error(`API error: ${res.status} ${res.statusText}`);
+            const errorText = await res.text();
+            console.error('Error response:', errorText);
+            throw new Error(`API error: ${res.status}`);
+          }
+          return res.json();
+        })
         .then(data => {
+          console.log('Remaining hours data:', data);
           // Show the project's estimated hours
           if (data.estimatedHours) {
             setEstimatedHours(String(data.estimatedHours));
@@ -226,7 +249,8 @@ export default function Activity() {
           }
         })
         .catch(e => {
-          console.error('Failed to load remaining hours:', e);
+          console.error('Failed to load remaining hours for project:', projectId, e);
+          setEstimatedHours('');
           setRemainingHours('');
         });
 
@@ -566,13 +590,23 @@ export default function Activity() {
                   label="Project Estimated Hours"
                   value={estimatedHours ? Number(estimatedHours) : undefined}
                   isDisabled
-                  description="Total hours available for this project"
+                  description="Total hours available for this project (from database)"
                 />
-                <TextField
-                  label="Cumulative Remaining Hours"
-                  value={remainingHours === '—' ? '—' : (remainingHours ? String(remainingHours) : '')}
+                <NumberField
+                  label="Current Cumulative Remaining"
+                  value={remainingHours && remainingHours !== '—' ? Number(remainingHours) : undefined}
                   isDisabled
-                  description="Project estimated minus all your work on it (can be negative)"
+                  description="Remaining before this entry (can be negative)"
+                />
+                <NumberField
+                  label="Projected Remaining After Entry"
+                  value={
+                    remainingHours && remainingHours !== '—' && actualDuration
+                      ? Number(remainingHours) - Number(actualDuration)
+                      : (remainingHours && remainingHours !== '—' ? Number(remainingHours) : undefined)
+                  }
+                  isDisabled
+                  description="Remaining hours after you submit this entry"
                 />
               </>
             )}
