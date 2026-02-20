@@ -1,3 +1,33 @@
+## Session 5: UX Improvements & Admin Auth Fix — 2026-02-20 ✅ NEW
+
+### Admin Pages Now Respond (401 Errors Fixed)
+- ✅ **Root cause**: `AdminCatalogService.js` and `AdminUserService.js` made axios calls without any auth header
+- ✅ **Fix**: Added a global axios request interceptor in `main.jsx` — every outgoing axios request automatically gets `X-User-Id` header when a user is logged in; no per-service changes needed
+- ✅ **Result**: All admin pages load data correctly for admin users
+
+### Activity Code / Network Number — Table with Radio Selection
+- ✅ **Root cause**: Two separate dropdowns for Activity Code and Network Number were not working and required users to memorize valid pairs
+- ✅ **Fix**: Replaced both dropdowns with a combined radio-button table showing all valid pairs for the selected project
+  - Selecting a row sets both Activity Code and Network Number at once
+  - Invalid combinations are impossible by design
+  - Clear button resets the selection
+- ✅ **Result**: Users see valid pairs at a glance and select in one click
+
+### Admin Console — Tab-Based Layout
+- ✅ **Root cause**: Admin sections required navigating to separate pages; no way to switch quickly
+- ✅ **Fix**: Rewrote `Administrator.jsx` as a tab-based container with 7 tabs: Users, Roles, Positions, Departments, Projects, Expense, Activity Options
+- ✅ Removed "Back to Administrator" buttons from all 7 admin sub-pages
+- ✅ Sub-routes (`/admin/users`, etc.) still work for direct deep-linking
+- ✅ **Result**: All admin management in one place, switching tabs without reload
+
+**Files Modified**:
+- `src/DSC.WebClient/src/main.jsx` (global axios interceptor)
+- `src/DSC.WebClient/src/pages/Administrator.jsx` (tab-based rewrite)
+- `src/DSC.WebClient/src/pages/Activity.jsx` (pair selection table)
+- All 7 admin sub-pages (removed back buttons)
+
+---
+
 ## Authentication System  — 2026-02-21 ✅ NEW
 
 ### User-Based Authentication Implemented

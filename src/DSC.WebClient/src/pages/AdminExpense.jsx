@@ -284,9 +284,7 @@ export default function AdminExpense() {
       <section className="section stack">
         <Heading level={1}>Admin Expense</Heading>
         <Text elementType="p">Legacy servlet: AdminExpense. This page will manage budgets (CAPEX/OPEX) and expense categories.</Text>
-        <div className="page-actions">
-          <Button variant="link" onPress={() => navigate('/admin')}>Back to Administrator</Button>
-        </div>
+
       </section>
       <section className="section stack">
         <Heading level={2}>{editingBudgetId ? 'Edit Budget' : 'Add Budget'}</Heading>

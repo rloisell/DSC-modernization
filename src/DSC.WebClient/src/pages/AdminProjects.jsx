@@ -192,9 +192,7 @@ export default function AdminProjects() {
       <section className="section stack">
         <Heading level={1}>Admin Projects</Heading>
         <Text elementType="p">Legacy servlet: AdminProjects. This page will manage project metadata and assignments.</Text>
-        <div className="page-actions">
-          <Button variant="link" onPress={() => navigate('/admin')}>Back to Administrator</Button>
-        </div>
+
       </section>
       <section className="section stack">
         <Heading level={2}>{editingId ? 'Edit Project' : 'Add Project'}</Heading>

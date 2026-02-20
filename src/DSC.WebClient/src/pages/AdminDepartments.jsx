@@ -151,9 +151,7 @@ export default function AdminDepartments() {
       <section className="section stack">
         <Heading level={1}>Admin Departments</Heading>
         <Text elementType="p">Legacy servlet: AdminDepartments. This page will manage department records.</Text>
-        <div className="page-actions">
-          <Button variant="link" onPress={() => navigate('/admin')}>Back to Administrator</Button>
-        </div>
+
       </section>
       <section className="section stack">
         <Heading level={2}>{editingId ? 'Edit Department' : 'Add Department'}</Heading>

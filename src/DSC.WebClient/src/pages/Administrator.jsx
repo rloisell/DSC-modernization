@@ -1,36 +1,84 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Button, ButtonGroup, Heading, Text } from '@bcgov/design-system-react-components';
+import React, { useState } from 'react';
+import { Heading, Text } from '@bcgov/design-system-react-components';
+import AdminUsers from './AdminUsers';
+import AdminRoles from './AdminRoles';
+import AdminPositions from './AdminPositions';
+import AdminDepartments from './AdminDepartments';
+import AdminProjects from './AdminProjects';
+import AdminExpense from './AdminExpense';
+import AdminActivityOptions from './AdminActivityOptions';
 
-function AdminLinkButton({ to, children }) {
-  const navigate = useNavigate();
-  return (
-    <Button variant="secondary" onPress={() => navigate(to)}>
-      {children}
-    </Button>
-  );
-}
+const TABS = [
+  { id: 'users',            label: 'Users' },
+  { id: 'roles',            label: 'Roles' },
+  { id: 'positions',        label: 'Positions' },
+  { id: 'departments',      label: 'Departments' },
+  { id: 'projects',         label: 'Projects' },
+  { id: 'expense',          label: 'Expense' },
+  { id: 'activity-options', label: 'Activity Options' },
+];
+
+const TAB_COMPONENTS = {
+  'users':            AdminUsers,
+  'roles':            AdminRoles,
+  'positions':        AdminPositions,
+  'departments':      AdminDepartments,
+  'projects':         AdminProjects,
+  'expense':          AdminExpense,
+  'activity-options': AdminActivityOptions,
+};
 
 export default function Administrator() {
-  // In the legacy JSP, this page links to admin subpages. We'll keep them as routes for now.
+  const [activeTab, setActiveTab] = useState('users');
+  const ActiveComponent = TAB_COMPONENTS[activeTab];
+
   return (
     <div className="page">
       <section className="section stack">
         <Heading level={1}>Administrator</Heading>
         <Text elementType="p">
-          Admin sections are now wired to the catalog and user APIs. Use the buttons below to manage users,
-          positions, departments, projects, expense options, and activity options.
+          Manage users, roles, positions, departments, projects, expense options, and activity options.
         </Text>
-        <ButtonGroup ariaLabel="Admin sections" alignment="start">
-          <AdminLinkButton to="/admin/users">Admin Users</AdminLinkButton>
-          <AdminLinkButton to="/admin/roles">Admin Roles</AdminLinkButton>
-          <AdminLinkButton to="/admin/positions">Admin Positions</AdminLinkButton>
-          <AdminLinkButton to="/admin/departments">Admin Departments</AdminLinkButton>
-          <AdminLinkButton to="/admin/projects">Admin Projects</AdminLinkButton>
-          <AdminLinkButton to="/admin/expense">Admin Expense</AdminLinkButton>
-          <AdminLinkButton to="/admin/activity-options">Admin Activity Options</AdminLinkButton>
-        </ButtonGroup>
       </section>
+
+      {/* Tab bar */}
+      <div style={{
+        display: 'flex',
+        flexWrap: 'wrap',
+        gap: '0',
+        borderBottom: '2px solid #003366',
+        marginBottom: '1.5rem',
+        padding: '0 1.5rem',
+      }}>
+        {TABS.map(tab => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id)}
+            style={{
+              padding: '0.6rem 1.2rem',
+              border: 'none',
+              borderBottom: activeTab === tab.id ? '3px solid #003366' : '3px solid transparent',
+              marginBottom: '-2px',
+              background: 'none',
+              cursor: 'pointer',
+              fontWeight: activeTab === tab.id ? '700' : '400',
+              color: activeTab === tab.id ? '#003366' : '#595959',
+              fontSize: '0.95rem',
+              transition: 'color 0.15s, border-bottom-color 0.15s',
+            }}
+            aria-selected={activeTab === tab.id}
+            role="tab"
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Render active tab content */}
+      <div role="tabpanel">
+        <ActiveComponent />
+      </div>
     </div>
   );
 }
+

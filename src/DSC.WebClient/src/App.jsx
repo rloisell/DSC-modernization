@@ -9,6 +9,67 @@ import {
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import { ProtectedRoute, AdminRoute } from './components/ProtectedRoute'
 
+// Error boundary to catch and display errors
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props)
+    this.state = { hasError: false, error: null }
+  }
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error }
+  }
+
+  componentDidCatch(error, errorInfo) {
+    console.error('React Error:', error, errorInfo)
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div style={{
+          padding: '20px',
+          margin: '20px',
+          border: '2px solid red',
+          borderRadius: '4px',
+          backgroundColor: '#ffeeee',
+          fontFamily: 'monospace'
+        }}>
+          <h2 style={{ color: 'darkred' }}>⚠️ Application Error</h2>
+          <p>An error occurred while loading the application:</p>
+          <pre style={{ 
+            overflow: 'auto', 
+            padding: '10px', 
+            backgroundColor: '#fff',
+            border: '1px solid #ccc',
+            borderRadius: '3px'
+          }}>
+            {this.state.error?.toString()}
+          </pre>
+          <p style={{ fontSize: '12px', color: '#666' }}>
+            Check the browser console (F12) for more details.
+          </p>
+          <button 
+            onClick={() => window.location.reload()}
+            style={{
+              padding: '8px 16px',
+              backgroundColor: '#1976d2',
+              color: 'white',
+              border: 'none',
+              borderRadius: '3px',
+              cursor: 'pointer'
+            }}
+          >
+            Reload Page
+          </button>
+        </div>
+      )
+    }
+
+    return this.props.children
+  }
+}
+
 const Home = React.lazy(() => import('./pages/Home'))
 const Activity = React.lazy(() => import('./pages/Activity'))
 const Project = React.lazy(() => import('./pages/Project'))
@@ -132,8 +193,10 @@ function AppContent() {
 
 export default function App() {
   return (
-    <AuthProvider>
-      <AppContent />
-    </AuthProvider>
+    <ErrorBoundary>
+      <AuthProvider>
+        <AppContent />
+      </AuthProvider>
+    </ErrorBoundary>
   )
 }

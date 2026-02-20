@@ -1,4 +1,27 @@
-# Remaining Work (2026-02-21)
+# Remaining Work (2026-02-20)
+
+## ✅ COMPLETED: UX Improvements & Admin Auth Fix (2026-02-20 — Session 5)
+
+**Status**: COMPLETE ✅
+
+### Changes Made
+1. ✅ **Admin 401 Errors Fixed** — Global axios interceptor in `main.jsx` automatically attaches `X-User-Id` to ALL outgoing requests when the user is logged in. AdminCatalogService and AdminUserService now work without modification.
+2. ✅ **Activity Code / Network Number UX** — Replaced two separate dropdowns with a radio-button pair-selection table. Shows all valid pairs for the selected project; selecting a row sets both code and number at once.
+3. ✅ **Admin Tab-Based Layout** — Administrator.jsx completely rewritten as a tab container with 7 tabs (Users, Roles, Positions, Departments, Projects, Expense, Activity Options). "Back to Administrator" buttons removed from all sub-pages.
+
+### Files Modified
+- `src/DSC.WebClient/src/main.jsx` (global axios interceptor)
+- `src/DSC.WebClient/src/pages/Administrator.jsx` (full rewrite — tabs)
+- `src/DSC.WebClient/src/pages/Activity.jsx` (pair selection table)
+- `src/DSC.WebClient/src/pages/AdminUsers.jsx` (removed back button)
+- `src/DSC.WebClient/src/pages/AdminRoles.jsx` (removed back button)
+- `src/DSC.WebClient/src/pages/AdminPositions.jsx` (removed back button)
+- `src/DSC.WebClient/src/pages/AdminDepartments.jsx` (removed back button)
+- `src/DSC.WebClient/src/pages/AdminProjects.jsx` (removed back button)
+- `src/DSC.WebClient/src/pages/AdminExpense.jsx` (removed back button)
+- `src/DSC.WebClient/src/pages/AdminActivityOptions.jsx` (removed back button)
+
+---
 
 ## ✅ COMPLETED: Fix Authentication & Enable API Access (2026-02-21 — Session 4)
 
@@ -49,34 +72,30 @@
 
 ---
 
-## 🔄 IN PROGRESS: Full Feature Testing & Validation
+## 🔄 NEXT PRIORITY: Reporting Dashboard
 
-**Current Phase**: User testing all features with proper authentication
+Feature request: Summary reporting page showing hours by project, by activity code, and trend over time.
 
-### Recommended Test Sequence:
-1. **Open** http://localhost:5173
-2. **Login** as kduma / test-password-updated
-3. **Activity Page Tests**:
-   - ✓ Project Summary displays 4 projects with estimations
-   - ✓ "My Activities" table shows only assigned projects (no Remaining Hours column)
-   - ✓ Add Work Item form has Project dropdown populated
-   - ✓ Select project → form fields auto-populate
-   - ✓ Three cumulative hours fields display correctly:
-     - Project Estimated Hours: 150
-     - Current Cumulative Remaining: -48
-     - Projected Remaining After Entry: updates dynamically
-   - ✓ Enter actual duration → projected field updates
-   - ✓ Overbudget indicator shows in red with ⚠️ warning
-4. **Projects Page Tests**:
-   - ✓ Projects page shows 4 assigned projects
-   - ✓ Each project shows name and current status
-5. **Admin Testing** (as rloisel1):
-   - ✓ Projects page shows all 8 projects (not just assigned)
-   - ✓ Project dropdown shows all 8 projects
-6. **Edge Cases**:
-   - ✓ Create new work item and verify cumulative recalculates
-   - ✓ Test with different project selections
-   - ✓ Verify form clears when canceling
+### Proposed Implementation
+- New page: `src/DSC.WebClient/src/pages/Reports.jsx`
+- New API endpoint: `GET /api/reports/summary?from=&to=&projectId=`
+- Charts: hours by project, by activity code, trend over time (consider Chart.js or similar)
+- Accessible to all authenticated users
+
+## 🔄 NEXT PRIORITY: Project Assignments UI
+
+Admin feature to manage which users are assigned to which projects.
+
+### Proposed Implementation
+- New admin tab in Administrator.jsx: "Assignments"
+- API endpoints already exist: `GET /api/admin/project-assignments`, `POST`, `DELETE`
+- UI: Select project → see assigned users → add/remove users
+
+## 🔄 FUTURE: Unit Tests for Authentication
+
+- Tests for UserIdAuthenticationHandler
+- Integration tests for ProjectsController with user-scoped data
+- Frontend API service tests
 
 ### Test Accounts
 - kduma (User) - test-password-updated - sees 4 assigned projects

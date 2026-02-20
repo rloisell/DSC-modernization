@@ -106,9 +106,7 @@ export default function AdminRoles() {
       <section className="section stack">
         <Heading level={1}>Admin Roles</Heading>
         <Text elementType="p">Manage system roles for user assignments.</Text>
-        <div className="page-actions">
-          <Button variant="link" onPress={() => navigate('/admin')}>Back to Administrator</Button>
-        </div>
+
       </section>
       <section className="section stack">
         <Heading level={2}>{editingId ? 'Edit Role' : 'Create New Role'}</Heading>

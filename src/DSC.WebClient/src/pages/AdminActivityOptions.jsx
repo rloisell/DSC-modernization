@@ -182,9 +182,7 @@ export default function AdminActivityOptions() {
         <Text elementType="p">
           Legacy servlet: AdminActivityOptions. This page will manage activity codes and network numbers.
         </Text>
-        <div className="page-actions">
-          <Button variant="link" onPress={() => navigate('/admin')}>Back to Administrator</Button>
-        </div>
+
       </section>
       <section className="section stack">
         <Heading level={2}>{editingCodeId ? 'Edit Activity Code' : 'Add Activity Code'}</Heading>

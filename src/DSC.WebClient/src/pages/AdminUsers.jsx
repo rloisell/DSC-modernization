@@ -243,9 +243,7 @@ export default function AdminUsers() {
       <section className="section stack">
         <Heading level={1}>Admin Users</Heading>
         <Text elementType="p">Legacy servlet: AdminUsers. This page will manage user accounts, roles, and assignments.</Text>
-        <div className="page-actions">
-          <Button variant="link" onPress={() => navigate('/admin')}>Back to Administrator</Button>
-        </div>
+
       </section>
       <section className="section stack">
         <Heading level={2}>Add New User</Heading>

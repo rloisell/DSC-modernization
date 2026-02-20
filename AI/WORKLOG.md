@@ -1,3 +1,42 @@
+## 2026-02-20 — Session 5: UX Improvements & Admin Auth Fix (COMPLETED ✓)
+
+**Objective**: Fix 401 admin errors, improve activity code/network selection UX, convert admin to tab-based layout.
+
+### Issues Identified & Fixed
+
+**Issue 1: Admin Pages Returning 401**
+- **Root Cause**: `AdminCatalogService.js` and `AdminUserService.js` made axios requests with no auth headers
+- **Fix**: Added a global axios request interceptor in `main.jsx` that automatically reads the logged-in user's ID from `localStorage` and attaches `X-User-Id` to every outgoing request — no individual service changes needed
+
+**Issue 2: Activity Code / Network Number Dropdowns Not Working**
+- **Root Cause**: BC Gov Select component not rendering correctly with code/number pairs loaded from project options
+- **Fix**: Replaced both dropdowns with a single combined table showing valid project pairs (Activity Code + Network Number) with radio button row selection. Selecting a row sets both values simultaneously. Cleared-pair button added for resetting selection.
+
+**Issue 3: Admin GUI Requires Navigation to Separate Pages**
+- **Root Cause**: Administrator.jsx was a hub of navigation buttons; each admin section was a separate route
+- **Fix**: Completely rewrote `Administrator.jsx` as a tab-based container. All 7 admin sections (Users, Roles, Positions, Departments, Projects, Expense, Activity Options) are rendered inline as tab panels. Removed "Back to Administrator" buttons from all sub-pages.
+
+### Files Changed
+
+**Frontend**:
+- `src/DSC.WebClient/src/main.jsx` — Added global axios interceptor for X-User-Id header
+- `src/DSC.WebClient/src/pages/Administrator.jsx` — Complete rewrite: tab-based layout importing all admin sub-components
+- `src/DSC.WebClient/src/pages/Activity.jsx` — Replaced Activity Code + Network Number dropdowns with radio-button pair selection table; removed unused variable declarations and bottom readonly pair table
+- `src/DSC.WebClient/src/pages/AdminUsers.jsx` — Removed "Back to Administrator" button
+- `src/DSC.WebClient/src/pages/AdminRoles.jsx` — Removed "Back to Administrator" button
+- `src/DSC.WebClient/src/pages/AdminPositions.jsx` — Removed "Back to Administrator" button
+- `src/DSC.WebClient/src/pages/AdminDepartments.jsx` — Removed "Back to Administrator" button
+- `src/DSC.WebClient/src/pages/AdminProjects.jsx` — Removed "Back to Administrator" button
+- `src/DSC.WebClient/src/pages/AdminExpense.jsx` — Removed "Back to Administrator" button
+- `src/DSC.WebClient/src/pages/AdminActivityOptions.jsx` — Removed "Back to Administrator" button
+
+### Architecture Notes
+- The global axios interceptor in `main.jsx` means ALL future API services automatically get auth — no need to manually add `getAuthConfig()` to new services
+- Admin sub-pages remain individually routable at `/admin/users`, `/admin/roles`, etc. for deep-linking
+- The pair-selection table prevents the user from entering an invalid activity code + network number combination by design
+
+---
+
 ## 2026-02-21 — Session 4: Fix Authentication & Enable API Access (COMPLETED ✓)
 
 **Objective**: Diagnose and fix why API endpoints (projects list, catalog endpoints) return empty data. Root cause was missing authentication context in frontend-to-API communication.

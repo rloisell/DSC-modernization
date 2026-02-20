@@ -111,9 +111,7 @@ export default function AdminPositions() {
       <section className="section stack">
         <Heading level={1}>Admin Positions</Heading>
         <Text elementType="p">Legacy servlet: AdminPositions. This page will manage position records.</Text>
-        <div className="page-actions">
-          <Button variant="link" onPress={() => navigate('/admin')}>Back to Administrator</Button>
-        </div>
+
       </section>
       <section className="section stack">
         <Heading level={2}>{editingId ? 'Edit Position' : 'Add Position'}</Heading>

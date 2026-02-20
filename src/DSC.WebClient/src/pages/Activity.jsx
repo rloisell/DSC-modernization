@@ -65,20 +65,6 @@ export default function Activity() {
     label: budget.description
   }));
 
-  // Use project-specific options if a project is selected, otherwise use all codes/numbers
-  const availableActivityCodes = projectOptions?.activityCodes || activityCodes;
-  const availableNetworkNumbers = projectOptions?.networkNumbers || networkNumbers;
-
-  const activityCodeItems = availableActivityCodes.map(code => ({
-    id: code.code,
-    label: code.description ? `${code.code} — ${code.description}` : code.code
-  }));
-
-  const networkNumberItems = availableNetworkNumbers.map(nn => ({
-    id: String(nn.number),
-    label: nn.description ? `${nn.number} — ${nn.description}` : String(nn.number)
-  }));
-
   function getErrorMessage(err) {
     return err?.response?.data?.error || err?.message || 'Request failed.';
   }
@@ -513,51 +499,82 @@ export default function Activity() {
             />
           </div>
           
-          {/* Project Activity Mode: Activity Code and Network Number */}
+          {/* Project Activity Mode: Activity Code / Network Number pair selection table */}
           {activityMode === 'project' && (
-          <div className="form-columns">
-            <Select
-              label="Activity Code"
-              placeholder={projectId ? "Select activity code" : "Select a project first"}
-              items={activityCodeItems}
-              selectedKey={activityCode || null}
-              onSelectionChange={key => {
-                const newCode = key ? String(key) : '';
-                setActivityCode(newCode);
-                // If filtering is active and an activity code is selected, filter network numbers
-                if (projectOptions && newCode && networkNumber) {
-                  const validPairs = projectOptions.validPairs
-                    .filter(p => p.activityCode === newCode)
-                    .map(p => String(p.networkNumber));
-                  if (!validPairs.includes(networkNumber)) {
-                    setNetworkNumber('');
-                  }
-                }
-              }}
-              description={projectId ? "Select an activity code for this work item" : "Select a project to see available codes"}
-              isDisabled={!projectId}
-            />
-            <Select
-              label="Network Number"
-              placeholder={projectId ? "Select network number" : "Select a project first"}
-              items={networkNumberItems}
-              selectedKey={networkNumber || null}
-              onSelectionChange={key => {
-                const newNumber = key ? String(key) : '';
-                setNetworkNumber(newNumber);
-                // If filtering is active and a network number is selected, filter activity codes
-                if (projectOptions && newNumber && activityCode) {
-                  const validPairs = projectOptions.validPairs
-                    .filter(p => String(p.networkNumber) === newNumber)
-                    .map(p => p.activityCode);
-                  if (!validPairs.includes(activityCode)) {
-                    setActivityCode('');
-                  }
-                }
-              }}
-              description={projectId ? "Select a network number for this work item" : "Select a project to see available numbers"}
-              isDisabled={!projectId}
-            />
+          <div style={{ gridColumn: '1 / -1' }}>
+            {!projectId ? (
+              <Text elementType="p" style={{ color: '#595959', fontStyle: 'italic' }}>
+                Select a project above to see available activity code / network number pairs.
+              </Text>
+            ) : !projectOptions ? (
+              <Text elementType="p" style={{ color: '#595959' }}>Loading options for selected project…</Text>
+            ) : projectOptions.validPairs && projectOptions.validPairs.length > 0 ? (
+              <fieldset style={{ border: '1px solid #ccc', borderRadius: '4px', padding: '1rem' }}>
+                <legend style={{ fontWeight: '700', padding: '0 0.5rem' }}>
+                  Select Activity Code / Network Number Pair <span style={{ color: '#d32f2f' }}>*</span>
+                </legend>
+                <Text elementType="p" style={{ marginTop: 0, marginBottom: '0.75rem', color: '#595959', fontSize: '0.9rem' }}>
+                  Choose the appropriate combination for this work item.
+                </Text>
+                <table className="bcds-table" style={{ width: '100%' }}>
+                  <thead>
+                    <tr>
+                      <th style={{ width: '2.5rem' }}></th>
+                      <th>Activity Code</th>
+                      <th>Network Number</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {projectOptions.validPairs.map(pair => {
+                      const code = projectOptions.activityCodes.find(c => c.code === pair.activityCode);
+                      const number = projectOptions.networkNumbers.find(n => n.number === pair.networkNumber);
+                      const pairKey = `${pair.activityCode}-${pair.networkNumber}`;
+                      const isSelected = activityCode === pair.activityCode && networkNumber === String(pair.networkNumber);
+                      return (
+                        <tr
+                          key={pairKey}
+                          onClick={() => { setActivityCode(pair.activityCode); setNetworkNumber(String(pair.networkNumber)); }}
+                          style={{ cursor: 'pointer', background: isSelected ? '#e3f0fc' : undefined }}
+                        >
+                          <td style={{ textAlign: 'center' }}>
+                            <input
+                              type="radio"
+                              name="activityPair"
+                              value={pairKey}
+                              checked={isSelected}
+                              onChange={() => { setActivityCode(pair.activityCode); setNetworkNumber(String(pair.networkNumber)); }}
+                              style={{ cursor: 'pointer' }}
+                            />
+                          </td>
+                          <td>
+                            <strong>{code?.code ?? pair.activityCode}</strong>
+                            {code?.description ? <> — {code.description}</> : null}
+                          </td>
+                          <td>
+                            <strong>{number?.number ?? pair.networkNumber}</strong>
+                            {number?.description ? <> — {number.description}</> : null}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+                {activityCode && networkNumber && (
+                  <div style={{ marginTop: '0.5rem', fontSize: '0.9rem', color: '#595959' }}>
+                    Selected: <strong>{activityCode}</strong> / Network <strong>{networkNumber}</strong>
+                    &nbsp;<button
+                      type="button"
+                      onClick={() => { setActivityCode(''); setNetworkNumber(''); }}
+                      style={{ background: 'none', border: 'none', color: '#d32f2f', cursor: 'pointer', textDecoration: 'underline', fontSize: '0.9rem' }}
+                    >Clear</button>
+                  </div>
+                )}
+              </fieldset>
+            ) : (
+              <Text elementType="p" style={{ color: '#d32f2f' }}>
+                No activity code / network number pairs are configured for this project. Contact your administrator.
+              </Text>
+            )}
           </div>
           )}
           
@@ -596,32 +613,6 @@ export default function Activity() {
           </ButtonGroup>
         </Form>
       </section>
-      {projectId && projectOptions && projectOptions.validPairs && projectOptions.validPairs.length > 0 ? (
-        <section className="section stack">
-          <Heading level={2}>Available Options for Selected Project</Heading>
-          <Text elementType="p">Valid activity code and network number combinations for this project:</Text>
-          <table className="bcds-table">
-            <thead>
-              <tr>
-                <th>Activity Code</th>
-                <th>Network Number</th>
-              </tr>
-            </thead>
-            <tbody>
-              {projectOptions.validPairs.map(pair => {
-                const code = projectOptions.activityCodes.find(c => c.code === pair.activityCode);
-                const number = projectOptions.networkNumbers.find(n => n.number === pair.networkNumber);
-                return (
-                  <tr key={`${pair.activityCode}-${pair.networkNumber}`}>
-                    <td>{code ? `${code.code}${code.description ? ` — ${code.description}` : ''}` : pair.activityCode}</td>
-                    <td>{number ? `${number.number}${number.description ? ` — ${number.description}` : ''}` : pair.networkNumber}</td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </section>
-      ) : null}
     </div>
   );
 }
