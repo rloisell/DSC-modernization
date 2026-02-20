@@ -1,5 +1,35 @@
 # Remaining Work (2026-02-21)
 
+## ✅ COMPLETED: Reason Code Catalog Port (2026-02-20)
+
+**Status**: COMPLETE ✅
+
+### Changes Made
+
+#### 1. Reason Code Model ✅
+- **Added**: `ReasonCode` entity mapped to legacy `Reason_Code`
+- **Mapped Columns**: `reasonCode`, `description`
+- **Migration**: `AddReasonCodeModel`
+
+#### 2. Admin API & DTOs ✅
+- **Admin**: `/api/admin/reason-codes` CRUD endpoints
+- **DTOs**: `ReasonCodeDto`, create/update requests
+
+#### 3. WebClient Admin Service ✅
+- **AdminCatalogService**: `getReasonCodes`, `createReasonCode`, `updateReasonCode`
+
+**Files Modified**:
+- `src/DSC.Data/Models/ReasonCode.cs`
+- `src/DSC.Data/ApplicationDbContext.cs`
+- `src/DSC.Data/Migrations/20260220111112_AddReasonCodeModel.cs`
+- `src/DSC.Data/Migrations/20260220111112_AddReasonCodeModel.Designer.cs`
+- `src/DSC.Data/Migrations/ApplicationDbContextModelSnapshot.cs`
+- `src/DSC.Api/Controllers/AdminReasonCodesController.cs`
+- `src/DSC.Api/DTOs/AdminCatalogDtos.cs`
+- `src/DSC.WebClient/src/api/AdminCatalogService.js`
+
+**Commit**: Pending - feat: port reason code catalog
+
 ## ✅ COMPLETED: Budget Classification (CAPEX/OPEX) Port (2026-02-20)
 
 **Status**: COMPLETE ✅

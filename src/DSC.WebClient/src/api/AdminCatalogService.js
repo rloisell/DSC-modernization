@@ -99,6 +99,18 @@ export const AdminCatalogService = {
     await axios.put(`/api/admin/activity-codes/${id}`, payload);
   },
 
+  async getReasonCodes() {
+    const res = await axios.get('/api/admin/reason-codes');
+    return res.data;
+  },
+  async createReasonCode(payload) {
+    const res = await axios.post('/api/admin/reason-codes', payload);
+    return res.data;
+  },
+  async updateReasonCode(code, payload) {
+    await axios.put(`/api/admin/reason-codes/${code}`, payload);
+  },
+
   async getNetworkNumbers() {
     const res = await axios.get('/api/admin/network-numbers');
     return res.data;
