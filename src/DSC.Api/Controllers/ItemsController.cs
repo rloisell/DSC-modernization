@@ -23,10 +23,18 @@ namespace DSC.Api.Controllers
 
         [HttpGet]
         [ProducesResponseType(typeof(WorkItemDto[]), StatusCodes.Status200OK)]
-        public async Task<ActionResult<WorkItemDto[]>> GetAll()
+        public async Task<ActionResult<WorkItemDto[]>> GetAll([FromQuery] Guid? userId = null)
         {
-            var items = await _db.WorkItems.AsNoTracking()
-                .Include(w => w.Budget)
+            IQueryable<WorkItem> query = _db.WorkItems.AsNoTracking()
+                .Include(w => w.Budget);
+
+            // Filter by userId if provided (restrict to user's own activities)
+            if (userId.HasValue)
+            {
+                query = query.Where(w => w.UserId == userId);
+            }
+
+            var items = await query
                 .OrderByDescending(w => w.Date ?? DateTime.MinValue)
                 .Select(w => new WorkItemDto
                 {
@@ -55,6 +63,7 @@ namespace DSC.Api.Controllers
         [HttpGet("detailed")]
         [ProducesResponseType(typeof(WorkItemDetailDto[]), StatusCodes.Status200OK)]
         public async Task<ActionResult<WorkItemDetailDto[]>> GetDetailed(
+            [FromQuery] Guid? userId,
             [FromQuery] DateTime? startDate,
             [FromQuery] DateTime? endDate,
             [FromQuery] string? period)
@@ -62,6 +71,12 @@ namespace DSC.Api.Controllers
             IQueryable<WorkItem> query = _db.WorkItems.AsNoTracking()
                 .Include(w => w.Project)
                 .Include(w => w.Budget);
+
+            // Filter by userId if provided (restrict to user's own activities)
+            if (userId.HasValue)
+            {
+                query = query.Where(w => w.UserId == userId);
+            }
 
             // Apply date filtering based on period or explicit date range
             if (!string.IsNullOrWhiteSpace(period))
