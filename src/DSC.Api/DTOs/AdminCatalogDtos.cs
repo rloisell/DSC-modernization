@@ -105,41 +105,6 @@ namespace DSC.Api.DTOs
         public bool IsActive { get; set; }
     }
 
-    public class ActivityCategoryDto
-    {
-        public int Id { get; set; }
-        public string Name { get; set; } = string.Empty;
-    }
-
-    public class ActivityCategoryCreateRequest
-    {
-        public string Name { get; set; } = string.Empty;
-    }
-
-    public class ActivityCategoryUpdateRequest
-    {
-        public string Name { get; set; } = string.Empty;
-    }
-
-    public class CalendarCategoryDto
-    {
-        public int Id { get; set; }
-        public string Name { get; set; } = string.Empty;
-        public string? Description { get; set; }
-    }
-
-    public class CalendarCategoryCreateRequest
-    {
-        public string Name { get; set; } = string.Empty;
-        public string? Description { get; set; }
-    }
-
-    public class CalendarCategoryUpdateRequest
-    {
-        public string Name { get; set; } = string.Empty;
-        public string? Description { get; set; }
-    }
-
     public class ExpenseOptionDto
     {
         public Guid Id { get; set; }
@@ -182,19 +147,19 @@ namespace DSC.Api.DTOs
         public bool IsActive { get; set; }
     }
 
-    public class CpcCodeDto
+    public class DirectorCodeDto
     {
         public string Code { get; set; } = string.Empty;
         public string? Description { get; set; }
     }
 
-    public class CpcCodeCreateRequest
+    public class DirectorCodeCreateRequest
     {
         public string Code { get; set; } = string.Empty;
         public string? Description { get; set; }
     }
 
-    public class CpcCodeUpdateRequest
+    public class DirectorCodeUpdateRequest
     {
         public string? Description { get; set; }
     }

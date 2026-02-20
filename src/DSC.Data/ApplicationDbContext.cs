@@ -33,6 +33,9 @@ namespace DSC.Data
         public DbSet<ExpenseOption> ExpenseOptions => Set<ExpenseOption>();
         public DbSet<ActivityCode> ActivityCodes => Set<ActivityCode>();
         public DbSet<CpcCode> CpcCodes => Set<CpcCode>();
+        public DbSet<DirectorCode> DirectorCodes => Set<DirectorCode>();
+        public DbSet<ReasonCode> ReasonCodes => Set<ReasonCode>();
+        public DbSet<Union> Unions => Set<Union>();
         public DbSet<NetworkNumber> NetworkNumbers => Set<NetworkNumber>();
         public DbSet<ProjectActivityOption> ProjectActivityOptions => Set<ProjectActivityOption>();
 
@@ -223,6 +226,30 @@ namespace DSC.Data
                 b.HasKey(c => c.Code);
                 b.Property(c => c.Code).HasColumnName("cpcCode");
                 b.Property(c => c.Description).HasColumnName("description").HasMaxLength(255);
+            });
+
+            modelBuilder.Entity<DirectorCode>(b =>
+            {
+                b.ToTable("Director_Code");
+                b.HasKey(d => d.Code);
+                b.Property(d => d.Code).HasColumnName("directorCode");
+                b.Property(d => d.Description).HasColumnName("description").HasMaxLength(255);
+            });
+
+            modelBuilder.Entity<ReasonCode>(b =>
+            {
+                b.ToTable("Reason_Code");
+                b.HasKey(r => r.Code);
+                b.Property(r => r.Code).HasColumnName("reasonCode");
+                b.Property(r => r.Description).HasColumnName("description").HasMaxLength(255);
+            });
+
+            modelBuilder.Entity<Union>(b =>
+            {
+                b.ToTable("Union");
+                b.HasKey(u => u.Code);
+                b.Property(u => u.Code).HasColumnName("unionCode");
+                b.Property(u => u.Description).HasColumnName("description").HasMaxLength(255);
             });
 
             modelBuilder.Entity<NetworkNumber>(b =>

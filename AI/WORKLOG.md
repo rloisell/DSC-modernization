@@ -1,37 +1,37 @@
-## 2026-02-20 — CPC Codes Catalog Port (COMPLETED ✓)
+## 2026-02-20 — Director Codes Catalog Port (COMPLETED ✓)
 
 **Problem Statement**:
-1. Port the legacy `CPC_Code` catalog table from the Java system
-2. Provide admin endpoints for managing CPC codes
+1. Port the legacy `Director_Code` catalog table from the Java system
+2. Provide admin endpoints for managing director codes
 
 **Implementation & Resolution**:
 
 ### Backend Changes
 
-#### 1. CPC Code Domain Model
-- ✅ Added `CpcCode` entity mapped to `CPC_Code` (`cpcCode`, `description`)
-- ✅ Added EF Core migration `AddCpcCodeModel`
+#### 1. Director Code Domain Model
+- ✅ Added `DirectorCode` entity mapped to `Director_Code` (`directorCode`, `description`)
+- ✅ Added EF Core migration `AddDirectorCodeModel`
 
 #### 2. Admin API Endpoints & DTOs
-- ✅ Added `AdminCpcCodesController` for admin CRUD
-- ✅ Added DTOs: `CpcCodeDto`, `CpcCodeCreateRequest`, `CpcCodeUpdateRequest`
+- ✅ Added `AdminDirectorCodesController` for admin CRUD
+- ✅ Added DTOs: `DirectorCodeDto`, `DirectorCodeCreateRequest`, `DirectorCodeUpdateRequest`
 
 ### Frontend Support
 
 #### 1. Admin Catalog Service
-- ✅ Added `getCpcCodes`, `createCpcCode`, `updateCpcCode` API helpers
+- ✅ Added `getDirectorCodes`, `createDirectorCode`, `updateDirectorCode` API helpers
 
 **Files Modified**:
-- `src/DSC.Data/Models/CpcCode.cs`
+- `src/DSC.Data/Models/DirectorCode.cs`
 - `src/DSC.Data/ApplicationDbContext.cs`
-- `src/DSC.Data/Migrations/20260220111513_AddCpcCodeModel.cs`
-- `src/DSC.Data/Migrations/20260220111513_AddCpcCodeModel.Designer.cs`
+- `src/DSC.Data/Migrations/20260220110559_AddDirectorCodeModel.cs`
+- `src/DSC.Data/Migrations/20260220110559_AddDirectorCodeModel.Designer.cs`
 - `src/DSC.Data/Migrations/ApplicationDbContextModelSnapshot.cs`
-- `src/DSC.Api/Controllers/AdminCpcCodesController.cs`
+- `src/DSC.Api/Controllers/AdminDirectorCodesController.cs`
 - `src/DSC.Api/DTOs/AdminCatalogDtos.cs`
 - `src/DSC.WebClient/src/api/AdminCatalogService.js`
 
-**Commit**: Pending - feat: port CPC code catalog
+**Commit**: Pending - feat: port director code catalog
 
 ---
 

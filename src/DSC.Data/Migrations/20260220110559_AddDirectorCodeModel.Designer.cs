@@ -4,6 +4,7 @@ using DSC.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DSC.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260220110559_AddDirectorCodeModel")]
+    partial class AddDirectorCodeModel
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -65,22 +68,6 @@ namespace DSC.Data.Migrations
                         .IsUnique();
 
                     b.ToTable("Budgets");
-                });
-
-            modelBuilder.Entity("DSC.Data.Models.CpcCode", b =>
-                {
-                    b.Property<string>("Code")
-                        .HasColumnType("varchar(255)")
-                        .HasColumnName("cpcCode");
-
-                    b.Property<string>("Description")
-                        .HasMaxLength(255)
-                        .HasColumnType("varchar(255)")
-                        .HasColumnName("description");
-
-                    b.HasKey("Code");
-
-                    b.ToTable("CPC_Code", (string)null);
                 });
 
             modelBuilder.Entity("DSC.Data.Models.Department", b =>
