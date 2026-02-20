@@ -8,7 +8,7 @@ using DSC.Data.Models;
 
 namespace DSC.Api.Seeding
 {
-public record TestSeedResult(int UsersCreated, int UserAuthCreated, int ProjectsCreated, int DepartmentsCreated, int RolesCreated);
+public record TestSeedResult(int UsersCreated, int UserAuthCreated, int ProjectsCreated, int DepartmentsCreated, int RolesCreated, int ActivityCodesCreated, int NetworkNumbersCreated);
 
     public class TestDataSeeder
     {
@@ -28,6 +28,8 @@ public record TestSeedResult(int UsersCreated, int UserAuthCreated, int Projects
             var projectsCreated = 0;
             var departmentsCreated = 0;
             var rolesCreated = 0;
+            var activityCodesCreated = 0;
+            var networkNumbersCreated = 0;
 
             await using var transaction = await _db.Database.BeginTransactionAsync(ct);
 
@@ -183,14 +185,70 @@ public record TestSeedResult(int UsersCreated, int UserAuthCreated, int Projects
                 }
             }
 
+            // Seed test activity codes
+            var activityCodeSeeds = new[]
+            {
+                new ActivityCodeSeed("DEV", "Development work"),
+                new ActivityCodeSeed("TEST", "Testing and QA"),
+                new ActivityCodeSeed("DOC", "Documentation"),
+                new ActivityCodeSeed("ADMIN", "Administrative work"),
+                new ActivityCodeSeed("MEET", "Meetings and planning"),
+                new ActivityCodeSeed("TRAIN", "Training activities")
+            };
+
+            foreach (var seed in activityCodeSeeds)
+            {
+                var code = await _db.ActivityCodes.FirstOrDefaultAsync(ac => ac.Code == seed.Code, ct);
+                if (code == null)
+                {
+                    _db.ActivityCodes.Add(new ActivityCode
+                    {
+                        Id = Guid.NewGuid(),
+                        Code = seed.Code,
+                        Description = seed.Description,
+                        IsActive = true
+                    });
+                    activityCodesCreated++;
+                }
+            }
+
+            // Seed test network numbers
+            var networkNumberSeeds = new[]
+            {
+                new NetworkNumberSeed(101, "Network Infrastructure"),
+                new NetworkNumberSeed(102, "Data Center Operations"),
+                new NetworkNumberSeed(103, "Customer Support"),
+                new NetworkNumberSeed(201, "Engineering"),
+                new NetworkNumberSeed(202, "Security Operations"),
+                new NetworkNumberSeed(203, "Cloud Services")
+            };
+
+            foreach (var seed in networkNumberSeeds)
+            {
+                var number = await _db.NetworkNumbers.FirstOrDefaultAsync(nn => nn.Number == seed.Number, ct);
+                if (number == null)
+                {
+                    _db.NetworkNumbers.Add(new NetworkNumber
+                    {
+                        Id = Guid.NewGuid(),
+                        Number = seed.Number,
+                        Description = seed.Description,
+                        IsActive = true
+                    });
+                    networkNumbersCreated++;
+                }
+            }
+
             await _db.SaveChangesAsync(ct);
             await transaction.CommitAsync(ct);
 
-            return new TestSeedResult(usersCreated, userAuthCreated, projectsCreated, departmentsCreated, rolesCreated);
+            return new TestSeedResult(usersCreated, userAuthCreated, projectsCreated, departmentsCreated, rolesCreated, activityCodesCreated, networkNumbersCreated);
         }
 
         private record UserSeed(int EmpId, string Username, string Email, string FirstName, string LastName, string? Password);
         private record UserAuthSeed(string UserName, int EmpId, string Password, bool UpdatePassword);
         private record RoleSeed(string Name, string? Description);
+        private record ActivityCodeSeed(string Code, string? Description);
+        private record NetworkNumberSeed(int Number, string? Description);
     }
 }
