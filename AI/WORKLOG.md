@@ -32,6 +32,56 @@
 
 ---
 
+## 2026-02-20 — Activity Category & Calendar Models (COMPLETED ✓)
+
+**Problem Statement**:
+1. Remaining Java models for Category and Calendar tables were not yet ported
+2. Admin APIs were needed to manage activity categories and calendar categories
+
+**Implementation & Resolution**:
+
+### Backend Changes
+- ✅ Added `ActivityCategory`, `CalendarCategory`, and `CalendarEntry` models
+- ✅ Mapped legacy tables: `Category`, `Calendar_Category`, and `Calendar`
+- ✅ Added admin controllers for activity categories and calendar categories
+- ✅ Added migration `AddActivityCalendarModels`
+
+### Frontend Changes
+- ✅ Added AdminCatalogService helpers for activity and calendar categories
+
+**Files Modified**:
+- `src/DSC.Data/Models/ActivityCategory.cs`
+- `src/DSC.Data/Models/CalendarCategory.cs`
+- `src/DSC.Data/Models/CalendarEntry.cs`
+- `src/DSC.Data/ApplicationDbContext.cs`
+- `src/DSC.Data/Migrations/20260220105914_AddActivityCalendarModels.cs`
+- `src/DSC.Data/Migrations/20260220105914_AddActivityCalendarModels.Designer.cs`
+- `src/DSC.Api/Controllers/AdminActivityCategoriesController.cs`
+- `src/DSC.Api/Controllers/AdminCalendarCategoriesController.cs`
+- `src/DSC.Api/DTOs/AdminCatalogDtos.cs`
+- `src/DSC.WebClient/src/api/AdminCatalogService.js`
+
+**Commit**: Current - feat: port activity category and calendar models
+
+---
+
+## 2026-02-20 — Budget Migration & Seed (COMPLETED ✓)
+
+**Problem Statement**:
+1. Budget migration applied partially and EF history needed alignment
+2. CAPEX/OPEX seed data required for new Budget classification
+
+**Implementation & Resolution**:
+- ✅ Applied missing foreign keys for `WorkItems.BudgetId` and `ExpenseCategories.BudgetId`
+- ✅ Inserted migration record for `AddBudgetModel` in `__EFMigrationsHistory`
+- ✅ Seeded CAPEX/OPEX budgets and backfilled existing expense categories
+
+**Validation**:
+- ✅ Verified `Budgets` table and foreign keys exist
+- ✅ Confirmed migration history includes `20260220104233_AddBudgetModel`
+
+---
+
 ## 2026-02-20 — Budget Classification (CAPEX/OPEX) Port (COMPLETED ✓)
 
 **Problem Statement**:

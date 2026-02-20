@@ -93,8 +93,9 @@ See [tests/howto.md](tests/howto.md) for comprehensive testing documentation, in
 - **Benefit**: Allows both systems to run in parallel with links between old and new records
 
 **How to test**:
-1. Start API: `cd src/DSC.Api && dotnet run`
-2. Seed test data: `curl -X POST http://localhost:5005/api/admin/seed/test-data -H "X-Admin-Token: local-admin-token"`
+1. Apply migrations: `dotnet ef database update --project src/DSC.Data --startup-project src/DSC.Api`
+2. Start API: `cd src/DSC.Api && dotnet run`
+3. Seed test data: `curl -X POST http://localhost:5005/api/admin/seed/test-data -H "X-Admin-Token: local-admin-token"`
    - Should return counts including ActivityCodesCreated and NetworkNumbersCreated
 3. Start WebClient: `cd src/DSC.WebClient && npm run dev`
 4. Navigate to Activity page and create a work item:
@@ -245,8 +246,8 @@ API update: The API now exposes legacy Java model fields via DTOs so the fronten
 - Admin UI scaffolding: `AdminUsers` now mirrors the legacy form fields (employee info, position/department assignment, role) with placeholder actions. Other admin pages include planned action lists and back links.
 - Admin UI build-out: positions, departments, projects, expense, and activity options pages now include draft forms and placeholder tables based on intended legacy workflows.
 - Admin Users wiring: `/api/admin/users` endpoints are available and `AdminUsers` now uses real API calls for list/create/update/delete (other admin pages still use placeholders).
-- Admin catalog wiring: positions, departments, projects, budgets, expense categories, activity codes, and network numbers are now backed by `/api/admin/*` endpoints and wired in the UI via `AdminCatalogService`.
-- Admin catalog edit workflows: admin pages now reuse create forms for edits and call update/deactivate APIs for positions, departments, projects, budgets, expense categories, activity codes, and network numbers.
+- Admin catalog wiring: positions, departments, projects, budgets, expense categories, activity codes, network numbers, activity categories, and calendar categories are now backed by `/api/admin/*` endpoints and wired in the UI via `AdminCatalogService`.
+- Admin catalog edit workflows: admin pages now reuse create forms for edits and call update/deactivate APIs for positions, departments, projects, budgets, expense categories, activity codes, network numbers, activity categories, and calendar categories.
 - Admin Expense improvements: Admin Expense now manages budgets (CAPEX/OPEX) and categories, with budget assignment required for categories.
 - Frontend design system: the React UI now uses the B.C. Design System component library with BC Sans and design tokens for layout, navigation, forms, and tables.
 - Admin landing page: updated copy to reflect the admin sections are wired to APIs.

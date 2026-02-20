@@ -29,6 +29,10 @@
 ### Seed Data ✅
 - CAPEX/OPEX budgets seeded for local testing
 
+### Database Update ✅
+- Applied migration `20260220104233_AddBudgetModel`
+- Verified foreign keys for Budget relationships
+
 **Files Modified**:
 - `src/DSC.Data/Models/Budget.cs`
 - `src/DSC.Data/Models/WorkItem.cs`
@@ -46,6 +50,38 @@
 - `src/DSC.WebClient/src/pages/AdminExpense.jsx`
 
 **Commit**: Current - feat: port CAPEX/OPEX budget classification
+
+---
+
+## ✅ COMPLETED: Activity Category & Calendar Models (2026-02-20)
+
+**Status**: COMPLETE ✅
+
+### Changes Made
+
+#### 1. Activity Category Model ✅
+- **Added**: `ActivityCategory` entity mapped to legacy `Category` table
+- **Admin API**: `/api/admin/activity-categories` CRUD
+
+#### 2. Calendar Models ✅
+- **Added**: `CalendarCategory` mapped to `Calendar_Category`
+- **Added**: `CalendarEntry` mapped to `Calendar` table (date primary key)
+- **Admin API**: `/api/admin/calendar-categories` CRUD
+
+#### 3. Migration ✅
+- `AddActivityCalendarModels` applied to database
+
+**Files Modified**:
+- `src/DSC.Data/Models/ActivityCategory.cs`
+- `src/DSC.Data/Models/CalendarCategory.cs`
+- `src/DSC.Data/Models/CalendarEntry.cs`
+- `src/DSC.Data/ApplicationDbContext.cs`
+- `src/DSC.Api/Controllers/AdminActivityCategoriesController.cs`
+- `src/DSC.Api/Controllers/AdminCalendarCategoriesController.cs`
+- `src/DSC.Api/DTOs/AdminCatalogDtos.cs`
+- `src/DSC.WebClient/src/api/AdminCatalogService.js`
+
+**Commit**: Current - feat: port activity category and calendar models
 
 ---
 

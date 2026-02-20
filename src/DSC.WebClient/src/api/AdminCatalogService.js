@@ -73,6 +73,30 @@ export const AdminCatalogService = {
     await axios.put(`/api/admin/budgets/${id}`, payload);
   },
 
+  async getActivityCategories() {
+    const res = await axios.get('/api/admin/activity-categories');
+    return res.data;
+  },
+  async createActivityCategory(payload) {
+    const res = await axios.post('/api/admin/activity-categories', payload);
+    return res.data;
+  },
+  async updateActivityCategory(id, payload) {
+    await axios.put(`/api/admin/activity-categories/${id}`, payload);
+  },
+
+  async getCalendarCategories() {
+    const res = await axios.get('/api/admin/calendar-categories');
+    return res.data;
+  },
+  async createCalendarCategory(payload) {
+    const res = await axios.post('/api/admin/calendar-categories', payload);
+    return res.data;
+  },
+  async updateCalendarCategory(id, payload) {
+    await axios.put(`/api/admin/calendar-categories/${id}`, payload);
+  },
+
   async getExpenseOptions(categoryId) {
     const res = await axios.get('/api/admin/expense-options', {
       params: categoryId ? { categoryId } : undefined
