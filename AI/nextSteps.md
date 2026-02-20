@@ -1,5 +1,179 @@
 # Remaining Work (2026-02-21)
 
+## Next Steps
+
+### 1. Merge Legacy Model Ports PR
+- **PR**: #2 - Legacy Model Ports: Department_User, User_Position, User_User, Project_Activity, Expense_Activity
+- **Branch**: `feature/department-user-model`
+- **Status**: Ready for review
+- **Tests**: All 21 tests passing
+- **Warnings**: Resolved CS0618 (ISystemClock) and NU1902 (XML security)
+
+### 2. Continue Admin Endpoint Development
+- Review [kitty-specs/001-modernize-api/tasks.md](../kitty-specs/001-modernize-api/tasks.md) for remaining admin endpoints
+- Implement any outstanding CRUD operations for admin entities
+
+### 3. Frontend Integration
+- Connect admin UI to remaining admin endpoints
+- Add validation and error handling for admin operations
+- Test full workflow for user/department/position/project management
+
+## ✅ COMPLETED: Legacy Model Ports (2026-02-20 - 2026-02-21)
+
+**Summary**: All 5 legacy mapping tables from the Java DSC system have been ported with composite primary keys and full test coverage.
+
+### Models Ported
+1. `Department_User` - User-department assignments with time periods
+2. `User_Position` - User-position assignments with time periods
+3. `User_User` - User relationships/hierarchy with time periods
+4. `Project_Activity` - Activity code and network number mappings to projects
+5. `Expense_Activity` - Expense metadata (director/reason/CPC codes)
+
+### Test Coverage
+- 21 unit tests passing (16 existing + 5 new legacy model tests)
+- Composite key validation
+- Data integrity checks
+- Seed data validation (corrected to 12 activity codes and 12 network numbers)
+
+### Bug Fixes
+- **CS0618**: Removed obsolete `ISystemClock` from `AdminTokenAuthenticationHandler`
+- **NU1902**: Pinned `System.Security.Cryptography.Xml` to 4.7.1
+
+### Commits
+- feat: port department user mapping (d12c5e5)
+- feat: port user position, user user, project activity, expense activity mappings
+- test: add unit tests for all legacy models
+- fix: resolve ISystemClock obsolete warning and NU1902 vulnerability (a0b14bb)
+
+### Pull Request
+- #2 - https://github.com/rloisell/DSC-modernization/pull/2
+
+---
+
+## ToDo (Archive): Legacy Models - All Complete ✅
+
+The sections below have been completed and merged/are ready for merge.
+
+## ✅ COMPLETED: Expense Activity Mapping Port (2026-02-20)
+
+**Status**: COMPLETE ✅
+
+### Changes Made
+
+#### 1. Expense Activity Model ✅
+- **Added**: `ExpenseActivity` entity mapped to `Expense_Activity`
+- **Activity Id**: `ActivityactivityID`
+- **Migration**: `AddExpenseActivityModel`
+
+#### 2. Tests ✅
+- **Added**: `ExpenseActivityTests` for insert/query coverage
+
+**Files Modified**:
+- `src/DSC.Data/Models/ExpenseActivity.cs`
+- `src/DSC.Data/ApplicationDbContext.cs`
+- `src/DSC.Data/Migrations/20260220120601_AddExpenseActivityModel.cs`
+- `src/DSC.Data/Migrations/20260220120601_AddExpenseActivityModel.Designer.cs`
+- `src/DSC.Data/Migrations/ApplicationDbContextModelSnapshot.cs`
+- `tests/DSC.Tests/ExpenseActivityTests.cs`
+
+**Commit**: Pending - feat: port expense activity mapping
+
+## ✅ COMPLETED: Project Activity Mapping Port (2026-02-20)
+
+**Status**: COMPLETE ✅
+
+### Changes Made
+
+#### 1. Project Activity Model ✅
+- **Added**: `ProjectActivity` entity mapped to `Project_Activity`
+- **Activity Id**: `ActivityactivityID`
+- **Migration**: `AddProjectActivityModel`
+
+#### 2. Tests ✅
+- **Added**: `ProjectActivityTests` for insert/query coverage
+
+**Files Modified**:
+- `src/DSC.Data/Models/ProjectActivity.cs`
+- `src/DSC.Data/ApplicationDbContext.cs`
+- `src/DSC.Data/Migrations/20260220120552_AddProjectActivityModel.cs`
+- `src/DSC.Data/Migrations/20260220120552_AddProjectActivityModel.Designer.cs`
+- `src/DSC.Data/Migrations/ApplicationDbContextModelSnapshot.cs`
+- `tests/DSC.Tests/ProjectActivityTests.cs`
+
+**Commit**: Pending - feat: port project activity mapping
+
+## ✅ COMPLETED: User Relationship Mapping Port (2026-02-20)
+
+**Status**: COMPLETE ✅
+
+### Changes Made
+
+#### 1. User User Model ✅
+- **Added**: `UserUser` entity mapped to `User_User`
+- **Composite Key**: `UserempId`, `UserempId2`, `startDate`
+- **Migration**: `AddUserUserModel`
+
+#### 2. Tests ✅
+- **Added**: `UserUserTests` for insert/query coverage
+
+**Files Modified**:
+- `src/DSC.Data/Models/UserUser.cs`
+- `src/DSC.Data/ApplicationDbContext.cs`
+- `src/DSC.Data/Migrations/20260220120416_AddUserUserModel.cs`
+- `src/DSC.Data/Migrations/20260220120416_AddUserUserModel.Designer.cs`
+- `src/DSC.Data/Migrations/ApplicationDbContextModelSnapshot.cs`
+- `tests/DSC.Tests/UserUserTests.cs`
+
+**Commit**: Pending - feat: port user user mapping
+
+## ✅ COMPLETED: User Position Mapping Port (2026-02-20)
+
+**Status**: COMPLETE ✅
+
+### Changes Made
+
+#### 1. User Position Model ✅
+- **Added**: `UserPosition` entity mapped to `User_Position`
+- **Composite Key**: `UserempId`, `PositionpositionID`, `startDate`
+- **Migration**: `AddUserPositionModel`
+
+#### 2. Tests ✅
+- **Added**: `UserPositionTests` for insert/query coverage
+
+**Files Modified**:
+- `src/DSC.Data/Models/UserPosition.cs`
+- `src/DSC.Data/ApplicationDbContext.cs`
+- `src/DSC.Data/Migrations/20260220120314_AddUserPositionModel.cs`
+- `src/DSC.Data/Migrations/20260220120314_AddUserPositionModel.Designer.cs`
+- `src/DSC.Data/Migrations/ApplicationDbContextModelSnapshot.cs`
+- `tests/DSC.Tests/UserPositionTests.cs`
+
+**Commit**: Pending - feat: port user position mapping
+
+## ✅ COMPLETED: Department User Mapping Port (2026-02-20)
+
+**Status**: COMPLETE ✅
+
+### Changes Made
+
+#### 1. Department User Model ✅
+- **Added**: `DepartmentUser` entity mapped to `Department_User`
+- **Composite Key**: `UserempId`, `DepartmentdeptID`, `startDate`
+- **Migration**: `AddDepartmentUserModel`
+
+#### 2. Tests ✅
+- **Added**: `DepartmentUserTests` for insert/query coverage
+
+**Files Modified**:
+- `src/DSC.Data/Models/DepartmentUser.cs`
+- `src/DSC.Data/ApplicationDbContext.cs`
+- `src/DSC.Data/Migrations/20260220115933_AddDepartmentUserModel.cs`
+- `src/DSC.Data/Migrations/20260220115933_AddDepartmentUserModel.Designer.cs`
+- `src/DSC.Data/Migrations/ApplicationDbContextModelSnapshot.cs`
+- `tests/DSC.Tests/DepartmentUserTests.cs`
+
+**Commit**: Pending - feat: port department user mapping
+
 ## ✅ COMPLETED: Budget Classification (CAPEX/OPEX) Port (2026-02-20)
 
 **Status**: COMPLETE ✅
