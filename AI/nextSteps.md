@@ -1,8 +1,62 @@
 # Remaining work (2026-02-21)
 
+## 🔴 BLOCKING: Activity Codes & Network Numbers Dropdowns Not Working
+
+**Priority**: CRITICAL — User-facing feature broken in local dev environment
+
+**Problem Summary**:
+Despite implementation of:
+- CatalogController with public endpoints
+- Activity.jsx and AdminActivityOptions.jsx components with Select dropdowns
+- TestDataSeeder configured to seed data
+- 16 passing unit tests validating seeding logic
+
+**Current Symptoms**:
+- Dropdowns display no values in UI
+- Admin pages show empty lists for Activity Codes and Network Numbers
+- Database confirmed to have old data only (2 activity codes: 10, 11; 3 network numbers: 99, 100, 101)
+- New seeding code changes do not persist data to database
+- Tests PASS (InMemory) but production (MySQL) doesn't get the data
+
+**Investigation Done**:
+- ✅ Database examined directly — only old data present
+- ✅ API endpoints created and tested in unit tests
+- ✅ Code compiles successfully
+- ✅ Seeding expanded to 12 activity codes, 12 network numbers, 7 projects, 3 departments
+- ❌ BUT: Data does not appear when seeding endpoint called in local development
+
+**Root Cause Analysis**:
+Unknown — possible issues:
+1. API binary not actually running latest compiled code
+2. Seeding endpoint not being triggered correctly
+3. Database transaction issue causing rollback
+4. MySQL connection/permissions problem
+5. Migrations not applying properly
+6. Bug in seeding logic not caught by InMemory tests
+7. Seeder assumes data exists that doesn't
+
+**Commits Related**:
+- ab05a24 - feat: expand test data seeding (code compiles, doesn't work)
+
+**Next Investigation Steps** (REQUIRED):
+- [ ] Add detailed logging to TestDataSeeder to see what's actually executing
+- [ ] Check API logs for errors/warnings during seeding call
+- [ ] Verify API is running latest build (check timestamps)`
+- [ ] Test seeding directly via SQL INSERT to verify database connectivity
+- [ ] Check transaction handling in TestDataSeeder (might be rolling back)
+- [ ] Verify migrations are complete and correct
+- [ ] Consider alternative: Direct SQL seeding script instead of C#
+
+**Blockers**:
+- Cannot complete local testing of Activity page dropdowns
+- Cannot verify UI works with populated data
+- Admin pages cannot be validated until this is resolved
+
+---
+
 ## COMPLETED: Unit Tests for Activity Page & Seeding ✅
 
-**Status**: DONE — Comprehensive automated test suite validates all functionality
+**Status**: Tests PASS but seeding not working in practice
 
 1. ✅ **Created 16 Unit Tests**:
    - 14 tests in `ActivityPageTests.cs`
@@ -70,6 +124,64 @@ dotnet test tests/DSC.Tests/DSC.Tests.csproj --filter "TestDataSeeder_CreatesAct
 - ✅ CatalogController endpoints return correct format and data
 - ✅ ItemsController GetAll returns work items or empty array
 - ✅ Full integration: all parts work together correctly
+
+---
+
+## 🟡 PARTIAL: Activity Page Catalog Data Seeding — Code Ready, Not Working
+
+**Status**: Code implemented and tested, but data not persisting to database in practice
+
+**What Was Built**:
+1. ✅ **Initial Seeding** (2 codes, 3 numbers):
+   - Activity Codes: 10, 11
+   - Network Numbers: 99, 100, 101
+   - Departments: OSS Operations, Security
+   - Roles: Admin, User
+
+2. ✅ **Expanded Seeding** (12 codes, 12 numbers + projects + departments):
+   - Activity Codes: 10, 11, DEV, TEST, DOC, ADMIN, MEET, TRAIN, BUG, REV, ARCH, DEPLOY
+   - Network Numbers: 99, 100, 101, 110, 111, 120, 121, 130, 200, 201, 210, 220
+   - Projects: 7 new projects (P1001-P1005, P2001-P2002)
+   - Departments: 3 new departments (Engineering, QA, Product Management)
+
+3. ✅ **API Endpoints Created**:
+   - `GET /api/catalog/activity-codes` (public)
+   - `GET /api/catalog/network-numbers` (public)
+   - `GET /api/admin/activity-codes` (admin)
+   - `GET /api/admin/network-numbers` (admin)
+   - `POST /api/admin/seed/test-data` (admin, triggers seeding)
+
+4. ✅ **Frontend Components Updated**:
+   - Activity.jsx: Uses CatalogService to load dropdowns
+   - AdminActivityOptions.jsx: Uses AdminCatalogService for admin interface
+   - Both have Select dropdowns (not text inputs anymore)
+
+5.✅ **Unit Tests** (all passing):
+   - 9 seeding validation tests
+   - 4 API endpoint tests
+   - 1 integration test
+
+**What's Not Working**:
+- ❌ Dropdowns display empty in UI despite API & components being correct
+- ❌ Admin pages don't show downloaded catalog data
+- ❌ New seeded data doesn't persist to MySQL database
+- ❌ Only old data visible in database (10, 11 codes; 99, 100, 101 numbers)
+
+**Known Facts**:
+- Tests PASS with InMemoryDatabase ✅
+- Code compiles successfully ✅
+- API endpoints exist and respond ✅
+- Seeding logic appears correct (tests validate it) ✅
+- Database connectivity works (old data is there) ✅
+- BUT: New data never appears in actual MySQL database ❌
+
+**Hypothesis**:
+The problem is likely in the **execution environment**, not the code:
+- API might not be running the latest compiled build
+- Seeding endpoint might not be fully executing
+- Transaction might be rolling back silently
+- Database permissions/connection issue
+- Migrations incomplete
 
 ---
 

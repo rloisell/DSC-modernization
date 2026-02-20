@@ -1,3 +1,59 @@
+## 2026-02-21 — Activity Codes & Network Numbers Dropdown Issue (BLOCKING) 🔴
+
+**Problem Statement**:
+User reports that Activity page and Admin pages still do not display dropdown data for activity codes and network numbers, despite:
+- Seeding code being implemented and merged
+- Tests validating seeding works in isolation
+- API endpoints (CatalogController) being created and tested
+- Frontend components (Activity.jsx, AdminActivityOptions.jsx) being updated to use dropdowns
+
+**Investigation & Findings**:
+1. ✅ Examined database directly via MySQL:
+   - **ActivityCodes table**: Contains only 2 codes (10: "Diagramming", 11: "Project Meeting")
+   - **NetworkNumbers table**: Contains only 3 numbers (99: "Dev", 100: "Test", 101: "Prod")
+   - Earlier seed attempts with DEV, TEST, DOC, ADMIN, MEET, TRAIN codes **did NOT persist**
+
+2. ✅ Verified API endpoints exist and should work:
+   - `GET /api/catalog/activity-codes` (public, no auth)
+   - `GET /api/catalog/network-numbers` (public, no auth)
+   - `GET /api/admin/activity-codes` (admin only)
+   - `GET /api/admin/network-numbers` (admin only)
+
+3. ✅ Updated TestDataSeeder to match actual database contents:
+   - Modified seeder to seed from existing database values (10, 11 for codes; 99, 100, 101 for numbers)
+   - Updated seed data expectations in tests
+
+4. ✅ Expanded test data with supplemental fake data:
+   - **Activity Codes**: now seeds 12 total (10, 11 + DEV, TEST, DOC, ADMIN, MEET, TRAIN, BUG, REV, ARCH, DEPLOY)
+   - **Network Numbers**: now seeds 12 total (99, 100, 101 + 110, 111, 120, 121, 130, 200, 201, 210, 220)
+   - **Projects**: seeds 7 additional projects with realistic names
+   - **Departments**: seeds 3 additional departments
+   - All changes compile successfully ✅
+
+**Current Status** 🔴:
+- Changes built and pushed to repo (commit `ab05a24`)
+- **BUT**: Dropdowns on local dev instance still not working
+- **New test data appears NOT to be seeding** when endpoint is called
+- **PAT**: Problem Awaiting Troubleshooting — unclear why compiled seeding code isn't persisting data
+
+**Possible Root Causes**:
+1. API not rebuilding with latest code before seeding endpoint called
+2. Seeding endpoint not actually being triggered by user
+3. Migrations not applying correctly
+4. Database connection in development environment issue
+5. Transaction handling issue causing rollback
+6. Seeding code logic has a bug not caught by tests (tests use InMemory, not real MySQL)
+
+**Next Steps Required**:
+- [ ] Investigate why seeding endpoint isn't persisting new data
+- [ ] Check API logs for errors when seeding endpoint called
+- [ ] Verify API is running compiled code (not cached older build)
+- [ ] Test seeding directly in database (SQL INSERT statements)
+- [ ] Consider alternative: Direct database seeding via SQL script instead of C# seeder
+- [ ] Add logging to TestDataSeeder to track what's actually happening
+
+---
+
 ## 2026-02-21 — Unit Tests for Activity Page & Catalog Functionality (Continued)
 
 **Completed**:
