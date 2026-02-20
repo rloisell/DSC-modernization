@@ -8,6 +8,8 @@
 
 **Implementation Summary**:
 
+### Core Feature Implementation
+
 ### 1. New API Endpoint
 **File Modified**:
 - [src/DSC.Api/Controllers/ItemsController.cs](src/DSC.Api/Controllers/ItemsController.cs#L302-L355)
@@ -117,6 +119,84 @@ console.log('Remaining hours data:', data);
 4. Test with different user accounts (different projects/budgets) to validate cumulative calculation
 5. Create unit tests for GetProjectRemainingHours endpoint
 6. Consider adding overflow warning when projected remaining becomes very negative
+
+---
+
+## 2026-02-21 — Session 2: Fix Expense Form & Expand Seed Data (COMPLETED ✓)
+
+**Objective**: 
+- Remove incorrect "Remaining Hours" field from expense activity form
+- Expand seed data to provide realistic test scenarios for cumulative hours tracking
+
+**Changes Made**:
+
+### 1. Expense Activity Form Fix
+**Issue**: Expense activities were showing a calculated "Remaining Hours" field
+**Why it was wrong**: 
+- Expense activities don't have estimated hours from database
+- User can optionally enter estimated hours, but it's not budget-tracked like projects
+- Remaining hours calculation doesn't apply to expense activities (they track costs, not hours)
+
+**Solution**: 
+- Removed the "Remaining Hours" TextField from expense activities
+- Project activities still show 3 fields: Est Hours, Current Cumulative Remaining, Projected Remaining
+- Expense activities now show only 1 field: Estimated Hours (optional, user-entered)
+
+**Files Modified**:
+- `src/DSC.WebClient/src/pages/Activity.jsx` (removed expense remaining hours calculation and display)
+
+### 2. Expanded Test Data for Realistic Cumulative Testing
+**Problem**: Previous seed data had only 4 work items (3 project + 1 expense per user)
+**Need**: Multiple activities across different projects to test cumulative hours properly
+**Solution**: Significantly expanded seed data:
+
+**Work Items per User (Total: 8-10 per user across multiple projects)**:
+- **Primary Project Activities** (6 total, user's first assigned project):
+  1. Development Sprint: 8 actual ÷ 10 estimated = 2 hrs remaining
+  2. Team Meeting: 2 actual ÷ 2 estimated = 0 hrs remaining
+  3. Current Development Work: 6 actual ÷ 10 estimated = 4 hrs remaining
+  4. Code Review & Testing: 5 actual ÷ 6 estimated = 1 hr remaining
+  5. Documentation Update: 4 actual ÷ 4 estimated = 0 hrs remaining
+  6. Integration Testing Suite: 12 actual ÷ 8 estimated = **-4 hrs remaining (OVERBUDGET)**
+  
+  - **Cumulative on Primary Project**: 37 actual hours
+  - **Shows real-world scenario**: User can exceed estimated hours on a project
+
+- **Secondary Projects** (1 activity per project, user's 2nd and 3rd assigned projects):
+  - Each has: 3 actual ÷ 5 estimated = 2 hrs remaining
+  - Demonstrates multi-project workload tracking
+  
+- **Expense Activity** (1 total per user):
+  - Training Conference: 16 actual ÷ 16 estimated = 0 hrs remaining
+
+**Benefit for Testing**:
+- Can now see Project Summary with multiple projects
+- Can test overbudget scenarios (Integration Testing Suite is -4 hours)
+- Can see how cumulative remaining updates as activities increase
+- Can validate that changes appear across form fields and project summary
+- Provides realistic workload scenarios for UI testing
+
+**Files Modified**:
+- `src/DSC.Api/Seeding/TestDataSeeder.cs` (expanded work item seeding from 4 to 10+ per user)
+- Fixed null reference warnings in new seeding logic
+
+### 3. Build & Verification
+- `dotnet build`: ✅ Success (7 nullable warnings, 0 errors)
+- No compilation errors
+- All code paths validated
+
+**Files Modified**:
+- `src/DSC.WebClient/src/pages/Activity.jsx` (fixed expense form)
+- `src/DSC.Api/Seeding/TestDataSeeder.cs` (expanded seed data)
+
+**Next Steps**:
+1. Start API server and seed database with new data
+2. Test Activity page with expanded seed data
+3. Verify Project Summary shows all projects correctly
+4. Verify overbudget warnings appear for projects with negative remaining hours
+5. Verify form fields populate correctly when selecting different projects
+6. Test that cumulative remaining updates as new activities are logged
+7. Commit and push changes to GitHub
 
 ---
 

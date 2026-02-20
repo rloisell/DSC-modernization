@@ -1,6 +1,103 @@
 # Remaining Work (2026-02-21)
 
+## ✅ COMPLETED: Fix Expense Form & Expand Seed Data (2026-02-21)
+
+**Status**: COMPLETE ✅
+
+### Expense Activity Form Fix
+- ✅ Removed incorrect "Remaining Hours" calculated field from expense activities
+- ✅ Expense activities now only show "Estimated Hours (Optional)" field for user entry
+- ✅ Project activities continue to show 3 fields: Est Hours, Current Cumulative Remaining, Projected Remaining
+- ✅ Clarified distinction: Projects track budgeted hours, Expenses track costs
+
+### Expanded Seed Data
+- ✅ Increased work items per user from 4 to 10+ across multiple projects
+- ✅ Primary project: 6 activities (37 actual hours total)
+  - Includes one overbudget activity (Integration Testing: 12 hrs actual vs 8 estimated = -4 hrs)
+- ✅ Secondary projects: 1 activity each (to show multi-project workload)
+- ✅ Expense activity: 1 per user (training conference example)
+- ✅ Realistic test scenarios with negative remaining hours for overbudget validation
+
+### Testing Improvements
+- ✅ Can now test Project Summary with multiple projects visible
+- ✅ Can test overbudget visual warnings (Integration Testing Suite = -4 hours)
+- ✅ Can test cumulative hours increases across activities
+- ✅ Can test form field population with different project selections
+- ✅ Build: ✅ Success (7 nullable warnings, 0 errors)
+
+**Files Modified**:
+- `src/DSC.WebClient/src/pages/Activity.jsx` (removed expense remaining hours field)
+- `src/DSC.Api/Seeding/TestDataSeeder.cs` (expanded work items, fixed null checks)
+
+**Next Steps**:
+1. Start API and verify seed data loads without errors
+2. Test Activity page with expanded data
+3. Verify Project Summary displays all projects correctly
+4. Test overbudget scenarios and warnings
+5. Commit: "fix: remove expense remaining hours field and expand seed data for realistic testing"
+6. Push to GitHub
+
+---
+
 ## ✅ COMPLETED: Cumulative Remaining Hours & Project Summary (2026-02-21)
+
+**Status**: COMPLETE ✅
+
+### Implementation Complete
+- ✅ Created `/api/items/project/{projectId}/remaining-hours` endpoint
+  - Returns: ProjectId, ProjectNo, ProjectName, EstimatedHours, ActualHoursUsed, RemainingHours
+  - Fetches project's estimated hours from database
+  - Sums ALL WorkItems for current user on that project
+  - Allows negative values to show overbudget status
+  - Includes proper authentication and error handling
+
+### Frontend Project Summary Display
+- ✅ Project Summary table above "My Activities" table
+  - Auto-loads summaries for all projects in activity list
+  - Shows: Project, Est. Hours, Actual Hours Used, Cumulative Remaining
+  - Red background + ⚠ OVERBUDGET label for overbudget projects
+  - Updates in real-time as new activities added
+
+### Work Item Form Enhancements
+- ✅ Three new disabled fields in project activity form:
+  - "Project Estimated Hours" - shows total project budget from database
+  - "Current Cumulative Remaining" - shows sum of all user hours on project
+  - "Projected Remaining After Entry" - dynamically calculated as user enters actual duration
+- ✅ Form fields populate when user selects a project
+- ✅ Negative numbers properly displayed and calculated
+- ✅ Dynamic projection updates as actual duration changes
+
+### Data Validation & Error Handling
+- ✅ Enhanced fetch calls with credentials and proper headers
+- ✅ Detailed error logging to browser console (shows HTTP status, error messages)
+- ✅ API responses logged for debugging
+- ✅ Graceful error handling if API calls fail
+
+**Files Modified**:
+- `src/DSC.Api/Controllers/ItemsController.cs` (added GetProjectRemainingHours endpoint)
+- `src/DSC.Api/DTOs/WorkItemDto.cs` (added RemainingHoursDto class)
+- `src/DSC.WebClient/src/pages/Activity.jsx` (project summary section, form field enhancements, fetch error handling)
+
+**Build Status**: ✅ Success (0 errors, 5 nullable warnings)
+
+**Test Scenario Validated**:
+- User: kduma on project P1004
+- Estimated: 10 hrs | Actual: 24 hrs | Remaining: -14 hrs
+- Visual: Red highlight + ⚠ OVERBUDGET in project summary
+- Form shows: 10, -14, and dynamically calculates projected remaining
+
+**Git Status**:
+- Commit: `5ae1f0c` "fix: add project summary showing cumulative remaining hours"
+- Commit: `0e5963a` "fix: improve fetch call error handling and add credentials for remaining hours endpoint"
+- All changes pushed to `origin/main`: ✅
+
+---
+
+## Recent Session Tasks (In Progress)
+
+### Pending Administration Pages
+
+**Create AdminProjectAssignments.jsx UI Page** (HIGH PRIORITY)
 
 **Status**: COMPLETE ✅
 

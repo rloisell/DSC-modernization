@@ -784,6 +784,132 @@ public record TestSeedResult(
                             });
                             workItemsCreated++;
                         }
+
+                        // Work item 4: Code Review
+                        var workItem4 = await _db.WorkItems.FirstOrDefaultAsync(
+                            w => w.UserId == user.Id && w.Title.Contains("Code Review"), ct);
+                        
+                        if (workItem4 == null)
+                        {
+                            _db.WorkItems.Add(new WorkItem
+                            {
+                                Id = Guid.NewGuid(),
+                                UserId = user.Id,
+                                ProjectId = userProject.Id,
+                                BudgetId = capex.Id,
+                                Title = "Code Review & Testing",
+                                Description = "Peer code review and testing activities",
+                                Date = DateTime.Now.AddDays(-1),
+                                ActivityType = "Project",
+                                ActivityCode = "TEST",
+                                NetworkNumber = userNetworkNumber.Number.ToString(),
+                                PlannedDuration = TimeSpan.FromHours(6),
+                                ActualDuration = 5,
+                                EstimatedHours = 6.0m,
+                                RemainingHours = 1.0m // 6.0 - 5 = 1.0 hours remaining
+                            });
+                            workItemsCreated++;
+                        }
+
+                        // Work item 5: Documentation - More hours to test cumulative calculation
+                        var workItem5 = await _db.WorkItems.FirstOrDefaultAsync(
+                            w => w.UserId == user.Id && w.Title.Contains("Documentation Update"), ct);
+                        
+                        if (workItem5 == null)
+                        {
+                            _db.WorkItems.Add(new WorkItem
+                            {
+                                Id = Guid.NewGuid(),
+                                UserId = user.Id,
+                                ProjectId = userProject.Id,
+                                BudgetId = capex.Id,
+                                Title = "Documentation Update",
+                                Description = "Update API documentation and README files",
+                                Date = DateTime.Now.AddDays(-3),
+                                ActivityType = "Project",
+                                ActivityCode = "DOC",
+                                NetworkNumber = userNetworkNumber.Number.ToString(),
+                                PlannedDuration = TimeSpan.FromHours(4),
+                                ActualDuration = 4,
+                                EstimatedHours = 4.0m,
+                                RemainingHours = 0m // 4.0 - 4 = 0 hours (completed)
+                            });
+                            workItemsCreated++;
+                        }
+
+                        // Work item 6: Testing effort - Push project over budget
+                        var workItem6 = await _db.WorkItems.FirstOrDefaultAsync(
+                            w => w.UserId == user.Id && w.Title.Contains("Integration Testing"), ct);
+                        
+                        if (workItem6 == null)
+                        {
+                            _db.WorkItems.Add(new WorkItem
+                            {
+                                Id = Guid.NewGuid(),
+                                UserId = user.Id,
+                                ProjectId = userProject.Id,
+                                BudgetId = capex.Id,
+                                Title = "Integration Testing Suite",
+                                Description = "Comprehensive integration testing across modules",
+                                Date = DateTime.Now.AddDays(-4),
+                                ActivityType = "Project",
+                                ActivityCode = "TEST",
+                                NetworkNumber = userNetworkNumber.Number.ToString(),
+                                PlannedDuration = TimeSpan.FromHours(8),
+                                ActualDuration = 12,
+                                EstimatedHours = 8.0m,
+                                RemainingHours = -4.0m // 8.0 - 12 = -4.0 hours (OVERBUDGET by 4 hours)
+                            });
+                            workItemsCreated++;
+                        }
+                    }
+
+                    // Add activities from multiple projects for each user to show cumulative tracking
+                    var otherProjects = await _db.Projects
+                        .Where(p => p.Id != userProject.Id && p.IsActive)
+                        .Take(2)
+                        .ToListAsync(ct);
+
+                    foreach (var otherProject in otherProjects)
+                    {
+                        if (otherProject == null) continue;
+                        
+                        var otherActivityCode = await _db.ActivityCodes
+                            .Where(ac => ac.IsActive)
+                            .FirstOrDefaultAsync(ct);
+                        
+                        var otherNetworkNumber = await _db.NetworkNumbers
+                            .Where(nn => nn.IsActive)
+                            .FirstOrDefaultAsync(ct);
+
+                        if (otherActivityCode != null && otherNetworkNumber != null && capex != null)
+                        {
+                            // One activity per other project
+                            var existingOtherActivity = await _db.WorkItems.FirstOrDefaultAsync(
+                                w => w.UserId == user.Id && w.ProjectId == otherProject.Id, ct);
+                            
+                            if (existingOtherActivity == null)
+                            {
+                                _db.WorkItems.Add(new WorkItem
+                                {
+                                    Id = Guid.NewGuid(),
+                                    UserId = user.Id,
+                                    ProjectId = otherProject.Id,
+                                    BudgetId = capex.Id,
+                                    Title = $"Work on {otherProject.Name}",
+                                    Description = $"Contributing to {otherProject.Name} project",
+                                    Date = DateTime.Now.AddDays(-6),
+                                    ActivityType = "Project",
+                                    ActivityCode = otherActivityCode.Code,
+                                    NetworkNumber = otherNetworkNumber.Number.ToString(),
+                                    PlannedDuration = TimeSpan.FromHours(5),
+                                    ActualDuration = 3,
+                                    EstimatedHours = 5.0m,
+                                    RemainingHours = 2.0m // 5.0 - 3 = 2.0 hours remaining
+                                });
+                                workItemsCreated++;
+                            }
+                        }
                     }
 
                     // Add one expense activity per user

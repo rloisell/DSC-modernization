@@ -1,4 +1,41 @@
-## Feature Branch Consolidation — 2026-02-20 ✅ NEW
+## Recent Fixes & Data Improvements — 2026-02-21 ✅ NEW
+
+### Expense Activity Form Fixed
+- ✅ **Issue**: Expense activities incorrectly showed a "Remaining Hours" calculated field
+- ✅ **Fix**: Removed the calculated remaining hours field from expense activities
+- ✅ **Why**: Expense activities are cost-tracked, not hour-tracked like project budgets
+  - Project activities: Hour-budget tracking with cumulative remaining calculation
+  - Expense activities: Cost tracking, estimated hours are optional user entries (no budget calculation)
+- ✅ **Result**: Cleaner form with only "Estimated Hours (Optional)" for expense activities
+
+### Seed Data Significantly Expanded
+- ✅ **Previous**: 4 work items per user (3 project + 1 expense)
+- ✅ **Current**: 10+ work items per user across multiple projects
+- ✅ **New Structure**:
+  - **Primary Project**: 6 activities showing real-world workload:
+    - Development Sprint: 8 hrs actual ÷ 10 estimated = 2 hrs remaining ✓
+    - Team Meeting: 2 hrs actual ÷ 2 estimated = 0 hrs remaining ✓
+    - Current Development: 6 hrs actual ÷ 10 estimated = 4 hrs remaining ✓
+    - Code Review & Testing: 5 hrs actual ÷ 6 estimated = 1 hr remaining ✓
+    - Documentation: 4 hrs actual ÷ 4 estimated = 0 hrs remaining ✓
+    - Integration Testing: **12 hrs actual ÷ 8 estimated = -4 hrs remaining ⚠️ OVERBUDGET**
+  - **Secondary Projects**: 1 activity each showing multi-project workload
+  - **Expense Activity**: 1 per user for expense tracking validation
+- ✅ **Benefits**:
+  - Real-world testing of overbudget scenarios
+  - Can validate Project Summary with multiple projects
+  - Can test negative remaining hours appearing in red with ⚠ OVERBUDGET label
+  - Can verify cumulative calculations across multiple activities on same project
+
+**Files Modified**:
+- `src/DSC.WebClient/src/pages/Activity.jsx` (removed expense remaining hours field)
+- `src/DSC.Api/Seeding/TestDataSeeder.cs` (expanded work items data)
+
+**Build Status**: ✅ Success (0 errors, 7 nullable warnings)
+
+---
+
+## Feature Branch Consolidation — 2026-02-20 ✅
 
 **All feature branches successfully merged to main**:
 
@@ -126,12 +163,14 @@ See [tests/howto.md](tests/howto.md) for comprehensive testing documentation, in
   - Expense budgets require Director/Reason/CPC codes
   - Budget dropdown labels show the budget description and type
 - ✅ **Project Hour Estimates in Form** (NEW 2026-02-21):
-  - When you select a project, form shows:
+  - **Project Activities** show 3 disabled fields:
     - "Project Estimated Hours" - total hours available for the project (from database)
-    - "Current Cumulative Remaining" - sum of all your hours spent on that project, showing remaining
-    - "Projected Remaining After Entry" - updates dynamically as you enter your actual hours, shows what remaining would be after you submit
-  - All three fields are disabled (read-only) to prevent manual editing
-  - Example: Selecting P1004 with 10 estimated hours where you've already used 24 hours shows: Est: 10, Current Remaining: -14, Projected (after entering 5 more): -19
+    - "Current Cumulative Remaining" - sum of all your hours spent on that project  
+    - "Projected Remaining After Entry" - updates dynamically as you enter actual hours
+    - Example: P1004 with 10 estimated hours where you've used 24 = Est: 10, Current: -14, Projected (after entering 5 more): -19
+  - **Expense Activities** show 1 field:
+    - "Estimated Hours (Optional)" - user can optionally enter estimated hours
+    - No remaining hours calculation for expenses (cost-tracked, not hour-budgeted)
 - ✅ **Catalog Service**: New public `/api/catalog` endpoints for activity codes and network numbers
 - ✅ **Expense Catalogs**: Director/Reason/CPC codes exposed via `/api/catalog/director-codes`, `/api/catalog/reason-codes`, `/api/catalog/cpc-codes`
 - ✅ **Test Data Seeding**: Activity Codes and Network Numbers automatically seeded with test data
@@ -147,6 +186,11 @@ See [tests/howto.md](tests/howto.md) for comprehensive testing documentation, in
   - When a project is selected, displays a table showing all valid activity code + network number pairs
   - Shows full descriptions for codes and numbers
   - Helps users understand what combinations are available before creating work items
+- ✅ **Expanded Test Data** (NEW 2026-02-21):
+  - Each user now has 10+ work items across multiple projects
+  - Primary project: 6 activities including one overbudget item (-4 hours)
+  - Secondary projects: 1 activity each for multi-project workload testing
+  - Realistic scenarios for validating cumulative hours and overbudget warnings
 
 **What Legacy Activity ID is:**
 - **Source**: Original Java Activity.activityID field from legacy DSC system
@@ -156,11 +200,17 @@ See [tests/howto.md](tests/howto.md) for comprehensive testing documentation, in
 - **Example**: Java Activity with ID=12345 → .NET WorkItem with LegacyActivityId=12345
 - **Benefit**: Allows both systems to run in parallel with links between old and new records
 
-**How to test**:
+**How to test cumulative remaining hours**:
 1. Start API: `cd src/DSC.Api && dotnet run`
 2. Seed test data: `curl -X POST http://localhost:5005/api/admin/seed/test-data -H "X-Admin-Token: local-admin-token"`
-   - Should return counts including ActivityCodesCreated and NetworkNumbersCreated
+   - Should return counts including work items created across multiple projects
 3. Start WebClient: `cd src/DSC.WebClient && npm run dev`
+4. Navigate to Activity page and verify:
+   - Project Summary shows all projects with cumulative hours
+   - Projects with overbudget (negative remaining) show red background + ⚠ OVERBUDGET
+   - Form fields populate when selecting a project
+   - Projected remaining updates dynamically as you enter actual duration
+
 4. Navigate to Activity page and test cumulative hours:
    - Verify Project Summary table shows all projects with cumulative hours
    - Verify projects with negative remaining hours show red background + ⚠ OVERBUDGET

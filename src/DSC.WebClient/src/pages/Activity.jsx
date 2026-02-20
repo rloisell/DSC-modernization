@@ -610,14 +610,7 @@ export default function Activity() {
                 />
               </>
             )}
-            {activityMode === 'expense' && (
-              <TextField
-                label="Remaining Hours"
-                value={actualDuration ? String(Number(estimatedHours || 0) - Number(actualDuration)) : ''}
-                isDisabled
-                description="Calculated as: Estimated Hours - Actual Duration"
-              />
-            )}
+            {/* Expense activities: No remaining hours field (expense activities are tracked by budget, not hours) */}
           </div>
           <TextArea label="Description" value={desc} onChange={setDesc} />
           <ButtonGroup alignment="start" ariaLabel="Work item actions">
