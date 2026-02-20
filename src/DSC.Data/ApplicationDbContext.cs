@@ -247,9 +247,9 @@ namespace DSC.Data
             modelBuilder.Entity<Union>(b =>
             {
                 b.ToTable("Union");
-                b.HasKey(u => u.Code);
-                b.Property(u => u.Code).HasColumnName("unionCode");
-                b.Property(u => u.Description).HasColumnName("description").HasMaxLength(255);
+                b.HasKey(u => u.Id);
+                b.Property(u => u.Id).HasColumnName("unionId").ValueGeneratedNever();
+                b.Property(u => u.Name).HasColumnName("unionName").HasMaxLength(255);
             });
 
             modelBuilder.Entity<NetworkNumber>(b =>

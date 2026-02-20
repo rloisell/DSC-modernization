@@ -65,6 +65,23 @@ namespace DSC.Api.DTOs
         public bool IsActive { get; set; }
     }
 
+    public class UnionDto
+    {
+        public int Id { get; set; }
+        public string? Name { get; set; }
+    }
+
+    public class UnionCreateRequest
+    {
+        public int Id { get; set; }
+        public string? Name { get; set; }
+    }
+
+    public class UnionUpdateRequest
+    {
+        public string? Name { get; set; }
+    }
+
     public class ExpenseCategoryDto
     {
         public Guid Id { get; set; }
@@ -183,19 +200,19 @@ namespace DSC.Api.DTOs
 
     public class UnionDto
     {
-        public string Code { get; set; } = string.Empty;
-        public string? Description { get; set; }
+        public Guid Id { get; set; }
+        public string Name { get; set; } = string.Empty;
     }
 
     public class UnionCreateRequest
     {
-        public string Code { get; set; } = string.Empty;
-        public string? Description { get; set; }
+        public Guid Id { get; set; }
+        public string Name { get; set; } = string.Empty;
     }
 
     public class UnionUpdateRequest
     {
-        public string? Description { get; set; }
+        public string Name { get; set; } = string.Empty;
     }
 
     public class NetworkNumberDto
