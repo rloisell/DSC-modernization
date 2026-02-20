@@ -12,5 +12,8 @@ namespace DSC.Data.Models
 
         // Role on the project: e.g., Owner, Contributor, Supervisor
         public string Role { get; set; } = "Contributor";
+
+        // Estimated hours for this user on this project
+        public decimal? EstimatedHours { get; set; }
     }
 }

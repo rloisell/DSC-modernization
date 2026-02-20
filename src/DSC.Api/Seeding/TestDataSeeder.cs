@@ -277,7 +277,9 @@ public record TestSeedResult(
             var roleSeeds = new[]
             {
                 new RoleSeed("Admin", "Administrator"),
-                new RoleSeed("User", "DSC User")
+                new RoleSeed("Manager", "Project Manager"),
+                new RoleSeed("Director", "Director - Can view all projects and assign users"),
+                new RoleSeed("User", "DSC User - Has limited project visibility")
             };
 
             foreach (var seed in roleSeeds)
@@ -303,6 +305,7 @@ public record TestSeedResult(
 
             // Assign roles to users
             var adminRole = await _db.Roles.FirstOrDefaultAsync(r => r.Name == "Admin", ct);
+            var managerRole = await _db.Roles.FirstOrDefaultAsync(r => r.Name == "Manager", ct);
             var userRole = await _db.Roles.FirstOrDefaultAsync(r => r.Name == "User", ct);
 
             if (adminRole != null)
@@ -314,10 +317,19 @@ public record TestSeedResult(
                 }
             }
 
+            if (managerRole != null)
+            {
+                var managerUser = await _db.Users.FirstOrDefaultAsync(u => u.Username == "dmcgregor", ct);
+                if (managerUser != null && managerUser.RoleId == null)
+                {
+                    managerUser.RoleId = managerRole.Id;
+                }
+            }
+
             if (userRole != null)
             {
                 var regularUsers = await _db.Users
-                    .Where(u => u.RoleId == null && u.Username != "rloisel1")
+                    .Where(u => u.RoleId == null && u.Username != "rloisel1" && u.Username != "dmcgregor")
                     .ToListAsync(ct);
                 
                 foreach (var user in regularUsers)
@@ -865,41 +877,87 @@ public record TestSeedResult(
             // Seed project assignments (assign users to projects)
             if (users.Any() && projects.Any())
             {
-                // Assign first project to all users
-                var firstProject = projects.First();
-                foreach (var user in users)
-                {
-                    var existing = await _db.ProjectAssignments.FirstOrDefaultAsync(
-                        pa => pa.ProjectId == firstProject.Id && pa.UserId == user.Id, ct);
-                    
-                    if (existing == null)
-                    {
-                        _db.ProjectAssignments.Add(new ProjectAssignment
-                        {
-                            ProjectId = firstProject.Id,
-                            UserId = user.Id
-                        });
-                        projectAssignmentsCreated++;
-                    }
-                }
+                // Seed project assignments with estimated hours
+                // This allows testing of role-based project visibility
+                var projectsList = projects.ToList();
+                var usersList = users.ToList();
 
-                // Assign second project to first two users if available
-                if (projects.Count() > 1 && users.Count() >= 2)
+                if (projectsList.Any() && usersList.Any())
                 {
-                    var secondProject = projects.Skip(1).First();
-                    foreach (var user in users.Take(2))
+                    // Admin sees all projects
+                    var adminUser = usersList.FirstOrDefault(u => u.Username == "rloisel1");
+                    
+                    // Manager sees all projects  
+                    var managerUser = usersList.FirstOrDefault(u => u.Username == "dmcgregor");
+                    
+                    // Regular users see only assigned projects
+                    var regularUsers = usersList.Where(u => u.Username != "rloisel1" && u.Username != "dmcgregor").ToList();
+
+                    // Assign projects to regular users with estimated hours
+                    if (regularUsers.Count > 0 && projectsList.Count > 0)
                     {
-                        var existing = await _db.ProjectAssignments.FirstOrDefaultAsync(
-                            pa => pa.ProjectId == secondProject.Id && pa.UserId == user.Id, ct);
-                        
-                        if (existing == null)
+                        // kduma gets P1001 (120 hrs) and P1002 (100 hrs)
+                        var kduma = regularUsers.FirstOrDefault(u => u.Username == "kduma");
+                        if (kduma != null)
                         {
-                        _db.ProjectAssignments.Add(new ProjectAssignment
+                            var p1001 = projectsList.FirstOrDefault(p => p.ProjectNo == "P1001");
+                            if (p1001 != null)
+                            {
+                                var existing = await _db.ProjectAssignments.FirstOrDefaultAsync(
+                                    pa => pa.ProjectId == p1001.Id && pa.UserId == kduma.Id, ct);
+                                if (existing == null)
+                                {
+                                    _db.ProjectAssignments.Add(new ProjectAssignment
+                                    {
+                                        ProjectId = p1001.Id,
+                                        UserId = kduma.Id,
+                                        Role = "Contributor",
+                                        EstimatedHours = 120m
+                                    });
+                                    projectAssignmentsCreated++;
+                                }
+                            }
+
+                            var p1002 = projectsList.FirstOrDefault(p => p.ProjectNo == "P1002");
+                            if (p1002 != null)
+                            {
+                                var existing = await _db.ProjectAssignments.FirstOrDefaultAsync(
+                                    pa => pa.ProjectId == p1002.Id && pa.UserId == kduma.Id, ct);
+                                if (existing == null)
+                                {
+                                    _db.ProjectAssignments.Add(new ProjectAssignment
+                                    {
+                                        ProjectId = p1002.Id,
+                                        UserId = kduma.Id,
+                                        Role = "Lead",
+                                        EstimatedHours = 100m
+                                    });
+                                    projectAssignmentsCreated++;
+                                }
+                            }
+                        }
+
+                        // mammeter gets P1003 (80 hrs)
+                        var mammeter = regularUsers.FirstOrDefault(u => u.Username == "mammeter");
+                        if (mammeter != null)
                         {
-                            ProjectId = secondProject.Id,
-                            UserId = user.Id
-                        });
-                        projectAssignmentsCreated++;
+                            var p1003 = projectsList.FirstOrDefault(p => p.ProjectNo == "P1003");
+                            if (p1003 != null)
+                            {
+                                var existing = await _db.ProjectAssignments.FirstOrDefaultAsync(
+                                    pa => pa.ProjectId == p1003.Id && pa.UserId == mammeter.Id, ct);
+                                if (existing == null)
+                                {
+                                    _db.ProjectAssignments.Add(new ProjectAssignment
+                                    {
+                                        ProjectId = p1003.Id,
+                                        UserId = mammeter.Id,
+                                        Role = "Contributor",
+                                        EstimatedHours = 80m
+                                    });
+                                    projectAssignmentsCreated++;
+                                }
+                            }
                         }
                     }
                 }

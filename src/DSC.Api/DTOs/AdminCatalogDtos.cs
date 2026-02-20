@@ -320,4 +320,30 @@ namespace DSC.Api.DTOs
         public ActivityCodeDto? ActivityCode { get; set; }
         public NetworkNumberDto? NetworkNumber { get; set; }
     }
+
+    public class ProjectAssignmentDto
+    {
+        public Guid ProjectId { get; set; }
+        public string ProjectNo { get; set; } = string.Empty;
+        public string ProjectName { get; set; } = string.Empty;
+        public Guid UserId { get; set; }
+        public string Username { get; set; } = string.Empty;
+        public string UserFullName { get; set; } = string.Empty;
+        public string Role { get; set; } = "Contributor";
+        public decimal? EstimatedHours { get; set; }
+    }
+
+    public class ProjectAssignmentCreateRequest
+    {
+        public Guid ProjectId { get; set; }
+        public Guid UserId { get; set; }
+        public string Role { get; set; } = "Contributor";
+        public decimal? EstimatedHours { get; set; }
+    }
+
+    public class ProjectAssignmentUpdateRequest
+    {
+        public string Role { get; set; } = "Contributor";
+        public decimal? EstimatedHours { get; set; }
+    }
 }
