@@ -23,6 +23,7 @@ namespace DSC.Data
         public DbSet<ExpenseCategory> ExpenseCategories => Set<ExpenseCategory>();
         public DbSet<ExpenseOption> ExpenseOptions => Set<ExpenseOption>();
         public DbSet<ActivityCode> ActivityCodes => Set<ActivityCode>();
+        public DbSet<DirectorCode> DirectorCodes => Set<DirectorCode>();
         public DbSet<NetworkNumber> NetworkNumbers => Set<NetworkNumber>();
         public DbSet<ProjectActivityOption> ProjectActivityOptions => Set<ProjectActivityOption>();
 
@@ -127,6 +128,14 @@ namespace DSC.Data
             {
                 b.HasKey(a => a.Id);
                 b.HasIndex(a => a.Code).IsUnique();
+            });
+
+            modelBuilder.Entity<DirectorCode>(b =>
+            {
+                b.ToTable("Director_Code");
+                b.HasKey(d => d.Code);
+                b.Property(d => d.Code).HasColumnName("directorCode");
+                b.Property(d => d.Description).HasColumnName("description").HasMaxLength(255);
             });
 
             modelBuilder.Entity<NetworkNumber>(b =>

@@ -147,6 +147,23 @@ namespace DSC.Api.DTOs
         public bool IsActive { get; set; }
     }
 
+    public class DirectorCodeDto
+    {
+        public string Code { get; set; } = string.Empty;
+        public string? Description { get; set; }
+    }
+
+    public class DirectorCodeCreateRequest
+    {
+        public string Code { get; set; } = string.Empty;
+        public string? Description { get; set; }
+    }
+
+    public class DirectorCodeUpdateRequest
+    {
+        public string? Description { get; set; }
+    }
+
     public class NetworkNumberDto
     {
         public Guid Id { get; set; }

@@ -99,6 +99,18 @@ export const AdminCatalogService = {
     await axios.put(`/api/admin/activity-codes/${id}`, payload);
   },
 
+  async getDirectorCodes() {
+    const res = await axios.get('/api/admin/director-codes');
+    return res.data;
+  },
+  async createDirectorCode(payload) {
+    const res = await axios.post('/api/admin/director-codes', payload);
+    return res.data;
+  },
+  async updateDirectorCode(code, payload) {
+    await axios.put(`/api/admin/director-codes/${code}`, payload);
+  },
+
   async getNetworkNumbers() {
     const res = await axios.get('/api/admin/network-numbers');
     return res.data;

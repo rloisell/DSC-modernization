@@ -1,5 +1,35 @@
 # Remaining Work (2026-02-21)
 
+## ✅ COMPLETED: Director Code Catalog Port (2026-02-20)
+
+**Status**: COMPLETE ✅
+
+### Changes Made
+
+#### 1. Director Code Model ✅
+- **Added**: `DirectorCode` entity mapped to legacy `Director_Code`
+- **Mapped Columns**: `directorCode`, `description`
+- **Migration**: `AddDirectorCodeModel`
+
+#### 2. Admin API & DTOs ✅
+- **Admin**: `/api/admin/director-codes` CRUD endpoints
+- **DTOs**: `DirectorCodeDto`, create/update requests
+
+#### 3. WebClient Admin Service ✅
+- **AdminCatalogService**: `getDirectorCodes`, `createDirectorCode`, `updateDirectorCode`
+
+**Files Modified**:
+- `src/DSC.Data/Models/DirectorCode.cs`
+- `src/DSC.Data/ApplicationDbContext.cs`
+- `src/DSC.Data/Migrations/20260220110559_AddDirectorCodeModel.cs`
+- `src/DSC.Data/Migrations/20260220110559_AddDirectorCodeModel.Designer.cs`
+- `src/DSC.Data/Migrations/ApplicationDbContextModelSnapshot.cs`
+- `src/DSC.Api/Controllers/AdminDirectorCodesController.cs`
+- `src/DSC.Api/DTOs/AdminCatalogDtos.cs`
+- `src/DSC.WebClient/src/api/AdminCatalogService.js`
+
+**Commit**: Pending - feat: port director code catalog
+
 ## ✅ COMPLETED: Budget Classification (CAPEX/OPEX) Port (2026-02-20)
 
 **Status**: COMPLETE ✅
