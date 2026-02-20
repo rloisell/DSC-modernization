@@ -8,28 +8,37 @@
 - All required npm dependencies installed.
 - Docs updated and changes pushed.
 
-## Activity Page — 2026-02-21 (NEW)
+## Activity Page — 2026-02-21 (UPDATED)
 
-**What's new:**
+**What's working:**
 - ✅ **Fixed 405 Error**: Added `ItemsController.GetAll()` endpoint to list work items (was missing, caused page error)
 - ✅ **Project Dropdown**: Loads all projects from database with "ProjectNo — Name" format
-- ✅ **Activity Code Dropdown**: Select from active activity codes in system (replaced text field)
-- ✅ **Network Number Dropdown**: Select from active network numbers in system (replaced number field)
+- ✅ **Activity Code Dropdown**: Selects from 6 test codes (DEV, TEST, DOC, ADMIN, MEET, TRAIN)
+- ✅ **Network Number Dropdown**: Selects from 6 test numbers (101, 102, 103, 201, 202, 203)
 - ✅ **Catalog Service**: New public `/api/catalog` endpoints for activity codes and network numbers
-- ✅ **Legacy Activity ID**: Integer field for backward compatibility, links to original Java system Activity IDs
+- ✅ **Test Data Seeding**: Activity Codes and Network Numbers automatically seeded with test data
+- ✅ **Legacy Activity ID**: Optional integer field for backward compatibility with Java system Activity IDs
+
+**What Legacy Activity ID is:**
+- **Source**: Original Java Activity.activityID field from legacy DSC system
+- **Type**: int? (nullable integer)
+- **Purpose**: Preserve traceability when migrating historical Activity records from Java to .NET
+- **When Used**: Populate this field during legacy data migration; leave empty for new items created in .NET
+- **Example**: Java Activity with ID=12345 → .NET WorkItem with LegacyActivityId=12345
+- **Benefit**: Allows both systems to run in parallel with links between old and new records
 
 **How to test**:
 1. Start API: `cd src/DSC.Api && dotnet run`
-2. Start WebClient: `cd src/DSC.WebClient && npm run dev`
-3. Navigate to Activity page
-4. Create a work item:
-   - Select project from dropdown
-   - (Optional) Enter Legacy Activity ID if linking to original system
-   - Select activity code from dropdown
-   - Select network number from dropdown
-   - Fill date, times, durations as needed
-   - Submit to create work item
-5. Verify work item appears in list without errors
+2. Seed test data: `curl -X POST http://localhost:5005/api/admin/seed/test-data -H "X-Admin-Token: local-admin-token"`
+   - Should return counts including ActivityCodesCreated and NetworkNumbersCreated
+3. Start WebClient: `cd src/DSC.WebClient && npm run dev`
+4. Navigate to Activity page and create a work item:
+   - Project dropdown: loads from `/api/projects`
+   - Activity Code dropdown: loads DEV, TEST, DOC, ADMIN, MEET, TRAIN from `/api/catalog/activity-codes`
+   - Network Number dropdown: loads 101, 102, 103, 201, 202, 203 from `/api/catalog/network-numbers`
+   - (Optional) Legacy Activity ID: enter an ID if linking to original system
+   - Select values and submit
+   - Verify work item appears in list below with no errors
 
 ## Admin Management — 2026-02-21 (UPDATED)
 
@@ -54,7 +63,7 @@
   - `/api/admin/roles` CRUD endpoints
   - `/api/admin/users` accepts and persists role/position/department assignments
 - ✅ **Database Migrations**: Automatic migration execution on API startup
-- ✅ **Test Data Seeding**: 4 system roles created (Administrator, Manager, Developer, Viewer)
+- ✅ **Test Data Seeding**: 4 system roles + 6 activity codes + 6 network numbers automatically seeded
 
 **How to test**:
 1. Start API: `cd src/DSC.Api && dotnet run` (migrations execute automatically)
@@ -65,8 +74,11 @@
    - [http://localhost:5173/admin/users](http://localhost:5173/admin/users) - assign roles, positions, departments
    - [http://localhost:5173/admin/departments](http://localhost:5173/admin/departments) - assign department managers
    - [http://localhost:5173/admin/positions](http://localhost:5173/admin/positions) - manage positions
+   - [http://localhost:5173/activity](http://localhost:5173/activity) - create work items with dropdown catalogs
 
-## Admin User Management & Role System — 2026-02-19
+## Previous Work — 2026-02-19
+
+### Admin User Management & Role System
 
 # DSC-modernization
 

@@ -1,4 +1,4 @@
-## 2026-02-21 — Activity Page Fixes & Catalog Endpoints
+## 2026-02-21 — Activity Page Fixes & Catalog Data Seeding
 
 **Completed**:
 1. ✅ Fixed 405 Method Not Allowed error in Activity page
@@ -26,12 +26,31 @@
    - **Optional**: Both fields are optional for work items
    - **Performance**: All catalog data loaded in parallel on component mount
 
-4. ✅ Verified project dropdown loads correctly
+4. ✅ Added test data seeding for Activity Codes and Network Numbers
+   - **Issue**: Dropdowns had no values because database was empty
+   - **Solution**: Extended TestDataSeeder to seed catalog data
+   - **Activity Codes seeded** (6 codes):
+     - DEV: Development work
+     - TEST: Testing and QA
+     - DOC: Documentation
+     - ADMIN: Administrative work
+     - MEET: Meetings and planning
+     - TRAIN: Training activities
+   - **Network Numbers seeded** (6 numbers):
+     - 101: Network Infrastructure
+     - 102: Data Center Operations
+     - 103: Customer Support
+     - 201: Engineering
+     - 202: Security Operations
+     - 203: Cloud Services
+   - **Updated TestSeedResult**: Now returns ActivityCodesCreated and NetworkNumbersCreated counts
+
+5. ✅ Verified project dropdown loads correctly
    - Projects dropdown now populates correctly from `/api/projects` endpoint
    - Displays "ProjectNo — Name" format for clarity
    - Works alongside new activity code and network number selectors
 
-5. ✅ Builds and tests passed
+6. ✅ Builds and tests passed
    - API builds successfully with no errors
    - WebClient builds successfully 
    - All components import/export correctly
@@ -39,15 +58,41 @@
 
 **Status**: Activity page now fully functional with:
 - Error resolved (405 fixed)
-- All dropdowns loading and working
+- All dropdowns loading real database data
+- Activity Codes and Network Numbers seeded in test data
 - Data sources properly wired to database catalogs
 
 **How to test**:
 1. Start API: `cd src/DSC.Api && dotnet run`
-2. Start WebClient: `cd src/DSC.WebClient && npm run dev`
-3. Navigate to Activity page
-4. Verify no error at top
-5. Create a work item:
+2. Seed test data (in another terminal):
+   ```bash
+   curl -X POST http://localhost:5005/api/admin/seed/test-data \
+     -H "X-Admin-Token: local-admin-token"
+   ```
+   Should show ActivityCodesCreated and NetworkNumbersCreated in response
+3. Start WebClient: `cd src/DSC.WebClient && npm run dev`
+4. Navigate to Activity page
+5. Verify no error at top
+6. Create a work item:
+   - All three dropdowns (Projects, Activity Codes, Network Numbers) should populate with values
+   - Select values from each and submit
+   - Verify work item appears in list below
+
+**Legacy Activity ID Clarification**:
+- **Source**: Original Java Activity.activityID field from legacy DSC system
+- **Type**: Integer (nullable)
+- **Purpose**: Backward compatibility field for linking work items to original Java Activity records during data migration
+- **Usage**: When migrating historical Activities from Java system, populate this field with the original Activity.activityID
+- **For new items**: Leave empty (optional) - only needed for legacy data migration
+- **Stored in**: `WorkItem.LegacyActivityId` column
+
+**Technical details**:
+- Files Modified: `TestDataSeeder.cs` (seeding logic)
+- Test Data: 6 activity codes + 6 network numbers automatically seeded
+- Catalog endpoints: Public (no authentication), filter to active records only
+- Migration-ready: Legacy Activity ID preserves traceability to original system
+
+## 2026-02-21 — Activity Page Fixes & Catalog Endpoints
    - Select a project from dropdown
    - Select an activity code from dropdown
    - Select a network number from dropdown

@@ -1,4 +1,72 @@
-# Remaining work (2026-02-20)
+# Remaining work (2026-02-21)
+
+## COMPLETED: Activity Page Catalog Data Seeding ✅
+
+**Status**: DONE — Dropdowns now load real data from database
+
+1. ✅ **Added Activity Code Seeding** (6 test codes):
+   - DEV: Development work
+   - TEST: Testing and QA
+   - DOC: Documentation
+   - ADMIN: Administrative work
+   - MEET: Meetings and planning
+   - TRAIN: Training activities
+
+2. ✅ **Added Network Number Seeding** (6 test numbers):
+   - 101: Network Infrastructure
+   - 102: Data Center Operations
+   - 103: Customer Support
+   - 201: Engineering
+   - 202: Security Operations
+   - 203: Cloud Services
+
+3. ✅ **Updated TestDataSeeder**:
+   - Extended TestSeedResult record to track ActivityCodesCreated and NetworkNumbersCreated
+   - Both catalog types seeded automatically when running test-data endpoint
+   - Sets IsActive=true for all seeded records
+
+4. ✅ **Verified Functionality**:
+   - API builds successfully
+   - Activity Code and Network Number dropdowns now populate with values
+   - Test data automatically seeds when calling `/api/admin/seed/test-data`
+
+**Files Modified**:
+- `src/DSC.Api/Seeding/TestDataSeeder.cs` (added catalog seeding logic)
+
+**Files Created**: None
+
+**Commits**:
+- `991c124` - feat: add activity code and network number seeding
+
+**How to test**:
+```bash
+# 1. Start API
+cd src/DSC.Api && dotnet run
+
+# 2. Seed test data
+curl -X POST http://localhost:5005/api/admin/seed/test-data \
+  -H "X-Admin-Token: local-admin-token"
+# Response should include ActivityCodesCreated and NetworkNumbersCreated
+
+# 3. Start WebClient
+cd src/DSC.WebClient && npm run dev
+
+# 4. Navigate to Activity page
+# All three dropdowns should now populate with test data:
+# - Projects: loaded from /api/projects
+# - Activity Codes: DEV, TEST, DOC, ADMIN, MEET, TRAIN
+# - Network Numbers: 101, 102, 103, 201, 202, 203
+```
+
+**Legacy Activity ID Documentation**:
+- **Original Source**: Java Activity.activityID field from legacy DSC system
+- **Type**: int? (nullable)
+- **Purpose**: Preserve link to original Activity records during Java → .NET migration
+- **When Used**: Populate during data migration; leave empty for new items
+- **Storage**: WorkItem.LegacyActivityId column
+- **Example Migration**: Java Activity (ID=12345) → .NET WorkItem (LegacyActivityId=12345)
+
+---
 
 ## COMPLETED: Admin Departments Manager Field Fix ✅
 
@@ -29,7 +97,7 @@
 
 ## COMPLETED: Activity Page Fixes & Catalog Endpoints ✅
 
-**Status**: DONE
+**Status**: DONE — Combined with seeding work above
 
 1. ✅ **Fixed 405 Error**:
    - Added `ItemsController.GetAll()` endpoint (was missing)
@@ -77,7 +145,7 @@
 **All tasks finished!**
 
 1. ✅ **Database Schema**: Role entity and Position/Department FKs added to User
-2. ✅ **API Layer**: 
+2. ✅ **API Layer**:
    - AdminRolesController with full CRUD endpoints (/api/admin/roles)
    - Updated AdminUsersController to accept role/position/department IDs
    - Comprehensive role, position, department DTOs
