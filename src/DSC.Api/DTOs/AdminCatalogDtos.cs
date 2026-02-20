@@ -182,6 +182,23 @@ namespace DSC.Api.DTOs
         public bool IsActive { get; set; }
     }
 
+    public class CpcCodeDto
+    {
+        public string Code { get; set; } = string.Empty;
+        public string? Description { get; set; }
+    }
+
+    public class CpcCodeCreateRequest
+    {
+        public string Code { get; set; } = string.Empty;
+        public string? Description { get; set; }
+    }
+
+    public class CpcCodeUpdateRequest
+    {
+        public string? Description { get; set; }
+    }
+
     public class NetworkNumberDto
     {
         public Guid Id { get; set; }

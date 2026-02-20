@@ -1,75 +1,4 @@
-## DSC Modernization Overview
-
-**Application Purpose**: This project modernizes the legacy Java-based DSC (Director Support Center) time tracking and project management system to a modern .NET 10 stack while preserving historical data structures and maintaining backward compatibility.
-
-**Tech Stack**:
-- **Backend**: ASP.NET Core 10 Web API with Entity Framework Core
-- **Frontend**: Vite-based JavaScript client with vanilla JS
-- **Database**: MySQL with EF Core migrations
-- **Testing**: xUnit with InMemory database provider
-
-**Key Features**:
-- Activity-based time tracking with project, activity code, and network number assignments
-- Project management with budget classifications (CAPEX/OPEX)
-- Catalog-driven dropdowns for activity codes and network numbers
-- Legacy activity ID preservation for Java system traceability
-- Comprehensive admin endpoints for managing users, departments, positions, projects, and catalog data
-
-**Legacy Model Preservation**:
-This modernization preserves five key legacy mapping tables from the original Java system:
-- `Department_User`: Many-to-many relationship between users and departments with time periods
-- `User_Position`: Many-to-many relationship between users and positions with time periods
-- `User_User`: User hierarchy/relationship mapping with time periods
-- `Project_Activity`: Maps activity codes and network numbers to projects
-- `Expense_Activity`: Maps expense-related activity metadata (director codes, reason codes, CPC codes)
-
-These tables use composite primary keys and preserve the original Java naming conventions for seamless data migration.
-
-## Authentication & Role-Based Access Control — 2026-02-21 (NEW ✅)
-
-**What's working:**
-- ✅ **Login System**: Simple username/password authentication via `/api/auth/login` endpoint
-- ✅ **Role-Based Access**: Two roles supported - Admin and User
-  - Admin role: Can access Activity, Projects, and all Admin pages
-  - User role: Can access Activity and Projects pages only
-  - Pre-login: Only Home page visible
-- ✅ **Protected Routes**: Authenticated routes redirect to login if not logged in
-- ✅ **Session Management**: User session persisted in localStorage with role information
-- ✅ **Conditional Navigation**: Navigation links show/hide based on authentication state and role
-- ✅ **Logout Functionality**: Logout button displays current username and clears session
-
-**Test Credentials**:
-- **Admin user**: username `rloisel1`, password `test-password-updated`
-- **Regular user**: username `kduma`, password `test-password`
-
-**How to test** (✅ TESTED & VERIFIED 2026-02-21):
-1. Start API: `cd src/DSC.Api && dotnet run --urls http://localhost:5005`
-2. Start WebClient: `cd src/DSC.WebClient && npm run dev`
-3. Navigate to [http://localhost:5173](http://localhost:5173)
-4. **Admin user test**: Click "Login" and use `rloisel1` / `test-password-updated`
-   - ✅ Home, Activity, Projects, Admin links all visible
-   - ✅ Can access all admin pages (/admin/users, /admin/departments, etc.)
-   - ✅ Logout shows username in button
-5. **Regular user test**: Login as `kduma` / `test-password`
-   - ✅ Home, Activity, Projects links visible
-   - ✅ Admin link NOT visible in navigation
-   - ✅ Cannot access /admin pages (redirects to home)
-6. **Pre-login test**: Logout and verify Home is the only page
-   - ✅ Cannot access Activity or Projects without login
-   - ✅ Clicking links redirects to login page
-7. **Return path test**: Try accessing /activity while logged out
-   - ✅ Redirects to login
-   - ✅ After login, returns to /activity (not home)
-
-**Architecture**:
-- **Backend**: `AuthController` validates credentials against `UserAuth` table and returns user details with role
-- **Frontend**: `AuthContext` manages authentication state, `ProtectedRoute` and `AdminRoute` components guard routes
-- **Database**: Role assignment managed in `TestDataSeeder` - rloisel1 gets Admin role, others get User role
-- **Future**: Will be replaced with OIDC/Keycloak for production use
-
----
-
-## Unit Testing — 2026-02-21 ✅
+## Unit Testing — 2026-02-21 ✅ NEW
 
 **16 unit tests implemented and passing**:
 - ✅ Test data seeding validation (9 tests): validates TestDataSeeder creates correct activity codes, network numbers, and marks them as active
@@ -77,7 +6,6 @@ These tables use composite primary keys and preserve the original Java naming co
 - ✅ Integration tests (1 test): validates complete data pipeline from seeding to frontend data binding
 - ✅ Framework: xUnit with Entity Framework Core InMemory database (isolated, no external database required)
 - ✅ Execution time: ~1 second for all tests
-- ✅ Security: System.Drawing.Common pinned to 8.0.8 to address NU1904
 
 **How to run**:
 ```bash
@@ -135,9 +63,8 @@ See [tests/howto.md](tests/howto.md) for comprehensive testing documentation, in
   - Uses new `/api/items/detailed?period={period}` endpoint
 - ✅ **Fixed 405 Error**: Added `ItemsController.GetAll()` endpoint to list work items (was missing, caused page error)
 - ✅ **Project Dropdown**: Loads all projects from database with "ProjectNo — Name" format
-- ✅ **Activity Code Dropdown**: Selects from 12 seeded test codes (DEV, TEST, DOC, ADMIN, MEET, TRAIN and additional codes)
-- ✅ **Network Number Dropdown**: Selects from 12 seeded test numbers (101, 102, 103, 201, 202, 203 and additional numbers)
-- ✅ **Budget Dropdown**: Loads CAPEX/OPEX budgets from `/api/catalog/budgets`
+- ✅ **Activity Code Dropdown**: Selects from 6 test codes (DEV, TEST, DOC, ADMIN, MEET, TRAIN)
+- ✅ **Network Number Dropdown**: Selects from 6 test numbers (101, 102, 103, 201, 202, 203)
 - ✅ **Budget Classification (CAPEX/OPEX)** (NEW 2026-02-21):
   - Activity create form requires a budget selection
   - Activity table displays the budget classification for each work item
@@ -166,9 +93,8 @@ See [tests/howto.md](tests/howto.md) for comprehensive testing documentation, in
 - **Benefit**: Allows both systems to run in parallel with links between old and new records
 
 **How to test**:
-1. Apply migrations: `dotnet ef database update --project src/DSC.Data --startup-project src/DSC.Api`
-2. Start API: `cd src/DSC.Api && dotnet run`
-3. Seed test data: `curl -X POST http://localhost:5005/api/admin/seed/test-data -H "X-Admin-Token: local-admin-token"`
+1. Start API: `cd src/DSC.Api && dotnet run`
+2. Seed test data: `curl -X POST http://localhost:5005/api/admin/seed/test-data -H "X-Admin-Token: local-admin-token"`
    - Should return counts including ActivityCodesCreated and NetworkNumbersCreated
 3. Start WebClient: `cd src/DSC.WebClient && npm run dev`
 4. Navigate to Activity page and create a work item:
@@ -180,10 +106,6 @@ See [tests/howto.md](tests/howto.md) for comprehensive testing documentation, in
    - Verify work item appears in list below with no errors
 
 ## Admin Management — 2026-02-21 (UPDATED)
-
-### Admin Catalog Deletion (NEW 2026-02-21)
-- Delete actions are available for departments, positions, projects, activity codes, network numbers, budgets, expense categories, and expense options
-- Destructive actions prompt for confirmation and refresh the catalog lists after completion
 
 ### Admin Users Page (UPDATED 2026-02-20)
 - **Enhanced Users Table**: Displays comprehensive user information in an easy-to-read format
@@ -226,25 +148,10 @@ See [tests/howto.md](tests/howto.md) for comprehensive testing documentation, in
   - Remove incorrect or obsolete assignments
   - Verify bulk assignments were created correctly
 
-### Legacy Department Assignments (NEW 2026-02-20)
-- **Feature**: Legacy `Department_User` mapping preserved for historical assignments
-- **Use case**: Reference prior department history by effective dates
-
-### Legacy Position Assignments (NEW 2026-02-20)
-- **Feature**: Legacy `User_Position` mapping preserved for historical assignments
-- **Use case**: Reference prior position history by effective dates
-
-### Legacy User Relationships (NEW 2026-02-20)
-- **Feature**: Legacy `User_User` mapping preserved for historical user relationships
-- **Use case**: Reference prior user associations by effective dates
-
-### Legacy Project Activity Links (NEW 2026-02-20)
-- **Feature**: Legacy `Project_Activity` mapping preserved for historical project activity links
-- **Use case**: Reference prior activity assignments to project/activity/network codes
-
-### Legacy Expense Activity Links (NEW 2026-02-20)
-- **Feature**: Legacy `Expense_Activity` mapping preserved for historical expense activity links
-- **Use case**: Reference prior activity assignments to Director/Reason/CPC codes
+### CPC Codes Catalog (NEW 2026-02-20)
+- **Feature**: Admin management for legacy `CPC_Code` catalog entries
+- **API endpoint**: `GET/POST/PUT /api/admin/cpc-codes`
+- **Use case**: Maintain CPC codes referenced by legacy expense activity records
 
 ### Manager Field Bug Fix in AdminDepartments
 - **Fixed**: Manager field is now a user selection dropdown (was plain text input)
@@ -343,8 +250,8 @@ API update: The API now exposes legacy Java model fields via DTOs so the fronten
 - Admin UI scaffolding: `AdminUsers` now mirrors the legacy form fields (employee info, position/department assignment, role) with placeholder actions. Other admin pages include planned action lists and back links.
 - Admin UI build-out: positions, departments, projects, expense, and activity options pages now include draft forms and placeholder tables based on intended legacy workflows.
 - Admin Users wiring: `/api/admin/users` endpoints are available and `AdminUsers` now uses real API calls for list/create/update/delete (other admin pages still use placeholders).
-- Admin catalog wiring: positions, departments, projects, budgets, expense categories, activity codes, network numbers, activity categories, and calendar categories are now backed by `/api/admin/*` endpoints and wired in the UI via `AdminCatalogService`.
-- Admin catalog edit workflows: admin pages now reuse create forms for edits and call update/deactivate APIs for positions, departments, projects, budgets, expense categories, activity codes, network numbers, activity categories, and calendar categories.
+- Admin catalog wiring: positions, departments, projects, budgets, expense categories, activity codes, and network numbers are now backed by `/api/admin/*` endpoints and wired in the UI via `AdminCatalogService`.
+- Admin catalog edit workflows: admin pages now reuse create forms for edits and call update/deactivate APIs for positions, departments, projects, budgets, expense categories, activity codes, and network numbers.
 - Admin Expense improvements: Admin Expense now manages budgets (CAPEX/OPEX) and categories, with budget assignment required for categories.
 - Frontend design system: the React UI now uses the B.C. Design System component library with BC Sans and design tokens for layout, navigation, forms, and tables.
 - Admin landing page: updated copy to reflect the admin sections are wired to APIs.

@@ -1,237 +1,34 @@
 # Remaining Work (2026-02-21)
 
-## Next Steps
-
-### 1. Production Authentication
-- Replace simple password authentication with OIDC/Keycloak integration
-- Implement JWT token-based authentication for API calls
-- Add refresh token support for session management
-- Implement password reset/change functionality
-
-### 2. Optional UX Enhancements
-- Add Toast notifications for successful actions (create, update, delete)
-- Add loading spinners for async operations
-- Implement undo functionality for destructive actions
-- Review empty states for expense options and project activity options
-
-### 3. Advanced Features
-- Implement user preferences/settings page
-- Add audit logging for admin actions
-- Implement search/filter functionality across admin catalog pages
-- Add bulk operation support for admin pages
-
-## ✅ COMPLETED: UI Walkthrough & Testing (2026-02-21)
-
-**Summary**: Local browser testing completed successfully with both admin and regular user accounts.
-
-### Testing Performed
-1. ✅ API running on http://localhost:5005 with all endpoints responding
-2. ✅ WebClient running on http://localhost:5173 and accessible
-3. ✅ Login page accessible and functional
-4. ✅ Admin user login: rloisel1 / test-password-updated
-   - Can access Activity page
-   - Can access Projects page
-   - Can see Admin navigation link
-   - Can access all Admin pages
-5. ✅ Regular user login: kduma / test-password
-   - Can access Activity page
-   - Can access Projects page
-   - Cannot see Admin navigation link
-   - Cannot access Admin pages (redirects to home)
-6. ✅ Pre-login state: Only Home page visible
-7. ✅ Logout functionality: Clears session and redirects to Home
-8. ✅ Return path: Login redirects to intended page after authentication
-
-### Test Results Summary
-- All protected routes working as expected
-- Role-based access control enforced correctly
-- Navigation conditional display working
-- Session persistence in localStorage verified
-- Error handling for invalid credentials verified
-
----
-
-## ✅ COMPLETED: Role-Based Access Control (2026-02-21)
-
-**Summary**: Implemented frontend and backend authentication with role-based access control. Admin users can access all pages, regular users can access Activity and Projects, and unauthenticated users only see Home.
-
-### Features Implemented
-1. Backend authentication endpoints (`/api/auth/login`)
-2. Frontend AuthContext for session management
-3. Protected routes for authenticated users (Activity, Projects)
-4. Admin-only routes for admin section
-5. Conditional navigation based on authentication state
-6. Role assignment in database seeding
-
-### Test Credentials
-- Admin: `rloisel1` / `test-password-updated`
-- User: `kduma` / `test-password`
-
----
-
-## ✅ COMPLETED: Legacy Model Ports (2026-02-20 - 2026-02-21)
-
-**Summary**: All 5 legacy mapping tables from the Java DSC system have been ported with composite primary keys and full test coverage.
-
-### Models Ported
-1. `Department_User` - User-department assignments with time periods
-2. `User_Position` - User-position assignments with time periods
-3. `User_User` - User relationships/hierarchy with time periods
-4. `Project_Activity` - Activity code and network number mappings to projects
-5. `Expense_Activity` - Expense metadata (director/reason/CPC codes)
-
-### Test Coverage
-- 21 unit tests passing (16 existing + 5 new legacy model tests)
-- Composite key validation
-- Data integrity checks
-- Seed data validation (corrected to 12 activity codes and 12 network numbers)
-
-### Bug Fixes
-- **CS0618**: Removed obsolete `ISystemClock` from `AdminTokenAuthenticationHandler`
-- **NU1902**: Pinned `System.Security.Cryptography.Xml` to 4.7.1
-- **NU1904**: Pinned `System.Drawing.Common` to 8.0.8
-
-### Commits
-- feat: port department user mapping (d12c5e5)
-- feat: port user position, user user, project activity, expense activity mappings
-- test: add unit tests for all legacy models
-- fix: resolve ISystemClock obsolete warning and NU1902 vulnerability (a0b14bb)
-
-### Pull Request
-- #2 - https://github.com/rloisell/DSC-modernization/pull/2
-
-### Admin Endpoints
-- Added DELETE endpoints for departments, positions, projects, activity codes, network numbers, budgets, expense categories, and expense options
-
-### Admin UI Wiring
-- Admin pages now call delete endpoints for catalog entities
-- Admin Expense page now manages expense options (create/edit/deactivate/delete)
-
----
-
-## ToDo (Archive): Legacy Models - All Complete ✅
-
-The sections below have been completed and merged/are ready for merge.
-
-## ✅ COMPLETED: Expense Activity Mapping Port (2026-02-20)
+## ✅ COMPLETED: CPC Code Catalog Port (2026-02-20)
 
 **Status**: COMPLETE ✅
 
 ### Changes Made
 
-#### 1. Expense Activity Model ✅
-- **Added**: `ExpenseActivity` entity mapped to `Expense_Activity`
-- **Activity Id**: `ActivityactivityID`
-- **Migration**: `AddExpenseActivityModel`
+#### 1. CPC Code Model ✅
+- **Added**: `CpcCode` entity mapped to legacy `CPC_Code`
+- **Mapped Columns**: `cpcCode`, `description`
+- **Migration**: `AddCpcCodeModel`
 
-#### 2. Tests ✅
-- **Added**: `ExpenseActivityTests` for insert/query coverage
+#### 2. Admin API & DTOs ✅
+- **Admin**: `/api/admin/cpc-codes` CRUD endpoints
+- **DTOs**: `CpcCodeDto`, create/update requests
 
-**Files Modified**:
-- `src/DSC.Data/Models/ExpenseActivity.cs`
-- `src/DSC.Data/ApplicationDbContext.cs`
-- `src/DSC.Data/Migrations/20260220120601_AddExpenseActivityModel.cs`
-- `src/DSC.Data/Migrations/20260220120601_AddExpenseActivityModel.Designer.cs`
-- `src/DSC.Data/Migrations/ApplicationDbContextModelSnapshot.cs`
-- `tests/DSC.Tests/ExpenseActivityTests.cs`
-
-**Commit**: Pending - feat: port expense activity mapping
-
-## ✅ COMPLETED: Project Activity Mapping Port (2026-02-20)
-
-**Status**: COMPLETE ✅
-
-### Changes Made
-
-#### 1. Project Activity Model ✅
-- **Added**: `ProjectActivity` entity mapped to `Project_Activity`
-- **Activity Id**: `ActivityactivityID`
-- **Migration**: `AddProjectActivityModel`
-
-#### 2. Tests ✅
-- **Added**: `ProjectActivityTests` for insert/query coverage
+#### 3. WebClient Admin Service ✅
+- **AdminCatalogService**: `getCpcCodes`, `createCpcCode`, `updateCpcCode`
 
 **Files Modified**:
-- `src/DSC.Data/Models/ProjectActivity.cs`
+- `src/DSC.Data/Models/CpcCode.cs`
 - `src/DSC.Data/ApplicationDbContext.cs`
-- `src/DSC.Data/Migrations/20260220120552_AddProjectActivityModel.cs`
-- `src/DSC.Data/Migrations/20260220120552_AddProjectActivityModel.Designer.cs`
+- `src/DSC.Data/Migrations/20260220111513_AddCpcCodeModel.cs`
+- `src/DSC.Data/Migrations/20260220111513_AddCpcCodeModel.Designer.cs`
 - `src/DSC.Data/Migrations/ApplicationDbContextModelSnapshot.cs`
-- `tests/DSC.Tests/ProjectActivityTests.cs`
+- `src/DSC.Api/Controllers/AdminCpcCodesController.cs`
+- `src/DSC.Api/DTOs/AdminCatalogDtos.cs`
+- `src/DSC.WebClient/src/api/AdminCatalogService.js`
 
-**Commit**: Pending - feat: port project activity mapping
-
-## ✅ COMPLETED: User Relationship Mapping Port (2026-02-20)
-
-**Status**: COMPLETE ✅
-
-### Changes Made
-
-#### 1. User User Model ✅
-- **Added**: `UserUser` entity mapped to `User_User`
-- **Composite Key**: `UserempId`, `UserempId2`, `startDate`
-- **Migration**: `AddUserUserModel`
-
-#### 2. Tests ✅
-- **Added**: `UserUserTests` for insert/query coverage
-
-**Files Modified**:
-- `src/DSC.Data/Models/UserUser.cs`
-- `src/DSC.Data/ApplicationDbContext.cs`
-- `src/DSC.Data/Migrations/20260220120416_AddUserUserModel.cs`
-- `src/DSC.Data/Migrations/20260220120416_AddUserUserModel.Designer.cs`
-- `src/DSC.Data/Migrations/ApplicationDbContextModelSnapshot.cs`
-- `tests/DSC.Tests/UserUserTests.cs`
-
-**Commit**: Pending - feat: port user user mapping
-
-## ✅ COMPLETED: User Position Mapping Port (2026-02-20)
-
-**Status**: COMPLETE ✅
-
-### Changes Made
-
-#### 1. User Position Model ✅
-- **Added**: `UserPosition` entity mapped to `User_Position`
-- **Composite Key**: `UserempId`, `PositionpositionID`, `startDate`
-- **Migration**: `AddUserPositionModel`
-
-#### 2. Tests ✅
-- **Added**: `UserPositionTests` for insert/query coverage
-
-**Files Modified**:
-- `src/DSC.Data/Models/UserPosition.cs`
-- `src/DSC.Data/ApplicationDbContext.cs`
-- `src/DSC.Data/Migrations/20260220120314_AddUserPositionModel.cs`
-- `src/DSC.Data/Migrations/20260220120314_AddUserPositionModel.Designer.cs`
-- `src/DSC.Data/Migrations/ApplicationDbContextModelSnapshot.cs`
-- `tests/DSC.Tests/UserPositionTests.cs`
-
-**Commit**: Pending - feat: port user position mapping
-
-## ✅ COMPLETED: Department User Mapping Port (2026-02-20)
-
-**Status**: COMPLETE ✅
-
-### Changes Made
-
-#### 1. Department User Model ✅
-- **Added**: `DepartmentUser` entity mapped to `Department_User`
-- **Composite Key**: `UserempId`, `DepartmentdeptID`, `startDate`
-- **Migration**: `AddDepartmentUserModel`
-
-#### 2. Tests ✅
-- **Added**: `DepartmentUserTests` for insert/query coverage
-
-**Files Modified**:
-- `src/DSC.Data/Models/DepartmentUser.cs`
-- `src/DSC.Data/ApplicationDbContext.cs`
-- `src/DSC.Data/Migrations/20260220115933_AddDepartmentUserModel.cs`
-- `src/DSC.Data/Migrations/20260220115933_AddDepartmentUserModel.Designer.cs`
-- `src/DSC.Data/Migrations/ApplicationDbContextModelSnapshot.cs`
-- `tests/DSC.Tests/DepartmentUserTests.cs`
-
-**Commit**: Pending - feat: port department user mapping
+**Commit**: Pending - feat: port CPC code catalog
 
 ## ✅ COMPLETED: Budget Classification (CAPEX/OPEX) Port (2026-02-20)
 
@@ -262,10 +59,6 @@ The sections below have been completed and merged/are ready for merge.
 ### Seed Data ✅
 - CAPEX/OPEX budgets seeded for local testing
 
-### Database Update ✅
-- Applied migration `20260220104233_AddBudgetModel`
-- Verified foreign keys for Budget relationships
-
 **Files Modified**:
 - `src/DSC.Data/Models/Budget.cs`
 - `src/DSC.Data/Models/WorkItem.cs`
@@ -283,38 +76,6 @@ The sections below have been completed and merged/are ready for merge.
 - `src/DSC.WebClient/src/pages/AdminExpense.jsx`
 
 **Commit**: Current - feat: port CAPEX/OPEX budget classification
-
----
-
-## ✅ COMPLETED: Activity Category & Calendar Models (2026-02-20)
-
-**Status**: COMPLETE ✅
-
-### Changes Made
-
-#### 1. Activity Category Model ✅
-- **Added**: `ActivityCategory` entity mapped to legacy `Category` table
-- **Admin API**: `/api/admin/activity-categories` CRUD
-
-#### 2. Calendar Models ✅
-- **Added**: `CalendarCategory` mapped to `Calendar_Category`
-- **Added**: `CalendarEntry` mapped to `Calendar` table (date primary key)
-- **Admin API**: `/api/admin/calendar-categories` CRUD
-
-#### 3. Migration ✅
-- `AddActivityCalendarModels` applied to database
-
-**Files Modified**:
-- `src/DSC.Data/Models/ActivityCategory.cs`
-- `src/DSC.Data/Models/CalendarCategory.cs`
-- `src/DSC.Data/Models/CalendarEntry.cs`
-- `src/DSC.Data/ApplicationDbContext.cs`
-- `src/DSC.Api/Controllers/AdminActivityCategoriesController.cs`
-- `src/DSC.Api/Controllers/AdminCalendarCategoriesController.cs`
-- `src/DSC.Api/DTOs/AdminCatalogDtos.cs`
-- `src/DSC.WebClient/src/api/AdminCatalogService.js`
-
-**Commit**: Current - feat: port activity category and calendar models
 
 ---
 

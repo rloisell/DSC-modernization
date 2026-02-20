@@ -32,6 +32,7 @@ namespace DSC.Data
         public DbSet<ExpenseCategory> ExpenseCategories => Set<ExpenseCategory>();
         public DbSet<ExpenseOption> ExpenseOptions => Set<ExpenseOption>();
         public DbSet<ActivityCode> ActivityCodes => Set<ActivityCode>();
+        public DbSet<CpcCode> CpcCodes => Set<CpcCode>();
         public DbSet<NetworkNumber> NetworkNumbers => Set<NetworkNumber>();
         public DbSet<ProjectActivityOption> ProjectActivityOptions => Set<ProjectActivityOption>();
 
@@ -214,6 +215,14 @@ namespace DSC.Data
             {
                 b.HasKey(a => a.Id);
                 b.HasIndex(a => a.Code).IsUnique();
+            });
+
+            modelBuilder.Entity<CpcCode>(b =>
+            {
+                b.ToTable("CPC_Code");
+                b.HasKey(c => c.Code);
+                b.Property(c => c.Code).HasColumnName("cpcCode");
+                b.Property(c => c.Description).HasColumnName("description").HasMaxLength(255);
             });
 
             modelBuilder.Entity<NetworkNumber>(b =>
