@@ -1,10 +1,11 @@
 using System;
 using System.Linq;
-using System.Security.Cryptography;
-using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using DSC.Api.DTOs;
 using DSC.Data;
@@ -14,13 +15,17 @@ namespace DSC.Api.Controllers
 {
     [ApiController]
     [Route("api/admin/users")]
+    [Authorize(Policy = "AdminOnly")]
+    [EnableRateLimiting("Admin")]
     public class AdminUsersController : ControllerBase
     {
         private readonly ApplicationDbContext _db;
+        private readonly IPasswordHasher<User> _passwordHasher;
 
-        public AdminUsersController(ApplicationDbContext db)
+        public AdminUsersController(ApplicationDbContext db, IPasswordHasher<User> passwordHasher)
         {
             _db = db;
+            _passwordHasher = passwordHasher;
         }
 
         [HttpGet]
@@ -89,7 +94,9 @@ namespace DSC.Api.Controllers
                 Email = request.Email,
                 FirstName = request.FirstName,
                 LastName = request.LastName,
-                PasswordHash = string.IsNullOrWhiteSpace(request.Password) ? null : HashPassword(request.Password)
+                PasswordHash = string.IsNullOrWhiteSpace(request.Password)
+                    ? null
+                    : _passwordHasher.HashPassword(null!, request.Password)
             };
 
             await _db.Users.AddAsync(user);
@@ -113,7 +120,7 @@ namespace DSC.Api.Controllers
 
             if (!string.IsNullOrWhiteSpace(request.Password))
             {
-                user.PasswordHash = HashPassword(request.Password);
+                user.PasswordHash = _passwordHasher.HashPassword(user, request.Password);
             }
 
             await _db.SaveChangesAsync();
@@ -133,16 +140,5 @@ namespace DSC.Api.Controllers
             return NoContent();
         }
 
-        private static string HashPassword(string password)
-        {
-            using var sha256 = SHA256.Create();
-            var bytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
-            var sb = new StringBuilder(bytes.Length * 2);
-            foreach (var b in bytes)
-            {
-                sb.Append(b.ToString("x2"));
-            }
-            return sb.ToString();
-        }
     }
 }

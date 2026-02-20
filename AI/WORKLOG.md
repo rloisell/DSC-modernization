@@ -141,6 +141,14 @@ Next: run integration tests or create controllers for other resources (Projects,
 
 - Updated the Administrator landing page copy to reflect that admin sections are now wired to APIs.
 
+## 2026-02-19 — Security hardening branch
+
+- Created `hardening-security` branch with initial hardening steps for the API.
+- Replaced SHA256 password hashing with ASP.NET Core password hashing for admin user creation/updates.
+- Added admin authorization policy with a header token handler and rate limiting on admin endpoints.
+- Removed the insecure default connection string fallback (now fails fast if missing).
+- Added `AI/securityNextSteps.md` with prioritized security follow-ups.
+
 ## 2026-02-19 — Frontend build warnings and code-splitting
 
 - Captured Vite build warnings about chunks exceeding 500 kB after minification.

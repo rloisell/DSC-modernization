@@ -159,6 +159,7 @@ API update: The API now exposes legacy Java model fields via DTOs so the fronten
 - Admin catalog edit workflows: admin pages now reuse create forms for edits and call update/deactivate APIs for positions, departments, projects, expense categories/options, activity codes, and network numbers.
 - Frontend design system: the React UI now uses the B.C. Design System component library with BC Sans and design tokens for layout, navigation, forms, and tables.
 - Admin landing page: updated copy to reflect the admin sections are wired to APIs.
+- Security notes: see `AI/securityNextSteps.md` for current risks and hardening actions.
 
 - Frontend build output: `src/DSC.WebClient/dist/` is ignored in git to avoid committing Vite build artifacts.
 

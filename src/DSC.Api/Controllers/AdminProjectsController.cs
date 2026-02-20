@@ -1,8 +1,10 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using DSC.Api.DTOs;
 using DSC.Data;
@@ -12,6 +14,8 @@ namespace DSC.Api.Controllers
 {
     [ApiController]
     [Route("api/admin/projects")]
+    [Authorize(Policy = "AdminOnly")]
+    [EnableRateLimiting("Admin")]
     public class AdminProjectsController : ControllerBase
     {
         private readonly ApplicationDbContext _db;
