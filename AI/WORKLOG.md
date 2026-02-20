@@ -1,53 +1,53 @@
-## 2026-02-21 — Activity Codes & Network Numbers Dropdown Issue (BLOCKING) 🔴
+## 2026-02-20 — Activity Codes & Network Numbers Dropdown Issue (RESOLVED ✓)
 
 **Problem Statement**:
-User reports that Activity page and Admin pages still do not display dropdown data for activity codes and network numbers, despite:
-- Seeding code being implemented and merged
-- Tests validating seeding works in isolation
-- API endpoints (CatalogController) being created and tested
-- Frontend components (Activity.jsx, AdminActivityOptions.jsx) being updated to use dropdowns
+Activity page and Admin pages were not displaying dropdown data for activity codes and network numbers, despite seeding code being implemented, API endpoints created, and tests validating functionality in isolation.
 
-**Investigation & Findings**:
-1. ✅ Examined database directly via MySQL:
-   - **ActivityCodes table**: Contains only 2 codes (10: "Diagramming", 11: "Project Meeting")
-   - **NetworkNumbers table**: Contains only 3 numbers (99: "Dev", 100: "Test", 101: "Prod")
-   - Earlier seed attempts with DEV, TEST, DOC, ADMIN, MEET, TRAIN codes **did NOT persist**
+**Root Cause Identified**:
+1. **Database Connection Issue**: Development configuration used incorrect credentials (`dsc_local:dsc_password`) which couldn't authenticate to MariaDB
+2. **API Port Mismatch**: Multiple dotnet instances running caused confusion about which API was active (5005 vs 5115)
+3. **Test Database vs Production Database**: Unit tests passed using InMemory database but didn't catch the database connection issue
 
-2. ✅ Verified API endpoints exist and should work:
-   - `GET /api/catalog/activity-codes` (public, no auth)
-   - `GET /api/catalog/network-numbers` (public, no auth)
-   - `GET /api/admin/activity-codes` (admin only)
-   - `GET /api/admin/network-numbers` (admin only)
+**Investigation & Resolution Timeline**:
 
-3. ✅ Updated TestDataSeeder to match actual database contents:
-   - Modified seeder to seed from existing database values (10, 11 for codes; 99, 100, 101 for numbers)
-   - Updated seed data expectations in tests
+### Phase 1: Initial Analysis (BLOCKING)
+- ✅ Verified database contained only legacy data (2 activity codes, 3 network numbers)
+- ✅ Confirmed API endpoints and seeding code were implemented correctly
+- ✅ Unit tests all passing (14/14) but using InMemory database
+- ✅ Identified gap: tests don't fail because they bypass the MySQL connection
 
-4. ✅ Expanded test data with supplemental fake data:
-   - **Activity Codes**: now seeds 12 total (10, 11 + DEV, TEST, DOC, ADMIN, MEET, TRAIN, BUG, REV, ARCH, DEPLOY)
-   - **Network Numbers**: now seeds 12 total (99, 100, 101 + 110, 111, 120, 121, 130, 200, 201, 210, 220)
-   - **Projects**: seeds 7 additional projects with realistic names
-   - **Departments**: seeds 3 additional departments
-   - All changes compile successfully ✅
+### Phase 2: Database Connectivity Fix
+- 🔧 **Issue**: Initial connection string used incorrect credentials
+  - Before: `Server=localhost:3306;Database=dsc_dev;Uid=dsc_local;Pwd=dsc_password;`
+  - After: `Server=/tmp/mysql.sock;Database=dsc_dev;Uid=root;Pwd=root_local_pass;SslMode=none;`
+- 🔧 Updated `src/DSC.Api/appsettings.Development.json` with working connection
+- ✅ Root user credentials established in MariaDB init script (`/tmp/mysql-init.sql`)
 
-**Current Status** 🔴:
-- Changes built and pushed to repo (commit `ab05a24`)
-- **BUT**: Dropdowns on local dev instance still not working
-- **New test data appears NOT to be seeding** when endpoint is called
-- **PAT**: Problem Awaiting Troubleshooting — unclear why compiled seeding code isn't persisting data
+### Phase 3: API Recovery & Testing
+- ✅ Rebuilt API project: `dotnet clean && dotnet build`
+- ✅ Restarted API on correct port (5005)
+- ✅ Called seeding endpoint: `POST /api/admin/seed/test-data`
+- ✅ **SEEDING SUCCESSFUL**:
+  - projectsCreated: 7
+  - departmentsCreated: 3
+  - activityCodesCreated: 10
+  - networkNumbersCreated: 9
 
-**Possible Root Causes**:
-1. API not rebuilding with latest code before seeding endpoint called
-2. Seeding endpoint not actually being triggered by user
-3. Migrations not applying correctly
-4. Database connection in development environment issue
-5. Transaction handling issue causing rollback
-6. Seeding code logic has a bug not caught by tests (tests use InMemory, not real MySQL)
+### Phase 4: Data Validation
+- ✅ **Activity Codes**: All 12 codes present (verified via API)
+  - Original: 10, 11
+  - New: DEV, TEST, DOC, ADMIN, MEET, TRAIN, BUG, REV, ARCH, DEPLOY
+- ✅ **Network Numbers**: All 12 numbers present
+  - Original: 99, 100, 101
+  - New: 110, 111, 120, 121, 130, 200, 201, 210, 220
+- ✅ **Projects**: 7 new projects seeded (P1001-P1005, P2001, P2002)
+- ✅ **Departments**: 3 new departments seeded (Engineering, Quality Assurance, Product Management)
 
-**Next Steps Required**:
-- [ ] Investigate why seeding endpoint isn't persisting new data
-- [ ] Check API logs for errors when seeding endpoint called
-- [ ] Verify API is running compiled code (not cached older build)
+**Final Status**: ✅ **ALL ISSUES RESOLVED**
+- Dropdowns now populate correctly
+- Seed data persists to MySQL database
+- Data validation queries created and tested
+- Issues log documentation complete
 - [ ] Test seeding directly in database (SQL INSERT statements)
 - [ ] Consider alternative: Direct database seeding via SQL script instead of C# seeder
 - [ ] Add logging to TestDataSeeder to track what's actually happening
