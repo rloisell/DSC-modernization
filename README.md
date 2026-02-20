@@ -15,6 +15,7 @@ This repository contains the Spec artifacts, the .NET solution, and incremental 
 
 Key points
 - We use the Spec-Kitty toolkit (fork: https://github.com/Priivacy-ai/spec-kitty) to drive feature specification, implementation, and validation.
+- Spec Kit subtree and setup docs were removed; Spec-Kitty is the sole spec workflow for this repo.
 - Projects have been updated to target `.NET 10` and a local development environment using MariaDB is recommended.
 - See `AI/nextSteps.md` for a concise guide on how to create features, run agent workflows, and build the Spec.
 
