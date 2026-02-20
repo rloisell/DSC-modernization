@@ -2,10 +2,18 @@ import axios from 'axios';
 
 const API_URL = '/api/items';
 
+const axiosConfig = {
+  headers: {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json'
+  },
+  withCredentials: true
+};
+
 export async function getWorkItems(userId) {
   const params = {};
   if (userId) params.userId = userId;
-  const res = await axios.get(API_URL, { params });
+  const res = await axios.get(API_URL, { params, ...axiosConfig });
   return res.data;
 }
 
@@ -13,13 +21,14 @@ export async function getDetailedWorkItems(period = 'all', userId) {
   const params = { period };
   if (userId) params.userId = userId;
   const res = await axios.get(`${API_URL}/detailed`, {
-    params
+    params,
+    ...axiosConfig
   });
   return res.data;
 }
 
 export async function createWorkItem(item) {
-  const res = await axios.post(API_URL, item);
+  const res = await axios.post(API_URL, item, axiosConfig);
   return res.data;
 }
 
@@ -62,6 +71,6 @@ export async function createWorkItemWithLegacy({
     estimatedHours,
     remainingHours
   };
-  const res = await axios.post(API_URL, payload);
+  const res = await axios.post(API_URL, payload, axiosConfig);
   return res.data;
 }

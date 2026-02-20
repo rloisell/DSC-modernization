@@ -408,22 +408,10 @@ export default function Activity() {
                 <th>Date</th>
                 <th>Est. Hours</th>
                 <th>Actual Hours</th>
-                <th>Remaining Hours</th>
               </tr>
             </thead>
             <tbody>
               {detailedItems.map(item => {
-                // Calculate remaining hours
-                let remaining = '—';
-                if (item.remainingHours != null) {
-                  remaining = `${item.remainingHours} hrs`;
-                } else if (item.projectEstimatedHours != null && item.actualDuration != null) {
-                  const calc = item.projectEstimatedHours - item.actualDuration;
-                  remaining = `${calc.toFixed(2)} hrs`;
-                } else if (item.projectEstimatedHours != null) {
-                  remaining = `${item.projectEstimatedHours} hrs`;
-                }
-
                 return (
                   <tr key={item.id}>
                     <td>
@@ -438,7 +426,6 @@ export default function Activity() {
                     <td>{item.date ? new Date(item.date).toLocaleDateString() : '—'}</td>
                     <td>{item.estimatedHours != null ? `${item.estimatedHours} hrs` : '—'}</td>
                     <td>{item.actualDuration != null ? `${item.actualDuration} hrs` : '—'}</td>
-                    <td>{remaining}</td>
                   </tr>
                 );
               })}

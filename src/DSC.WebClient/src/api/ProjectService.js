@@ -3,7 +3,13 @@ import axios from 'axios';
 const API_URL = '/api/projects';
 
 export async function getProjects() {
-  const res = await axios.get(API_URL);
+  const res = await axios.get(API_URL, {
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
+    },
+    withCredentials: true
+  });
   return res.data;
 }
 
