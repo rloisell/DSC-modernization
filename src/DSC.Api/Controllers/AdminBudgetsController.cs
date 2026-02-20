@@ -79,5 +79,26 @@ namespace DSC.Api.Controllers
             await _db.SaveChangesAsync();
             return NoContent();
         }
+
+        [HttpDelete("{id}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status409Conflict)]
+        public async Task<IActionResult> Delete(Guid id)
+        {
+            var entity = await _db.Budgets.FirstOrDefaultAsync(b => b.Id == id);
+            if (entity == null) return NotFound();
+
+            var hasCategories = await _db.ExpenseCategories.AnyAsync(c => c.BudgetId == id);
+            if (hasCategories)
+            {
+                return Conflict(new { error = "Budget has expense categories and cannot be deleted." });
+            }
+
+            _db.Budgets.Remove(entity);
+            await _db.SaveChangesAsync();
+
+            return NoContent();
+        }
     }
 }

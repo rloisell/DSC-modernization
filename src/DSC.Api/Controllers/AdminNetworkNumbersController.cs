@@ -82,5 +82,19 @@ namespace DSC.Api.Controllers
             await _db.SaveChangesAsync();
             return NoContent();
         }
+
+        [HttpDelete("{id}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> Delete(Guid id)
+        {
+            var entity = await _db.NetworkNumbers.FirstOrDefaultAsync(n => n.Id == id);
+            if (entity == null) return NotFound();
+
+            _db.NetworkNumbers.Remove(entity);
+            await _db.SaveChangesAsync();
+
+            return NoContent();
+        }
     }
 }
