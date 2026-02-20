@@ -5,6 +5,8 @@
 - Run end-to-end smoke tests (DB migrations + API + Vite + admin flows).
 - Draft Spec-Kitty features for pending migration work (entities, auth, reporting).
 
+Reference: local environment setup is documented in [docs/local-development/README.md](docs/local-development/README.md).
+
 # WebClient progress (2026-02-19)
 
 - All static assets from legacy `WebContent` (CSS, JS, images, calendar libs) are now in `src/DSC.WebClient/public`.

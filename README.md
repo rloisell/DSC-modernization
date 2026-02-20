@@ -34,136 +34,19 @@ Current status (high level)
 - Local prerequisites documented and partially installed in `AI/WORKLOG.md` and `AI/COMMANDS.sh` (dotnet 10 SDK, `dotnet-ef`, MariaDB).
 - A successful local build and unit test run was completed (see `AI/WORKLOG.md` for results).
 
-Quickstart (macOS)
+Local development
 
-1. Verify .NET SDK and tools:
-
-```bash
-dotnet --version
-dotnet --info
-dotnet tool list -g
-```
-
-2. Build the solution:
-
-```bash
-dotnet build DSC.Modernization.sln
-```
-
-3. Run tests:
-
-```bash
-dotnet test tests/DSC.Tests/DSC.Tests.csproj
-```
-
-4. Spec-Kitty (verify & prepare):
-
-```bash
-spec-kitty verify-setup
-spec-kitty upgrade    # adds metadata scaffolding
-spec-kitty specify    # create feature specs interactively
-
-Run locally (webserver + DB)
-
-- Webserver: the API runs on ASP.NET Core (Kestrel) and can be started with:
-
-```bash
-# Run the API (development)
-dotnet run --project src/DSC.Api
-# or with hot reload
-dotnet watch run --project src/DSC.Api
-```
-
-- Database (two common options on macOS):
-	- Homebrew MariaDB: `brew install mariadb@10.11` and `brew services start mariadb@10.11` (then create `dsc_dev` DB)
-	- Docker MariaDB (recommended for isolated environment):
-		```bash
-		docker run --name dsc-mariadb -e MYSQL_ROOT_PASSWORD=localpass -e MYSQL_DATABASE=dsc_dev -p 3306:3306 -d mariadb:10.11
-		```
-
-After the DB is available, set a connection string (env var used by the design-time factory):
-
-```bash
-export DSC_Connection="Server=127.0.0.1;Port=3306;Database=dsc_dev;User=dsc_local;Password=dsc_password;"
-```
-
-Then apply migrations and seed data (examples):
-
-```bash
-dotnet ef database update --project src/DSC.Data --startup-project src/DSC.Api --context ApplicationDbContext
-mysql -h 127.0.0.1 -P 3306 -u dsc_local -pdsc_password dsc_dev < spec/fixtures/db/seed.sql
-```
-
-Seed legacy Java test data (from `FirstTest.java` and `SecondTest.java`) with the admin seed endpoint:
-
-```bash
-curl -X POST http://localhost:5005/api/admin/seed/test-data \
-	-H "X-Admin-Token: local-admin-token"
-```
-
-This seeds four users (`rloisel1`, `dmcgregor`, `kduma`, `mammeter`), legacy user auth entries, the `P99999` project, and the `OSS Operations` department.
-
-If you are running in Development with `Admin__RequireToken=false`, the seed endpoint will accept requests without the header.
-
-Frontend (React/Vite scaffold)
-
-A minimal React client has been added at `src/DSC.WebClient`. To run it locally you will need Node.js and npm installed. Example:
-
-```bash
-cd src/DSC.WebClient
-npm install
-npm run dev
-```
-
-If `npm` is not installed on your machine, install Node.js (Homebrew: `brew install node`) and re-run the commands above.
-
-Note: On this machine I installed Node.js via Homebrew and started the Vite dev server for the client. The client is available at `http://localhost:5173` (run `npm run dev` in `src/DSC.WebClient` if you need to restart it).
-```
-
-Notes
-- Use MariaDB for local development (compatible with the `Pomelo.EntityFrameworkCore.MySql` provider referenced in the project). Do not commit secrets — use environment variables or a local `.env` excluded from source control.
-- All AI-driven steps, logs, and commands are tracked under the `AI/` folder; review `AI/WORKLOG.md` and `AI/nextSteps.md` before running agent workflows.
+Local environment setup, dependencies, commands, and persistent service configuration are documented in [docs/local-development/README.md](docs/local-development/README.md).
 
 If you'd like, I can scaffold example features with `spec-kitty specify` and run an initial `spec-kitty orchestrate` in a disposable worktree. Stop me if you prefer to author the first feature text yourself.
 
-## Recent mapping update & Local GUI test
+## Recent mapping update
 
 - An EF Core migration `MapJavaModel` was created and applied locally to add legacy mapping fields (for example, `ProjectNo`) to support the Java → EF incremental port.
 
 ### Local GUI test (quick)
 
-Start the frontend (from repo root):
-
-```bash
-cd src/DSC.WebClient
-npm install    # first time only
-npm run dev -- --host 0.0.0.0 --port 5173
-```
-
-Start the API (from repo root):
-
-```bash
-export ConnectionStrings__DefaultConnection="Server=127.0.0.1;Port=3306;Database=dsc_dev;User=dsc_local;Password=dsc_password;"
-dotnet run --project src/DSC.Api --urls http://localhost:5005
-```
-
-If you are working on the `hardening-security` branch, admin APIs require an admin token:
-
-```bash
-export Admin__Token="local-admin-token"
-```
-
-Send the token as `X-Admin-Token` in API requests to `/api/admin/*`.
-
-To temporarily disable the admin token requirement in local development, set:
-
-```bash
-export Admin__RequireToken=false
-```
-
-This bypass is enforced only when `ASPNETCORE_ENVIRONMENT=Development`. In Test/Production, the API will reject the bypass even if the setting is present.
-
-Open the GUI at: http://localhost:5173/ (the API is available at http://localhost:5005/)
+See [docs/local-development/README.md](docs/local-development/README.md) for current run commands, environment variables, and verification steps.
 
 API update: The API now exposes legacy Java model fields via DTOs so the frontend can consume them (e.g. `ProjectDto.ProjectNo`, and legacy activity fields on `WorkItemDto`). See `src/DSC.Api/DTOs` and `src/DSC.Api/Controllers` for details.
 

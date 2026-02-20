@@ -30,6 +30,11 @@
 - Updated `diagrams/README.md` and `README.md` to reference Draw.io artifacts.
 - Archived PlantUML sources and rendered PNGs under `AI/archive/plantuml/` to preserve prior artifacts.
 
+## 2026-02-19 — Local development guide
+
+- Created [docs/local-development/README.md](docs/local-development/README.md) with local setup steps, dependencies, configuration, and persistent service setup.
+- Moved local development instructions out of [README.md](README.md) and linked to the new guide.
+
 - Copied all relevant static assets from legacy `WebContent` (CSS, JS, images, calendar libs) into `src/DSC.WebClient/public`.
 - Created React page stubs for `Activity`, `Project`, `Administrator`, and `Login` in `src/DSC.WebClient/src/pages/`.
 - Set up routing in `src/DSC.WebClient/src/App.jsx` to match legacy JSP routes.
