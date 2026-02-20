@@ -1,5 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import {
+  Button,
+  ButtonGroup,
+  Form,
+  Heading,
+  InlineAlert,
+  Select,
+  Text,
+  TextField
+} from '@bcgov/design-system-react-components';
 import { AdminCatalogService } from '../api/AdminCatalogService';
 
 export default function AdminExpense() {
@@ -13,6 +23,16 @@ export default function AdminExpense() {
   const [optionForm, setOptionForm] = useState({ categoryId: '', name: '' });
   const [editingCategoryId, setEditingCategoryId] = useState('');
   const [editingOptionId, setEditingOptionId] = useState('');
+  const navigate = useNavigate();
+
+  const statusItems = [
+    { id: 'active', label: 'Active' },
+    { id: 'inactive', label: 'Inactive' }
+  ];
+  const categoryItems = categories.map(category => ({
+    id: category.id,
+    label: category.name
+  }));
 
   useEffect(() => {
     AdminCatalogService.getExpenseCategories()
@@ -145,46 +165,51 @@ export default function AdminExpense() {
   }
 
   return (
-    <div>
-      <h1>Admin Expense</h1>
-      <p>Legacy servlet: AdminExpense. This page will manage expense categories and options.</p>
-      <p><Link to="/admin">Back to Administrator</Link></p>
-      <section>
-        <h2>{editingCategoryId ? 'Edit Expense Category' : 'Add Expense Category'}</h2>
-        <form onSubmit={handleCategorySubmit}>
-          <div>
-            <label>
-              Category Name
-              <input
-                type="text"
-                name="name"
-                value={categoryForm.name}
-                onChange={e => updateCategoryForm('name', e.target.value)}
-                required
-              />
-            </label>
-          </div>
-          <div>
-            <label>
-              Status
-              <select name="status">
-                <option value="active">Active</option>
-                <option value="inactive">Inactive</option>
-              </select>
-            </label>
-          </div>
-          <button type="submit">Create Category</button>
-          {editingCategoryId ? (
-            <button type="button" onClick={() => {
-              setEditingCategoryId('');
-              setCategoryForm({ name: '', status: 'active' });
-            }}>Cancel</button>
-          ) : null}
-        </form>
+    <div className="page">
+      <section className="section stack">
+        <Heading level={1}>Admin Expense</Heading>
+        <Text elementType="p">Legacy servlet: AdminExpense. This page will manage expense categories and options.</Text>
+        <div className="page-actions">
+          <Button variant="link" onPress={() => navigate('/admin')}>Back to Administrator</Button>
+        </div>
       </section>
-      <section>
-        <h2>Expense Categories</h2>
-        <table>
+      <section className="section stack">
+        <Heading level={2}>{editingCategoryId ? 'Edit Expense Category' : 'Add Expense Category'}</Heading>
+        <Form onSubmit={handleCategorySubmit} className="form-grid">
+          <TextField
+            label="Category Name"
+            value={categoryForm.name}
+            onChange={value => updateCategoryForm('name', value)}
+            isRequired
+          />
+          <Select
+            label="Status"
+            items={statusItems}
+            selectedKey={categoryForm.status}
+            onSelectionChange={key => updateCategoryForm('status', String(key))}
+          />
+          <ButtonGroup alignment="start" ariaLabel="Expense category actions">
+            <Button type="submit" variant="primary">
+              {editingCategoryId ? 'Save Category' : 'Create Category'}
+            </Button>
+            {editingCategoryId ? (
+              <Button
+                type="button"
+                variant="tertiary"
+                onPress={() => {
+                  setEditingCategoryId('');
+                  setCategoryForm({ name: '', status: 'active' });
+                }}
+              >
+                Cancel
+              </Button>
+            ) : null}
+          </ButtonGroup>
+        </Form>
+      </section>
+      <section className="section stack">
+        <Heading level={2}>Expense Categories</Heading>
+        <table className="bcds-table">
           <thead>
             <tr>
               <th>Name</th>
@@ -198,62 +223,61 @@ export default function AdminExpense() {
                 <td>{category.name}</td>
                 <td>{category.isActive ? 'Active' : 'Inactive'}</td>
                 <td>
-                  <button type="button" onClick={() => handleEditCategory(category)}>Edit</button>
-                  <button type="button" onClick={() => handleDeactivateCategory(category)}>Deactivate</button>
+                  <div className="actions">
+                    <Button size="small" variant="tertiary" onPress={() => handleEditCategory(category)}>Edit</Button>
+                    <Button size="small" variant="tertiary" danger onPress={() => handleDeactivateCategory(category)}>
+                      Deactivate
+                    </Button>
+                  </div>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
       </section>
-      <section>
-        <h2>{editingOptionId ? 'Edit Expense Option' : 'Add Expense Option'}</h2>
-        <form onSubmit={handleOptionSubmit}>
-          <div>
-            <label>
-              Category
-              <select
-                name="category"
-                value={optionForm.categoryId}
-                onChange={e => {
-                  updateOptionForm('categoryId', e.target.value);
-                  setSelectedCategoryId(e.target.value);
+      <section className="section stack">
+        <Heading level={2}>{editingOptionId ? 'Edit Expense Option' : 'Add Expense Option'}</Heading>
+        <Form onSubmit={handleOptionSubmit} className="form-grid">
+          <Select
+            label="Category"
+            placeholder="Select category"
+            items={categoryItems}
+            selectedKey={optionForm.categoryId || null}
+            onSelectionChange={key => {
+              const nextValue = key ? String(key) : '';
+              updateOptionForm('categoryId', nextValue);
+              setSelectedCategoryId(nextValue);
+            }}
+            isRequired
+          />
+          <TextField
+            label="Option Name"
+            value={optionForm.name}
+            onChange={value => updateOptionForm('name', value)}
+            isRequired
+          />
+          <ButtonGroup alignment="start" ariaLabel="Expense option actions">
+            <Button type="submit" variant="primary">
+              {editingOptionId ? 'Save Option' : 'Add Option'}
+            </Button>
+            {editingOptionId ? (
+              <Button
+                type="button"
+                variant="tertiary"
+                onPress={() => {
+                  setEditingOptionId('');
+                  setOptionForm({ categoryId: '', name: '' });
                 }}
-                required
               >
-                <option value="">Select category</option>
-                {categories.map(category => (
-                  <option key={category.id} value={category.id}>
-                    {category.name}
-                  </option>
-                ))}
-              </select>
-            </label>
-          </div>
-          <div>
-            <label>
-              Option Name
-              <input
-                type="text"
-                name="optionName"
-                value={optionForm.name}
-                onChange={e => updateOptionForm('name', e.target.value)}
-                required
-              />
-            </label>
-          </div>
-          <button type="submit">Add Option</button>
-          {editingOptionId ? (
-            <button type="button" onClick={() => {
-              setEditingOptionId('');
-              setOptionForm({ categoryId: '', name: '' });
-            }}>Cancel</button>
-          ) : null}
-        </form>
+                Cancel
+              </Button>
+            ) : null}
+          </ButtonGroup>
+        </Form>
       </section>
-      <section>
-        <h2>Expense Options</h2>
-        <table>
+      <section className="section stack">
+        <Heading level={2}>Expense Options</Heading>
+        <table className="bcds-table">
           <thead>
             <tr>
               <th>Name</th>
@@ -267,17 +291,21 @@ export default function AdminExpense() {
                 <td>{option.name}</td>
                 <td>{option.isActive ? 'Active' : 'Inactive'}</td>
                 <td>
-                  <button type="button" onClick={() => handleEditOption(option)}>Edit</button>
-                  <button type="button" onClick={() => handleDeactivateOption(option)}>Deactivate</button>
+                  <div className="actions">
+                    <Button size="small" variant="tertiary" onPress={() => handleEditOption(option)}>Edit</Button>
+                    <Button size="small" variant="tertiary" danger onPress={() => handleDeactivateOption(option)}>
+                      Deactivate
+                    </Button>
+                  </div>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
       </section>
-      {loading ? <p>Loading...</p> : null}
-      {error ? <p style={{color:'red'}}>Error: {error}</p> : null}
-      {message ? <p>{message}</p> : null}
+      {loading ? <Text elementType="p">Loading...</Text> : null}
+      {error ? <InlineAlert variant="danger" title="Error" description={error} /> : null}
+      {message ? <InlineAlert variant="success" title="Success" description={message} /> : null}
     </div>
   );
 }

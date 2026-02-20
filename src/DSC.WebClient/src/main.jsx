@@ -1,6 +1,8 @@
 import React from 'react'
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
+import '@bcgov/bc-sans/css/BC_Sans.css'
+import '@bcgov/design-tokens/css/variables.css'
 import App from './App'
 import './styles.css'
 

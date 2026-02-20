@@ -1,20 +1,34 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import { Button, ButtonGroup, Heading, Text } from '@bcgov/design-system-react-components';
+
+function AdminLinkButton({ to, children }) {
+  const navigate = useNavigate();
+  return (
+    <Button variant="secondary" onPress={() => navigate(to)}>
+      {children}
+    </Button>
+  );
+}
 
 export default function Administrator() {
   // In the legacy JSP, this page links to admin subpages. We'll keep them as routes for now.
   return (
-    <div>
-      <h1>Administrator</h1>
-      <ul>
-        <li><Link to="/admin/users">Admin Users</Link></li>
-        <li><Link to="/admin/positions">Admin Positions</Link></li>
-        <li><Link to="/admin/departments">Admin Departments</Link></li>
-        <li><Link to="/admin/projects">Admin Projects</Link></li>
-        <li><Link to="/admin/expense">Admin Expense</Link></li>
-        <li><Link to="/admin/activity-options">Admin Activity Options</Link></li>
-      </ul>
-      <p>Subpages are stubbed for now and will be expanded during the admin port.</p>
+    <div className="page">
+      <section className="section stack">
+        <Heading level={1}>Administrator</Heading>
+        <Text elementType="p">
+          Subpages are stubbed for now and will be expanded during the admin port.
+        </Text>
+        <ButtonGroup ariaLabel="Admin sections" alignment="start">
+          <AdminLinkButton to="/admin/users">Admin Users</AdminLinkButton>
+          <AdminLinkButton to="/admin/positions">Admin Positions</AdminLinkButton>
+          <AdminLinkButton to="/admin/departments">Admin Departments</AdminLinkButton>
+          <AdminLinkButton to="/admin/projects">Admin Projects</AdminLinkButton>
+          <AdminLinkButton to="/admin/expense">Admin Expense</AdminLinkButton>
+          <AdminLinkButton to="/admin/activity-options">Admin Activity Options</AdminLinkButton>
+        </ButtonGroup>
+      </section>
     </div>
   );
 }

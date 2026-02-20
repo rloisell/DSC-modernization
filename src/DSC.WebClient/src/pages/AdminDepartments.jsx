@@ -1,5 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import {
+  Button,
+  ButtonGroup,
+  Form,
+  Heading,
+  InlineAlert,
+  Select,
+  Text,
+  TextField
+} from '@bcgov/design-system-react-components';
 import { AdminCatalogService } from '../api/AdminCatalogService';
 
 export default function AdminDepartments() {
@@ -9,6 +19,12 @@ export default function AdminDepartments() {
   const [error, setError] = useState(null);
   const [form, setForm] = useState({ name: '', manager: '', status: 'active' });
   const [editingId, setEditingId] = useState('');
+  const navigate = useNavigate();
+
+  const statusItems = [
+    { id: 'active', label: 'Active' },
+    { id: 'inactive', label: 'Inactive' }
+  ];
 
   useEffect(() => {
     AdminCatalogService.getDepartments()
@@ -75,58 +91,57 @@ export default function AdminDepartments() {
   }
 
   return (
-    <div>
-      <h1>Admin Departments</h1>
-      <p>Legacy servlet: AdminDepartments. This page will manage department records.</p>
-      <p><Link to="/admin">Back to Administrator</Link></p>
-      <section>
-        <h2>{editingId ? 'Edit Department' : 'Add Department'}</h2>
-        <form onSubmit={handleSubmit}>
-          <div>
-            <label>
-              Department Name
-              <input
-                type="text"
-                name="name"
-                value={form.name}
-                onChange={e => updateForm('name', e.target.value)}
-                required
-              />
-            </label>
-          </div>
-          <div>
-            <label>
-              Manager
-              <input
-                type="text"
-                name="manager"
-                placeholder="Select user"
-                value={form.manager}
-                onChange={e => updateForm('manager', e.target.value)}
-              />
-            </label>
-          </div>
-          <div>
-            <label>
-              Status
-              <select name="status">
-                <option value="active">Active</option>
-                <option value="inactive">Inactive</option>
-              </select>
-            </label>
-          </div>
-          <button type="submit">Create Department</button>
-          {editingId ? (
-            <button type="button" onClick={() => {
-              setEditingId('');
-              setForm({ name: '', manager: '', status: 'active' });
-            }}>Cancel</button>
-          ) : null}
-        </form>
+    <div className="page">
+      <section className="section stack">
+        <Heading level={1}>Admin Departments</Heading>
+        <Text elementType="p">Legacy servlet: AdminDepartments. This page will manage department records.</Text>
+        <div className="page-actions">
+          <Button variant="link" onPress={() => navigate('/admin')}>Back to Administrator</Button>
+        </div>
       </section>
-      <section>
-        <h2>Existing Departments</h2>
-        <table>
+      <section className="section stack">
+        <Heading level={2}>{editingId ? 'Edit Department' : 'Add Department'}</Heading>
+        <Form onSubmit={handleSubmit} className="form-grid">
+          <TextField
+            label="Department Name"
+            value={form.name}
+            onChange={value => updateForm('name', value)}
+            isRequired
+          />
+          <TextField
+            label="Manager"
+            value={form.manager}
+            onChange={value => updateForm('manager', value)}
+            placeholder="Select user"
+          />
+          <Select
+            label="Status"
+            items={statusItems}
+            selectedKey={form.status}
+            onSelectionChange={key => updateForm('status', String(key))}
+          />
+          <ButtonGroup alignment="start" ariaLabel="Department actions">
+            <Button type="submit" variant="primary">
+              {editingId ? 'Save Department' : 'Create Department'}
+            </Button>
+            {editingId ? (
+              <Button
+                type="button"
+                variant="tertiary"
+                onPress={() => {
+                  setEditingId('');
+                  setForm({ name: '', manager: '', status: 'active' });
+                }}
+              >
+                Cancel
+              </Button>
+            ) : null}
+          </ButtonGroup>
+        </Form>
+      </section>
+      <section className="section stack">
+        <Heading level={2}>Existing Departments</Heading>
+        <table className="bcds-table">
           <thead>
             <tr>
               <th>Name</th>
@@ -142,17 +157,21 @@ export default function AdminDepartments() {
                 <td>{dept.managerName || '-'}</td>
                 <td>{dept.isActive ? 'Active' : 'Inactive'}</td>
                 <td>
-                  <button type="button" onClick={() => handleEdit(dept)}>Edit</button>
-                  <button type="button" onClick={() => handleDeactivate(dept)}>Deactivate</button>
+                  <div className="actions">
+                    <Button size="small" variant="tertiary" onPress={() => handleEdit(dept)}>Edit</Button>
+                    <Button size="small" variant="tertiary" danger onPress={() => handleDeactivate(dept)}>
+                      Deactivate
+                    </Button>
+                  </div>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
       </section>
-      {loading ? <p>Loading...</p> : null}
-      {error ? <p style={{color:'red'}}>Error: {error}</p> : null}
-      {message ? <p>{message}</p> : null}
+      {loading ? <Text elementType="p">Loading...</Text> : null}
+      {error ? <InlineAlert variant="danger" title="Error" description={error} /> : null}
+      {message ? <InlineAlert variant="success" title="Success" description={message} /> : null}
     </div>
   );
 }

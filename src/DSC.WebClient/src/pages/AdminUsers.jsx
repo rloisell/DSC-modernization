@@ -1,5 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import {
+  Button,
+  ButtonGroup,
+  Form,
+  Heading,
+  InlineAlert,
+  NumberField,
+  Select,
+  Text,
+  TextField
+} from '@bcgov/design-system-react-components';
 import {
   getAdminUsers,
   createAdminUser,
@@ -43,6 +54,21 @@ export default function AdminUsers() {
     password: '',
     role: '1'
   });
+  const navigate = useNavigate();
+
+  const userItems = users.map(user => {
+    const name = `${user.firstName ?? ''} ${user.lastName ?? ''}`.trim();
+    return {
+      id: user.id,
+      label: name || user.username || user.email || user.id,
+      description: user.email || undefined
+    };
+  });
+
+  const roleItems = [
+    { id: '1', label: 'Role 1' },
+    { id: '2', label: 'Role 2' }
+  ];
 
   useEffect(() => {
     getAdminUsers()
@@ -175,324 +201,189 @@ export default function AdminUsers() {
   }
 
   return (
-    <div>
-      <h1>Admin Users</h1>
-      <p>Legacy servlet: AdminUsers. This page will manage user accounts, roles, and assignments.</p>
-      <p><Link to="/admin">Back to Administrator</Link></p>
-
-      <section>
-        <h2>Add New User</h2>
-        <form onSubmit={handleAddUser}>
-          <div>
-            <label>
-              Employee ID
-              <input
-                type="text"
-                name="empId"
-                placeholder="#####"
-                value={addForm.empId}
-                onChange={e => updateAddForm('empId', e.target.value)}
-              />
-            </label>
-          </div>
-          <div>
-            <label>
-              First Name
-              <input
-                type="text"
-                name="firstName"
-                value={addForm.firstName}
-                onChange={e => updateAddForm('firstName', e.target.value)}
-              />
-            </label>
-            <label>
-              Last Name
-              <input
-                type="text"
-                name="lastName"
-                value={addForm.lastName}
-                onChange={e => updateAddForm('lastName', e.target.value)}
-              />
-            </label>
-          </div>
-          <div>
-            <label>
-              Email
-              <input
-                type="email"
-                name="email"
-                value={addForm.email}
-                onChange={e => updateAddForm('email', e.target.value)}
-                required
-              />
-            </label>
-          </div>
-          <div>
-            <label>
-              NCS Date
-              <input
-                type="date"
-                name="ncsDate"
-                value={addForm.ncsDate}
-                onChange={e => updateAddForm('ncsDate', e.target.value)}
-              />
-            </label>
-          </div>
-          <div>
-            <label>
-              Position
-              <select name="position">
-                <option value="">Select position</option>
-              </select>
-            </label>
-            <label>
-              Position Start Date
-              <input
-                type="date"
-                name="positionStartDate"
-                value={addForm.positionStartDate}
-                onChange={e => updateAddForm('positionStartDate', e.target.value)}
-              />
-            </label>
-          </div>
-          <div>
-            <label>
-              Department
-              <select name="department">
-                <option value="">Select department</option>
-              </select>
-            </label>
-            <label>
-              Department Start Date
-              <input
-                type="date"
-                name="departmentStartDate"
-                value={addForm.departmentStartDate}
-                onChange={e => updateAddForm('departmentStartDate', e.target.value)}
-              />
-            </label>
-          </div>
-          <div>
-            <label>
-              LAN ID
-              <input
-                type="text"
-                name="lanId"
-                value={addForm.lanId}
-                onChange={e => updateAddForm('lanId', e.target.value)}
-                required
-              />
-            </label>
-            <label>
-              Password
-              <input
-                type="password"
-                name="password"
-                value={addForm.password}
-                onChange={e => updateAddForm('password', e.target.value)}
-              />
-            </label>
-          </div>
-          <div>
-            <label>
-              DSC Role
-              <select name="role">
-                <option value="1">Employee</option>
-                <option value="2">Manager</option>
-                <option value="-1">Administrator</option>
-              </select>
-            </label>
-            <small>Role/assignment fields are not persisted yet.</small>
-          </div>
-          <button type="submit">Add User</button>
-        </form>
+    <div className="page">
+      <section className="section stack">
+        <Heading level={1}>Admin Users</Heading>
+        <Text elementType="p">Legacy servlet: AdminUsers. This page will manage user accounts, roles, and assignments.</Text>
+        <div className="page-actions">
+          <Button variant="link" onPress={() => navigate('/admin')}>Back to Administrator</Button>
+        </div>
       </section>
-
-      <section>
-        <h2>Edit Current User</h2>
-        <form onSubmit={handleUpdateUser}>
-          <div>
-            <label>
-              Select User
-              <select
-                name="user"
-                value={selectedUserId}
-                onChange={e => handleSelectUser(e.target.value)}
-              >
-                <option value="">Select user</option>
-                {users.map(user => (
-                  <option key={user.id} value={user.id}>
-                    {user.lastName}, {user.firstName} ({user.username})
-                  </option>
-                ))}
-              </select>
-            </label>
-            <button type="button" onClick={() => handleSelectUser(selectedUserId)}>Load User</button>
+      <section className="section stack">
+        <Heading level={2}>Add New User</Heading>
+        <Form onSubmit={handleAddUser} className="form-grid">
+          <NumberField
+            label="Employee ID"
+            value={addForm.empId ? Number(addForm.empId) : undefined}
+            onChange={value => updateAddForm('empId', value == null ? '' : String(value))}
+            description="Optional"
+          />
+          <div className="form-columns">
+            <TextField label="First Name" value={addForm.firstName} onChange={value => updateAddForm('firstName', value)} />
+            <TextField label="Last Name" value={addForm.lastName} onChange={value => updateAddForm('lastName', value)} />
           </div>
-          <div>
-            <label>
-              First Name
-              <input
-                type="text"
-                name="editFirstName"
-                value={editForm.firstName}
-                onChange={e => updateEditForm('firstName', e.target.value)}
-              />
-            </label>
-            <label>
-              Last Name
-              <input
-                type="text"
-                name="editLastName"
-                value={editForm.lastName}
-                onChange={e => updateEditForm('lastName', e.target.value)}
-              />
-            </label>
+          <TextField
+            label="Email"
+            type="email"
+            value={addForm.email}
+            onChange={value => updateAddForm('email', value)}
+            isRequired
+          />
+          <TextField
+            label="NCS Date"
+            type="date"
+            value={addForm.ncsDate}
+            onChange={value => updateAddForm('ncsDate', value)}
+          />
+          <div className="form-columns">
+            <Select label="Position" placeholder="Select position" items={[]} selectedKey={null} />
+            <TextField
+              label="Position Start Date"
+              type="date"
+              value={addForm.positionStartDate}
+              onChange={value => updateAddForm('positionStartDate', value)}
+            />
           </div>
-          <div>
-            <label>
-              Email
-              <input
-                type="email"
-                name="editEmail"
-                value={editForm.email}
-                onChange={e => updateEditForm('email', e.target.value)}
-                required
-              />
-            </label>
+          <div className="form-columns">
+            <Select label="Department" placeholder="Select department" items={[]} selectedKey={null} />
+            <TextField
+              label="Department Start Date"
+              type="date"
+              value={addForm.departmentStartDate}
+              onChange={value => updateAddForm('departmentStartDate', value)}
+            />
           </div>
-          <div>
-            <label>
-              NCS Date
-              <input
-                type="date"
-                name="editNcsDate"
-                value={editForm.ncsDate}
-                onChange={e => updateEditForm('ncsDate', e.target.value)}
-              />
-            </label>
+          <div className="form-columns">
+            <TextField label="LAN ID" value={addForm.lanId} onChange={value => updateAddForm('lanId', value)} />
+            <TextField
+              label="Password"
+              type="password"
+              value={addForm.password}
+              onChange={value => updateAddForm('password', value)}
+            />
           </div>
-          <div>
-            <label>
-              Position
-              <select name="editPosition">
-                <option value="">Select position</option>
-              </select>
-            </label>
-          </div>
-          <div>
-            <label>
-              Position Start Date
-              <input
-                type="date"
-                name="editPositionStartDate"
-                value={editForm.positionStartDate}
-                onChange={e => updateEditForm('positionStartDate', e.target.value)}
-              />
-            </label>
-            <label>
-              Position End Date
-              <input
-                type="date"
-                name="editPositionEndDate"
-                value={editForm.positionEndDate}
-                onChange={e => updateEditForm('positionEndDate', e.target.value)}
-              />
-            </label>
-          </div>
-          <div>
-            <label>
-              Department
-              <select name="editDepartment">
-                <option value="">Select department</option>
-              </select>
-            </label>
-          </div>
-          <div>
-            <label>
-              Department Start Date
-              <input
-                type="date"
-                name="editDepartmentStartDate"
-                value={editForm.departmentStartDate}
-                onChange={e => updateEditForm('departmentStartDate', e.target.value)}
-              />
-            </label>
-            <label>
-              Department End Date
-              <input
-                type="date"
-                name="editDepartmentEndDate"
-                value={editForm.departmentEndDate}
-                onChange={e => updateEditForm('departmentEndDate', e.target.value)}
-              />
-            </label>
-          </div>
-          <div>
-            <label>
-              LAN ID
-              <input
-                type="text"
-                name="editLanId"
-                value={editForm.lanId}
-                onChange={e => updateEditForm('lanId', e.target.value)}
-                disabled
-              />
-            </label>
-            <label>
-              Password
-              <input
-                type="password"
-                name="editPassword"
-                value={editForm.password}
-                onChange={e => updateEditForm('password', e.target.value)}
-              />
-            </label>
-          </div>
-          <div>
-            <label>
-              DSC Role
-              <select name="editRole">
-                <option value="1">Employee</option>
-                <option value="2">Manager</option>
-                <option value="-1">Administrator</option>
-              </select>
-            </label>
-            <small>Role/assignment fields are not persisted yet.</small>
-          </div>
-          <div>
-            <button type="submit">Save Changes</button>
-            <button type="button" onClick={handleDeleteUser}>Delete User</button>
-          </div>
-        </form>
+          <Select
+            label="Role"
+            items={roleItems}
+            selectedKey={addForm.role}
+            onSelectionChange={key => updateAddForm('role', String(key))}
+          />
+          <ButtonGroup alignment="start" ariaLabel="Create user actions">
+            <Button type="submit" variant="primary">Create User</Button>
+          </ButtonGroup>
+        </Form>
       </section>
-      <section>
-        <h2>Current Users</h2>
-        <table>
+      <section className="section stack">
+        <Heading level={2}>Edit User</Heading>
+        <Select
+          label="Select User"
+          placeholder="Select user"
+          items={userItems}
+          selectedKey={selectedUserId || null}
+          onSelectionChange={key => handleSelectUser(key ? String(key) : '')}
+        />
+        <Form onSubmit={handleUpdateUser} className="form-grid">
+          <NumberField
+            label="Employee ID"
+            value={editForm.empId ? Number(editForm.empId) : undefined}
+            onChange={value => updateEditForm('empId', value == null ? '' : String(value))}
+            description="Optional"
+          />
+          <div className="form-columns">
+            <TextField label="First Name" value={editForm.firstName} onChange={value => updateEditForm('firstName', value)} />
+            <TextField label="Last Name" value={editForm.lastName} onChange={value => updateEditForm('lastName', value)} />
+          </div>
+          <TextField
+            label="Email"
+            type="email"
+            value={editForm.email}
+            onChange={value => updateEditForm('email', value)}
+          />
+          <TextField
+            label="NCS Date"
+            type="date"
+            value={editForm.ncsDate}
+            onChange={value => updateEditForm('ncsDate', value)}
+          />
+          <div className="form-columns">
+            <Select label="Position" placeholder="Select position" items={[]} selectedKey={null} />
+            <TextField
+              label="Position Start Date"
+              type="date"
+              value={editForm.positionStartDate}
+              onChange={value => updateEditForm('positionStartDate', value)}
+            />
+            <TextField
+              label="Position End Date"
+              type="date"
+              value={editForm.positionEndDate}
+              onChange={value => updateEditForm('positionEndDate', value)}
+            />
+          </div>
+          <div className="form-columns">
+            <Select label="Department" placeholder="Select department" items={[]} selectedKey={null} />
+            <TextField
+              label="Department Start Date"
+              type="date"
+              value={editForm.departmentStartDate}
+              onChange={value => updateEditForm('departmentStartDate', value)}
+            />
+            <TextField
+              label="Department End Date"
+              type="date"
+              value={editForm.departmentEndDate}
+              onChange={value => updateEditForm('departmentEndDate', value)}
+            />
+          </div>
+          <div className="form-columns">
+            <TextField label="LAN ID" value={editForm.lanId} onChange={value => updateEditForm('lanId', value)} />
+            <TextField
+              label="Password"
+              type="password"
+              value={editForm.password}
+              onChange={value => updateEditForm('password', value)}
+            />
+          </div>
+          <Select
+            label="Role"
+            items={roleItems}
+            selectedKey={editForm.role}
+            onSelectionChange={key => updateEditForm('role', String(key))}
+          />
+          <ButtonGroup alignment="start" ariaLabel="Update user actions">
+            <Button type="submit" variant="primary">Update User</Button>
+            <Button type="button" variant="tertiary" danger onPress={handleDeleteUser}>Delete User</Button>
+          </ButtonGroup>
+        </Form>
+      </section>
+      <section className="section stack">
+        <Heading level={2}>Current Users</Heading>
+        {loading ? <Text elementType="p">Loading...</Text> : null}
+        <table className="bcds-table">
           <thead>
             <tr>
+              <th>ID</th>
               <th>Employee ID</th>
               <th>Name</th>
               <th>Username</th>
-              <th>Role</th>
+              <th>Email</th>
             </tr>
           </thead>
           <tbody>
             {users.map(user => (
               <tr key={user.id}>
-                <td>{user.empId ?? '-'}</td>
-                <td>{user.lastName}, {user.firstName}</td>
+                <td>{user.id}</td>
+                <td>{user.empId}</td>
+                <td>{user.firstName} {user.lastName}</td>
                 <td>{user.username}</td>
-                <td>Unassigned</td>
+                <td>{user.email}</td>
               </tr>
             ))}
           </tbody>
         </table>
       </section>
-
-      {loading ? <p>Loading...</p> : null}
-      {error ? <p style={{color:'red'}}>Error: {error}</p> : null}
-      {message ? <p>{message}</p> : null}
+      {error ? <InlineAlert variant="danger" title="Error" description={error} /> : null}
+      {message ? <InlineAlert variant="success" title="Success" description={message} /> : null}
     </div>
   );
 }

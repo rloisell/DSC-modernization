@@ -1,5 +1,11 @@
 import React from 'react'
-import { Routes, Route, Link } from 'react-router-dom'
+import { Routes, Route, useNavigate } from 'react-router-dom'
+import {
+  Button,
+  ButtonGroup,
+  Footer,
+  Header
+} from '@bcgov/design-system-react-components'
 import Home from './pages/Home'
 import Activity from './pages/Activity'
 import Project from './pages/Project'
@@ -12,17 +18,32 @@ import AdminExpense from './pages/AdminExpense'
 import AdminActivityOptions from './pages/AdminActivityOptions'
 import Login from './pages/Login'
 
+function NavButton({ to, children }) {
+  const navigate = useNavigate()
+  return (
+    <Button variant="link" size="small" onPress={() => navigate(to)}>
+      {children}
+    </Button>
+  )
+}
+
 export default function App() {
   return (
-    <div>
-      <nav>
-        <Link to="/">Home</Link>
-        <Link to="/activity">Activity</Link>
-        <Link to="/projects">Projects</Link>
-        <Link to="/admin">Admin</Link>
-        <Link to="/login">Login</Link>
-      </nav>
-      <main>
+    <div className="app-shell">
+      <Header
+        title="DSC Modernization"
+        skipLinks={[<a key="main" href="#main-content">Skip to main content</a>]}
+      />
+      <div className="app-nav">
+        <ButtonGroup ariaLabel="Primary navigation" alignment="start">
+          <NavButton to="/">Home</NavButton>
+          <NavButton to="/activity">Activity</NavButton>
+          <NavButton to="/projects">Projects</NavButton>
+          <NavButton to="/admin">Admin</NavButton>
+          <NavButton to="/login">Login</NavButton>
+        </ButtonGroup>
+      </div>
+      <main id="main-content" className="app-main">
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/activity" element={<Activity />} />
@@ -37,6 +58,7 @@ export default function App() {
           <Route path="/login" element={<Login />} />
         </Routes>
       </main>
+      <Footer />
     </div>
   )
 }

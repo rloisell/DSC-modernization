@@ -1,4 +1,16 @@
 import React, { useEffect, useState } from 'react';
+import {
+  Button,
+  ButtonGroup,
+  Form,
+  Heading,
+  InlineAlert,
+  NumberField,
+  Select,
+  Text,
+  TextArea,
+  TextField
+} from '@bcgov/design-system-react-components';
 import { getWorkItems, createWorkItemWithLegacy } from '../api/WorkItemService';
 import { getProjects } from '../api/ProjectService';
 
@@ -21,6 +33,11 @@ export default function Activity() {
   const [estimatedHours, setEstimatedHours] = useState('');
   const [remainingHours, setRemainingHours] = useState('');
   const [creating, setCreating] = useState(false);
+
+  const projectItems = projects.map(project => ({
+    id: project.id,
+    label: project.projectNo ? `${project.projectNo} — ${project.name}` : project.name
+  }));
 
   useEffect(() => {
     Promise.all([getWorkItems(), getProjects()])
@@ -76,50 +93,86 @@ export default function Activity() {
   }
 
   return (
-    <div>
-      <h1>Activity</h1>
-      {loading ? <p>Loading...</p> : null}
-      {error ? <p style={{color:'red'}}>Error: {error}</p> : null}
-      <ul>
-        {items.map(i => (
-          <li key={i.id}>
-            {i.title ? <strong>{i.title}</strong> : null}
-            {i.legacyActivityId ? <span> (Legacy ID: {i.legacyActivityId})</span> : null}
-            <div>{i.description}</div>
-            <div style={{fontSize:'0.9em',color:'#666'}}>
-              {i.date ? <span>Date: {i.date} </span> : null}
-              {i.startTime ? <span>Start: {i.startTime} </span> : null}
-              {i.endTime ? <span>End: {i.endTime} </span> : null}
-              {i.plannedDuration ? <span>Planned: {i.plannedDuration}h </span> : null}
-              {i.actualDuration ? <span>Actual: {i.actualDuration}h </span> : null}
-              {i.activityCode ? <span>Code: {i.activityCode} </span> : null}
-              {i.networkNumber ? <span>Network: {i.networkNumber}</span> : null}
-            </div>
-          </li>
-        ))}
-      </ul>
-      <h2>Add Work Item</h2>
-      <form onSubmit={handleCreate}>
-        <input value={title} onChange={e=>setTitle(e.target.value)} placeholder="Title" required />
-        <select value={projectId} onChange={e=>setProjectId(e.target.value)} required>
-          <option value="">Select project</option>
-          {projects.map(p => (
-            <option key={p.id} value={p.id}>{p.projectNo ? `${p.projectNo} — ${p.name}` : p.name}</option>
+    <div className="page">
+      <section className="section stack">
+        <Heading level={1}>Activity</Heading>
+        {loading ? <Text elementType="p">Loading...</Text> : null}
+        {error ? <InlineAlert variant="danger" title="Error" description={error} /> : null}
+        <ul className="inline-list">
+          {items.map(i => (
+            <li key={i.id}>
+              {i.title ? <Text elementType="strong">{i.title}</Text> : null}
+              {i.legacyActivityId ? <Text elementType="span"> (Legacy ID: {i.legacyActivityId})</Text> : null}
+              {i.description ? <Text elementType="p">{i.description}</Text> : null}
+              <Text elementType="p" className="muted">
+                {i.date ? <span>Date: {i.date} </span> : null}
+                {i.startTime ? <span>Start: {i.startTime} </span> : null}
+                {i.endTime ? <span>End: {i.endTime} </span> : null}
+                {i.plannedDuration ? <span>Planned: {i.plannedDuration}h </span> : null}
+                {i.actualDuration ? <span>Actual: {i.actualDuration}h </span> : null}
+                {i.activityCode ? <span>Code: {i.activityCode} </span> : null}
+                {i.networkNumber ? <span>Network: {i.networkNumber}</span> : null}
+              </Text>
+            </li>
           ))}
-        </select>
-        <input value={legacyActivityId} onChange={e=>setLegacyActivityId(e.target.value)} placeholder="Legacy Activity ID" />
-        <input value={date} onChange={e=>setDate(e.target.value)} placeholder="Date (YYYY-MM-DD)" />
-        <input value={startTime} onChange={e=>setStartTime(e.target.value)} placeholder="Start Time (HH:mm)" />
-        <input value={endTime} onChange={e=>setEndTime(e.target.value)} placeholder="End Time (HH:mm)" />
-        <input value={plannedDuration} onChange={e=>setPlannedDuration(e.target.value)} placeholder="Planned Duration (hours)" />
-        <input value={actualDuration} onChange={e=>setActualDuration(e.target.value)} placeholder="Actual Duration (hours)" />
-        <input value={activityCode} onChange={e=>setActivityCode(e.target.value)} placeholder="Activity Code" />
-        <input value={networkNumber} onChange={e=>setNetworkNumber(e.target.value)} placeholder="Network Number" />
-        <input value={estimatedHours} onChange={e=>setEstimatedHours(e.target.value)} placeholder="Estimated Hours" />
-        <input value={remainingHours} onChange={e=>setRemainingHours(e.target.value)} placeholder="Remaining Hours" />
-        <textarea value={desc} onChange={e=>setDesc(e.target.value)} placeholder="Description" />
-        <button type="submit" disabled={creating}>Create</button>
-      </form>
+        </ul>
+      </section>
+      <section className="section stack">
+        <Heading level={2}>Add Work Item</Heading>
+        <Form onSubmit={handleCreate} className="form-grid">
+          <TextField label="Title" value={title} onChange={setTitle} isRequired />
+          <Select
+            label="Project"
+            placeholder="Select project"
+            items={projectItems}
+            selectedKey={projectId || null}
+            onSelectionChange={key => setProjectId(key ? String(key) : '')}
+            isRequired
+          />
+          <TextField label="Legacy Activity ID" value={legacyActivityId} onChange={setLegacyActivityId} />
+          <div className="form-columns">
+            <TextField label="Date" type="date" value={date} onChange={setDate} />
+            <TextField label="Start Time" type="time" value={startTime} onChange={setStartTime} />
+            <TextField label="End Time" type="time" value={endTime} onChange={setEndTime} />
+          </div>
+          <div className="form-columns">
+            <NumberField
+              label="Planned Duration (hours)"
+              value={plannedDuration ? Number(plannedDuration) : undefined}
+              onChange={value => setPlannedDuration(value == null ? '' : String(value))}
+            />
+            <NumberField
+              label="Actual Duration (hours)"
+              value={actualDuration ? Number(actualDuration) : undefined}
+              onChange={value => setActualDuration(value == null ? '' : String(value))}
+            />
+          </div>
+          <div className="form-columns">
+            <TextField label="Activity Code" value={activityCode} onChange={setActivityCode} />
+            <NumberField
+              label="Network Number"
+              value={networkNumber ? Number(networkNumber) : undefined}
+              onChange={value => setNetworkNumber(value == null ? '' : String(value))}
+            />
+          </div>
+          <div className="form-columns">
+            <NumberField
+              label="Estimated Hours"
+              value={estimatedHours ? Number(estimatedHours) : undefined}
+              onChange={value => setEstimatedHours(value == null ? '' : String(value))}
+            />
+            <NumberField
+              label="Remaining Hours"
+              value={remainingHours ? Number(remainingHours) : undefined}
+              onChange={value => setRemainingHours(value == null ? '' : String(value))}
+            />
+          </div>
+          <TextArea label="Description" value={desc} onChange={setDesc} />
+          <ButtonGroup alignment="start" ariaLabel="Work item actions">
+            <Button type="submit" variant="primary" isDisabled={creating}>Create</Button>
+          </ButtonGroup>
+        </Form>
+      </section>
     </div>
   );
 }

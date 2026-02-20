@@ -1,5 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import {
+  Button,
+  ButtonGroup,
+  Form,
+  Heading,
+  InlineAlert,
+  NumberField,
+  Text,
+  TextField
+} from '@bcgov/design-system-react-components';
 import { AdminCatalogService } from '../api/AdminCatalogService';
 
 export default function AdminActivityOptions() {
@@ -12,6 +22,7 @@ export default function AdminActivityOptions() {
   const [networkForm, setNetworkForm] = useState({ number: '', description: '' });
   const [editingCodeId, setEditingCodeId] = useState('');
   const [editingNetworkId, setEditingNetworkId] = useState('');
+  const navigate = useNavigate();
 
   useEffect(() => {
     Promise.all([
@@ -133,48 +144,52 @@ export default function AdminActivityOptions() {
   }
 
   return (
-    <div>
-      <h1>Admin Activity Options</h1>
-      <p>Legacy servlet: AdminActivityOptions. This page will manage activity codes and network numbers.</p>
-      <p><Link to="/admin">Back to Administrator</Link></p>
-      <section>
-        <h2>{editingCodeId ? 'Edit Activity Code' : 'Add Activity Code'}</h2>
-        <form onSubmit={handleCodeSubmit}>
-          <div>
-            <label>
-              Code
-              <input
-                type="text"
-                name="code"
-                value={codeForm.code}
-                onChange={e => updateCodeForm('code', e.target.value)}
-                required
-              />
-            </label>
-          </div>
-          <div>
-            <label>
-              Description
-              <input
-                type="text"
-                name="description"
-                value={codeForm.description}
-                onChange={e => updateCodeForm('description', e.target.value)}
-              />
-            </label>
-          </div>
-          <button type="submit">{editingCodeId ? 'Save Activity Code' : 'Create Activity Code'}</button>
-          {editingCodeId ? (
-            <button type="button" onClick={() => {
-              setEditingCodeId('');
-              setCodeForm({ code: '', description: '' });
-            }}>Cancel</button>
-          ) : null}
-        </form>
+    <div className="page">
+      <section className="section stack">
+        <Heading level={1}>Admin Activity Options</Heading>
+        <Text elementType="p">
+          Legacy servlet: AdminActivityOptions. This page will manage activity codes and network numbers.
+        </Text>
+        <div className="page-actions">
+          <Button variant="link" onPress={() => navigate('/admin')}>Back to Administrator</Button>
+        </div>
       </section>
-      <section>
-        <h2>Activity Codes</h2>
-        <table>
+      <section className="section stack">
+        <Heading level={2}>{editingCodeId ? 'Edit Activity Code' : 'Add Activity Code'}</Heading>
+        <Form onSubmit={handleCodeSubmit} className="form-grid">
+          <TextField
+            label="Code"
+            value={codeForm.code}
+            onChange={value => updateCodeForm('code', value)}
+            isRequired
+          />
+          <TextField
+            label="Description"
+            value={codeForm.description}
+            onChange={value => updateCodeForm('description', value)}
+          />
+          <ButtonGroup alignment="start" ariaLabel="Activity code actions">
+            <Button type="submit" variant="primary">
+              {editingCodeId ? 'Save Activity Code' : 'Create Activity Code'}
+            </Button>
+            {editingCodeId ? (
+              <Button
+                type="button"
+                variant="tertiary"
+                onPress={() => {
+                  setEditingCodeId('');
+                  setCodeForm({ code: '', description: '' });
+                }}
+              >
+                Cancel
+              </Button>
+            ) : null}
+          </ButtonGroup>
+        </Form>
+      </section>
+      <section className="section stack">
+        <Heading level={2}>Activity Codes</Heading>
+        <table className="bcds-table">
           <thead>
             <tr>
               <th>Code</th>
@@ -188,52 +203,54 @@ export default function AdminActivityOptions() {
                 <td>{code.code}</td>
                 <td>{code.description}</td>
                 <td>
-                  <button type="button" onClick={() => handleEditCode(code)}>Edit</button>
-                  <button type="button" onClick={() => handleDeactivateCode(code)}>Deactivate</button>
+                  <div className="actions">
+                    <Button size="small" variant="tertiary" onPress={() => handleEditCode(code)}>Edit</Button>
+                    <Button size="small" variant="tertiary" danger onPress={() => handleDeactivateCode(code)}>
+                      Deactivate
+                    </Button>
+                  </div>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
       </section>
-      <section>
-        <h2>{editingNetworkId ? 'Edit Network Number' : 'Add Network Number'}</h2>
-        <form onSubmit={handleNetworkSubmit}>
-          <div>
-            <label>
-              Network Number
-              <input
-                type="number"
-                name="networkNumber"
-                value={networkForm.number}
-                onChange={e => updateNetworkForm('number', e.target.value)}
-                required
-              />
-            </label>
-          </div>
-          <div>
-            <label>
-              Description
-              <input
-                type="text"
-                name="networkDescription"
-                value={networkForm.description}
-                onChange={e => updateNetworkForm('description', e.target.value)}
-              />
-            </label>
-          </div>
-          <button type="submit">{editingNetworkId ? 'Save Network Number' : 'Create Network Number'}</button>
-          {editingNetworkId ? (
-            <button type="button" onClick={() => {
-              setEditingNetworkId('');
-              setNetworkForm({ number: '', description: '' });
-            }}>Cancel</button>
-          ) : null}
-        </form>
+      <section className="section stack">
+        <Heading level={2}>{editingNetworkId ? 'Edit Network Number' : 'Add Network Number'}</Heading>
+        <Form onSubmit={handleNetworkSubmit} className="form-grid">
+          <NumberField
+            label="Network Number"
+            value={networkForm.number ? Number(networkForm.number) : undefined}
+            onChange={value => updateNetworkForm('number', value == null ? '' : String(value))}
+            isRequired
+          />
+          <TextField
+            label="Description"
+            value={networkForm.description}
+            onChange={value => updateNetworkForm('description', value)}
+          />
+          <ButtonGroup alignment="start" ariaLabel="Network number actions">
+            <Button type="submit" variant="primary">
+              {editingNetworkId ? 'Save Network Number' : 'Create Network Number'}
+            </Button>
+            {editingNetworkId ? (
+              <Button
+                type="button"
+                variant="tertiary"
+                onPress={() => {
+                  setEditingNetworkId('');
+                  setNetworkForm({ number: '', description: '' });
+                }}
+              >
+                Cancel
+              </Button>
+            ) : null}
+          </ButtonGroup>
+        </Form>
       </section>
-      <section>
-        <h2>Network Numbers</h2>
-        <table>
+      <section className="section stack">
+        <Heading level={2}>Network Numbers</Heading>
+        <table className="bcds-table">
           <thead>
             <tr>
               <th>Number</th>
@@ -247,17 +264,21 @@ export default function AdminActivityOptions() {
                 <td>{network.number}</td>
                 <td>{network.description}</td>
                 <td>
-                  <button type="button" onClick={() => handleEditNetwork(network)}>Edit</button>
-                  <button type="button" onClick={() => handleDeactivateNetwork(network)}>Deactivate</button>
+                  <div className="actions">
+                    <Button size="small" variant="tertiary" onPress={() => handleEditNetwork(network)}>Edit</Button>
+                    <Button size="small" variant="tertiary" danger onPress={() => handleDeactivateNetwork(network)}>
+                      Deactivate
+                    </Button>
+                  </div>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
       </section>
-      {loading ? <p>Loading...</p> : null}
-      {error ? <p style={{color:'red'}}>Error: {error}</p> : null}
-      {message ? <p>{message}</p> : null}
+      {loading ? <Text elementType="p">Loading...</Text> : null}
+      {error ? <InlineAlert variant="danger" title="Error" description={error} /> : null}
+      {message ? <InlineAlert variant="success" title="Success" description={message} /> : null}
     </div>
   );
 }

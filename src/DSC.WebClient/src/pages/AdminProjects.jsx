@@ -1,5 +1,17 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import {
+  Button,
+  ButtonGroup,
+  Form,
+  Heading,
+  InlineAlert,
+  NumberField,
+  Select,
+  Text,
+  TextArea,
+  TextField
+} from '@bcgov/design-system-react-components';
 import { AdminCatalogService } from '../api/AdminCatalogService';
 
 export default function AdminProjects() {
@@ -12,6 +24,20 @@ export default function AdminProjects() {
   const [form, setForm] = useState({ projectNo: '', name: '', description: '', estimatedHours: '' });
   const [assignForm, setAssignForm] = useState({ projectId: '', activityCodeId: '', networkNumberId: '' });
   const [editingId, setEditingId] = useState('');
+  const navigate = useNavigate();
+
+  const projectItems = projects.map(project => ({
+    id: project.id,
+    label: project.projectNo ? `${project.projectNo} — ${project.name}` : project.name
+  }));
+  const activityItems = activityCodes.map(code => ({
+    id: code.id,
+    label: `${code.code} - ${code.description || ''}`.trim()
+  }));
+  const networkItems = networkNumbers.map(network => ({
+    id: network.id,
+    label: `${network.number}${network.description ? ` - ${network.description}` : ''}`
+  }));
 
   useEffect(() => {
     Promise.all([
@@ -114,71 +140,60 @@ export default function AdminProjects() {
   }
 
   return (
-    <div>
-      <h1>Admin Projects</h1>
-      <p>Legacy servlet: AdminProjects. This page will manage project metadata and assignments.</p>
-      <p><Link to="/admin">Back to Administrator</Link></p>
-      <section>
-        <h2>{editingId ? 'Edit Project' : 'Add Project'}</h2>
-        <form onSubmit={handleSubmit}>
-          <div>
-            <label>
-              Project No (Legacy)
-              <input
-                type="text"
-                name="projectNo"
-                value={form.projectNo}
-                onChange={e => updateForm('projectNo', e.target.value)}
-              />
-            </label>
-          </div>
-          <div>
-            <label>
-              Name
-              <input
-                type="text"
-                name="name"
-                value={form.name}
-                onChange={e => updateForm('name', e.target.value)}
-                required
-              />
-            </label>
-          </div>
-          <div>
-            <label>
-              Description
-              <input
-                type="text"
-                name="description"
-                value={form.description}
-                onChange={e => updateForm('description', e.target.value)}
-              />
-            </label>
-          </div>
-          <div>
-            <label>
-              Estimated Hours
-              <input
-                type="number"
-                name="estimatedHours"
-                step="0.5"
-                value={form.estimatedHours}
-                onChange={e => updateForm('estimatedHours', e.target.value)}
-              />
-            </label>
-          </div>
-          <button type="submit">Create Project</button>
-          {editingId ? (
-            <button type="button" onClick={() => {
-              setEditingId('');
-              setForm({ projectNo: '', name: '', description: '', estimatedHours: '' });
-            }}>Cancel</button>
-          ) : null}
-        </form>
+    <div className="page">
+      <section className="section stack">
+        <Heading level={1}>Admin Projects</Heading>
+        <Text elementType="p">Legacy servlet: AdminProjects. This page will manage project metadata and assignments.</Text>
+        <div className="page-actions">
+          <Button variant="link" onPress={() => navigate('/admin')}>Back to Administrator</Button>
+        </div>
       </section>
-      <section>
-        <h2>Existing Projects</h2>
-        <table>
+      <section className="section stack">
+        <Heading level={2}>{editingId ? 'Edit Project' : 'Add Project'}</Heading>
+        <Form onSubmit={handleSubmit} className="form-grid">
+          <TextField
+            label="Project No (Legacy)"
+            value={form.projectNo}
+            onChange={value => updateForm('projectNo', value)}
+          />
+          <TextField
+            label="Name"
+            value={form.name}
+            onChange={value => updateForm('name', value)}
+            isRequired
+          />
+          <TextArea
+            label="Description"
+            value={form.description}
+            onChange={value => updateForm('description', value)}
+          />
+          <NumberField
+            label="Estimated Hours"
+            value={form.estimatedHours ? Number(form.estimatedHours) : undefined}
+            onChange={value => updateForm('estimatedHours', value == null ? '' : String(value))}
+          />
+          <ButtonGroup alignment="start" ariaLabel="Project actions">
+            <Button type="submit" variant="primary">
+              {editingId ? 'Save Project' : 'Create Project'}
+            </Button>
+            {editingId ? (
+              <Button
+                type="button"
+                variant="tertiary"
+                onPress={() => {
+                  setEditingId('');
+                  setForm({ projectNo: '', name: '', description: '', estimatedHours: '' });
+                }}
+              >
+                Cancel
+              </Button>
+            ) : null}
+          </ButtonGroup>
+        </Form>
+      </section>
+      <section className="section stack">
+        <Heading level={2}>Existing Projects</Heading>
+        <table className="bcds-table">
           <thead>
             <tr>
               <th>Project No</th>
@@ -194,75 +209,55 @@ export default function AdminProjects() {
                 <td>{project.name}</td>
                 <td>{project.isActive ? 'Active' : 'Inactive'}</td>
                 <td>
-                  <button type="button" onClick={() => handleEdit(project)}>Edit</button>
-                  <button type="button" onClick={() => handleArchive(project)}>Archive</button>
+                  <div className="actions">
+                    <Button size="small" variant="tertiary" onPress={() => handleEdit(project)}>Edit</Button>
+                    <Button size="small" variant="tertiary" danger onPress={() => handleArchive(project)}>
+                      Archive
+                    </Button>
+                  </div>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
       </section>
-      <section>
-        <h2>Assign Activity Codes / Network Numbers</h2>
-        <form onSubmit={handleAssign}>
-          <div>
-            <label>
-              Project
-              <select
-                name="projectId"
-                value={assignForm.projectId}
-                onChange={e => updateAssignForm('projectId', e.target.value)}
-                required
-              >
-                <option value="">Select project</option>
-                {projects.map(project => (
-                  <option key={project.id} value={project.id}>
-                    {project.projectNo ? `${project.projectNo} — ${project.name}` : project.name}
-                  </option>
-                ))}
-              </select>
-            </label>
+      <section className="section stack">
+        <Heading level={2}>Assign Activity Codes / Network Numbers</Heading>
+        <Form onSubmit={handleAssign} className="form-grid">
+          <Select
+            label="Project"
+            placeholder="Select project"
+            items={projectItems}
+            selectedKey={assignForm.projectId || null}
+            onSelectionChange={key => updateAssignForm('projectId', key ? String(key) : '')}
+            isRequired
+          />
+          <div className="form-columns">
+            <Select
+              label="Activity Code"
+              placeholder="Select activity code"
+              items={activityItems}
+              selectedKey={assignForm.activityCodeId || null}
+              onSelectionChange={key => updateAssignForm('activityCodeId', key ? String(key) : '')}
+              isRequired
+            />
+            <Select
+              label="Network Number"
+              placeholder="Select network number"
+              items={networkItems}
+              selectedKey={assignForm.networkNumberId || null}
+              onSelectionChange={key => updateAssignForm('networkNumberId', key ? String(key) : '')}
+              isRequired
+            />
           </div>
-          <div>
-            <label>
-              Activity Code
-              <select
-                name="activityCodeId"
-                value={assignForm.activityCodeId}
-                onChange={e => updateAssignForm('activityCodeId', e.target.value)}
-                required
-              >
-                <option value="">Select activity code</option>
-                {activityCodes.map(code => (
-                  <option key={code.id} value={code.id}>
-                    {code.code} - {code.description}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label>
-              Network Number
-              <select
-                name="networkNumberId"
-                value={assignForm.networkNumberId}
-                onChange={e => updateAssignForm('networkNumberId', e.target.value)}
-                required
-              >
-                <option value="">Select network number</option>
-                {networkNumbers.map(network => (
-                  <option key={network.id} value={network.id}>
-                    {network.number} {network.description ? `- ${network.description}` : ''}
-                  </option>
-                ))}
-              </select>
-            </label>
-          </div>
-          <button type="submit">Assign</button>
-        </form>
+          <ButtonGroup alignment="start" ariaLabel="Assignment actions">
+            <Button type="submit" variant="primary">Assign</Button>
+          </ButtonGroup>
+        </Form>
       </section>
-      {loading ? <p>Loading...</p> : null}
-      {error ? <p style={{color:'red'}}>Error: {error}</p> : null}
-      {message ? <p>{message}</p> : null}
+      {loading ? <Text elementType="p">Loading...</Text> : null}
+      {error ? <InlineAlert variant="danger" title="Error" description={error} /> : null}
+      {message ? <InlineAlert variant="success" title="Success" description={message} /> : null}
     </div>
   );
 }

@@ -1,4 +1,14 @@
 import React, { useEffect, useState } from 'react';
+import {
+  Button,
+  ButtonGroup,
+  Form,
+  Heading,
+  InlineAlert,
+  Text,
+  TextArea,
+  TextField
+} from '@bcgov/design-system-react-components';
 import { getProjects, createProject } from '../api/ProjectService';
 
 export default function Project() {
@@ -35,25 +45,42 @@ export default function Project() {
   }
 
   return (
-    <div>
-      <h1>Projects</h1>
-      {loading ? <p>Loading...</p> : null}
-      {error ? <p style={{color:'red'}}>Error: {error}</p> : null}
-      <ul>
-        {projects.map(p => (
-          <li key={p.id}>
-            <b>{p.projectNo ? `${p.projectNo} — ${p.name}` : p.name}</b>
-            : {p.description}
-          </li>
-        ))}
-      </ul>
-      <h2>Add Project</h2>
-      <form onSubmit={handleCreate}>
-        <input value={projectNo} onChange={e=>setProjectNo(e.target.value)} placeholder="Project No (legacy)" />
-        <input value={name} onChange={e=>setName(e.target.value)} placeholder="Name" required />
-        <input value={desc} onChange={e=>setDesc(e.target.value)} placeholder="Description" />
-        <button type="submit" disabled={creating}>Create</button>
-      </form>
+    <div className="page">
+      <section className="section stack">
+        <Heading level={1}>Projects</Heading>
+        {loading ? <Text elementType="p">Loading...</Text> : null}
+        {error ? <InlineAlert variant="danger" title="Error" description={error} /> : null}
+        <ul className="inline-list">
+          {projects.map(p => (
+            <li key={p.id}>
+              <Text elementType="strong">
+                {p.projectNo ? `${p.projectNo} — ${p.name}` : p.name}
+              </Text>
+              {p.description ? <Text elementType="span">: {p.description}</Text> : null}
+            </li>
+          ))}
+        </ul>
+      </section>
+      <section className="section stack">
+        <Heading level={2}>Add Project</Heading>
+        <Form onSubmit={handleCreate} className="form-grid">
+          <TextField
+            label="Project No (legacy)"
+            value={projectNo}
+            onChange={setProjectNo}
+          />
+          <TextField
+            label="Name"
+            value={name}
+            onChange={setName}
+            isRequired
+          />
+          <TextArea label="Description" value={desc} onChange={setDesc} />
+          <ButtonGroup alignment="start" ariaLabel="Project actions">
+            <Button type="submit" variant="primary" isDisabled={creating}>Create</Button>
+          </ButtonGroup>
+        </Form>
+      </section>
     </div>
   );
 }

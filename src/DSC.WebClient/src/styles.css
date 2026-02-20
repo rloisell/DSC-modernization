@@ -1,13 +1,110 @@
+* {
+  box-sizing: border-box;
+}
+
 body {
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--typography-font-families-bc-sans, 'BC Sans', 'Noto Sans', Arial, sans-serif);
   margin: 0;
-  padding: 16px;
-  background: #f6f8fb;
-  color: #111;
+  background: var(--surface-color-background-light-gray);
+  color: var(--typography-color-primary);
 }
-nav {
-  background: #222;
-  padding: 8px 16px;
+
+a {
+  color: var(--typography-color-link);
 }
-nav a { color: #fff; text-decoration: none; margin-right: 12px }
-main { padding: 16px; background: #fff; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+
+.app-shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-nav {
+  background: var(--surface-color-secondary-default);
+  border-bottom: 1px solid var(--surface-color-border-default);
+  padding: var(--layout-padding-small) var(--layout-padding-large);
+}
+
+.app-nav .bcds-button-group {
+  gap: var(--layout-padding-small);
+}
+
+.app-main {
+  flex: 1;
+  padding: var(--layout-padding-large);
+}
+
+.page {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: grid;
+  gap: var(--layout-padding-large);
+}
+
+.section {
+  background: var(--surface-color-background-white);
+  border: 1px solid var(--surface-color-border-default);
+  border-radius: var(--layout-border-radius-large);
+  padding: var(--layout-padding-large);
+  box-shadow: var(--surface-shadow-none);
+}
+
+.stack {
+  display: grid;
+  gap: var(--layout-padding-medium);
+}
+
+.form-grid {
+  display: grid;
+  gap: var(--layout-padding-medium);
+}
+
+.form-columns {
+  display: grid;
+  gap: var(--layout-padding-medium);
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.actions {
+  display: flex;
+  gap: var(--layout-padding-small);
+  flex-wrap: wrap;
+}
+
+.bcds-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--surface-color-background-white);
+}
+
+.bcds-table th,
+.bcds-table td {
+  padding: var(--layout-padding-small) var(--layout-padding-medium);
+  border-bottom: 1px solid var(--surface-color-border-default);
+  text-align: left;
+}
+
+.bcds-table th {
+  font: var(--typography-bold-label);
+  color: var(--typography-color-secondary);
+}
+
+.bcds-table tbody tr:hover {
+  background: var(--surface-color-background-light-blue);
+}
+
+.muted {
+  color: var(--typography-color-secondary);
+}
+
+.page-actions {
+  display: flex;
+  gap: var(--layout-padding-small);
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.inline-list {
+  margin: 0;
+  padding-left: 1.2rem;
+}

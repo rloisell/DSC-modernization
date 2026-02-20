@@ -1,5 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import {
+  Button,
+  ButtonGroup,
+  Form,
+  Heading,
+  InlineAlert,
+  Select,
+  Text,
+  TextField
+} from '@bcgov/design-system-react-components';
 import { AdminCatalogService } from '../api/AdminCatalogService';
 
 export default function AdminPositions() {
@@ -9,6 +19,12 @@ export default function AdminPositions() {
   const [error, setError] = useState(null);
   const [form, setForm] = useState({ title: '', description: '', status: 'active' });
   const [editingId, setEditingId] = useState('');
+  const navigate = useNavigate();
+
+  const statusItems = [
+    { id: 'active', label: 'Active' },
+    { id: 'inactive', label: 'Inactive' }
+  ];
 
   useEffect(() => {
     AdminCatalogService.getPositions()
@@ -75,57 +91,56 @@ export default function AdminPositions() {
   }
 
   return (
-    <div>
-      <h1>Admin Positions</h1>
-      <p>Legacy servlet: AdminPositions. This page will manage position records.</p>
-      <p><Link to="/admin">Back to Administrator</Link></p>
-      <section>
-        <h2>{editingId ? 'Edit Position' : 'Add Position'}</h2>
-        <form onSubmit={handleSubmit}>
-          <div>
-            <label>
-              Title
-              <input
-                type="text"
-                name="title"
-                value={form.title}
-                onChange={e => updateForm('title', e.target.value)}
-                required
-              />
-            </label>
-          </div>
-          <div>
-            <label>
-              Description
-              <input
-                type="text"
-                name="description"
-                value={form.description}
-                onChange={e => updateForm('description', e.target.value)}
-              />
-            </label>
-          </div>
-          <div>
-            <label>
-              Status
-              <select name="status">
-                <option value="active">Active</option>
-                <option value="inactive">Inactive</option>
-              </select>
-            </label>
-          </div>
-          <button type="submit">Create Position</button>
-          {editingId ? (
-            <button type="button" onClick={() => {
-              setEditingId('');
-              setForm({ title: '', description: '', status: 'active' });
-            }}>Cancel</button>
-          ) : null}
-        </form>
+    <div className="page">
+      <section className="section stack">
+        <Heading level={1}>Admin Positions</Heading>
+        <Text elementType="p">Legacy servlet: AdminPositions. This page will manage position records.</Text>
+        <div className="page-actions">
+          <Button variant="link" onPress={() => navigate('/admin')}>Back to Administrator</Button>
+        </div>
       </section>
-      <section>
-        <h2>Existing Positions</h2>
-        <table>
+      <section className="section stack">
+        <Heading level={2}>{editingId ? 'Edit Position' : 'Add Position'}</Heading>
+        <Form onSubmit={handleSubmit} className="form-grid">
+          <TextField
+            label="Title"
+            value={form.title}
+            onChange={value => updateForm('title', value)}
+            isRequired
+          />
+          <TextField
+            label="Description"
+            value={form.description}
+            onChange={value => updateForm('description', value)}
+          />
+          <Select
+            label="Status"
+            items={statusItems}
+            selectedKey={form.status}
+            onSelectionChange={key => updateForm('status', String(key))}
+          />
+          <ButtonGroup alignment="start" ariaLabel="Position actions">
+            <Button type="submit" variant="primary">
+              {editingId ? 'Save Position' : 'Create Position'}
+            </Button>
+            {editingId ? (
+              <Button
+                type="button"
+                variant="tertiary"
+                onPress={() => {
+                  setEditingId('');
+                  setForm({ title: '', description: '', status: 'active' });
+                }}
+              >
+                Cancel
+              </Button>
+            ) : null}
+          </ButtonGroup>
+        </Form>
+      </section>
+      <section className="section stack">
+        <Heading level={2}>Existing Positions</Heading>
+        <table className="bcds-table">
           <thead>
             <tr>
               <th>Title</th>
@@ -141,17 +156,21 @@ export default function AdminPositions() {
                 <td>{position.description}</td>
                 <td>{position.isActive ? 'Active' : 'Inactive'}</td>
                 <td>
-                  <button type="button" onClick={() => handleEdit(position)}>Edit</button>
-                  <button type="button" onClick={() => handleDeactivate(position)}>Deactivate</button>
+                  <div className="actions">
+                    <Button size="small" variant="tertiary" onPress={() => handleEdit(position)}>Edit</Button>
+                    <Button size="small" variant="tertiary" danger onPress={() => handleDeactivate(position)}>
+                      Deactivate
+                    </Button>
+                  </div>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
       </section>
-      {loading ? <p>Loading...</p> : null}
-      {error ? <p style={{color:'red'}}>Error: {error}</p> : null}
-      {message ? <p>{message}</p> : null}
+      {loading ? <Text elementType="p">Loading...</Text> : null}
+      {error ? <InlineAlert variant="danger" title="Error" description={error} /> : null}
+      {message ? <InlineAlert variant="success" title="Success" description={message} /> : null}
     </div>
   );
 }

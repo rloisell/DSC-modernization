@@ -130,6 +130,13 @@ Next: run integration tests or create controllers for other resources (Projects,
 - Activity Options now supports edit/update flows for activity codes and network numbers in the UI.
 - Smoke-tested the Admin Activity Options page via the Vite dev server route (`/admin/activity-options`).
 
+## 2026-02-19 — Frontend: B.C. Design System adoption
+
+- Installed `@bcgov/design-system-react-components`, `@bcgov/design-tokens`, and `@bcgov/bc-sans` in the React client.
+- Imported BC Sans and design token CSS in `src/DSC.WebClient/src/main.jsx` and updated global styles to use tokens.
+- Replaced navigation and page layouts with B.C. Design System components (Header, Footer, Button, Form, TextField, NumberField, Select, InlineAlert) across core and admin screens.
+- Ran `npm run build` successfully after the UI refactor.
+
 Notes: The `root` password reset was performed non-interactively to allow scripting the setup; if you want a different root password or to re-run the secure setup, run `mysql_secure_installation` and change credentials.
 
 # AI Worklog — DSC-modernization
