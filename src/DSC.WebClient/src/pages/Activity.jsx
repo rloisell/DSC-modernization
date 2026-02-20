@@ -70,10 +70,15 @@ export default function Activity() {
     label: project.projectNo ? `${project.projectNo} — ${project.name}` : project.name
   }));
 
-  const budgetItems = budgets.map(budget => ({
-    id: budget.id,
-    label: budget.description
-  }));
+  const budgetItems = budgets.map(budget => {
+    const description = budget.description || '';
+    const isExpense = description.toLowerCase().includes('opex') || description.toLowerCase().includes('expense');
+    const typeLabel = isExpense ? 'Expense' : 'Project';
+    return {
+      id: budget.id,
+      label: `${description} (${typeLabel})`
+    };
+  });
 
   const selectedBudget = budgets.find(b => b.id === budgetId);
   const isExpenseBudget = selectedBudget
@@ -335,6 +340,7 @@ export default function Activity() {
             items={budgetItems}
             selectedKey={budgetId || null}
             onSelectionChange={key => setBudgetId(key ? String(key) : '')}
+            description="Budget selection controls whether project or expense fields are required."
             isRequired
           />
           {isExpenseBudget ? (

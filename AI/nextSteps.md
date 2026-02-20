@@ -78,6 +78,11 @@
 - Budget selection toggles project inputs vs expense inputs
 - Project mode requires project/activity/network selections
 - Expense mode requires director/reason/CPC selections
+- Budget dropdown labels show the budget description and type
+
+#### 4. Operations ✅
+- Step 1: `AddExpenseActivityFields` marked as applied (schema already aligned)
+- Step 2: test data seed executed (no new rows created)
 
 **Files Modified**:
 - `src/DSC.Data/Models/WorkItem.cs`
@@ -95,7 +100,7 @@
 - `src/DSC.WebClient/src/api/WorkItemService.js`
 - `src/DSC.WebClient/src/pages/Activity.jsx`
 
-**Commit**: Pending - feat: split project and expense activities
+**Commit**: Current - feat: split project and expense activities
 
 ---
 

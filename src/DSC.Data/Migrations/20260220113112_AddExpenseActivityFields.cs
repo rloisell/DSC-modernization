@@ -11,10 +11,6 @@ namespace DSC.Data.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropForeignKey(
-                name: "FK_WorkItems_Projects_ProjectId",
-                table: "WorkItems");
-
             migrationBuilder.AlterColumn<Guid>(
                 name: "ProjectId",
                 table: "WorkItems",
@@ -49,38 +45,7 @@ namespace DSC.Data.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4")
                 .OldAnnotation("MySql:CharSet", "utf8mb4");
 
-            migrationBuilder.AddColumn<string>(
-                name: "ActivityType",
-                table: "WorkItems",
-                type: "varchar(20)",
-                maxLength: 20,
-                nullable: false,
-                defaultValue: "Project")
-                .Annotation("MySql:CharSet", "utf8mb4");
-
-            migrationBuilder.AddColumn<string>(
-                name: "CpcCode",
-                table: "WorkItems",
-                type: "varchar(50)",
-                maxLength: 50,
-                nullable: true)
-                .Annotation("MySql:CharSet", "utf8mb4");
-
-            migrationBuilder.AddColumn<string>(
-                name: "DirectorCode",
-                table: "WorkItems",
-                type: "varchar(50)",
-                maxLength: 50,
-                nullable: true)
-                .Annotation("MySql:CharSet", "utf8mb4");
-
-            migrationBuilder.AddColumn<string>(
-                name: "ReasonCode",
-                table: "WorkItems",
-                type: "varchar(50)",
-                maxLength: 50,
-                nullable: true)
-                .Annotation("MySql:CharSet", "utf8mb4");
+            // Columns already exist in the legacy-aligned schema; keep migration idempotent.
 
             migrationBuilder.CreateTable(
                 name: "CPC_Code",
@@ -127,22 +92,11 @@ namespace DSC.Data.Migrations
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
-            migrationBuilder.AddForeignKey(
-                name: "FK_WorkItems_Projects_ProjectId",
-                table: "WorkItems",
-                column: "ProjectId",
-                principalTable: "Projects",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.SetNull);
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropForeignKey(
-                name: "FK_WorkItems_Projects_ProjectId",
-                table: "WorkItems");
-
             migrationBuilder.DropTable(
                 name: "CPC_Code");
 
@@ -152,21 +106,7 @@ namespace DSC.Data.Migrations
             migrationBuilder.DropTable(
                 name: "Reason_Code");
 
-            migrationBuilder.DropColumn(
-                name: "ActivityType",
-                table: "WorkItems");
-
-            migrationBuilder.DropColumn(
-                name: "CpcCode",
-                table: "WorkItems");
-
-            migrationBuilder.DropColumn(
-                name: "DirectorCode",
-                table: "WorkItems");
-
-            migrationBuilder.DropColumn(
-                name: "ReasonCode",
-                table: "WorkItems");
+            // Columns already exist in the legacy-aligned schema; no-op on down.
 
             migrationBuilder.AlterColumn<Guid>(
                 name: "ProjectId",
@@ -204,13 +144,6 @@ namespace DSC.Data.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4")
                 .OldAnnotation("MySql:CharSet", "utf8mb4");
 
-            migrationBuilder.AddForeignKey(
-                name: "FK_WorkItems_Projects_ProjectId",
-                table: "WorkItems",
-                column: "ProjectId",
-                principalTable: "Projects",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
         }
     }
 }
