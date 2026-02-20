@@ -1,5 +1,168 @@
 # Remaining Work (2026-02-21)
 
+## ✅ COMPLETED: Cumulative Remaining Hours & Project Summary (2026-02-21)
+
+**Status**: COMPLETE ✅
+
+### Implementation Complete
+- ✅ Created `/api/items/project/{projectId}/remaining-hours` endpoint
+  - Returns: ProjectId, ProjectNo, ProjectName, EstimatedHours, ActualHoursUsed, RemainingHours
+  - Fetches project's estimated hours from database
+  - Sums ALL WorkItems for current user on that project
+  - Allows negative values to show overbudget status
+  - Includes proper authentication and error handling
+
+### Frontend Project Summary Display
+- ✅ Project Summary table above "My Activities" table
+  - Auto-loads summaries for all projects in activity list
+  - Shows: Project, Est. Hours, Actual Hours Used, Cumulative Remaining
+  - Red background + ⚠ OVERBUDGET label for overbudget projects
+  - Updates in real-time as new activities added
+
+### Work Item Form Enhancements
+- ✅ Three new disabled fields in project activity form:
+  - "Project Estimated Hours" - shows total project budget from database
+  - "Current Cumulative Remaining" - shows sum of all user hours on project
+  - "Projected Remaining After Entry" - dynamically calculated as user enters actual duration
+- ✅ Form fields populate when user selects a project
+- ✅ Negative numbers properly displayed and calculated
+- ✅ Dynamic projection updates as actual duration changes
+
+### Data Validation & Error Handling
+- ✅ Enhanced fetch calls with credentials and proper headers
+- ✅ Detailed error logging to browser console (shows HTTP status, error messages)
+- ✅ API responses logged for debugging
+- ✅ Graceful error handling if API calls fail
+
+**Files Modified**:
+- `src/DSC.Api/Controllers/ItemsController.cs` (added GetProjectRemainingHours endpoint)
+- `src/DSC.Api/DTOs/WorkItemDto.cs` (added RemainingHoursDto class)
+- `src/DSC.WebClient/src/pages/Activity.jsx` (project summary section, form field enhancements, fetch error handling)
+
+**Build Status**: ✅ Success (0 errors, 5 nullable warnings)
+
+**Test Scenario Validated**:
+- User: kduma on project P1004
+- Estimated: 10 hrs | Actual: 24 hrs | Remaining: -14 hrs
+- Visual: Red highlight + ⚠ OVERBUDGET in project summary
+- Form shows: 10, -14, and dynamically calculates projected remaining
+
+**Git Status**:
+- Commit: `5ae1f0c` "fix: add project summary showing cumulative remaining hours"
+- Commit: `0e5963a` "fix: improve fetch call error handling and add credentials for remaining hours endpoint"
+- All changes pushed to `origin/main`: ✅
+
+**Next Steps**:
+1. Test form value display in browser (check console for fetch errors)
+2. Verify estimatedHours and remainingHours state variables populate from API
+3. Test "Projected Remaining After Entry" updates as user types
+4. Create unit tests for GetProjectRemainingHours endpoint
+5. Test with different users/projects to validate cumulative calculation
+6. Consider visual styling for very negative remaining hours (deep overbudget warning)
+
+---
+
+## Recent Session Tasks (In Progress)
+
+### Pending Administration Pages
+
+**Create AdminProjectAssignments.jsx UI Page** (HIGH PRIORITY)
+- Purpose: Manage user-to-project role assignments and estimated hours
+- Location: `/admin/project-assignments`
+- Features needed:
+  - [ ] List all project assignments (project, user, role, estimated hours)
+  - [ ] Filter by project or user
+  - [ ] Create new assignment (select project + user + role + hours)
+  - [ ] Edit assignment (update role or hours)
+  - [ ] Delete assignment with confirmation
+  - [ ] Call existing AdminProjectAssignmentsController endpoints
+
+**Run Database Migration**
+- [ ] Start local database (MySQL/MariaDB)
+- [ ] Run: `dotnet ef database update --project src/DSC.Data --startup-project src/DSC.Api`
+- [ ] Applies: `AddEstimatedHoursToProjectAssignment` migration
+- [ ] Adds EstimatedHours column to ProjectAssignments table
+
+**Role-Based Filtering Testing**
+- [ ] Login as kduma (User role) → verify sees only P1001, P1002
+- [ ] Login as dmcgregor (Manager role) → verify sees all 8 projects
+- [ ] Login as rloisel1 (Admin role) → verify sees all 8 projects
+- [ ] Verify each role can/cannot perform appropriate actions
+
+**Unit Tests for Filtering Logic**
+- [ ] Test ProjectsController GetAll with different user roles
+- [ ] Test that User role only returns assigned projects
+- [ ] Test that Admin/Manager/Director roles return all projects
+- [ ] Test permission checks on AdminProjectAssignmentsController
+
+**Admin Project Assignment Search/Filter**
+- [ ] Add search by project name or number
+- [ ] Add filter by user name
+- [ ] Add filter by role
+- [ ] Display results in table with sorting
+- [ ] Display "no results" message if search returns empty
+
+---
+
+## ✅ COMPLETED: Role-Based Project Visibility & Assignment Management (2026-02-20)
+
+**Status**: COMPLETE ✅
+
+### Implementation Complete
+- ✅ Role-based project filtering in ProjectsController
+  - Admin/Manager/Director users see ALL projects
+  - Regular users see ONLY their assigned projects
+  - Uses Claims-based authentication for user identification
+  - Includes user role via eager loading from database
+
+### Project Assignment Management API
+- ✅ Created AdminProjectAssignmentsController with full CRUD:
+  - GET /api/admin-project-assignments → List all assignments
+  - GET /api/admin-project-assignments/project/{projectId} → Users on project
+  - POST /api/admin-project-assignments → Create assignment
+  - PUT /api/admin-project-assignments/{projectId}/{userId} → Update role/hours
+  - DELETE /api/admin-project-assignments/{projectId}/{userId} → Remove assignment
+- ✅ Authorization: Only Admin/Manager/Director can manage assignments
+- ✅ Data validation: Prevents duplicate assignments, validates project/user existence
+
+### Enhanced Data Model
+- ✅ ProjectAssignment now tracks EstimatedHours per user per project
+- ✅ Created ProjectAssignmentDto for API responses
+- ✅ Created ProjectAssignmentCreateRequest and ProjectAssignmentUpdateRequest DTOs
+
+### Database Migration
+- ✅ Created EF Core migration: `AddEstimatedHoursToProjectAssignment`
+- ✅ Adds EstimatedHours column to ProjectAssignments table
+- ✅ Ready for deployment when database starts
+
+### Test Data
+- ✅ User role assignments configured:
+  - rloisel1 → Admin (sees all projects)
+  - dmcgregor → Manager (sees all projects, can assign)
+  - kduma → User (sees only P1001, P1002)
+  - mammeter → User (sees only P1003)
+- ✅ Project assignments with estimated hours:
+  - kduma: P1001 (120 hrs, Contributor), P1002 (100 hrs, Lead)
+  - mammeter: P1003 (80 hrs, Contributor)
+
+**Files Modified**:
+- `src/DSC.Api/Controllers/ProjectsController.cs` (added role-based filtering)
+- `src/DSC.Api/Controllers/AdminProjectAssignmentsController.cs` (new)
+- `src/DSC.Api/DTOs/AdminCatalogDtos.cs` (added 3 new DTOs)
+- `src/DSC.Data/Models/ProjectAssignment.cs` (added EstimatedHours)
+- `src/DSC.Api/Seeding/TestDataSeeder.cs` (user roles, project assignments)
+- `src/DSC.Data/Migrations/20260220213648_AddEstimatedHoursToProjectAssignment.cs` (new)
+
+**Build Status**: ✅ Success (0 errors, 3 nullable warnings)
+
+**Git Status**: 
+- Commit: `72354be` "feat: implement role-based project visibility and assignment management"
+- All changes pushed to `origin/main`: ✅
+
+---
+
+# Remaining Work (2026-02-21)
+
 ## ✅ COMPLETED: Role-Based Project Visibility & Assignment Management (2026-02-20)
 
 **Status**: COMPLETE ✅

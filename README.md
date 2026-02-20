@@ -95,11 +95,20 @@ See [tests/howto.md](tests/howto.md) for comprehensive testing documentation, in
 ## Activity Page — 2026-02-21 (UPDATED)
 
 **What's working:**
-- ✅ **Activity Tracking Table** (NEW 2026-02-21):
+- ✅ **Project Summary Table** (NEW 2026-02-21):
+  - Displays cumulative budget status for all projects in your activity list
+  - Shows for each project: Estimated Hours, Actual Hours Used, Cumulative Remaining
+  - Cumulative Remaining = Sum of ALL your activities on that project vs project estimated hours
+  - Can show negative values (indicates overbudget on that project)
+  - Visual warning: Red background with ⚠ OVERBUDGET label for projects running over budget
+  - Automatically loads and updates as you add new activities
+  - Example: Project P1004 has 10 estimated hours, you have 4 activities of 6 hours each = 24 actual hours = -14 hours remaining (overbudget by 14 hours)
+
+- ✅ **Activity Tracking Table** (2026-02-21):
   - Comprehensive table showing all user activities with time period filtering
   - Time period options: Today, This Week, This Month, This Year, All Time
   - Displays: Project, Title, Activity Code, Network, Date, Estimated Hours, Actual Hours, Remaining Hours
-  - Remaining hours calculated as: `projectEstimatedHours - actualDuration`
+  - Remaining hours calculated as: `projectEstimatedHours - actualDuration` (per activity)
   - Auto-refreshes when time period changes or new work item is created
   - Empty state message when no activities found for selected period
   - Uses new `/api/items/detailed?period={period}` endpoint
@@ -116,6 +125,13 @@ See [tests/howto.md](tests/howto.md) for comprehensive testing documentation, in
   - Project budgets require Project/Activity Code/Network Number
   - Expense budgets require Director/Reason/CPC codes
   - Budget dropdown labels show the budget description and type
+- ✅ **Project Hour Estimates in Form** (NEW 2026-02-21):
+  - When you select a project, form shows:
+    - "Project Estimated Hours" - total hours available for the project (from database)
+    - "Current Cumulative Remaining" - sum of all your hours spent on that project, showing remaining
+    - "Projected Remaining After Entry" - updates dynamically as you enter your actual hours, shows what remaining would be after you submit
+  - All three fields are disabled (read-only) to prevent manual editing
+  - Example: Selecting P1004 with 10 estimated hours where you've already used 24 hours shows: Est: 10, Current Remaining: -14, Projected (after entering 5 more): -19
 - ✅ **Catalog Service**: New public `/api/catalog` endpoints for activity codes and network numbers
 - ✅ **Expense Catalogs**: Director/Reason/CPC codes exposed via `/api/catalog/director-codes`, `/api/catalog/reason-codes`, `/api/catalog/cpc-codes`
 - ✅ **Test Data Seeding**: Activity Codes and Network Numbers automatically seeded with test data
@@ -145,14 +161,56 @@ See [tests/howto.md](tests/howto.md) for comprehensive testing documentation, in
 2. Seed test data: `curl -X POST http://localhost:5005/api/admin/seed/test-data -H "X-Admin-Token: local-admin-token"`
    - Should return counts including ActivityCodesCreated and NetworkNumbersCreated
 3. Start WebClient: `cd src/DSC.WebClient && npm run dev`
-4. Navigate to Activity page and create a work item:
-   - Project dropdown: loads from `/api/projects`
-  - Budget dropdown: shows budget description + type (Project/Expense)
-   - Activity Code dropdown: loads DEV, TEST, DOC, ADMIN, MEET, TRAIN from `/api/catalog/activity-codes`
-   - Network Number dropdown: loads 101, 102, 103, 201, 202, 203 from `/api/catalog/network-numbers`
-   - (Optional) Legacy Activity ID: enter an ID if linking to original system
-   - Select values and submit
-   - Verify work item appears in list below with no errors
+4. Navigate to Activity page and test cumulative hours:
+   - Verify Project Summary table shows all projects with cumulative hours
+   - Verify projects with negative remaining hours show red background + ⚠ OVERBUDGET
+   - Select a project in the form
+   - Verify form shows: Project Estimated Hours, Current Cumulative Remaining, Projected Remaining After Entry
+   - Enter an actual duration value
+   - Verify Projected Remaining updates dynamically (current remaining - your entered hours)
+   - Submit and verify new activity appears in list and updates project summary
+
+**Troubleshooting**:
+- If form fields are blank: Open browser DevTools (Cmd+Option+I), go to Console tab, select a project, and check for "Remaining hours data" log message
+- If API error shown: Check the error message in console (shows HTTP status and error details)
+- If projected remaining not calculating: Make sure you're entering a valid number in the "Actual Duration" field
+
+## Next Steps & Priorities (2026-02-21)
+
+### 🔴 HIGH PRIORITY — Next Features to Build
+
+1. **Create AdminProjectAssignments.jsx UI Page**
+   - Purpose: Manage user-to-project role assignments and estimated hours
+   - Endpoints available: `/api/admin-project-assignments` (GET, POST, PUT, DELETE) 
+   - Features needed: List all assignments, filter by project/user, create/edit/delete assignments
+   - Business logic: Users assigned to projects have access to those projects on Activity page
+   - Test data ready: Run migrations and seed data includes assignments from TestDataSeeder
+
+2. **Run Database Migration**
+   - Command: `dotnet ef database update --project src/DSC.Data --startup-project src/DSC.Api`
+   - Applies: `AddEstimatedHoursToProjectAssignment` migration
+   - Adds EstimatedHours column to ProjectAssignments table for per-user estimated hours
+
+3. **Role-Based Filtering Testing**
+   - Login as kduma (User role) → should see only P1001, P1002
+   - Login as dmcgregor (Manager role) → should see all projects
+   - Login as rloisel1 (Admin role) → should see all projects
+   - Verify role-based project visibility working correctly
+
+4. **Add Unit Tests for Filtering Logic**
+   - Test ProjectsController GetAll with different user roles
+   - Test that User role returns only assigned projects
+   - Test that Admin/Manager/Director return all projects
+   - Test permission checks on AdminProjectAssignmentsController
+
+5. **Admin Project Assignment Search/Filter UI**
+   - Add search by project name or number
+   - Add filter by user name  
+   - Add filter by role
+   - Display results in table with sorting capabilities
+   - Show "no results" message when search returns empty
+
+---
 
 ## Admin Management — 2026-02-21 (UPDATED)
 

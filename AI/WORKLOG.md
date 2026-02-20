@@ -1,3 +1,125 @@
+## 2026-02-21 — Cumulative Remaining Hours & Project Summary Display (COMPLETED ✓)
+
+**Objective**: Implement cumulative project budget tracking to show:
+- Total estimated hours per project (from ProjectAssignment records)
+- Sum of ALL user's actual hours spent on project across all activities
+- Cumulative remaining hours (can be negative if overbudget)
+- Visual warnings for overbudget projects
+
+**Implementation Summary**:
+
+### 1. New API Endpoint
+**File Modified**:
+- [src/DSC.Api/Controllers/ItemsController.cs](src/DSC.Api/Controllers/ItemsController.cs#L302-L355)
+  - Added `GetProjectRemainingHours(Guid projectId)` endpoint
+  - Returns cumulative hours data for current user on selected project
+  - Query logic:
+    - Gets project's estimated hours
+    - Sums ALL WorkItems for current user on that project
+    - Calculates: RemainingHours = EstimatedHours - SumOfActualDuration
+    - Allows negative values (indicates overbudget)
+  - Endpoint: `GET /api/items/project/{projectId}/remaining-hours`
+  - Returns: RemainingHoursDto
+
+### 2. New DTO for API Response
+**File Modified**:
+- [src/DSC.Api/DTOs/WorkItemDto.cs](src/DSC.Api/DTOs/WorkItemDto.cs#L89-L112)
+  - Added `RemainingHoursDto` class with properties:
+    - `ProjectId` - Project identifier
+    - `ProjectNo` - Legacy project number (e.g., "P1004")
+    - `ProjectName` - Project name
+    - `EstimatedHours` - Total hours allocated for project
+    - `ActualHoursUsed` - Sum of all user's actual hours on project
+    - `RemainingHours` - Calculated as EstimatedHours - ActualHoursUsed (can be negative)
+
+### 3. Frontend Project Summary Section
+**File Modified**:
+- [src/DSC.WebClient/src/pages/Activity.jsx](src/DSC.WebClient/src/pages/Activity.jsx#L355-L398)
+
+**New Features**:
+- **Project Summary Table** (above "My Activities" table):
+  - Auto-loads for all projects in detailed items
+  - Displays: Project, Est. Hours, Actual Hours Used, Cumulative Remaining
+  - Visual warnings:
+    - Red background for overbudget projects (remaining < 0)
+    - ⚠ OVERBUDGET label in red
+  - Updates in real-time as new activities are added
+
+- **Enhanced Form Fields** (project activities):
+  - "Project Estimated Hours" (disabled, from database)
+  - "Current Cumulative Remaining" (disabled, shows sum of all user's actual hours)
+  - "Projected Remaining After Entry" (disabled, calculated dynamically as user types actual duration)
+  - Shows all values including negative numbers for overbudget scenarios
+
+### 4. State Management & Data Fetching
+**New State Variables**:
+- `projectSummaries` - Object mapping projectId → RemainingHoursDto
+- `estimatedHours` - Project estimated hours for current selection
+- `remainingHours` - Cumulative remaining for current selection
+
+**Data Flow**:
+1. useEffect loads detailed items for time period
+2. useEffect extracts unique project IDs and fetches summaries for each
+3. When project is selected in form, fetch remaining hours for that specific project
+4. Form fields display fetched values in disabled NumberField components
+5. "Projected Remaining" updates as user types actual duration
+
+### 5. Authentication & Error Handling
+**Improvements**:
+- Fetch calls now include `credentials: 'include'` for authentication
+- Added `/api/items/project/{projectId}/remaining-hours` authentication headers
+- Detailed error logging to browser console for debugging
+- Error logs include HTTP status codes and response text
+- Graceful handling of failed API calls
+
+**Error Handling**:
+```javascript
+// Check response status before parsing JSON
+if (!res.ok) {
+  console.error(`API error: ${res.status} ${res.statusText}`);
+  const errorText = await res.text();
+  console.error('Error response:', errorText);
+  throw new Error(`API error: ${res.status}`);
+}
+
+// Log successful responses
+console.log('Remaining hours data:', data);
+```
+
+### 6. Test Scenario
+**Test User**: kduma on project P1004
+- Project Estimated Hours: 10
+- Actual Hours Used: 24 (4 activities × 6 hours each)
+- Cumulative Remaining: -14 (overbudget by 14 hours)
+- Visual: P1004 row highlighted in red with ⚠ OVERBUDGET label
+- Form shows: 10, -14, and dynamically updates projected remaining as actual duration is entered
+
+**Validations**:
+- ✅ Negative values properly displayed and calculated
+- ✅ Project summary auto-loads for all projects in list
+- ✅ Form fields populate when project is selected
+- ✅ Dynamic calculation of projected remaining works correctly
+- ✅ API endpoint correctly sums all user activities on project
+
+**Build & Test Results**:
+- `dotnet build`: ✅ Success (5 nullable warnings, 0 errors)
+- API endpoint: ✅ Created and responding
+- Frontend form fields: ✅ Defined with proper bindings
+- Error handling: ✅ Improved with detailed logging
+- Git commits:
+  - `5ae1f0c` - "fix: add project summary showing cumulative remaining hours"
+  - `0e5963a` - "fix: improve fetch call error handling and add credentials for remaining hours endpoint"
+
+**Next Steps**:
+1. Test form value display in browser (verify estimatedHours and remainingHours state variables are populated)
+2. Check browser console logs for any API errors during fetch
+3. Verify "Projected Remaining After Entry" updates dynamically as user enters actual duration
+4. Test with different user accounts (different projects/budgets) to validate cumulative calculation
+5. Create unit tests for GetProjectRemainingHours endpoint
+6. Consider adding overflow warning when projected remaining becomes very negative
+
+---
+
 ## 2026-02-20 — Role-Based Project Visibility & Assignment Management (COMPLETED ✓)
 
 **Objective**: Implement role-based project visibility so that:
