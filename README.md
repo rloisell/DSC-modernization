@@ -25,7 +25,42 @@ This modernization preserves five key legacy mapping tables from the original Ja
 
 These tables use composite primary keys and preserve the original Java naming conventions for seamless data migration.
 
-## Unit Testing — 2026-02-21 ✅ NEW
+## Authentication & Role-Based Access Control — 2026-02-21 (NEW ✅)
+
+**What's working:**
+- ✅ **Login System**: Simple username/password authentication via `/api/auth/login` endpoint
+- ✅ **Role-Based Access**: Two roles supported - Admin and User
+  - Admin role: Can access Activity, Projects, and all Admin pages
+  - User role: Can access Activity and Projects pages only
+  - Pre-login: Only Home page visible
+- ✅ **Protected Routes**: Authenticated routes redirect to login if not logged in
+- ✅ **Session Management**: User session persisted in localStorage with role information
+- ✅ **Conditional Navigation**: Navigation links show/hide based on authentication state and role
+- ✅ **Logout Functionality**: Logout button displays current username and clears session
+
+**Test Credentials**:
+- **Admin user**: username `rloisel1`, password `test-password-updated`
+- **Regular user**: username `kduma`, password `test-password`
+
+**How to test**:
+1. Start API: `cd src/DSC.Api && dotnet run --urls http://localhost:5005`
+2. Start WebClient: `cd src/DSC.WebClient && npm run dev`
+3. Navigate to [http://localhost:5173](http://localhost:5173)
+4. Click "Login" and use admin credentials
+5. Verify you can access Activity, Projects, and Admin links
+6. Logout and login as regular user (kduma)
+7. Verify Admin link is not visible and attempting to access /admin redirects to home
+8. Logout and verify only Home is accessible
+
+**Architecture**:
+- **Backend**: `AuthController` validates credentials against `UserAuth` table and returns user details with role
+- **Frontend**: `AuthContext` manages authentication state, `ProtectedRoute` and `AdminRoute` components guard routes
+- **Database**: Role assignment managed in `TestDataSeeder` - rloisel1 gets Admin role, others get User role
+- **Future**: Will be replaced with OIDC/Keycloak for production use
+
+---
+
+## Unit Testing — 2026-02-21 ✅
 
 **16 unit tests implemented and passing**:
 - ✅ Test data seeding validation (9 tests): validates TestDataSeeder creates correct activity codes, network numbers, and marks them as active

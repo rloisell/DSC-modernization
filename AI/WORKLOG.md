@@ -1,3 +1,64 @@
+## 2026-02-21 — Role-Based Access Control Implementation (COMPLETED ✓)
+
+**Problem Statement**:
+1. Implement role-based access control to protect pages based on user authentication and role
+2. Regular users should access Activity and Projects pages after login
+3. Admin users should access Admin section in addition to regular user pages
+4. Pre-login, users should only see the Home page
+
+**Implementation & Resolution**:
+
+### Backend Authentication
+- ✅ Created `AuthController` with `/api/auth/login` and `/api/auth/user/{empId}` endpoints
+- ✅ Authentication validates against UserAuth table (simple password check for now, to be replaced with OIDC)
+- ✅ Login returns user details with role information (Admin or User)
+- ✅ Updated TestDataSeeder to assign Admin role to rloisel1 and User role to other users
+
+### Frontend Authentication Context
+- ✅ Created `AuthContext` with login/logout/role checking functionality
+- ✅ Authentication state persisted in localStorage for session management
+- ✅ Added `AuthService.js` to handle login API calls
+
+### Protected Routes
+- ✅ Created `ProtectedRoute` component to require authentication for Activity and Projects pages
+- ✅ Created `AdminRoute` component to require Admin role for all /admin/* pages
+- ✅ Redirects unauthenticated users to login page with return path
+- ✅ Redirects non-admin authenticated users to home if they try to access admin pages
+
+### Navigation Updates
+- ✅ Updated App.jsx navigation to conditionally show links based on authentication state
+- ✅ Activity and Projects links only show when authenticated
+- ✅ Admin link only shows for admin users
+- ✅ Login/Logout button toggles based on auth state
+- ✅ Shows current username in logout button
+
+### Login Page
+- ✅ Updated Login.jsx to use AuthService for authentication
+- ✅ Added error handling for failed login attempts
+- ✅ Redirects to intended page after successful login
+- ✅ Added test credentials hint: username `rloisel1`, password `test-password-updated`
+
+**Test Credentials**:
+- Admin user: username `rloisel1`, password `test-password-updated`
+- Regular user: username `kduma`, password `test-password`
+
+**Files Created**:
+- `src/DSC.WebClient/src/contexts/AuthContext.jsx`
+- `src/DSC.WebClient/src/api/AuthService.js`
+- `src/DSC.WebClient/src/components/ProtectedRoute.jsx`
+- `src/DSC.Api/Controllers/AuthController.cs`
+
+**Files Modified**:
+- `src/DSC.WebClient/src/App.jsx`
+- `src/DSC.WebClient/src/pages/Login.jsx`
+- `src/DSC.Api/Seeding/TestDataSeeder.cs`
+- `README.md`
+- `AI/nextSteps.md`
+
+**Commit**: [pending]
+
+---
+
 ## 2026-02-21 — Activity Dropdown Wiring Verification (COMPLETED ✓)
 
 **Problem Statement**:

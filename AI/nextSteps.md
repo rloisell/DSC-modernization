@@ -2,13 +2,42 @@
 
 ## Next Steps
 
-### 1. End-to-End UI Walkthrough
-- Validate admin CRUD flows in the browser after the latest deletes wiring
-- Confirm Activity page dropdowns (projects, budgets, codes, numbers) load from the database
+### 1. UI Walkthrough & Testing
+- **READY**: Browser-based testing of role-based access control
+  - Test login as admin (rloisel1 / test-password-updated)
+  - Test login as regular user (kduma / test-password)
+  - Verify navigation restrictions based on role
+  - Test admin CRUD flows for all catalog entities
+  - Confirm Activity page dropdowns work after login
 
-### 2. Optional UX Polish
+### 2. Future Enhancements
+- Replace simple password authentication with OIDC/Keycloak integration
+- Add JWT token-based authentication for API calls
+- Add refresh token support for session management
+- Consider adding password reset/change functionality
+
+### 3. Optional UX Polish
 - Add inline confirmations or toast messaging for destructive actions if needed
 - Review empty states for expense options and project activity options
+- Add loading states for authentication operations
+
+## ✅ COMPLETED: Role-Based Access Control (2026-02-21)
+
+**Summary**: Implemented frontend and backend authentication with role-based access control. Admin users can access all pages, regular users can access Activity and Projects, and unauthenticated users only see Home.
+
+### Features Implemented
+1. Backend authentication endpoints (`/api/auth/login`)
+2. Frontend AuthContext for session management
+3. Protected routes for authenticated users (Activity, Projects)
+4. Admin-only routes for admin section
+5. Conditional navigation based on authentication state
+6. Role assignment in database seeding
+
+### Test Credentials
+- Admin: `rloisel1` / `test-password-updated`
+- User: `kduma` / `test-password`
+
+---
 
 ## ✅ COMPLETED: Legacy Model Ports (2026-02-20 - 2026-02-21)
 

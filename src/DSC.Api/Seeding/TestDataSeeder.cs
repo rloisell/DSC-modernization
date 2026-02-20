@@ -258,6 +258,34 @@ public record TestSeedResult(int UsersCreated, int UserAuthCreated, int Projects
                 }
             }
 
+            // Save roles before assigning them to users
+            await _db.SaveChangesAsync(ct);
+
+            // Assign roles to users
+            var adminRole = await _db.Roles.FirstOrDefaultAsync(r => r.Name == "Admin", ct);
+            var userRole = await _db.Roles.FirstOrDefaultAsync(r => r.Name == "User", ct);
+
+            if (adminRole != null)
+            {
+                var adminUser = await _db.Users.FirstOrDefaultAsync(u => u.Username == "rloisel1", ct);
+                if (adminUser != null && adminUser.RoleId == null)
+                {
+                    adminUser.RoleId = adminRole.Id;
+                }
+            }
+
+            if (userRole != null)
+            {
+                var regularUsers = await _db.Users
+                    .Where(u => u.RoleId == null && u.Username != "rloisel1")
+                    .ToListAsync(ct);
+                
+                foreach (var user in regularUsers)
+                {
+                    user.RoleId = userRole.Id;
+                }
+            }
+
             // Seed test activity codes (from database schema + supplemental)
             var activityCodeSeeds = new[]
             {
