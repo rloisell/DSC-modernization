@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="900" viewBox="0 0 1400 900">
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto" markerUnits="strokeWidth">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#334155" />
+    </marker>
+  </defs>
+  <rect x="0" y="0" width="1400" height="900" fill="#ffffff" />
+  <rect x="0" y="0" width="1400" height="70" fill="#0f172a" />
+  <text x="32" y="45" font-family="Arial, Helvetica, sans-serif" font-size="26" fill="#ffffff">DSC Domain Model</text>
+
+  <rect x="40" y="110" width="620" height="680" rx="12" fill="#e0f2fe" stroke="#0ea5e9" stroke-width="2" />
+  <text x="60" y="145" font-family="Arial, Helvetica, sans-serif" font-size="18" fill="#0f172a">Core Domain</text>
+
+  <rect x="80" y="170" width="540" height="580" rx="8" fill="#ffffff" stroke="#94a3b8" />
+  <text x="100" y="205" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#0f172a">
+    <tspan x="100" dy="0">User</tspan>
+    <tspan x="100" dy="22">UserAuth (legacy)</tspan>
+    <tspan x="100" dy="22">ExternalIdentity</tspan>
+    <tspan x="100" dy="22">Project</tspan>
+    <tspan x="100" dy="22">WorkItem</tspan>
+    <tspan x="100" dy="22">TimeEntry</tspan>
+    <tspan x="100" dy="22">ProjectAssignment</tspan>
+  </text>
+
+  <rect x="740" y="110" width="620" height="680" rx="12" fill="#dcfce7" stroke="#16a34a" stroke-width="2" />
+  <text x="760" y="145" font-family="Arial, Helvetica, sans-serif" font-size="18" fill="#0f172a">Catalog Domain</text>
+
+  <rect x="780" y="170" width="540" height="580" rx="8" fill="#ffffff" stroke="#94a3b8" />
+  <text x="800" y="205" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#0f172a">
+    <tspan x="800" dy="0">Position</tspan>
+    <tspan x="800" dy="22">Department</tspan>
+    <tspan x="800" dy="22">ExpenseCategory</tspan>
+    <tspan x="800" dy="22">ExpenseOption</tspan>
+    <tspan x="800" dy="22">ActivityCode</tspan>
+    <tspan x="800" dy="22">NetworkNumber</tspan>
+    <tspan x="800" dy="22">ProjectActivityOption</tspan>
+  </text>
+
+  <rect x="200" y="780" width="1000" height="90" rx="10" fill="#f8fafc" stroke="#94a3b8" />
+  <text x="220" y="810" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#0f172a">
+    <tspan x="220" dy="0">Key Relationships</tspan>
+    <tspan x="220" dy="20">User 1..* TimeEntry, User 1..* ProjectAssignment</tspan>
+    <tspan x="220" dy="20">Project 1..* WorkItem, WorkItem 1..* TimeEntry, Project 1..* ProjectActivityOption</tspan>
+    <tspan x="220" dy="20">ExpenseCategory 1..* ExpenseOption, ProjectActivityOption -> ActivityCode, NetworkNumber</tspan>
+  </text>
+
+  <line x1="360" y1="330" x2="360" y2="520" stroke="#334155" stroke-width="2" marker-end="url(#arrow)" />
+  <text x="375" y="430" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#0f172a">User -> TimeEntry</text>
+
+  <line x1="520" y1="330" x2="520" y2="520" stroke="#334155" stroke-width="2" marker-end="url(#arrow)" />
+  <text x="535" y="430" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#0f172a">Project -> WorkItem</text>
+
+  <line x1="1060" y1="330" x2="1060" y2="520" stroke="#334155" stroke-width="2" marker-end="url(#arrow)" />
+  <text x="1075" y="430" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#0f172a">ExpenseCategory -> ExpenseOption</text>
+</svg>

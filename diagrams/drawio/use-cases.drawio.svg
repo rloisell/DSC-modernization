@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="900" viewBox="0 0 1500 900">
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto" markerUnits="strokeWidth">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#334155" />
+    </marker>
+  </defs>
+  <rect x="0" y="0" width="1500" height="900" fill="#ffffff" />
+  <rect x="0" y="0" width="1500" height="70" fill="#0f172a" />
+  <text x="32" y="45" font-family="Arial, Helvetica, sans-serif" font-size="26" fill="#ffffff">DSC Use Cases</text>
+
+  <circle cx="120" cy="240" r="30" fill="#e2e8f0" stroke="#64748b" />
+  <line x1="120" y1="270" x2="120" y2="340" stroke="#64748b" stroke-width="3" />
+  <line x1="90" y1="300" x2="150" y2="300" stroke="#64748b" stroke-width="3" />
+  <line x1="120" y1="340" x2="90" y2="390" stroke="#64748b" stroke-width="3" />
+  <line x1="120" y1="340" x2="150" y2="390" stroke="#64748b" stroke-width="3" />
+  <text x="70" y="430" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#0f172a">End User</text>
+
+  <circle cx="120" cy="570" r="30" fill="#e2e8f0" stroke="#64748b" />
+  <line x1="120" y1="600" x2="120" y2="670" stroke="#64748b" stroke-width="3" />
+  <line x1="90" y1="630" x2="150" y2="630" stroke="#64748b" stroke-width="3" />
+  <line x1="120" y1="670" x2="90" y2="720" stroke="#64748b" stroke-width="3" />
+  <line x1="120" y1="670" x2="150" y2="720" stroke="#64748b" stroke-width="3" />
+  <text x="60" y="760" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#0f172a">Administrator</text>
+
+  <rect x="260" y="120" width="1180" height="700" rx="16" fill="#f8fafc" stroke="#94a3b8" stroke-width="2" />
+  <text x="290" y="160" font-family="Arial, Helvetica, sans-serif" font-size="18" fill="#0f172a">DSC Time & Expense Tracking</text>
+
+  <ellipse cx="520" cy="250" rx="150" ry="40" fill="#e0f2fe" stroke="#0ea5e9" />
+  <text x="430" y="255" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#0f172a">View Projects</text>
+
+  <ellipse cx="520" cy="340" rx="150" ry="40" fill="#e0f2fe" stroke="#0ea5e9" />
+  <text x="420" y="345" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#0f172a">Create Work Item</text>
+
+  <ellipse cx="520" cy="430" rx="150" ry="40" fill="#e0f2fe" stroke="#0ea5e9" />
+  <text x="410" y="435" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#0f172a">Record Time Entry</text>
+
+  <ellipse cx="920" cy="250" rx="170" ry="40" fill="#dcfce7" stroke="#16a34a" />
+  <text x="820" y="255" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#0f172a">Manage Users</text>
+
+  <ellipse cx="920" cy="340" rx="170" ry="40" fill="#dcfce7" stroke="#16a34a" />
+  <text x="780" y="345" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#0f172a">Manage Catalog (projects, codes)</text>
+
+  <ellipse cx="920" cy="430" rx="170" ry="40" fill="#dcfce7" stroke="#16a34a" />
+  <text x="820" y="435" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#0f172a">Seed Test Data</text>
+
+  <ellipse cx="920" cy="520" rx="170" ry="40" fill="#dcfce7" stroke="#16a34a" />
+  <text x="820" y="525" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#0f172a">Export / Import Data</text>
+
+  <ellipse cx="520" cy="560" rx="150" ry="40" fill="#e0f2fe" stroke="#0ea5e9" />
+  <text x="420" y="565" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#0f172a">Login (local)</text>
+
+  <ellipse cx="520" cy="640" rx="150" ry="40" fill="#fef9c3" stroke="#eab308" />
+  <text x="420" y="645" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#0f172a">Login (OIDC future)</text>
+
+  <line x1="150" y1="320" x2="370" y2="300" stroke="#334155" stroke-width="2" marker-end="url(#arrow)" />
+  <line x1="150" y1="340" x2="370" y2="340" stroke="#334155" stroke-width="2" marker-end="url(#arrow)" />
+  <line x1="150" y1="360" x2="370" y2="430" stroke="#334155" stroke-width="2" marker-end="url(#arrow)" />
+  <line x1="150" y1="380" x2="370" y2="560" stroke="#334155" stroke-width="2" marker-end="url(#arrow)" />
+
+  <line x1="150" y1="650" x2="740" y2="250" stroke="#334155" stroke-width="2" marker-end="url(#arrow)" />
+  <line x1="150" y1="670" x2="740" y2="340" stroke="#334155" stroke-width="2" marker-end="url(#arrow)" />
+  <line x1="150" y1="690" x2="740" y2="430" stroke="#334155" stroke-width="2" marker-end="url(#arrow)" />
+  <line x1="150" y1="710" x2="740" y2="520" stroke="#334155" stroke-width="2" marker-end="url(#arrow)" />
+</svg>

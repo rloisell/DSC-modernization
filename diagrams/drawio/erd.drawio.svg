@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1000" viewBox="0 0 1600 1000">
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto" markerUnits="strokeWidth">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#334155" />
+    </marker>
+  </defs>
+  <rect x="0" y="0" width="1600" height="1000" fill="#ffffff" />
+  <rect x="0" y="0" width="1600" height="70" fill="#0f172a" />
+  <text x="32" y="45" font-family="Arial, Helvetica, sans-serif" font-size="26" fill="#ffffff">DSC Entity Relationship Diagram (ERD)</text>
+
+  <rect x="40" y="100" width="300" height="180" rx="8" fill="#f8fafc" stroke="#94a3b8" />
+  <text x="60" y="130" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#0f172a">
+    <tspan x="60" dy="0">users</tspan>
+    <tspan x="60" dy="20">PK id</tspan>
+    <tspan x="60" dy="18">emp_id</tspan>
+    <tspan x="60" dy="18">username</tspan>
+    <tspan x="60" dy="18">email</tspan>
+  </text>
+
+  <rect x="380" y="100" width="300" height="160" rx="8" fill="#f8fafc" stroke="#94a3b8" />
+  <text x="400" y="130" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#0f172a">
+    <tspan x="400" dy="0">user_auth</tspan>
+    <tspan x="400" dy="20">PK username</tspan>
+    <tspan x="400" dy="18">emp_id</tspan>
+    <tspan x="400" dy="18">password</tspan>
+  </text>
+
+  <rect x="720" y="100" width="320" height="180" rx="8" fill="#f8fafc" stroke="#94a3b8" />
+  <text x="740" y="130" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#0f172a">
+    <tspan x="740" dy="0">external_identities</tspan>
+    <tspan x="740" dy="20">PK id</tspan>
+    <tspan x="740" dy="18">FK user_id</tspan>
+    <tspan x="740" dy="18">provider</tspan>
+    <tspan x="740" dy="18">subject</tspan>
+  </text>
+
+  <rect x="40" y="320" width="300" height="200" rx="8" fill="#f8fafc" stroke="#94a3b8" />
+  <text x="60" y="350" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#0f172a">
+    <tspan x="60" dy="0">projects</tspan>
+    <tspan x="60" dy="20">PK id</tspan>
+    <tspan x="60" dy="18">project_no</tspan>
+    <tspan x="60" dy="18">name</tspan>
+    <tspan x="60" dy="18">is_active</tspan>
+  </text>
+
+  <rect x="380" y="320" width="300" height="220" rx="8" fill="#f8fafc" stroke="#94a3b8" />
+  <text x="400" y="350" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#0f172a">
+    <tspan x="400" dy="0">work_items</tspan>
+    <tspan x="400" dy="20">PK id</tspan>
+    <tspan x="400" dy="18">FK project_id</tspan>
+    <tspan x="400" dy="18">title</tspan>
+    <tspan x="400" dy="18">legacy_activity_id</tspan>
+  </text>
+
+  <rect x="720" y="320" width="320" height="220" rx="8" fill="#f8fafc" stroke="#94a3b8" />
+  <text x="740" y="350" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#0f172a">
+    <tspan x="740" dy="0">time_entries</tspan>
+    <tspan x="740" dy="20">PK id</tspan>
+    <tspan x="740" dy="18">FK work_item_id</tspan>
+    <tspan x="740" dy="18">FK user_id</tspan>
+    <tspan x="740" dy="18">hours, entry_date</tspan>
+  </text>
+
+  <rect x="1080" y="320" width="320" height="200" rx="8" fill="#f8fafc" stroke="#94a3b8" />
+  <text x="1100" y="350" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#0f172a">
+    <tspan x="1100" dy="0">project_assignments</tspan>
+    <tspan x="1100" dy="20">PK project_id</tspan>
+    <tspan x="1100" dy="18">PK user_id</tspan>
+    <tspan x="1100" dy="18">assigned_date</tspan>
+  </text>
+
+  <rect x="40" y="580" width="300" height="200" rx="8" fill="#f8fafc" stroke="#94a3b8" />
+  <text x="60" y="610" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#0f172a">
+    <tspan x="60" dy="0">expense_categories</tspan>
+    <tspan x="60" dy="20">PK id</tspan>
+    <tspan x="60" dy="18">name</tspan>
+    <tspan x="60" dy="18">is_active</tspan>
+  </text>
+
+  <rect x="380" y="580" width="300" height="200" rx="8" fill="#f8fafc" stroke="#94a3b8" />
+  <text x="400" y="610" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#0f172a">
+    <tspan x="400" dy="0">expense_options</tspan>
+    <tspan x="400" dy="20">PK id</tspan>
+    <tspan x="400" dy="18">FK expense_category_id</tspan>
+    <tspan x="400" dy="18">name</tspan>
+  </text>
+
+  <rect x="720" y="580" width="260" height="180" rx="8" fill="#f8fafc" stroke="#94a3b8" />
+  <text x="740" y="610" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#0f172a">
+    <tspan x="740" dy="0">activity_codes</tspan>
+    <tspan x="740" dy="20">PK id</tspan>
+    <tspan x="740" dy="18">code</tspan>
+  </text>
+
+  <rect x="1020" y="580" width="260" height="180" rx="8" fill="#f8fafc" stroke="#94a3b8" />
+  <text x="1040" y="610" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#0f172a">
+    <tspan x="1040" dy="0">network_numbers</tspan>
+    <tspan x="1040" dy="20">PK id</tspan>
+    <tspan x="1040" dy="18">number</tspan>
+  </text>
+
+  <rect x="1320" y="580" width="240" height="200" rx="8" fill="#f8fafc" stroke="#94a3b8" />
+  <text x="1340" y="610" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#0f172a">
+    <tspan x="1340" dy="0">project_activity_options</tspan>
+    <tspan x="1340" dy="20">PK project_id</tspan>
+    <tspan x="1340" dy="18">PK activity_code_id</tspan>
+    <tspan x="1340" dy="18">PK network_number_id</tspan>
+  </text>
+
+  <rect x="1080" y="100" width="260" height="150" rx="8" fill="#f8fafc" stroke="#94a3b8" />
+  <text x="1100" y="130" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#0f172a">
+    <tspan x="1100" dy="0">positions</tspan>
+    <tspan x="1100" dy="20">PK id</tspan>
+    <tspan x="1100" dy="18">title</tspan>
+  </text>
+
+  <rect x="1370" y="100" width="200" height="150" rx="8" fill="#f8fafc" stroke="#94a3b8" />
+  <text x="1390" y="130" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#0f172a">
+    <tspan x="1390" dy="0">departments</tspan>
+    <tspan x="1390" dy="20">PK id</tspan>
+    <tspan x="1390" dy="18">name</tspan>
+  </text>
+
+  <line x1="340" y1="160" x2="380" y2="160" stroke="#334155" stroke-width="2" marker-end="url(#arrow)" />
+  <line x1="680" y1="180" x2="720" y2="180" stroke="#334155" stroke-width="2" marker-end="url(#arrow)" />
+
+  <line x1="340" y1="380" x2="380" y2="380" stroke="#334155" stroke-width="2" marker-end="url(#arrow)" />
+  <line x1="680" y1="420" x2="720" y2="420" stroke="#334155" stroke-width="2" marker-end="url(#arrow)" />
+  <line x1="720" y1="440" x2="1040" y2="440" stroke="#334155" stroke-width="2" marker-end="url(#arrow)" />
+
+  <line x1="340" y1="660" x2="380" y2="660" stroke="#334155" stroke-width="2" marker-end="url(#arrow)" />
+  <line x1="980" y1="660" x2="1320" y2="660" stroke="#334155" stroke-width="2" marker-end="url(#arrow)" />
+  <line x1="1280" y1="660" x2="1320" y2="660" stroke="#334155" stroke-width="2" marker-end="url(#arrow)" />
+</svg>

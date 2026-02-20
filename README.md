@@ -192,12 +192,16 @@ API update: The API now exposes legacy Java model fields via DTOs so the fronten
 
 Architecture Documentation
 
-Comprehensive UML diagrams documenting the application architecture are available in `diagrams/uml/`:
+Comprehensive Draw.io diagrams documenting the application architecture are available in `diagrams/drawio/`:
 
-- **Domain Model** ([diagrams/uml/domain-model.puml](diagrams/uml/domain-model.puml)): Entity relationships, properties, and cardinalities
-- **API Architecture** ([diagrams/uml/api-architecture.puml](diagrams/uml/api-architecture.puml)): Middleware pipeline, controllers, security, DTOs
-- **Use Cases** ([diagrams/uml/use-cases.puml](diagrams/uml/use-cases.puml)): User and admin workflows
-- **Deployment** ([diagrams/uml/deployment.puml](diagrams/uml/deployment.puml)): Development and production environments
+- **Domain Model** (`diagrams/drawio/domain-model.drawio.svg`): Domain entities and relationships
+- **ERD** (`diagrams/drawio/erd.drawio.svg`): Database tables with PK/FK focus
+- **API Architecture** (`diagrams/drawio/api-architecture.drawio.svg`): Middleware pipeline, controllers, security, DTOs
+- **Use Cases** (`diagrams/drawio/use-cases.drawio.svg`): User and admin workflows
+- **Deployment** (`diagrams/drawio/deployment.drawio.svg`): Development and production environments
+- **Admin Seed Sequence** (`diagrams/drawio/sequence-admin-seed.drawio.svg`): Test data seeding flow
+- **Time Entry Sequence** (`diagrams/drawio/sequence-time-entry.drawio.svg`): Work item creation flow
+- **Component Diagram** (`diagrams/drawio/component-diagram.drawio.svg`): Major packages and dependencies
 - **Sequence Diagrams**: Admin seed and time entry workflows
 - **Component Diagram** ([diagrams/uml/component-diagram.puml](diagrams/uml/component-diagram.puml)): Package structure and dependencies
 

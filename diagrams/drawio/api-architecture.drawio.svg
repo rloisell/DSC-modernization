@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="900" viewBox="0 0 1500 900">
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto" markerUnits="strokeWidth">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#334155" />
+    </marker>
+  </defs>
+  <rect x="0" y="0" width="1500" height="900" fill="#ffffff" />
+  <rect x="0" y="0" width="1500" height="70" fill="#0f172a" />
+  <text x="32" y="45" font-family="Arial, Helvetica, sans-serif" font-size="26" fill="#ffffff">DSC API Architecture</text>
+
+  <rect x="40" y="110" width="420" height="680" rx="12" fill="#e0f2fe" stroke="#0ea5e9" stroke-width="2" />
+  <text x="60" y="145" font-family="Arial, Helvetica, sans-serif" font-size="18" fill="#0f172a">Presentation Layer</text>
+  <rect x="70" y="180" width="360" height="240" rx="8" fill="#ffffff" stroke="#94a3b8" />
+  <text x="90" y="210" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#0f172a">
+    <tspan x="90" dy="0">React SPA</tspan>
+    <tspan x="90" dy="18">- Vite dev server :5173</tspan>
+    <tspan x="90" dy="18">- BC Design System</tspan>
+    <tspan x="90" dy="18">- Axios API client</tspan>
+  </text>
+
+  <rect x="520" y="110" width="520" height="680" rx="12" fill="#fef9c3" stroke="#eab308" stroke-width="2" />
+  <text x="540" y="145" font-family="Arial, Helvetica, sans-serif" font-size="18" fill="#0f172a">API Layer (ASP.NET Core)</text>
+  <rect x="550" y="180" width="460" height="110" rx="8" fill="#ffffff" stroke="#94a3b8" />
+  <text x="570" y="210" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#0f172a">Kestrel :5005</text>
+
+  <rect x="550" y="310" width="460" height="140" rx="8" fill="#ffffff" stroke="#94a3b8" />
+  <text x="570" y="340" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#0f172a">
+    <tspan x="570" dy="0">Middleware Pipeline</tspan>
+    <tspan x="570" dy="18">CORS -> Routing -> Rate Limiter</tspan>
+    <tspan x="570" dy="18">Authentication -> Authorization</tspan>
+  </text>
+
+  <rect x="550" y="470" width="220" height="280" rx="8" fill="#ffffff" stroke="#94a3b8" />
+  <text x="570" y="500" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#0f172a">
+    <tspan x="570" dy="0">Controllers</tspan>
+    <tspan x="570" dy="18">ProjectsController</tspan>
+    <tspan x="570" dy="18">ItemsController</tspan>
+    <tspan x="570" dy="18">AdminUsersController</tspan>
+    <tspan x="570" dy="18">AdminProjectsController</tspan>
+    <tspan x="570" dy="18">AdminDepartmentsController</tspan>
+    <tspan x="570" dy="18">AdminSeedController</tspan>
+  </text>
+
+  <rect x="790" y="470" width="220" height="280" rx="8" fill="#ffffff" stroke="#94a3b8" />
+  <text x="810" y="500" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#0f172a">
+    <tspan x="810" dy="0">Security + Services</tspan>
+    <tspan x="810" dy="18">AdminTokenAuthHandler</tspan>
+    <tspan x="810" dy="18">Admin policy + rate limit</tspan>
+    <tspan x="810" dy="18">TestDataSeeder</tspan>
+    <tspan x="810" dy="18">DTOs</tspan>
+  </text>
+
+  <rect x="1080" y="110" width="380" height="680" rx="12" fill="#dcfce7" stroke="#16a34a" stroke-width="2" />
+  <text x="1100" y="145" font-family="Arial, Helvetica, sans-serif" font-size="18" fill="#0f172a">Data Layer</text>
+  <rect x="1110" y="180" width="320" height="160" rx="8" fill="#ffffff" stroke="#94a3b8" />
+  <text x="1130" y="210" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#0f172a">
+    <tspan x="1130" dy="0">EF Core</tspan>
+    <tspan x="1130" dy="18">ApplicationDbContext</tspan>
+    <tspan x="1130" dy="18">Migrations</tspan>
+  </text>
+
+  <rect x="1110" y="370" width="320" height="260" rx="8" fill="#ffffff" stroke="#94a3b8" />
+  <text x="1130" y="400" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#0f172a">
+    <tspan x="1130" dy="0">Models</tspan>
+    <tspan x="1130" dy="18">User, UserAuth, Project, WorkItem</tspan>
+    <tspan x="1130" dy="18">TimeEntry, ProjectAssignment</tspan>
+    <tspan x="1130" dy="18">Catalog entities</tspan>
+  </text>
+
+  <rect x="1110" y="650" width="320" height="90" rx="8" fill="#ffffff" stroke="#94a3b8" />
+  <text x="1130" y="680" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#0f172a">MariaDB : dsc_dev</text>
+
+  <line x1="430" y1="300" x2="520" y2="300" stroke="#334155" stroke-width="2" marker-end="url(#arrow)" />
+  <text x="450" y="285" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#0f172a">HTTP/REST</text>
+
+  <line x1="1040" y1="330" x2="1080" y2="330" stroke="#334155" stroke-width="2" marker-end="url(#arrow)" />
+  <text x="1045" y="315" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#0f172a">queries + CRUD</text>
+</svg>

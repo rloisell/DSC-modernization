@@ -1,42 +1,35 @@
-# DSC Modernization UML Documentation
+# DSC Modernization Diagram Documentation
 
-This directory contains PlantUML diagrams documenting the architecture, domain model, and workflows of the DSC (Daily Status & Charges) modernization project.
+This directory contains Draw.io (diagrams.net) diagrams documenting the architecture, domain model, and workflows of the DSC (Daily Status & Charges) modernization project.
 
 ## Diagram Overview
 
-### 1. Domain Model (`uml/domain-model.puml`)
-**Purpose:** Entity relationship diagram showing all domain entities, their properties, and relationships.
+### 1. Domain Model (diagrams/drawio/domain-model.drawio.svg)
+**Purpose:** Domain entity overview and key relationships.
 
 **Key Features:**
 - Core domain entities (User, Project, WorkItem, TimeEntry, ProjectAssignment)
-- Legacy compatibility entities (UserAuth for incremental auth migration)
+- Legacy compatibility entities (UserAuth, ExternalIdentity)
 - Catalog domain (Position, Department, ExpenseCategory, ActivityCode, NetworkNumber)
-- Relationship cardinalities and foreign keys
+- Relationship highlights
 
-**Use in Spec-Kitty:**
-- Reference when defining acceptance criteria for entity CRUD operations
-- Map API contracts to domain entities
-- Identify missing relationships or fields during feature specification
+### 2. ERD (diagrams/drawio/erd.drawio.svg)
+**Purpose:** Database-focused ERD with primary keys and foreign keys.
 
----
+**Key Features:**
+- Core tables and join tables
+- Key relationships between User, WorkItem, TimeEntry, ProjectAssignment
+- Catalog tables and activity options
 
-### 2. API Architecture (`uml/api-architecture.puml`)
+### 3. API Architecture (diagrams/drawio/api-architecture.drawio.svg)
 **Purpose:** Component view of the API layers, middleware, controllers, and data flow.
 
 **Key Features:**
 - API middleware pipeline (CORS, Rate Limiting, Authentication, Authorization)
-- Controller segregation (public vs admin)
-- DTO patterns
-- Security components (AdminTokenAuthenticationHandler)
+- Controller separation (public vs admin)
+- DTO patterns and seeding services
 
-**Use in Spec-Kitty:**
-- Understand API surface area when specifying new endpoints
-- Identify security requirements (auth/rate limiting) for new features
-- Map DTOs to controller actions
-
----
-
-### 3. Use Cases (`uml/use-cases.puml`)
+### 4. Use Cases (diagrams/drawio/use-cases.drawio.svg)
 **Purpose:** Actor-based use case diagram showing what users and administrators can do.
 
 **Key Features:**
@@ -44,14 +37,7 @@ This directory contains PlantUML diagrams documenting the architecture, domain m
 - Admin workflows (user management, catalog administration, data seeding)
 - Planned features (OIDC login)
 
-**Use in Spec-Kitty:**
-- Define feature scope and user stories
-- Identify actors and permissions for new features
-- Map use cases to acceptance criteria
-
----
-
-### 4. Deployment Architecture (`uml/deployment.puml`)
+### 5. Deployment Architecture (diagrams/drawio/deployment.drawio.svg)
 **Purpose:** Deployment view showing development and production environments.
 
 **Key Features:**
@@ -59,55 +45,21 @@ This directory contains PlantUML diagrams documenting the architecture, domain m
 - Production tier separation (web, app, database)
 - Planned OIDC integration (Keycloak)
 
-**Use in Spec-Kitty:**
-- Understand deployment constraints when specifying infrastructure requirements
-- Identify environment-specific configuration (Dev vs Prod)
+### 6. Sequence Diagrams
 
----
-
-### 5. Sequence Diagrams
-
-#### Admin Seed Test Data (`uml/sequence-admin-seed.puml`)
+#### Admin Seed Test Data (diagrams/drawio/sequence-admin-seed.drawio.svg)
 **Purpose:** Shows the flow for seeding legacy test data via the admin endpoint.
 
-**Key Steps:**
-1. Admin requests seed with X-Admin-Token (or dev bypass)
-2. Authentication handler validates or bypasses in Development
-3. TestDataSeeder inserts users, UserAuth, project, department
-4. Transaction committed and result returned
-
-**Use in Spec-Kitty:**
-- Template for specifying new admin data operations
-- Understand transactional seeding patterns
-
-#### Time Entry Creation (`uml/sequence-time-entry.puml`)
+#### Time Entry Creation (diagrams/drawio/sequence-time-entry.drawio.svg)
 **Purpose:** Shows the flow for creating a work item with legacy activity fields.
 
-**Key Steps:**
-1. User loads Activity page and project selector
-2. User fills work item form
-3. React SPA posts to /api/items
-4. Controller validates project and inserts WorkItem
-5. Success response and UI refresh
-
-**Use in Spec-Kitty:**
-- Template for user-facing CRUD workflows
-- Map UI interactions to API contracts
-
----
-
-### 6. Component Diagram (`uml/component-diagram.puml`)
+### 7. Component Diagram (diagrams/drawio/component-diagram.drawio.svg)
 **Purpose:** Logical component view showing all major packages and dependencies.
 
 **Key Features:**
 - Frontend components (pages, services, UI components)
 - Backend controllers, security, data services
 - Data layer entities and migrations
-- Component dependencies
-
-**Use in Spec-Kitty:**
-- Identify affected components when specifying new features
-- Understand cross-cutting concerns (security, DTOs, services)
 
 ---
 
@@ -117,101 +69,27 @@ This directory contains PlantUML diagrams documenting the architecture, domain m
 
 When creating a new Spec-Kitty feature (e.g., `spec-kitty specify`):
 
-1. **Identify actors and use cases** from `use-cases.puml`
-   - Example: "As an Administrator, I want to export time entries to CSV"
-
-2. **Map domain entities** from `domain-model.puml`
-   - Identify entities involved (TimeEntry, User, WorkItem, Project)
-
-3. **Define API contracts** using `api-architecture.puml` and `component-diagram.puml`
-   - Which controller? (e.g., new `AdminReportsController`)
-   - Which DTOs? (e.g., new `TimeEntryExportDto`)
-   - Security requirements? (admin auth + rate limiting)
-
+1. **Identify actors and use cases** from `use-cases.drawio.svg`
+2. **Map domain entities** from `domain-model.drawio.svg` and `erd.drawio.svg`
+3. **Define API contracts** using `api-architecture.drawio.svg` and `component-diagram.drawio.svg`
 4. **Specify acceptance criteria** using sequence diagrams as templates
-   - Flow: Admin requests export → Controller queries TimeEntries → CSV generated → Download
-
-5. **Deployment considerations** from `deployment.puml`
-   - Dev vs Prod configuration
-   - Environment-specific behavior
+5. **Deployment considerations** from `deployment.drawio.svg`
 
 ---
 
-### 2. Rendering Diagrams
+## Editing Diagrams (Draw.io)
 
-These diagrams use **PlantUML** syntax. To render them:
+These diagrams are stored as editable Draw.io SVGs.
 
-#### Option 1: VS Code Extension
-Install the PlantUML extension and preview `.puml` files in the editor.
+### Option 1: Draw.io Desktop App
+- Open the `.drawio.svg` files directly in the Draw.io app.
 
-#### Option 2: Command-Line (Java + Graphviz)
-```bash
-brew install plantuml graphviz
-plantuml diagrams/uml/*.puml -o ../output
-```
+### Option 2: diagrams.net (Web)
+- Visit https://app.diagrams.net
+- Drag and drop the `.drawio.svg` files into the editor.
 
-#### Option 3: Online Renderer
-Paste diagram content into [PlantUML Online](http://www.plantuml.com/plantuml/uml/)
-
----
-
-### 3. Updating Diagrams
-
-When implementing new features:
-
-1. **Update domain model** if new entities or relationships are added
-2. **Update API architecture** for new controllers or security policies
-3. **Add sequence diagrams** for complex workflows
-4. **Update use cases** when new user stories are implemented
-5. **Update component diagram** if new services or packages are introduced
-
----
-
-### 4. Example: Adding a "Timesheet Export" Feature
-
-#### Step 1: Spec-Kitty Feature Scaffold
-```bash
-spec-kitty specify --path kitty-specs/005-timesheet-export
-```
-
-#### Step 2: Reference Diagrams in Spec
-In `kitty-specs/005-timesheet-export/spec.md`:
-
-```markdown
-## Feature: Timesheet Export
-
-### Actors
-- Administrator (from use-cases.puml)
-
-### Domain Entities
-- TimeEntry, User, WorkItem, Project (from domain-model.puml)
-
-### API Contract
-- Endpoint: GET /api/admin/reports/timesheet
-- Controller: AdminReportsController (new, add to api-architecture.puml)
-- DTO: TimesheetExportDto (new, add to component-diagram.puml)
-- Security: [Authorize(Policy="AdminOnly")], [EnableRateLimiting("Admin")]
-
-### Acceptance Criteria
-1. Admin can request a timesheet export for a date range
-2. Export includes: User, Project, WorkItem, Hours, EntryDate
-3. Response is CSV format
-4. Rate limited to 60 exports/min
-
-### Sequence (based on sequence-admin-seed.puml pattern)
-1. Admin → GET /api/admin/reports/timesheet?start=2026-01-01&end=2026-01-31
-2. AdminTokenAuthHandler → validate X-Admin-Token
-3. AdminReportsController → query TimeEntries with joins
-4. EF Core → SELECT with includes
-5. Controller → serialize to CSV
-6. Response → 200 OK with CSV attachment
-```
-
-#### Step 3: Update UML After Implementation
-- Add `AdminReportsController` to `api-architecture.puml`
-- Add `TimesheetExportDto` to `component-diagram.puml`
-- Add "Export Timesheet" use case to `use-cases.puml`
-- Create `sequence-timesheet-export.puml` for the detailed flow
+### Option 3: VS Code Extension
+- Install a Draw.io extension (e.g., `hediet.vscode-drawio`) and open the SVGs.
 
 ---
 
@@ -225,7 +103,6 @@ In `kitty-specs/005-timesheet-export/spec.md`:
 - New deployment tiers or infrastructure
 
 **Validation:**
-- Run `dotnet build` and ensure no compile errors before updating diagrams
 - Cross-reference diagram relationships with actual EF Core navigation properties
 - Verify sequence diagrams match actual controller logic
 
@@ -233,7 +110,7 @@ In `kitty-specs/005-timesheet-export/spec.md`:
 
 ## Questions or Additions?
 
-If you need additional diagrams (e.g., state machine for WorkItem lifecycle, ERD with database-level details), create a request and follow the Spec-Kitty workflow to specify the new documentation artifact.
+If you need additional diagrams (e.g., state machine for WorkItem lifecycle, detailed ERD updates), create a request and follow the Spec-Kitty workflow to specify the new documentation artifact.
 
-**Generated:** 2026-02-19  
+**Generated:** 2026-02-19
 **Maintainer:** AI-assisted documentation for DSC-modernization project
