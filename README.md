@@ -95,6 +95,21 @@ See [tests/howto.md](tests/howto.md) for comprehensive testing documentation, in
 
 ## Admin Management — 2026-02-21 (UPDATED)
 
+### Admin Users Page (UPDATED 2026-02-20)
+- **Enhanced Users Table**: Displays comprehensive user information in an easy-to-read format
+  - Columns: Employee ID, Name, Email, LAN ID, Role, Position, Department
+  - Shows actual role, position, and department names (not just IDs)
+  - Placeholder "—" for unassigned or empty values
+- **Interactive User Selection**: Click any user row to edit their information
+  - Visual feedback: selected row highlighted, hover effects
+  - Works alongside dropdown selector for flexibility
+  - Consistent UX with Projects page table interactions
+- **User Management Features**:
+  - Create new users with role, position, and department assignments
+  - Edit existing users (update details, change assignments)
+  - Delete users with confirmation
+  - Password management for local accounts
+
 ### Project Activity Options Assignment (NEW 2026-02-21)
 - **Feature**: Bulk assignment of activity codes and network numbers to projects
 - **How it works**:

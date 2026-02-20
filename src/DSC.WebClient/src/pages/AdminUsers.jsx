@@ -313,6 +313,7 @@ export default function AdminUsers() {
       </section>
       <section className="section stack">
         <Heading level={2}>Edit User</Heading>
+        <Text elementType="p">Select a user from the dropdown below or click a user in the table.</Text>
         <Select
           label="Select User"
           placeholder="Select user"
@@ -396,29 +397,62 @@ export default function AdminUsers() {
       </section>
       <section className="section stack">
         <Heading level={2}>Current Users</Heading>
+        <Text elementType="p">Click a user to edit their information.</Text>
         {loading ? <Text elementType="p">Loading...</Text> : null}
-        <table className="bcds-table">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Employee ID</th>
-              <th>Name</th>
-              <th>Username</th>
-              <th>Email</th>
-            </tr>
-          </thead>
-          <tbody>
-            {users.map(user => (
-              <tr key={user.id}>
-                <td>{user.id}</td>
-                <td>{user.empId}</td>
-                <td>{user.firstName} {user.lastName}</td>
-                <td>{user.username}</td>
-                <td>{user.email}</td>
+        {users.length > 0 ? (
+          <table className="bcds-table">
+            <thead>
+              <tr>
+                <th>Employee ID</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>LAN ID</th>
+                <th>Role</th>
+                <th>Position</th>
+                <th>Department</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {users.map(user => {
+                const role = roles.find(r => r.id === user.roleId);
+                const position = positions.find(p => p.id === user.positionId);
+                const department = departments.find(d => d.id === user.departmentId);
+                const fullName = `${user.firstName || ''} ${user.lastName || ''}`.trim() || '—';
+                
+                return (
+                  <tr 
+                    key={user.id}
+                    onClick={() => handleSelectUser(user.id)}
+                    style={{ 
+                      cursor: 'pointer', 
+                      backgroundColor: selectedUserId === user.id ? '#f0f9ff' : 'transparent' 
+                    }}
+                    onMouseEnter={(e) => {
+                      if (selectedUserId !== user.id) {
+                        e.currentTarget.style.backgroundColor = '#f8fafc';
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (selectedUserId !== user.id) {
+                        e.currentTarget.style.backgroundColor = 'transparent';
+                      }
+                    }}
+                  >
+                    <td>{user.empId ?? '—'}</td>
+                    <td><strong>{fullName}</strong></td>
+                    <td>{user.email || '—'}</td>
+                    <td>{user.username || '—'}</td>
+                    <td>{role?.name || '—'}</td>
+                    <td>{position?.title || '—'}</td>
+                    <td>{department?.name || '—'}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        ) : !loading ? (
+          <Text elementType="p" className="muted">No users found.</Text>
+        ) : null}
       </section>
       {error ? <InlineAlert variant="danger" title="Error" description={error} /> : null}
       {message ? <InlineAlert variant="success" title="Success" description={message} /> : null}

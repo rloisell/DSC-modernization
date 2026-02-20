@@ -108,6 +108,63 @@
 
 **Files Modified**: `src/DSC.WebClient/src/pages/Project.jsx`
 
+**Commit**: `dc4567c` - refactor: enhance Projects page with interactive table and activity options viewer
+
+---
+
+## ✅ COMPLETED: Admin Users Table Enhancement (2026-02-20)
+
+**Status**: COMPLETE ✅
+
+### Changes Made
+
+#### 1. Enhanced Users Table Display ✅
+- **Issue**: Current Users table showed minimal information (ID, Employee ID, Name, Username, Email)
+- **Solution**: Expanded table to show comprehensive user data:
+  - Employee ID
+  - Name (First + Last, bold)
+  - Email
+  - LAN ID (username)
+  - **Role** (NEW - displays role name)
+  - **Position** (NEW - displays position title)
+  - **Department** (NEW - displays department name)
+- **Benefits**:
+  - Removed internal ID column (not useful for admins)
+  - Entity lookups for readable names instead of IDs
+  - Placeholder "—" for null/empty values
+
+#### 2. Interactive User Selection ✅
+- **Enhancement**: Made table rows clickable for editing
+- **Features**:
+  - Click any row to populate Edit User form
+  - Selected row highlighted (light blue #f0f9ff)
+  - Hover effect on rows (light gray #f8fafc)
+  - Pointer cursor on hover
+  - Both dropdown and table selection work simultaneously
+- **Benefits**:
+  - More intuitive than dropdown-only selection
+  - Visual confirmation of selected user
+  - Faster workflow for admin tasks
+
+#### 3. User Experience Improvements ✅
+- ✅ Added instructional text: "Click a user to edit their information."
+- ✅ Updated Edit User section: "Select a user from the dropdown below or click a user in the table."
+- ✅ Empty state: Shows "No users found." when table is empty
+- ✅ Loading state while fetching data
+- ✅ Consistent styling with Projects page table interactions
+
+### Technical Implementation
+- ✅ Entity lookups for related data:
+  - `roles.find(r => r.id === user.roleId)?.name`
+  - `positions.find(p => p.id === user.positionId)?.title`
+  - `departments.find(d => d.id === user.departmentId)?.name`
+- ✅ Reused existing `handleSelectUser()` function for both input methods
+- ✅ No API changes required - frontend-only enhancement
+
+**Files Modified**: `src/DSC.WebClient/src/pages/AdminUsers.jsx`
+
+**Commit**: Current - refactor: enhance Admin Users table with comprehensive data and clickable rows
+
 ---
 
 ## ✅ COMPLETED: Project Activity Options Table Views (2026-02-20)

@@ -149,7 +149,61 @@
 **Files Modified**:
 - `src/DSC.WebClient/src/pages/Project.jsx`
 
-**Commit**: Current - refactor: enhance Projects page with interactive table and activity options viewer
+**Commit**: `dc4567c` - refactor: enhance Projects page with interactive table and activity options viewer
+
+---
+
+## 2026-02-20 — Admin Users Table Enhancement (COMPLETED ✓)
+
+**Problem Statement**:
+1. Current Users table showed minimal information (ID, Employee ID, Name, Username, Email)
+2. Users had to use dropdown to select user for editing - not intuitive
+3. No visibility of role, position, or department assignments in the table
+
+**Implementation & Resolution**:
+
+### Frontend Changes
+
+#### 1. Enhanced Users Table Display
+- ✅ Expanded table to show comprehensive user information:
+  - Employee ID (with "—" placeholder if null)
+  - Name (First + Last name, bold for emphasis)
+  - Email
+  - LAN ID (username)
+  - **Role** (NEW - displays role name by looking up roleId)
+  - **Position** (NEW - displays position title by looking up positionId)
+  - **Department** (NEW - displays department name by looking up departmentId)
+- ✅ Removed internal ID column (not useful for admins)
+- ✅ Added placeholder "—" for null/empty values for better readability
+
+#### 2. Interactive User Selection
+- ✅ Made table rows clickable to select user for editing
+- ✅ Added visual feedback:
+  - Selected row highlighted with light blue background (#f0f9ff)
+  - Hover effect on non-selected rows (light gray #f8fafc)
+  - Pointer cursor on hover
+- ✅ Clicking a row populates the Edit User form with that user's data
+- ✅ Updated Edit User section instructions: "Select a user from the dropdown below or click a user in the table."
+- ✅ Both dropdown and table clicks work for user selection
+
+#### 3. User Experience Improvements
+- ✅ Added descriptive text: "Click a user to edit their information."
+- ✅ Empty state handling: Shows "No users found." when table is empty
+- ✅ Loading state while data is being fetched
+- ✅ Role, position, and department names displayed instead of just IDs for better context
+
+**Technical Implementation**:
+- ✅ Enhanced table to look up related entity names:
+  - `roles.find(r => r.id === user.roleId)?.name`
+  - `positions.find(p => p.id === user.positionId)?.title`
+  - `departments.find(d => d.id === user.departmentId)?.name`
+- ✅ Reused existing `handleSelectUser()` function for both dropdown and table row clicks
+- ✅ Consistent styling with Projects page table interactions
+
+**Files Modified**:
+- `src/DSC.WebClient/src/pages/AdminUsers.jsx`
+
+**Commit**: Current - refactor: enhance Admin Users table with comprehensive data and clickable rows
 
 ---
 
