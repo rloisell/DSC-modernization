@@ -141,6 +141,11 @@ Next: run integration tests or create controllers for other resources (Projects,
 
 - Updated the Administrator landing page copy to reflect that admin sections are now wired to APIs.
 
+## 2026-02-19 — Frontend build warnings and code-splitting
+
+- Captured Vite build warnings about chunks exceeding 500 kB after minification.
+- Added route-based lazy loading and manual chunking in Vite to reduce initial bundle size.
+
 Notes: The `root` password reset was performed non-interactively to allow scripting the setup; if you want a different root password or to re-run the secure setup, run `mysql_secure_installation` and change credentials.
 
 # AI Worklog — DSC-modernization

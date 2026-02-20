@@ -6,17 +6,18 @@ import {
   Footer,
   Header
 } from '@bcgov/design-system-react-components'
-import Home from './pages/Home'
-import Activity from './pages/Activity'
-import Project from './pages/Project'
-import Administrator from './pages/Administrator'
-import AdminUsers from './pages/AdminUsers'
-import AdminPositions from './pages/AdminPositions'
-import AdminDepartments from './pages/AdminDepartments'
-import AdminProjects from './pages/AdminProjects'
-import AdminExpense from './pages/AdminExpense'
-import AdminActivityOptions from './pages/AdminActivityOptions'
-import Login from './pages/Login'
+
+const Home = React.lazy(() => import('./pages/Home'))
+const Activity = React.lazy(() => import('./pages/Activity'))
+const Project = React.lazy(() => import('./pages/Project'))
+const Administrator = React.lazy(() => import('./pages/Administrator'))
+const AdminUsers = React.lazy(() => import('./pages/AdminUsers'))
+const AdminPositions = React.lazy(() => import('./pages/AdminPositions'))
+const AdminDepartments = React.lazy(() => import('./pages/AdminDepartments'))
+const AdminProjects = React.lazy(() => import('./pages/AdminProjects'))
+const AdminExpense = React.lazy(() => import('./pages/AdminExpense'))
+const AdminActivityOptions = React.lazy(() => import('./pages/AdminActivityOptions'))
+const Login = React.lazy(() => import('./pages/Login'))
 
 function NavButton({ to, children }) {
   const navigate = useNavigate()
@@ -44,19 +45,21 @@ export default function App() {
         </ButtonGroup>
       </div>
       <main id="main-content" className="app-main">
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/activity" element={<Activity />} />
-          <Route path="/projects" element={<Project />} />
-          <Route path="/admin" element={<Administrator />} />
-          <Route path="/admin/users" element={<AdminUsers />} />
-          <Route path="/admin/positions" element={<AdminPositions />} />
-          <Route path="/admin/departments" element={<AdminDepartments />} />
-          <Route path="/admin/projects" element={<AdminProjects />} />
-          <Route path="/admin/expense" element={<AdminExpense />} />
-          <Route path="/admin/activity-options" element={<AdminActivityOptions />} />
-          <Route path="/login" element={<Login />} />
-        </Routes>
+        <React.Suspense fallback={<div className="section">Loading...</div>}>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/activity" element={<Activity />} />
+            <Route path="/projects" element={<Project />} />
+            <Route path="/admin" element={<Administrator />} />
+            <Route path="/admin/users" element={<AdminUsers />} />
+            <Route path="/admin/positions" element={<AdminPositions />} />
+            <Route path="/admin/departments" element={<AdminDepartments />} />
+            <Route path="/admin/projects" element={<AdminProjects />} />
+            <Route path="/admin/expense" element={<AdminExpense />} />
+            <Route path="/admin/activity-options" element={<AdminActivityOptions />} />
+            <Route path="/login" element={<Login />} />
+          </Routes>
+        </React.Suspense>
       </main>
       <Footer />
     </div>
