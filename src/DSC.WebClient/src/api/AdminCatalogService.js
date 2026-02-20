@@ -112,5 +112,10 @@ export const AdminCatalogService = {
   async assignAllActivityOptionsToProject(projectId) {
     const res = await axios.post('/api/admin/project-activity-options/assign-all', { projectId });
     return res.data;
+  },
+  async deleteProjectActivityOption(projectId, activityCodeId, networkNumberId) {
+    await axios.delete('/api/admin/project-activity-options', {
+      params: { projectId, activityCodeId, networkNumberId }
+    });
   }
 };

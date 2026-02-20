@@ -41,6 +41,17 @@ See [tests/howto.md](tests/howto.md) for comprehensive testing documentation, in
 - ✅ **Catalog Service**: New public `/api/catalog` endpoints for activity codes and network numbers
 - ✅ **Test Data Seeding**: Activity Codes and Network Numbers automatically seeded with test data
 - ✅ **Legacy Activity ID**: Optional integer field for backward compatibility with Java system Activity IDs
+- ✅ **Project-Specific Filtering** (NEW 2026-02-21):
+  - Activity code and network number dropdowns now filter based on selected project
+  - Only shows valid activity code + network number pairs assigned to the project via `ProjectActivityOption` table
+  - Bidirectional conditional filtering: selecting code filters compatible numbers (and vice versa)
+  - Dropdowns disabled until project is selected
+  - Auto-clears invalid selections when project changes
+  - Uses new `/api/catalog/project-options/{projectId}` endpoint for filtered data
+- ✅ **Available Options Table** (NEW 2026-02-21):
+  - When a project is selected, displays a table showing all valid activity code + network number pairs
+  - Shows full descriptions for codes and numbers
+  - Helps users understand what combinations are available before creating work items
 
 **What Legacy Activity ID is:**
 - **Source**: Original Java Activity.activityID field from legacy DSC system
@@ -64,6 +75,32 @@ See [tests/howto.md](tests/howto.md) for comprehensive testing documentation, in
    - Verify work item appears in list below with no errors
 
 ## Admin Management — 2026-02-21 (UPDATED)
+
+### Project Activity Options Assignment (NEW 2026-02-21)
+- **Feature**: Bulk assignment of activity codes and network numbers to projects
+- **How it works**:
+  - "Assign All Options" button on AdminProjects page for each project
+  - Creates all combinations (activity codes × network numbers) for the selected project
+  - Stores assignments in `ProjectActivityOption` junction table
+  - Used by Activity page to filter dropdowns based on selected project
+  - Example: 12 activity codes × 12 network numbers = 144 assignments per project
+  - API endpoint: `POST /api/admin/project-activity-options/assign-all`
+  - Returns count of new assignments created (skips duplicates)
+
+### Project Activity Options Table (NEW 2026-02-21)
+- **Feature**: View and manage all project activity option assignments
+- **Location**: AdminProjects page, below the assignment form
+- **What it shows**:
+  - Complete table of all project activity option assignments across all projects
+  - Displays: Project name (with ProjectNo), Activity Code (with description), Network Number (with description)
+  - Delete button for each assignment to remove specific combinations
+- **API endpoints**:
+  - `GET /api/admin/project-activity-options` - retrieves all assignments with nested objects
+  - `DELETE /api/admin/project-activity-options?projectId={guid}&activityCodeId={guid}&networkNumberId={guid}` - removes specific assignment
+- **Use cases**:
+  - Audit what activity codes and network numbers are available for each project
+  - Remove incorrect or obsolete assignments
+  - Verify bulk assignments were created correctly
 
 ### Manager Field Bug Fix in AdminDepartments
 - **Fixed**: Manager field is now a user selection dropdown (was plain text input)

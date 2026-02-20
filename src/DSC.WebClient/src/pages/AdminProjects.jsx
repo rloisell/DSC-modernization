@@ -19,6 +19,7 @@ export default function AdminProjects() {
   const [projects, setProjects] = useState([]);
   const [activityCodes, setActivityCodes] = useState([]);
   const [networkNumbers, setNetworkNumbers] = useState([]);
+  const [projectActivityOptions, setProjectActivityOptions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [form, setForm] = useState({ projectNo: '', name: '', description: '', estimatedHours: '' });
@@ -40,19 +41,27 @@ export default function AdminProjects() {
   }));
 
   useEffect(() => {
-    Promise.all([
-      AdminCatalogService.getProjects(),
-      AdminCatalogService.getActivityCodes(),
-      AdminCatalogService.getNetworkNumbers()
-    ])
-      .then(([projectData, codeData, networkData]) => {
-        setProjects(projectData);
-        setActivityCodes(codeData);
-        setNetworkNumbers(networkData);
-      })
-      .catch(e => setError(e.message))
-      .finally(() => setLoading(false));
+    loadData();
   }, []);
+
+  async function loadData() {
+    try {
+      const [projectData, codeData, networkData, optionsData] = await Promise.all([
+        AdminCatalogService.getProjects(),
+        AdminCatalogService.getActivityCodes(),
+        AdminCatalogService.getNetworkNumbers(),
+        AdminCatalogService.getProjectActivityOptions()
+      ]);
+      setProjects(projectData);
+      setActivityCodes(codeData);
+      setNetworkNumbers(networkData);
+      setProjectActivityOptions(optionsData);
+    } catch (e) {
+      setError(e.message);
+    } finally {
+      setLoading(false);
+    }
+  }
 
   function updateForm(field, value) {
     setForm(prev => ({ ...prev, [field]: value }));
@@ -145,6 +154,19 @@ export default function AdminProjects() {
     try {
       const response = await AdminCatalogService.assignAllActivityOptionsToProject(projectId);
       setMessage(response.message || 'All activity codes and network numbers assigned to project.');
+      await loadData();
+    } catch (e) {
+      setError(e.message);
+    }
+  }
+
+  async function handleDeleteOption(projectId, activityCodeId, networkNumberId) {
+    setMessage('');
+    setError(null);
+    try {
+      await AdminCatalogService.deleteProjectActivityOption(projectId, activityCodeId, networkNumberId);
+      setMessage('Project activity option deleted.');
+      await loadData();
     } catch (e) {
       setError(e.message);
     }
@@ -268,6 +290,46 @@ export default function AdminProjects() {
             <Button type="submit" variant="primary">Assign</Button>
           </ButtonGroup>
         </Form>
+      </section>
+      <section className="section stack">
+        <Heading level={2}>Project Activity Options</Heading>
+        <Text elementType="p">All assigned activity code and network number combinations for projects.</Text>
+        {projectActivityOptions.length === 0 ? (
+          <Text elementType="p" className="muted">No project activity options assigned yet.</Text>
+        ) : (
+          <table className="bcds-table">
+            <thead>
+              <tr>
+                <th>Project</th>
+                <th>Activity Code</th>
+                <th>Network Number</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {projectActivityOptions.map(option => {
+                const project = projects.find(p => p.id === option.projectId);
+                return (
+                  <tr key={`${option.projectId}-${option.activityCodeId}-${option.networkNumberId}`}>
+                    <td>{project ? (project.projectNo ? `${project.projectNo} — ${project.name}` : project.name) : 'Unknown'}</td>
+                    <td>{option.activityCode ? `${option.activityCode.code}${option.activityCode.description ? ` — ${option.activityCode.description}` : ''}` : 'Unknown'}</td>
+                    <td>{option.networkNumber ? `${option.networkNumber.number}${option.networkNumber.description ? ` — ${option.networkNumber.description}` : ''}` : 'Unknown'}</td>
+                    <td>
+                      <Button 
+                        size="small" 
+                        variant="tertiary" 
+                        danger 
+                        onPress={() => handleDeleteOption(option.projectId, option.activityCodeId, option.networkNumberId)}
+                      >
+                        Delete
+                      </Button>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        )}
       </section>
       {loading ? <Text elementType="p">Loading...</Text> : null}
       {error ? <InlineAlert variant="danger" title="Error" description={error} /> : null}

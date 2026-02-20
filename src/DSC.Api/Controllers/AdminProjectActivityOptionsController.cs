@@ -157,6 +157,32 @@ namespace DSC.Api.Controllers
 
             return Ok(new { message = $"Created {newAssignments.Count} project activity option assignments.", totalAssignments = existing.Count + newAssignments.Count });
         }
+
+        [HttpDelete]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> Delete([FromQuery] Guid projectId, [FromQuery] Guid activityCodeId, [FromQuery] Guid networkNumberId)
+        {
+            if (projectId == Guid.Empty || activityCodeId == Guid.Empty || networkNumberId == Guid.Empty)
+            {
+                return BadRequest(new { error = "ProjectId, ActivityCodeId, and NetworkNumberId are required." });
+            }
+
+            var entity = await _db.ProjectActivityOptions
+                .FirstOrDefaultAsync(p => p.ProjectId == projectId 
+                    && p.ActivityCodeId == activityCodeId 
+                    && p.NetworkNumberId == networkNumberId);
+
+            if (entity == null)
+            {
+                return NotFound(new { error = "Project activity option not found." });
+            }
+
+            _db.ProjectActivityOptions.Remove(entity);
+            await _db.SaveChangesAsync();
+
+            return Ok(new { message = "Project activity option deleted." });
+        }
     }
 
     public class AssignAllRequest

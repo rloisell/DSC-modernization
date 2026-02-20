@@ -262,6 +262,32 @@ export default function Activity() {
           </ButtonGroup>
         </Form>
       </section>
+      {projectId && projectOptions && projectOptions.validPairs && projectOptions.validPairs.length > 0 ? (
+        <section className="section stack">
+          <Heading level={2}>Available Options for Selected Project</Heading>
+          <Text elementType="p">Valid activity code and network number combinations for this project:</Text>
+          <table className="bcds-table">
+            <thead>
+              <tr>
+                <th>Activity Code</th>
+                <th>Network Number</th>
+              </tr>
+            </thead>
+            <tbody>
+              {projectOptions.validPairs.map(pair => {
+                const code = projectOptions.activityCodes.find(c => c.code === pair.activityCode);
+                const number = projectOptions.networkNumbers.find(n => n.number === pair.networkNumber);
+                return (
+                  <tr key={`${pair.activityCode}-${pair.networkNumber}`}>
+                    <td>{code ? `${code.code}${code.description ? ` — ${code.description}` : ''}` : pair.activityCode}</td>
+                    <td>{number ? `${number.number}${number.description ? ` — ${number.description}` : ''}` : pair.networkNumber}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </section>
+      ) : null}
     </div>
   );
 }

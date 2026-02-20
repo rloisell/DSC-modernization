@@ -1,4 +1,103 @@
-## 2026-02-20 — Activity Codes & Network Numbers Dropdown Issue (RESOLVED ✓)
+## 2026-02-20 — Project Activity Options & Work Item Creation (COMPLETED ✓)
+
+**Problem Statement**:
+1. Activity page returned "Request failed with status code 400" when creating work items
+2. AdminProjects "Assign Activity Codes / Network Numbers" button showed success but created no records
+3. Activity page dropdowns didn't filter options based on selected project
+
+**Root Causes Identified**:
+1. **Work Item Creation Error**: API endpoint expected `WorkItem` entity but frontend sent different payload structure; type mismatch on `networkNumber` (int vs string)
+2. **Project Assignment Issue**: Frontend called basic create endpoint (1 assignment) instead of bulk assignment (all combinations)
+3. **Missing Filtering Logic**: No API endpoint or frontend logic to filter activity codes/network numbers by project
+
+**Implementation & Resolution**:
+
+### Backend Changes
+
+#### 1. Work Item Creation Fix
+- ✅ Created `WorkItemCreateRequest` DTO with proper field types
+- ✅ Updated `ItemsController.Post()` to use new DTO instead of entity
+- ✅ Fixed `networkNumber` type mapping (frontend sends `int`, backend stores as `string`)
+- ✅ Added project existence validation before creating work item
+- ✅ Returns full `WorkItemDto` in response instead of just ID
+
+#### 2. Project Activity Options Management
+- ✅ Created `ProjectActivityOptionDetailDto` with nested ActivityCode and NetworkNumber DTOs
+- ✅ Updated `AdminProjectActivityOptionsController.GetAll()` to return detailed options
+- ✅ Added `POST /api/admin/project-activity-options/assign-all` endpoint
+  - Creates all combinations of active activity codes × network numbers for a project
+  - Duplicate checking to prevent re-creating existing assignments
+  - Returns count of new assignments created
+- ✅ Added `AssignAllRequest` DTO for bulk assignment
+
+#### 3. Catalog Filtering by Project
+- ✅ Added `GET /api/catalog/project-options/{projectId}` endpoint
+  - Returns project-specific activity codes and network numbers
+  - Includes valid pairs for conditional filtering
+  - Filters only active codes/numbers assigned to the project
+- ✅ Created supporting DTOs:
+  - `ProjectActivityOptionsResponse`
+  - `ProjectActivityCodeNetworkPair`
+
+### Frontend Changes
+
+#### 1. AdminProjects Page Enhancement
+- ✅ Added "Assign All Options" button for each project in table
+- ✅ Calls new `assign-all` endpoint to bulk-create project activity options
+- ✅ Shows success message with count of assignments created
+- ✅ Updated `AdminCatalogService.js` with `assignAllActivityOptionsToProject()` method
+
+#### 2. Activity Page Smart Filtering
+- ✅ Added `projectOptions` state to track project-specific data
+- ✅ Implemented `useEffect` hook to load project options when project is selected
+- ✅ Dropdowns now disabled until a project is selected
+- ✅ Activity code and network number dropdowns filter based on selected project
+- ✅ Implemented bidirectional conditional filtering:
+  - When activity code is selected, network numbers filter to show only compatible options
+  - When network number is selected, activity codes filter to show only compatible options
+- ✅ Auto-clears invalid selections when project changes
+- ✅ Added "Available Options for Selected Project" table
+  - Displays all valid activity code + network number pairs for the selected project
+  - Shows full descriptions for codes and numbers
+  - Helps users see exactly what combinations are available
+
+#### 3. Project Activity Options Management Tables
+- ✅ Added comprehensive table to AdminProjects page showing all project activity option assignments
+  - Displays project name, activity code, and network number for each assignment
+  - Shows descriptions for codes and numbers
+  - Allows filtering and viewing all assignments across all projects
+- ✅ Added DELETE endpoint: `DELETE /api/admin/project-activity-options`
+  - Accepts projectId, activityCodeId, and networkNumberId as query parameters
+  - Returns 404 if assignment not found
+  - Allows removal of specific project activity option assignments
+- ✅ Added delete button for each assignment in AdminProjects table
+- ✅ Updated `AdminCatalogService.js` with `deleteProjectActivityOption()` method
+- ✅ AdminProjects page now loads project activity options on page load and refreshes after operations
+
+**Testing & Validation**:
+- ✅ Verified 144 assignments created (12 activity codes × 12 network numbers) for test project
+- ✅ Confirmed project-options endpoint returns correct filtered data
+- ✅ Successfully created work item with activity code "DEV" and network number 99
+- ✅ Verified dropdowns filter correctly based on project selection
+- ✅ Tested conditional filtering between activity codes and network numbers
+
+**Files Modified**:
+- `src/DSC.Api/Controllers/ItemsController.cs`
+- `src/DSC.Api/Controllers/CatalogController.cs`
+- `src/DSC.Api/Controllers/AdminProjectActivityOptionsController.cs` (added DELETE endpoint)
+- `src/DSC.Api/DTOs/WorkItemDto.cs`
+- `src/DSC.Api/DTOs/AdminCatalogDtos.cs`
+- `src/DSC.WebClient/src/pages/Activity.jsx` (added available options table)
+- `src/DSC.WebClient/src/pages/AdminProjects.jsx` (added project activity options table with delete)
+- `src/DSC.WebClient/src/api/AdminCatalogService.js` (added delete method)
+
+**Commits**: 
+- `80a0841` - feat: implement project activity options assignment and filtering
+- Current - feat: add project activity options table views with delete functionality
+
+---
+
+## 2026-02-20 — Activity Codes & Network Numbers Dropout Issue (RESOLVED ✓)
 
 **Problem Statement**:
 Activity page and Admin pages were not displaying dropdown data for activity codes and network numbers, despite seeding code being implemented, API endpoints created, and tests validating functionality in isolation.
