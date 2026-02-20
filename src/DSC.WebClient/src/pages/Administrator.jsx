@@ -23,6 +23,7 @@ export default function Administrator() {
         </Text>
         <ButtonGroup ariaLabel="Admin sections" alignment="start">
           <AdminLinkButton to="/admin/users">Admin Users</AdminLinkButton>
+          <AdminLinkButton to="/admin/roles">Admin Roles</AdminLinkButton>
           <AdminLinkButton to="/admin/positions">Admin Positions</AdminLinkButton>
           <AdminLinkButton to="/admin/departments">Admin Departments</AdminLinkButton>
           <AdminLinkButton to="/admin/projects">Admin Projects</AdminLinkButton>

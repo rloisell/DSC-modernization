@@ -1,5 +1,47 @@
 # Remaining work (2026-02-19)
 
+## CURRENT: Admin Users & Role Management Fix
+
+**Status**: Code changes complete, pending database migration and testing.
+
+**What was fixed**:
+1. ✅ Created `Role.cs` entity with Id, Name, Description, IsActive fields
+2. ✅ Added `RoleId`, `PositionId`, `DepartmentId` foreign keys to `User` entity
+3. ✅ Updated `ApplicationDbContext` to configure relationships (SetNull on delete)
+4. ✅ Created `AdminRoles` React component for role CRUD management
+5. ✅ Created `AdminRolesController` API with full CRUD endpoints
+6. ✅ Added role, position, department DTOs (`RoleDto`, `RoleCreateRequest`, `RoleUpdateRequest`)
+7. ✅ Updated `AdminUsersController` to accept and persist Role/Position/Department IDs
+8. ✅ Updated `AdminUsers` component to:
+   - Load positions, departments, and roles from database on mount
+   - Wire dropdowns to actual data from API
+   - Send selected values when creating/updating users
+9. ✅ Added `getRoles()`, `createRole()`, `updateRole()` methods to `AdminCatalogService`
+10. ✅ Created two database migrations:
+    - `20260220071710_AddRoleEntity.cs` - adds Role table
+    - `20260220073552_AddPositionDepartmentToUser.cs` - adds Position/Department FKs to Users
+11. ✅ Updated `appsettings.Development.json` with connection string
+
+**Pending**:
+- Apply migrations to database (blocked by MariaDB SSL configuration issue - see Issue section below)
+- Manual testing of role/position/department selection in AdminUsers form
+
+**Files modified**:
+- Database models: `User.cs`, `Role.cs`, `ApplicationDbContext.cs`
+- API: `AdminRolesController.cs`, `AdminUserDtos.cs`, `AdminUsersController.cs`
+- Frontend: `AdminUsers.jsx`, `AdminRoles.jsx`, `AdminCatalogService.js`, `App.jsx`, `Administrator.jsx`
+- Config: `appsettings.Development.json`
+
+**Known Issue**: MariaDB SSL Configuration
+- MariaDB client requires SSL but server doesn't support it
+- Workaround: Updated connection string with `SslMode=none;`
+- User needs to either:
+  1. Fix MariaDB SSL configuration, OR
+  2. Use Docker MariaDB without SSL, OR
+  3. Manually run: `dotnet ef database update` after resolving SSL issue
+
+---
+
 - Implement OIDC/Keycloak integration in `DSC.Api` and persist `ExternalIdentity` mappings.
 - Continue mapping remaining Java entities into EF Core and add migrations per logical group.
 - Run end-to-end smoke tests (DB migrations + API + Vite + admin flows).

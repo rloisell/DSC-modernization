@@ -10,6 +10,9 @@ namespace DSC.Api.DTOs
         public string Email { get; set; } = string.Empty;
         public string? FirstName { get; set; }
         public string? LastName { get; set; }
+        public Guid? RoleId { get; set; }
+        public Guid? PositionId { get; set; }
+        public Guid? DepartmentId { get; set; }
     }
 
     public class AdminUserCreateRequest
@@ -20,6 +23,9 @@ namespace DSC.Api.DTOs
         public string? FirstName { get; set; }
         public string? LastName { get; set; }
         public string? Password { get; set; }
+        public Guid? RoleId { get; set; }
+        public Guid? PositionId { get; set; }
+        public Guid? DepartmentId { get; set; }
     }
 
     public class AdminUserUpdateRequest
@@ -29,5 +35,8 @@ namespace DSC.Api.DTOs
         public string? FirstName { get; set; }
         public string? LastName { get; set; }
         public string? Password { get; set; }
+        public Guid? RoleId { get; set; }
+        public Guid? PositionId { get; set; }
+        public Guid? DepartmentId { get; set; }
     }
 }

@@ -25,6 +25,18 @@ export const AdminCatalogService = {
     await axios.put(`/api/admin/departments/${id}`, payload);
   },
 
+  async getRoles() {
+    const res = await axios.get('/api/admin/roles');
+    return res.data;
+  },
+  async createRole(payload) {
+    const res = await axios.post('/api/admin/roles', payload);
+    return res.data;
+  },
+  async updateRole(id, payload) {
+    await axios.put(`/api/admin/roles/${id}`, payload);
+  },
+
   async getProjects() {
     const res = await axios.get('/api/admin/projects');
     return res.data;

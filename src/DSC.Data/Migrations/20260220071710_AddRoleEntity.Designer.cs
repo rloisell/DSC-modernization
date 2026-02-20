@@ -4,6 +4,7 @@ using DSC.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DSC.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260220071710_AddRoleEntity")]
+    partial class AddRoleEntity
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -323,9 +326,6 @@ namespace DSC.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("char(36)");
 
-                    b.Property<Guid?>("DepartmentId")
-                        .HasColumnType("char(36)");
-
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasColumnType("longtext");
@@ -342,9 +342,6 @@ namespace DSC.Data.Migrations
                     b.Property<string>("PasswordHash")
                         .HasColumnType("longtext");
 
-                    b.Property<Guid?>("PositionId")
-                        .HasColumnType("char(36)");
-
                     b.Property<Guid?>("RoleId")
                         .HasColumnType("char(36)");
 
@@ -353,10 +350,6 @@ namespace DSC.Data.Migrations
                         .HasColumnType("varchar(255)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("DepartmentId");
-
-                    b.HasIndex("PositionId");
 
                     b.HasIndex("RoleId");
 
@@ -530,24 +523,10 @@ namespace DSC.Data.Migrations
 
             modelBuilder.Entity("DSC.Data.Models.User", b =>
                 {
-                    b.HasOne("DSC.Data.Models.Department", "Department")
-                        .WithMany()
-                        .HasForeignKey("DepartmentId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.HasOne("DSC.Data.Models.Position", "Position")
-                        .WithMany()
-                        .HasForeignKey("PositionId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
                     b.HasOne("DSC.Data.Models.Role", "Role")
                         .WithMany()
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.SetNull);
-
-                    b.Navigation("Department");
-
-                    b.Navigation("Position");
 
                     b.Navigation("Role");
                 });

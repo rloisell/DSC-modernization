@@ -42,7 +42,10 @@ namespace DSC.Api.Controllers
                     Username = u.Username,
                     Email = u.Email,
                     FirstName = u.FirstName,
-                    LastName = u.LastName
+                    LastName = u.LastName,
+                    RoleId = u.RoleId,
+                    PositionId = u.PositionId,
+                    DepartmentId = u.DepartmentId
                 })
                 .ToArrayAsync();
 
@@ -64,7 +67,10 @@ namespace DSC.Api.Controllers
                 Username = user.Username,
                 Email = user.Email,
                 FirstName = user.FirstName,
-                LastName = user.LastName
+                LastName = user.LastName,
+                RoleId = user.RoleId,
+                PositionId = user.PositionId,
+                DepartmentId = user.DepartmentId
             };
 
             return Ok(dto);
@@ -94,6 +100,9 @@ namespace DSC.Api.Controllers
                 Email = request.Email,
                 FirstName = request.FirstName,
                 LastName = request.LastName,
+                RoleId = request.RoleId,
+                PositionId = request.PositionId,
+                DepartmentId = request.DepartmentId,
                 PasswordHash = string.IsNullOrWhiteSpace(request.Password)
                     ? null
                     : _passwordHasher.HashPassword(null!, request.Password)
@@ -117,6 +126,9 @@ namespace DSC.Api.Controllers
             user.Email = request.Email;
             user.FirstName = request.FirstName;
             user.LastName = request.LastName;
+            user.RoleId = request.RoleId;
+            user.PositionId = request.PositionId;
+            user.DepartmentId = request.DepartmentId;
 
             if (!string.IsNullOrWhiteSpace(request.Password))
             {

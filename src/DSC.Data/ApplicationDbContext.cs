@@ -11,6 +11,7 @@ namespace DSC.Data
         }
 
         public DbSet<User> Users => Set<User>();
+        public DbSet<Role> Roles => Set<Role>();
         public DbSet<Project> Projects => Set<Project>();
         public DbSet<WorkItem> WorkItems => Set<WorkItem>();
         public DbSet<TimeEntry> TimeEntries => Set<TimeEntry>();
@@ -34,6 +35,16 @@ namespace DSC.Data
                 b.Property(u => u.EmpId);
                 b.HasIndex(u => u.Username).IsUnique();
                 b.Property(u => u.Email).IsRequired();
+                b.HasOne(u => u.Role).WithMany().HasForeignKey(u => u.RoleId).OnDelete(DeleteBehavior.SetNull);
+                b.HasOne(u => u.Position).WithMany().HasForeignKey(u => u.PositionId).OnDelete(DeleteBehavior.SetNull);
+                b.HasOne(u => u.Department).WithMany().HasForeignKey(u => u.DepartmentId).OnDelete(DeleteBehavior.SetNull);
+            });
+
+            modelBuilder.Entity<Role>(b =>
+            {
+                b.HasKey(r => r.Id);
+                b.HasIndex(r => r.Name).IsUnique();
+                b.Property(r => r.Name).IsRequired();
             });
 
             modelBuilder.Entity<Project>(b =>

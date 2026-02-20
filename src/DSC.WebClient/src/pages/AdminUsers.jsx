@@ -17,6 +17,7 @@ import {
   updateAdminUser,
   deleteAdminUser
 } from '../api/AdminUserService';
+import { AdminCatalogService } from '../api/AdminCatalogService';
 
 export default function AdminUsers() {
   const [message, setMessage] = useState('');
@@ -24,6 +25,9 @@ export default function AdminUsers() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedUserId, setSelectedUserId] = useState('');
+  const [positions, setPositions] = useState([]);
+  const [departments, setDepartments] = useState([]);
+  const [roles, setRoles] = useState([]);
   const [addForm, setAddForm] = useState({
     empId: '',
     firstName: '',
@@ -36,7 +40,7 @@ export default function AdminUsers() {
     departmentStartDate: '',
     lanId: '',
     password: '',
-    role: '1'
+    role: ''
   });
   const [editForm, setEditForm] = useState({
     empId: '',
@@ -52,7 +56,7 @@ export default function AdminUsers() {
     departmentEndDate: '',
     lanId: '',
     password: '',
-    role: '1'
+    role: ''
   });
   const navigate = useNavigate();
 
@@ -65,16 +69,41 @@ export default function AdminUsers() {
     };
   });
 
-  const roleItems = [
-    { id: '1', label: 'Role 1' },
-    { id: '2', label: 'Role 2' }
-  ];
+  const positionItems = positions.map(p => ({
+    id: p.id,
+    label: p.title
+  }));
+
+  const departmentItems = departments.map(d => ({
+    id: d.id,
+    label: d.name
+  }));
+
+  const roleItems = roles.map(r => ({
+    id: r.id,
+    label: r.name
+  }));
 
   useEffect(() => {
-    getAdminUsers()
-      .then(setUsers)
-      .catch(e => setError(e.message))
-      .finally(() => setLoading(false));
+    const loadData = async () => {
+      try {
+        const [usersData, posData, deptData, roleData] = await Promise.all([
+          getAdminUsers(),
+          AdminCatalogService.getPositions(),
+          AdminCatalogService.getDepartments(),
+          AdminCatalogService.getRoles()
+        ]);
+        setUsers(usersData);
+        setPositions(posData);
+        setDepartments(deptData);
+        setRoles(roleData);
+      } catch (e) {
+        setError(e.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadData();
   }, []);
 
   function updateAddForm(field, value) {
@@ -103,7 +132,7 @@ export default function AdminUsers() {
         departmentEndDate: '',
         lanId: '',
         password: '',
-        role: '1'
+        role: ''
       });
       return;
     }
@@ -114,7 +143,10 @@ export default function AdminUsers() {
       firstName: selected.firstName ?? '',
       lastName: selected.lastName ?? '',
       email: selected.email ?? '',
-      lanId: selected.username ?? ''
+      lanId: selected.username ?? '',
+      role: selected.roleId ?? '',
+      position: selected.positionId ?? '',
+      department: selected.departmentId ?? ''
     }));
   }
 
@@ -130,7 +162,10 @@ export default function AdminUsers() {
         email: addForm.email,
         firstName: addForm.firstName,
         lastName: addForm.lastName,
-        password: addForm.password || null
+        password: addForm.password || null,
+        roleId: addForm.role || null,
+        positionId: addForm.position || null,
+        departmentId: addForm.department || null
       };
       await createAdminUser(payload);
       const refreshed = await getAdminUsers();
@@ -147,7 +182,7 @@ export default function AdminUsers() {
         departmentStartDate: '',
         lanId: '',
         password: '',
-        role: '1'
+        role: ''
       });
       setMessage('User created.');
     } catch (e) {
@@ -170,7 +205,10 @@ export default function AdminUsers() {
         email: editForm.email,
         firstName: editForm.firstName,
         lastName: editForm.lastName,
-        password: editForm.password || null
+        password: editForm.password || null,
+        roleId: editForm.role || null,
+        positionId: editForm.position || null,
+        departmentId: editForm.department || null
       };
       await updateAdminUser(selectedUserId, payload);
       const refreshed = await getAdminUsers();
@@ -236,7 +274,7 @@ export default function AdminUsers() {
             onChange={value => updateAddForm('ncsDate', value)}
           />
           <div className="form-columns">
-            <Select label="Position" placeholder="Select position" items={[]} selectedKey={null} />
+            <Select label="Position" placeholder="Select position" items={positionItems} selectedKey={addForm.position || null} onSelectionChange={key => updateAddForm('position', key ? String(key) : '')} />
             <TextField
               label="Position Start Date"
               type="date"
@@ -245,7 +283,7 @@ export default function AdminUsers() {
             />
           </div>
           <div className="form-columns">
-            <Select label="Department" placeholder="Select department" items={[]} selectedKey={null} />
+            <Select label="Department" placeholder="Select department" items={departmentItems} selectedKey={addForm.department || null} onSelectionChange={key => updateAddForm('department', key ? String(key) : '')} />
             <TextField
               label="Department Start Date"
               type="date"
@@ -306,7 +344,7 @@ export default function AdminUsers() {
             onChange={value => updateEditForm('ncsDate', value)}
           />
           <div className="form-columns">
-            <Select label="Position" placeholder="Select position" items={[]} selectedKey={null} />
+            <Select label="Position" placeholder="Select position" items={positionItems} selectedKey={editForm.position || null} onSelectionChange={key => updateEditForm('position', key ? String(key) : '')} />
             <TextField
               label="Position Start Date"
               type="date"
@@ -321,7 +359,7 @@ export default function AdminUsers() {
             />
           </div>
           <div className="form-columns">
-            <Select label="Department" placeholder="Select department" items={[]} selectedKey={null} />
+            <Select label="Department" placeholder="Select department" items={departmentItems} selectedKey={editForm.department || null} onSelectionChange={key => updateEditForm('department', key ? String(key) : '')} />
             <TextField
               label="Department Start Date"
               type="date"

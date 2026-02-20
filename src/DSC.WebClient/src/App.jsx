@@ -12,6 +12,7 @@ const Activity = React.lazy(() => import('./pages/Activity'))
 const Project = React.lazy(() => import('./pages/Project'))
 const Administrator = React.lazy(() => import('./pages/Administrator'))
 const AdminUsers = React.lazy(() => import('./pages/AdminUsers'))
+const AdminRoles = React.lazy(() => import('./pages/AdminRoles'))
 const AdminPositions = React.lazy(() => import('./pages/AdminPositions'))
 const AdminDepartments = React.lazy(() => import('./pages/AdminDepartments'))
 const AdminProjects = React.lazy(() => import('./pages/AdminProjects'))
@@ -52,6 +53,7 @@ export default function App() {
             <Route path="/projects" element={<Project />} />
             <Route path="/admin" element={<Administrator />} />
             <Route path="/admin/users" element={<AdminUsers />} />
+            <Route path="/admin/roles" element={<AdminRoles />} />
             <Route path="/admin/positions" element={<AdminPositions />} />
             <Route path="/admin/departments" element={<AdminDepartments />} />
             <Route path="/admin/projects" element={<AdminProjects />} />

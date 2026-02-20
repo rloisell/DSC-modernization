@@ -1,3 +1,48 @@
+## 2026-02-20 — Admin User Management & Role System Implementation
+
+**Issue**: AdminUsers component had role, position, and department dropdowns, but:
+1. Role dropdown was hard-coded with dummy data; no role management feature existed
+2. Position and Department dropdowns were empty; not wired to database
+
+**Resolution**:
+1. **Created Role entity and management**:
+   - Added `src/DSC.Data/Models/Role.cs` with Id, Name, Description, IsActive fields
+   - Created `AdminRolesController` with full CRUD endpoints at `/api/admin/roles`
+   - Created `src/DSC.WebClient/src/pages/AdminRoles.jsx` React component for role management UI
+   - Added role management button to Admin landing page
+
+2. **Enhanced User model with assignments**:
+   - Added `RoleId`, `PositionId`, `DepartmentId` foreign keys to `User` entity
+   - Configured relationships in `ApplicationDbContext` (SetNull on delete)
+
+3. **Updated Admin Users workflow**:
+   - Modified `AdminUsers` component to load positions, departments, and roles from database
+   - Wired dropdowns to actual data (no more empty lists)
+   - Form now sends role/position/department IDs when creating/updating users
+   - Updated `handleSelectUser` to pre-populate these fields when editing
+
+4. **API layer updates**:
+   - Enhanced `AdminUserDtos` to include RoleId, PositionId, DepartmentId fields
+   - Updated `AdminUsersController` Get/Create/Update to handle new fields
+   - Added `getRoles()`, `createRole()`, `updateRole()` methods to `AdminCatalogService`
+
+5. **Database migrations**:
+   - Created `20260220071710_AddRoleEntity.cs` (adds Roles table)
+   - Created `20260220073552_AddPositionDepartmentToUser.cs` (adds FK columns to Users)
+
+6. **Code validated**:
+   - Both API and WebClient build successfully ✅
+   - All TypeScript and C# compilation checks passed ✅
+
+**Status**: Code complete. Pending database migration application (blocked by MariaDB SSL config issue).
+
+**Next steps**:
+- Resolve MariaDB SSL configuration or use Docker alternative
+- Run `dotnet ef database update` to apply schema changes
+- Test role/position/department selection in AdminUsers form
+
+---
+
 ## 2026-02-19 — WebClient asset copy, API service, and data fetch
 
 ## 2026-02-19 — Legacy test data seeding

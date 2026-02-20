@@ -7,6 +7,27 @@
 - `Project` page fetches and displays project data from `/api/projects`.
 - All required npm dependencies installed.
 - Docs updated and changes pushed.
+
+## Admin User Management & Role System — 2026-02-19 (NEW)
+
+**What's new:**
+- ✅ **Role Management**: New `AdminRoles` page allows admins to create, edit, and deactivate roles.
+- ✅ **Position & Department Dropdowns**: `AdminUsers` now loads positions and departments from the database (no longer empty placeholders).
+- ✅ **User Role Assignment**: Users can now be assigned to roles when creating or editing.
+- ✅ **Comprehensive Data Model**: 
+  - New `Role` entity with Id, Name, Description, IsActive fields.
+  - `User` entity now has `RoleId`, `PositionId`, `DepartmentId` foreign keys.
+  - Full relationship configuration in `ApplicationDbContext`.
+- ✅ **API Endpoints**: 
+  - New `/api/admin/roles` CRUD endpoints.
+  - Updated `/api/admin/users` to accept and persist role, position, and department assignments.
+- ✅ **Database Migrations**: Two new migrations created (Role entity, Position/Department FKs).
+
+**Still Required:**
+- Apply database migrations (`dotnet ef database update`) — blocked by MariaDB SSL configuration issue.
+- See `AI/nextSteps.md` for details on the SSL issue and workarounds.
+- Manual end-to-end testing of role, position, and department selection in AdminUsers form.
+
 # DSC-modernization
 
 Spec-driven modernization of the DSC Java application to .NET 10, using a Spec-Kitty-driven workflow.
