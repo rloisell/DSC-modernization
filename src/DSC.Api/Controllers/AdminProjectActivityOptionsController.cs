@@ -26,21 +26,38 @@ namespace DSC.Api.Controllers
         }
 
         [HttpGet]
-        [ProducesResponseType(typeof(ProjectActivityOptionDto[]), StatusCodes.Status200OK)]
-        public async Task<ActionResult<ProjectActivityOptionDto[]>> GetAll([FromQuery] Guid? projectId)
+        [ProducesResponseType(typeof(ProjectActivityOptionDetailDto[]), StatusCodes.Status200OK)]
+        public async Task<ActionResult<ProjectActivityOptionDetailDto[]>> GetAll([FromQuery] Guid? projectId)
         {
-            var query = _db.ProjectActivityOptions.AsNoTracking();
+            IQueryable<ProjectActivityOption> query = _db.ProjectActivityOptions.AsNoTracking()
+                .Include(p => p.ActivityCode)
+                .Include(p => p.NetworkNumber);
+                
             if (projectId.HasValue && projectId.Value != Guid.Empty)
             {
                 query = query.Where(p => p.ProjectId == projectId);
             }
 
             var items = await query
-                .Select(p => new ProjectActivityOptionDto
+                .Select(p => new ProjectActivityOptionDetailDto
                 {
                     ProjectId = p.ProjectId,
                     ActivityCodeId = p.ActivityCodeId,
-                    NetworkNumberId = p.NetworkNumberId
+                    NetworkNumberId = p.NetworkNumberId,
+                    ActivityCode = p.ActivityCode != null ? new ActivityCodeDto
+                    {
+                        Id = p.ActivityCode.Id,
+                        Code = p.ActivityCode.Code,
+                        Description = p.ActivityCode.Description,
+                        IsActive = p.ActivityCode.IsActive
+                    } : null,
+                    NetworkNumber = p.NetworkNumber != null ? new NetworkNumberDto
+                    {
+                        Id = p.NetworkNumber.Id,
+                        Number = p.NetworkNumber.Number,
+                        Description = p.NetworkNumber.Description,
+                        IsActive = p.NetworkNumber.IsActive
+                    } : null
                 })
                 .ToArrayAsync();
 
@@ -57,6 +74,17 @@ namespace DSC.Api.Controllers
                 return BadRequest(new { error = "ProjectId, ActivityCodeId, and NetworkNumberId are required." });
             }
 
+            // Check if this combination already exists
+            var exists = await _db.ProjectActivityOptions
+                .AnyAsync(p => p.ProjectId == request.ProjectId 
+                    && p.ActivityCodeId == request.ActivityCodeId 
+                    && p.NetworkNumberId == request.NetworkNumberId);
+
+            if (exists)
+            {
+                return BadRequest(new { error = "This project activity option already exists." });
+            }
+
             var entity = new ProjectActivityOption
             {
                 ProjectId = request.ProjectId,
@@ -67,7 +95,72 @@ namespace DSC.Api.Controllers
             await _db.ProjectActivityOptions.AddAsync(entity);
             await _db.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(GetAll), new { projectId = request.ProjectId }, new { request.ProjectId });
+            return CreatedAtAction(nameof(GetAll), new { projectId = request.ProjectId }, entity);
         }
+
+        [HttpPost("assign-all")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> AssignAllToProject([FromBody] AssignAllRequest request)
+        {
+            if (request.ProjectId == Guid.Empty)
+            {
+                return BadRequest(new { error = "ProjectId is required." });
+            }
+
+            // Verify project exists
+            var projectExists = await _db.Projects.AnyAsync(p => p.Id == request.ProjectId);
+            if (!projectExists)
+            {
+                return BadRequest(new { error = "Project not found." });
+            }
+
+            // Get all active activity codes and network numbers
+            var activityCodes = await _db.ActivityCodes.Where(a => a.IsActive).ToListAsync();
+            var networkNumbers = await _db.NetworkNumbers.Where(n => n.IsActive).ToListAsync();
+
+            if (activityCodes.Count == 0 || networkNumbers.Count == 0)
+            {
+                return BadRequest(new { error = "No active activity codes or network numbers found." });
+            }
+
+            // Get existing assignments to avoid duplicates
+            var existing = await _db.ProjectActivityOptions
+                .Where(p => p.ProjectId == request.ProjectId)
+                .Select(p => new { p.ActivityCodeId, p.NetworkNumberId })
+                .ToHashSetAsync();
+
+            var newAssignments = new List<ProjectActivityOption>();
+
+            // Create all combinations
+            foreach (var activityCode in activityCodes)
+            {
+                foreach (var networkNumber in networkNumbers)
+                {
+                    if (!existing.Contains(new { ActivityCodeId = activityCode.Id, NetworkNumberId = networkNumber.Id }))
+                    {
+                        newAssignments.Add(new ProjectActivityOption
+                        {
+                            ProjectId = request.ProjectId,
+                            ActivityCodeId = activityCode.Id,
+                            NetworkNumberId = networkNumber.Id
+                        });
+                    }
+                }
+            }
+
+            if (newAssignments.Count > 0)
+            {
+                await _db.ProjectActivityOptions.AddRangeAsync(newAssignments);
+                await _db.SaveChangesAsync();
+            }
+
+            return Ok(new { message = $"Created {newAssignments.Count} project activity option assignments.", totalAssignments = existing.Count + newAssignments.Count });
+        }
+    }
+
+    public class AssignAllRequest
+    {
+        public Guid ProjectId { get; set; }
     }
 }

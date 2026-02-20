@@ -37,7 +37,7 @@ namespace DSC.Api.Controllers
                     PlannedDuration = w.PlannedDuration,
                     ActualDuration = w.ActualDuration,
                     ActivityCode = w.ActivityCode,
-                    NetworkNumber = w.NetworkNumber,
+                    NetworkNumber = w.NetworkNumber != null ? int.Parse(w.NetworkNumber) : null,
                     Title = w.Title,
                     Description = w.Description,
                     EstimatedHours = w.EstimatedHours,
@@ -66,7 +66,7 @@ namespace DSC.Api.Controllers
                 PlannedDuration = item.PlannedDuration,
                 ActualDuration = item.ActualDuration,
                 ActivityCode = item.ActivityCode,
-                NetworkNumber = item.NetworkNumber,
+                NetworkNumber = item.NetworkNumber != null ? int.Parse(item.NetworkNumber) : null,
                 Title = item.Title,
                 Description = item.Description,
                 EstimatedHours = item.EstimatedHours,
@@ -78,19 +78,61 @@ namespace DSC.Api.Controllers
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> Post([FromBody] WorkItem dto)
+        public async Task<IActionResult> Post([FromBody] WorkItemCreateRequest request)
         {
             // Basic server-side validation
-            if (string.IsNullOrWhiteSpace(dto.Title) || dto.ProjectId == Guid.Empty)
+            if (string.IsNullOrWhiteSpace(request.Title) || request.ProjectId == Guid.Empty)
             {
                 return BadRequest(new { error = "Missing required fields: Title and ProjectId" });
             }
 
-            dto.Id = Guid.NewGuid();
-            await _db.WorkItems.AddAsync(dto);
+            // Verify project exists
+            var projectExists = await _db.Projects.AnyAsync(p => p.Id == request.ProjectId);
+            if (!projectExists)
+            {
+                return BadRequest(new { error = "Project not found" });
+            }
+
+            var workItem = new WorkItem
+            {
+                Id = Guid.NewGuid(),
+                ProjectId = request.ProjectId,
+                Title = request.Title,
+                Description = request.Description,
+                LegacyActivityId = request.LegacyActivityId,
+                Date = request.Date,
+                StartTime = request.StartTime,
+                EndTime = request.EndTime,
+                PlannedDuration = request.PlannedDuration.HasValue ? TimeSpan.FromHours(request.PlannedDuration.Value) : null,
+                ActualDuration = request.ActualDuration,
+                ActivityCode = request.ActivityCode,
+                NetworkNumber = request.NetworkNumber?.ToString(),
+                EstimatedHours = request.EstimatedHours,
+                RemainingHours = request.RemainingHours
+            };
+
+            await _db.WorkItems.AddAsync(workItem);
             await _db.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(Get), new { id = dto.Id }, new { id = dto.Id });
+            var responseDto = new WorkItemDto
+            {
+                Id = workItem.Id,
+                ProjectId = workItem.ProjectId,
+                Title = workItem.Title,
+                Description = workItem.Description,
+                LegacyActivityId = workItem.LegacyActivityId,
+                Date = workItem.Date,
+                StartTime = workItem.StartTime,
+                EndTime = workItem.EndTime,
+                PlannedDuration = workItem.PlannedDuration,
+                ActualDuration = workItem.ActualDuration,
+                ActivityCode = workItem.ActivityCode,
+                NetworkNumber = workItem.NetworkNumber != null ? int.Parse(workItem.NetworkNumber) : null,
+                EstimatedHours = workItem.EstimatedHours,
+                RemainingHours = workItem.RemainingHours
+            };
+
+            return CreatedAtAction(nameof(Get), new { id = workItem.Id }, responseDto);
         }
     }
 }

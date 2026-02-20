@@ -108,5 +108,9 @@ export const AdminCatalogService = {
   async createProjectActivityOption(payload) {
     const res = await axios.post('/api/admin/project-activity-options', payload);
     return res.data;
+  },
+  async assignAllActivityOptionsToProject(projectId) {
+    const res = await axios.post('/api/admin/project-activity-options/assign-all', { projectId });
+    return res.data;
   }
 };

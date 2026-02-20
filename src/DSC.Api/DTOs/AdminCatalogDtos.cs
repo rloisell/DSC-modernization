@@ -185,4 +185,13 @@ namespace DSC.Api.DTOs
         public Guid ActivityCodeId { get; set; }
         public Guid NetworkNumberId { get; set; }
     }
+
+    public class ProjectActivityOptionDetailDto
+    {
+        public Guid ProjectId { get; set; }
+        public Guid ActivityCodeId { get; set; }
+        public Guid NetworkNumberId { get; set; }
+        public ActivityCodeDto? ActivityCode { get; set; }
+        public NetworkNumberDto? NetworkNumber { get; set; }
+    }
 }

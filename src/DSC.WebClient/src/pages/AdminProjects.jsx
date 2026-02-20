@@ -139,6 +139,17 @@ export default function AdminProjects() {
     }
   }
 
+  async function handleAssignAll(projectId) {
+    setMessage('');
+    setError(null);
+    try {
+      const response = await AdminCatalogService.assignAllActivityOptionsToProject(projectId);
+      setMessage(response.message || 'All activity codes and network numbers assigned to project.');
+    } catch (e) {
+      setError(e.message);
+    }
+  }
+
   return (
     <div className="page">
       <section className="section stack">
@@ -213,6 +224,9 @@ export default function AdminProjects() {
                     <Button size="small" variant="tertiary" onPress={() => handleEdit(project)}>Edit</Button>
                     <Button size="small" variant="tertiary" danger onPress={() => handleArchive(project)}>
                       Archive
+                    </Button>
+                    <Button size="small" variant="secondary" onPress={() => handleAssignAll(project.id)}>
+                      Assign All Options
                     </Button>
                   </div>
                 </td>

@@ -14,12 +14,14 @@ import {
 import { getWorkItems, createWorkItemWithLegacy } from '../api/WorkItemService';
 import { getProjects } from '../api/ProjectService';
 import { getActivityCodes, getNetworkNumbers } from '../api/CatalogService';
+import axios from 'axios';
 
 export default function Activity() {
   const [items, setItems] = useState([]);
   const [projects, setProjects] = useState([]);
   const [activityCodes, setActivityCodes] = useState([]);
   const [networkNumbers, setNetworkNumbers] = useState([]);
+  const [projectOptions, setProjectOptions] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [title, setTitle] = useState('');
@@ -42,12 +44,16 @@ export default function Activity() {
     label: project.projectNo ? `${project.projectNo} — ${project.name}` : project.name
   }));
 
-  const activityCodeItems = activityCodes.map(code => ({
+  // Use project-specific options if a project is selected, otherwise use all codes/numbers
+  const availableActivityCodes = projectOptions?.activityCodes || activityCodes;
+  const availableNetworkNumbers = projectOptions?.networkNumbers || networkNumbers;
+
+  const activityCodeItems = availableActivityCodes.map(code => ({
     id: code.code,
     label: code.description ? `${code.code} — ${code.description}` : code.code
   }));
 
-  const networkNumberItems = networkNumbers.map(nn => ({
+  const networkNumberItems = availableNetworkNumbers.map(nn => ({
     id: String(nn.number),
     label: nn.description ? `${nn.number} — ${nn.description}` : String(nn.number)
   }));
@@ -68,6 +74,33 @@ export default function Activity() {
       .catch(e => setError(e.message))
       .finally(() => setLoading(false));
   }, []);
+
+  // When project changes, load project-specific options
+  useEffect(() => {
+    if (projectId) {
+      axios.get(`/api/catalog/project-options/${projectId}`)
+        .then(res => {
+          setProjectOptions(res.data);
+          // Reset selected activity code and network number if they're not in the project options
+          const validCodes = res.data.activityCodes.map(c => c.code);
+          const validNumbers = res.data.networkNumbers.map(n => String(n.number));
+          if (activityCode && !validCodes.includes(activityCode)) {
+            setActivityCode('');
+          }
+          if (networkNumber && !validNumbers.includes(networkNumber)) {
+            setNetworkNumber('');
+          }
+        })
+        .catch(e => {
+          console.error('Failed to load project options:', e);
+          setProjectOptions(null);
+        });
+    } else {
+      setProjectOptions(null);
+      setActivityCode('');
+      setNetworkNumber('');
+    }
+  }, [projectId]);
 
   async function handleCreate(e) {
     e.preventDefault();
@@ -170,19 +203,45 @@ export default function Activity() {
           <div className="form-columns">
             <Select
               label="Activity Code"
-              placeholder="Select activity code"
+              placeholder={projectId ? "Select activity code" : "Select a project first"}
               items={activityCodeItems}
               selectedKey={activityCode || null}
-              onSelectionChange={key => setActivityCode(key ? String(key) : '')}
-              description="Optional: select an activity code for this work item"
+              onSelectionChange={key => {
+                const newCode = key ? String(key) : '';
+                setActivityCode(newCode);
+                // If filtering is active and an activity code is selected, filter network numbers
+                if (projectOptions && newCode && networkNumber) {
+                  const validPairs = projectOptions.validPairs
+                    .filter(p => p.activityCode === newCode)
+                    .map(p => String(p.networkNumber));
+                  if (!validPairs.includes(networkNumber)) {
+                    setNetworkNumber('');
+                  }
+                }
+              }}
+              description={projectId ? "Select an activity code for this work item" : "Select a project to see available codes"}
+              isDisabled={!projectId}
             />
             <Select
               label="Network Number"
-              placeholder="Select network number"
+              placeholder={projectId ? "Select network number" : "Select a project first"}
               items={networkNumberItems}
               selectedKey={networkNumber || null}
-              onSelectionChange={key => setNetworkNumber(key ? String(key) : '')}
-              description="Optional: select a network number for this work item"
+              onSelectionChange={key => {
+                const newNumber = key ? String(key) : '';
+                setNetworkNumber(newNumber);
+                // If filtering is active and a network number is selected, filter activity codes
+                if (projectOptions && newNumber && activityCode) {
+                  const validPairs = projectOptions.validPairs
+                    .filter(p => String(p.networkNumber) === newNumber)
+                    .map(p => p.activityCode);
+                  if (!validPairs.includes(activityCode)) {
+                    setActivityCode('');
+                  }
+                }
+              }}
+              description={projectId ? "Select a network number for this work item" : "Select a project to see available numbers"}
+              isDisabled={!projectId}
             />
           </div>
           <div className="form-columns">
