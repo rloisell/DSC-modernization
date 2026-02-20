@@ -700,14 +700,14 @@ public record TestSeedResult(
                 // Create work items for each user
                 foreach (var user in users)
                 {
-                    // Create 2-3 work items per user
+                    // Create work items per user on primary project
                     var userProject = projects.FirstOrDefault();
                     var userActivityCode = activityCodes.FirstOrDefault();
                     var userNetworkNumber = networkNumbers.FirstOrDefault();
 
                     if (userProject != null && capex != null && userActivityCode != null && userNetworkNumber != null)
                     {
-                        // Work item 1: Recent project work
+                        // Work item 1: Development Sprint (8 actual hours)
                         var workItem1 = await _db.WorkItems.FirstOrDefaultAsync(
                             w => w.UserId == user.Id && w.Title.Contains("Development Sprint"), ct);
                         
@@ -726,14 +726,14 @@ public record TestSeedResult(
                                 ActivityCode = userActivityCode.Code,
                                 NetworkNumber = userNetworkNumber.Number.ToString(),
                                 PlannedDuration = TimeSpan.FromHours(8),
-                                ActualDuration = 8,
-                                EstimatedHours = 10.0m,
-                                RemainingHours = 2.0m // 10.0 - 8 = 2.0 hours remaining
+                                ActualDuration = 8
+                                // NOTE: EstimatedHours and RemainingHours are NOT set for seeded items
+                                // They will be calculated at project level via cumulative API
                             });
                             workItemsCreated++;
                         }
 
-                        // Work item 2: Meeting
+                        // Work item 2: Team Meeting (2 actual hours)
                         var workItem2 = await _db.WorkItems.FirstOrDefaultAsync(
                             w => w.UserId == user.Id && w.Title.Contains("Team Meeting"), ct);
                         
@@ -752,16 +752,15 @@ public record TestSeedResult(
                                 ActivityCode = "MEET",
                                 NetworkNumber = userNetworkNumber.Number.ToString(),
                                 PlannedDuration = TimeSpan.FromHours(2),
-                                ActualDuration = 2,
-                                EstimatedHours = 2.0m,
-                                RemainingHours = 0m // 2.0 - 2 = 0 hours (completed)
+                                ActualDuration = 2
+                                // NOTE: EstimatedHours and RemainingHours are NOT set
                             });
                             workItemsCreated++;
                         }
 
-                        // Work item 3: Today's work
+                        // Work item 3: Current Development Work (6 actual hours) - TODAY
                         var workItem3 = await _db.WorkItems.FirstOrDefaultAsync(
-                            w => w.UserId == user.Id && w.Date.HasValue && w.Date.Value.Date == DateTime.Now.Date, ct);
+                            w => w.UserId == user.Id && w.Date.HasValue && w.Date.Value.Date == DateTime.Now.Date && w.Title.Contains("Current Development"), ct);
                         
                         if (workItem3 == null)
                         {
@@ -778,14 +777,13 @@ public record TestSeedResult(
                                 ActivityCode = userActivityCode.Code,
                                 NetworkNumber = userNetworkNumber.Number.ToString(),
                                 PlannedDuration = TimeSpan.FromHours(8),
-                                ActualDuration = 6,
-                                EstimatedHours = 10.0m,
-                                RemainingHours = 4.0m // 10.0 - 6 = 4.0 hours remaining
+                                ActualDuration = 6
+                                // NOTE: EstimatedHours and RemainingHours are NOT set
                             });
                             workItemsCreated++;
                         }
 
-                        // Work item 4: Code Review
+                        // Work item 4: Code Review (5 actual hours)
                         var workItem4 = await _db.WorkItems.FirstOrDefaultAsync(
                             w => w.UserId == user.Id && w.Title.Contains("Code Review"), ct);
                         
@@ -804,14 +802,13 @@ public record TestSeedResult(
                                 ActivityCode = "TEST",
                                 NetworkNumber = userNetworkNumber.Number.ToString(),
                                 PlannedDuration = TimeSpan.FromHours(6),
-                                ActualDuration = 5,
-                                EstimatedHours = 6.0m,
-                                RemainingHours = 1.0m // 6.0 - 5 = 1.0 hours remaining
+                                ActualDuration = 5
+                                // NOTE: EstimatedHours and RemainingHours are NOT set
                             });
                             workItemsCreated++;
                         }
 
-                        // Work item 5: Documentation - More hours to test cumulative calculation
+                        // Work item 5: Documentation Update (4 actual hours)
                         var workItem5 = await _db.WorkItems.FirstOrDefaultAsync(
                             w => w.UserId == user.Id && w.Title.Contains("Documentation Update"), ct);
                         
@@ -830,14 +827,14 @@ public record TestSeedResult(
                                 ActivityCode = "DOC",
                                 NetworkNumber = userNetworkNumber.Number.ToString(),
                                 PlannedDuration = TimeSpan.FromHours(4),
-                                ActualDuration = 4,
-                                EstimatedHours = 4.0m,
-                                RemainingHours = 0m // 4.0 - 4 = 0 hours (completed)
+                                ActualDuration = 4
+                                // NOTE: EstimatedHours and RemainingHours are NOT set
                             });
                             workItemsCreated++;
                         }
 
-                        // Work item 6: Testing effort - Push project over budget
+                        // Work item 6: Integration Testing (12 actual hours - will cause overbudget)
+                        // P1004 total = 150 hours, so cumulative will be: 8+2+6+5+4+12 = 37 hours used, 113 remaining
                         var workItem6 = await _db.WorkItems.FirstOrDefaultAsync(
                             w => w.UserId == user.Id && w.Title.Contains("Integration Testing"), ct);
                         
@@ -856,9 +853,58 @@ public record TestSeedResult(
                                 ActivityCode = "TEST",
                                 NetworkNumber = userNetworkNumber.Number.ToString(),
                                 PlannedDuration = TimeSpan.FromHours(8),
-                                ActualDuration = 12,
-                                EstimatedHours = 8.0m,
-                                RemainingHours = -4.0m // 8.0 - 12 = -4.0 hours (OVERBUDGET by 4 hours)
+                                ActualDuration = 12
+                                // NOTE: EstimatedHours and RemainingHours are NOT set
+                            });
+                            workItemsCreated++;
+                        }
+
+                        // Work item 7: Architecture Design (4 actual hours)
+                        var workItem7 = await _db.WorkItems.FirstOrDefaultAsync(
+                            w => w.UserId == user.Id && w.Title.Contains("Architecture Design"), ct);
+                        
+                        if (workItem7 == null)
+                        {
+                            _db.WorkItems.Add(new WorkItem
+                            {
+                                Id = Guid.NewGuid(),
+                                UserId = user.Id,
+                                ProjectId = userProject.Id,
+                                BudgetId = capex.Id,
+                                Title = "Architecture Design",
+                                Description = "Design system architecture and diagrams",
+                                Date = DateTime.Now.AddDays(-10),
+                                ActivityType = "Project",
+                                ActivityCode = "ARCH",
+                                NetworkNumber = userNetworkNumber.Number.ToString(),
+                                PlannedDuration = TimeSpan.FromHours(6),
+                                ActualDuration = 4
+                                // NOTE: EstimatedHours and RemainingHours are NOT set
+                            });
+                            workItemsCreated++;
+                        }
+
+                        // Work item 8: Code Refactoring (7 actual hours)
+                        var workItem8 = await _db.WorkItems.FirstOrDefaultAsync(
+                            w => w.UserId == user.Id && w.Title.Contains("Code Refactoring"), ct);
+                        
+                        if (workItem8 == null)
+                        {
+                            _db.WorkItems.Add(new WorkItem
+                            {
+                                Id = Guid.NewGuid(),
+                                UserId = user.Id,
+                                ProjectId = userProject.Id,
+                                BudgetId = capex.Id,
+                                Title = "Code Refactoring",
+                                Description = "Refactor legacy code for performance",
+                                Date = DateTime.Now.AddDays(-8),
+                                ActivityType = "Project",
+                                ActivityCode = "CODE",
+                                NetworkNumber = userNetworkNumber.Number.ToString(),
+                                PlannedDuration = TimeSpan.FromHours(8),
+                                ActualDuration = 7
+                                // NOTE: EstimatedHours and RemainingHours are NOT set
                             });
                             workItemsCreated++;
                         }
@@ -903,9 +949,8 @@ public record TestSeedResult(
                                     ActivityCode = otherActivityCode.Code,
                                     NetworkNumber = otherNetworkNumber.Number.ToString(),
                                     PlannedDuration = TimeSpan.FromHours(5),
-                                    ActualDuration = 3,
-                                    EstimatedHours = 5.0m,
-                                    RemainingHours = 2.0m // 5.0 - 3 = 2.0 hours remaining
+                                    ActualDuration = 3
+                                    // NOTE: EstimatedHours and RemainingHours are NOT set
                                 });
                                 workItemsCreated++;
                             }
@@ -939,9 +984,8 @@ public record TestSeedResult(
                                     ReasonCode = reasonCode.Code,
                                     CpcCode = cpcCode.Code,
                                     PlannedDuration = TimeSpan.FromHours(16),
-                                    ActualDuration = 16,
-                                    EstimatedHours = 16.0m,
-                                    RemainingHours = 0m
+                                    ActualDuration = 16
+                                    // NOTE: EstimatedHours and RemainingHours are NOT set for expense items
                                 });
                                 workItemsCreated++;
                             }

@@ -237,19 +237,22 @@ export default function Activity() {
         })
         .then(data => {
           console.log('Remaining hours data:', data);
-          // Show the project's estimated hours
-          if (data.estimatedHours) {
+          // Display project's total estimated hours
+          if (data.estimatedHours !== null && data.estimatedHours !== undefined) {
             setEstimatedHours(String(data.estimatedHours));
+          } else {
+            setEstimatedHours('0');
           }
-          // Show the cumulative remaining hours (can be negative)
+          // Display cumulative remaining hours (can be negative for overbudget)
           if (data.remainingHours !== null && data.remainingHours !== undefined) {
             setRemainingHours(String(data.remainingHours));
           } else {
-            setRemainingHours('—');
+            setRemainingHours('0');
           }
         })
         .catch(e => {
           console.error('Failed to load remaining hours for project:', projectId, e);
+          // Clear on error so field shows nothing (user can still submit)
           setEstimatedHours('');
           setRemainingHours('');
         });
@@ -571,39 +574,27 @@ export default function Activity() {
           </div>
           )}
           
-          {/* Expense Activity Mode: Estimated Hours and Display Remaining Hours */}
-          {activityMode === 'expense' && (
-          <div className="form-columns">
-            <NumberField
-              label="Estimated Hours (Optional)"
-              value={estimatedHours ? Number(estimatedHours) : undefined}
-              onChange={value => setEstimatedHours(value == null ? '' : String(value))}
-              description="Optional: Set estimated hours for this expense activity"
-            />
-          </div>
-          )}
-          
           <div className="form-columns">
             {activityMode === 'project' && (
               <>
                 <NumberField
                   label="Project Estimated Hours"
-                  value={estimatedHours ? Number(estimatedHours) : undefined}
+                  value={estimatedHours && estimatedHours !== '' ? Number(estimatedHours) : undefined}
                   isDisabled
                   description="Total hours available for this project (from database)"
                 />
                 <NumberField
                   label="Current Cumulative Remaining"
-                  value={remainingHours && remainingHours !== '—' ? Number(remainingHours) : undefined}
+                  value={remainingHours && remainingHours !== '' ? Number(remainingHours) : undefined}
                   isDisabled
                   description="Remaining before this entry (can be negative)"
                 />
                 <NumberField
                   label="Projected Remaining After Entry"
                   value={
-                    remainingHours && remainingHours !== '—' && actualDuration
+                    remainingHours && remainingHours !== '' && actualDuration
                       ? Number(remainingHours) - Number(actualDuration)
-                      : (remainingHours && remainingHours !== '—' ? Number(remainingHours) : undefined)
+                      : (remainingHours && remainingHours !== '' ? Number(remainingHours) : undefined)
                   }
                   isDisabled
                   description="Remaining hours after you submit this entry"
