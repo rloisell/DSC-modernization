@@ -45,6 +45,7 @@ export default function Activity() {
   const [remainingHours, setRemainingHours] = useState('');
   const [creating, setCreating] = useState(false);
   const [selectedProjectData, setSelectedProjectData] = useState(null);
+  const [projectSummaries, setProjectSummaries] = useState({});
 
   const timePeriodItems = [
     { id: 'day', label: 'Today' },
@@ -147,6 +148,43 @@ export default function Activity() {
       .catch(e => console.error('Failed to load detailed work items:', e))
       .finally(() => setDetailedLoading(false));
   }, [timePeriod, user?.Id]);
+
+  // Load project summaries (cumulative remaining hours) for all projects in detailed items
+  useEffect(() => {
+    if (!detailedItems.length) {
+      setProjectSummaries({});
+      return;
+    }
+
+    // Get all unique project IDs from detailed items
+    const uniqueProjectIds = [...new Set(detailedItems.map(item => item.projectId).filter(Boolean))];
+    
+    if (uniqueProjectIds.length === 0) {
+      setProjectSummaries({});
+      return;
+    }
+
+    // Fetch remaining hours for each project
+    const fetchSummaries = async () => {
+      const summaries = {};
+      
+      for (const projectId of uniqueProjectIds) {
+        try {
+          const response = await fetch(`/api/items/project/${projectId}/remaining-hours`);
+          if (response.ok) {
+            const data = await response.json();
+            summaries[projectId] = data;
+          }
+        } catch (e) {
+          console.error(`Failed to load summary for project ${projectId}:`, e);
+        }
+      }
+      
+      setProjectSummaries(summaries);
+    };
+
+    fetchSummaries();
+  }, [detailedItems]);
 
   // When activity mode changes, auto-select appropriate budget
   useEffect(() => {
@@ -284,6 +322,46 @@ export default function Activity() {
             onSelectionChange={key => setTimePeriod(key ? String(key) : 'month')}
           />
         </div>
+
+        {/* Project Summary - Cumulative Hours by Project */}
+        {!detailedLoading && detailedItems.length > 0 && Object.keys(projectSummaries).length > 0 && (
+          <div style={{ marginTop: '2rem' }}>
+            <Heading level={2}>Project Summary</Heading>
+            <Text elementType="p" className="muted">Total estimated, actual hours used, and remaining hours for your assigned projects:</Text>
+            <table className="bcds-table">
+              <thead>
+                <tr>
+                  <th>Project</th>
+                  <th>Est. Hours</th>
+                  <th>Actual Hours Used</th>
+                  <th>Cumulative Remaining</th>
+                </tr>
+              </thead>
+              <tbody>
+                {Object.entries(projectSummaries).map(([projectId, summary]) => {
+                  const statusColor = summary.remainingHours < 0 ? '#d32f2f' : '#1976d2';
+                  const statusLabel = summary.remainingHours < 0 ? '⚠ OVERBUDGET' : 'On Track';
+                  
+                  return (
+                    <tr key={projectId}>
+                      <td>
+                        <strong>{summary.projectNo}</strong> — {summary.projectName}
+                      </td>
+                      <td>{summary.estimatedHours ? `${summary.estimatedHours} hrs` : '—'}</td>
+                      <td>{summary.actualHoursUsed} hrs</td>
+                      <td style={{ color: statusColor, fontWeight: 'bold' }}>
+                        {summary.remainingHours !== null ? `${summary.remainingHours} hrs` : '—'}
+                        <div style={{ fontSize: '0.85em', fontWeight: 'normal', color: statusColor }}>
+                          {statusLabel}
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
 
         {/* Activity Tracking Table */}
         <Heading level={2}>My Activities</Heading>
