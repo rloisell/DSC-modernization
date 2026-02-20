@@ -19,7 +19,6 @@ namespace DSC.Data
         public DbSet<ExternalIdentity> ExternalIdentities => Set<ExternalIdentity>();
         public DbSet<Position> Positions => Set<Position>();
         public DbSet<Department> Departments => Set<Department>();
-<<<<<<< HEAD
         public DbSet<DepartmentUser> DepartmentUsers => Set<DepartmentUser>();
         public DbSet<UserPosition> UserPositions => Set<UserPosition>();
         public DbSet<UserUser> UserUsers => Set<UserUser>();
@@ -117,7 +116,6 @@ namespace DSC.Data
                 b.HasIndex(d => d.Name).IsUnique();
             });
 
-<<<<<<< HEAD
             modelBuilder.Entity<DepartmentUser>(b =>
             {
                 b.ToTable("Department_User");

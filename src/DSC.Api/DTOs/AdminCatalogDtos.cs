@@ -198,21 +198,56 @@ namespace DSC.Api.DTOs
         public string? Description { get; set; }
     }
 
-    public class UnionDto
+    public class CpcCodeDto
     {
-        public Guid Id { get; set; }
+        public string Code { get; set; } = string.Empty;
+        public string? Description { get; set; }
+    }
+
+    public class CpcCodeCreateRequest
+    {
+        public string Code { get; set; } = string.Empty;
+        public string? Description { get; set; }
+    }
+
+    public class CpcCodeUpdateRequest
+    {
+        public string? Description { get; set; }
+    }
+
+    public class ActivityCategoryDto
+    {
+        public int Id { get; set; }
         public string Name { get; set; } = string.Empty;
     }
 
-    public class UnionCreateRequest
+    public class ActivityCategoryCreateRequest
     {
-        public Guid Id { get; set; }
         public string Name { get; set; } = string.Empty;
     }
 
-    public class UnionUpdateRequest
+    public class ActivityCategoryUpdateRequest
     {
         public string Name { get; set; } = string.Empty;
+    }
+
+    public class CalendarCategoryDto
+    {
+        public int Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public string? Description { get; set; }
+    }
+
+    public class CalendarCategoryCreateRequest
+    {
+        public string Name { get; set; } = string.Empty;
+        public string? Description { get; set; }
+    }
+
+    public class CalendarCategoryUpdateRequest
+    {
+        public string Name { get; set; } = string.Empty;
+        public string? Description { get; set; }
     }
 
     public class NetworkNumberDto
