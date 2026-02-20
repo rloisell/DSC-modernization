@@ -8,7 +8,7 @@ using DSC.Data.Models;
 
 namespace DSC.Api.Seeding
 {
-    public record TestSeedResult(int UsersCreated, int UserAuthCreated, int ProjectsCreated, int DepartmentsCreated);
+public record TestSeedResult(int UsersCreated, int UserAuthCreated, int ProjectsCreated, int DepartmentsCreated, int RolesCreated);
 
     public class TestDataSeeder
     {
@@ -27,6 +27,7 @@ namespace DSC.Api.Seeding
             var userAuthCreated = 0;
             var projectsCreated = 0;
             var departmentsCreated = 0;
+            var rolesCreated = 0;
 
             await using var transaction = await _db.Database.BeginTransactionAsync(ct);
 
@@ -155,13 +156,41 @@ namespace DSC.Api.Seeding
                 departmentsCreated++;
             }
 
+            // Seed test roles
+            var roleSeeds = new[]
+            {
+                new RoleSeed("Administrator", "System administrator with full access"),
+                new RoleSeed("Manager", "Project manager role"),
+                new RoleSeed("Developer", "Development team member"),
+                new RoleSeed("Viewer", "Read-only access to projects")
+            };
+
+            foreach (var seed in roleSeeds)
+            {
+                var role = await _db.Roles.FirstOrDefaultAsync(r => r.Name == seed.Name, ct);
+                if (role == null)
+                {
+                    _db.Roles.Add(new Role
+                    {
+                        Id = Guid.NewGuid(),
+                        Name = seed.Name,
+                        Description = seed.Description,
+                        IsActive = true,
+                        CreatedAt = DateTime.UtcNow,
+                        ModifiedAt = DateTime.UtcNow
+                    });
+                    rolesCreated++;
+                }
+            }
+
             await _db.SaveChangesAsync(ct);
             await transaction.CommitAsync(ct);
 
-            return new TestSeedResult(usersCreated, userAuthCreated, projectsCreated, departmentsCreated);
+            return new TestSeedResult(usersCreated, userAuthCreated, projectsCreated, departmentsCreated, rolesCreated);
         }
 
         private record UserSeed(int EmpId, string Username, string Email, string FirstName, string LastName, string? Password);
         private record UserAuthSeed(string UserName, int EmpId, string Password, bool UpdatePassword);
+        private record RoleSeed(string Name, string? Description);
     }
 }
