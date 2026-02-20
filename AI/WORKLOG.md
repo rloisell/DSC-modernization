@@ -137,6 +137,10 @@ Next: run integration tests or create controllers for other resources (Projects,
 - Replaced navigation and page layouts with B.C. Design System components (Header, Footer, Button, Form, TextField, NumberField, Select, InlineAlert) across core and admin screens.
 - Ran `npm run build` successfully after the UI refactor.
 
+## 2026-02-19 — Admin landing copy
+
+- Updated the Administrator landing page copy to reflect that admin sections are now wired to APIs.
+
 Notes: The `root` password reset was performed non-interactively to allow scripting the setup; if you want a different root password or to re-run the secure setup, run `mysql_secure_installation` and change credentials.
 
 # AI Worklog — DSC-modernization

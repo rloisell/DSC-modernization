@@ -49,6 +49,7 @@ Next steps (recommended, prioritized):
 11. Wire admin catalog pages (positions, departments, projects, expense, activity options) to APIs. — Completed: admin controllers + React wiring via `AdminCatalogService`.
 12. Add edit workflows for admin catalog pages (create/edit reuse with update/deactivate). — Completed: positions, departments, projects, expense categories/options, activity codes, and network numbers.
 13. Apply the B.C. Design System React component library across the frontend. — Completed: updated layout, navigation, forms, and tables with B.C. design system components and tokens.
+14. Refresh admin landing page copy to reflect wired sections. — Completed.
 
 Spec-Kitty / Migration next steps (explicit)
 
