@@ -588,11 +588,16 @@ namespace DSC.Data.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
+                    b.Property<Guid?>("UserId")
+                        .HasColumnType("char(36)");
+
                     b.HasKey("Id");
 
                     b.HasIndex("BudgetId");
 
                     b.HasIndex("ProjectId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("WorkItems");
                 });
@@ -741,9 +746,16 @@ namespace DSC.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("DSC.Data.Models.User", "User")
+                        .WithMany("WorkItems")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.Navigation("Budget");
 
                     b.Navigation("Project");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("DSC.Data.Models.Budget", b =>
@@ -770,6 +782,8 @@ namespace DSC.Data.Migrations
                     b.Navigation("ProjectAssignments");
 
                     b.Navigation("TimeEntries");
+
+                    b.Navigation("WorkItems");
                 });
 
             modelBuilder.Entity("DSC.Data.Models.WorkItem", b =>

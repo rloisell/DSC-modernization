@@ -8,6 +8,11 @@ namespace DSC.Data.Models
         public Guid Id { get; set; }
         public Guid ProjectId { get; set; }
         public Project Project { get; set; } = null!;
+        
+        // User assignment - tracks which user created/owns this work item
+        public Guid? UserId { get; set; }
+        public User? User { get; set; }
+        
         public Guid? BudgetId { get; set; }
         public Budget? Budget { get; set; }
 

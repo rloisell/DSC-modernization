@@ -30,5 +30,6 @@ namespace DSC.Data.Models
         // Navigation
         public ICollection<TimeEntry> TimeEntries { get; set; } = new List<TimeEntry>();
         public ICollection<ProjectAssignment> ProjectAssignments { get; set; } = new List<ProjectAssignment>();
+        public ICollection<WorkItem> WorkItems { get; set; } = new List<WorkItem>();
     }
 }

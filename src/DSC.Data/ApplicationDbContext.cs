@@ -64,6 +64,7 @@ namespace DSC.Data
             {
                 b.HasKey(w => w.Id);
                 b.HasOne(w => w.Project).WithMany(p => p.WorkItems).HasForeignKey(w => w.ProjectId).OnDelete(DeleteBehavior.Cascade);
+                b.HasOne(w => w.User).WithMany(u => u.WorkItems).HasForeignKey(w => w.UserId).OnDelete(DeleteBehavior.SetNull);
                 b.HasOne(w => w.Budget).WithMany(bu => bu.WorkItems).HasForeignKey(w => w.BudgetId).OnDelete(DeleteBehavior.SetNull);
             });
 
