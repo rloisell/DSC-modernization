@@ -2,19 +2,18 @@
 !theme plain
 
 package "Presentation Layer" {
-    interface "React SPA" as WebClient {
-        + Vite Dev Server (port 5173)
-        + B.C. Design System Components
-        + Axios API Client
-    }
+    component "React SPA" as WebClient
+    note right of WebClient
+      Vite Dev Server (port 5173)
+      B.C. Design System Components
+      Axios API Client
+    end note
 }
 
 package "API Layer (ASP.NET Core)" {
-    component "Kestrel" {
-        port "5005" as APIPort
-    }
+    [Kestrel 5005] as APIPort
 
-    component "Middleware Pipeline" {
+    package "Middleware Pipeline" {
         [CORS]
         [Routing]
         [Rate Limiter]
