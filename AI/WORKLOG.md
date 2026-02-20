@@ -32,6 +32,70 @@
 
 ---
 
+## 2026-02-20 — Budget Classification (CAPEX/OPEX) Port (COMPLETED ✓)
+
+**Problem Statement**:
+1. CAPEX/OPEX budget classification from Java app needed to be ported into .NET
+2. Activity entries required a budget classification for reporting
+3. Admin Expense needed to manage budgets and bind categories to them
+
+**Implementation & Resolution**:
+
+### Backend Changes
+
+#### 1. Budget Domain Model
+- ✅ Added `Budget` entity with CAPEX/OPEX descriptions
+- ✅ Linked `WorkItem` to `Budget` via `BudgetId`
+- ✅ Linked `ExpenseCategory` to `Budget` via `BudgetId`
+- ✅ Added EF Core migration `AddBudgetModel`
+
+#### 2. API Endpoints & DTOs
+- ✅ Added `AdminBudgetsController` for admin CRUD
+- ✅ Added `GET /api/catalog/budgets` for public lookup
+- ✅ Updated `ExpenseCategoryDto` to include `BudgetId` and `BudgetDescription`
+- ✅ Updated work item DTOs to include budget fields
+- ✅ Work item creation now requires `BudgetId`
+
+#### 3. Seed Data
+- ✅ Added CAPEX/OPEX budgets to test data seeding
+
+### Frontend Changes
+
+#### 1. Activity Page
+- ✅ Added Budget selector (CAPEX/OPEX) to work item form
+- ✅ Budget classification included in activity table
+- ✅ Work item creation now includes budget selection
+
+#### 2. Admin Expense Page
+- ✅ Reworked Admin Expense to manage Budgets and Categories
+- ✅ Categories now require budget selection
+- ✅ Category table shows budget description
+
+**Files Modified**:
+- `src/DSC.Data/Models/Budget.cs`
+- `src/DSC.Data/Models/WorkItem.cs`
+- `src/DSC.Data/Models/ExpenseCategory.cs`
+- `src/DSC.Data/ApplicationDbContext.cs`
+- `src/DSC.Data/Migrations/20260220104233_AddBudgetModel.cs`
+- `src/DSC.Data/Migrations/20260220104233_AddBudgetModel.Designer.cs`
+- `src/DSC.Api/DTOs/AdminCatalogDtos.cs`
+- `src/DSC.Api/DTOs/WorkItemDto.cs`
+- `src/DSC.Api/Controllers/AdminBudgetsController.cs`
+- `src/DSC.Api/Controllers/AdminExpenseCategoriesController.cs`
+- `src/DSC.Api/Controllers/ItemsController.cs`
+- `src/DSC.Api/Controllers/CatalogController.cs`
+- `src/DSC.Api/Seeding/TestDataSeeder.cs`
+- `src/DSC.Api/Swagger/WorkItemExamplesOperationFilter.cs`
+- `src/DSC.WebClient/src/api/AdminCatalogService.js`
+- `src/DSC.WebClient/src/api/CatalogService.js`
+- `src/DSC.WebClient/src/api/WorkItemService.js`
+- `src/DSC.WebClient/src/pages/Activity.jsx`
+- `src/DSC.WebClient/src/pages/AdminExpense.jsx`
+
+**Commit**: Current - feat: port CAPEX/OPEX budget classification
+
+---
+
 ## 2026-02-20 — Activity Page Tracking Table Enhancement (COMPLETED ✓)
 
 **Problem Statement**:

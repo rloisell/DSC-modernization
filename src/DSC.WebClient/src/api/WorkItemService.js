@@ -23,6 +23,7 @@ export async function createWorkItem(item) {
 export async function createWorkItemWithLegacy({
   title,
   projectId,
+  budgetId,
   description,
   legacyActivityId,
   date,
@@ -38,6 +39,7 @@ export async function createWorkItemWithLegacy({
   const payload = {
     title,
     projectId,
+    budgetId,
     description,
     legacyActivityId,
     date,

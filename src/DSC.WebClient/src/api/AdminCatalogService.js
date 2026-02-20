@@ -61,6 +61,18 @@ export const AdminCatalogService = {
     await axios.put(`/api/admin/expense-categories/${id}`, payload);
   },
 
+  async getBudgets() {
+    const res = await axios.get('/api/admin/budgets');
+    return res.data;
+  },
+  async createBudget(payload) {
+    const res = await axios.post('/api/admin/budgets', payload);
+    return res.data;
+  },
+  async updateBudget(id, payload) {
+    await axios.put(`/api/admin/budgets/${id}`, payload);
+  },
+
   async getExpenseOptions(categoryId) {
     const res = await axios.get('/api/admin/expense-options', {
       params: categoryId ? { categoryId } : undefined

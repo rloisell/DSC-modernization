@@ -19,6 +19,7 @@ namespace DSC.Data
         public DbSet<ExternalIdentity> ExternalIdentities => Set<ExternalIdentity>();
         public DbSet<Position> Positions => Set<Position>();
         public DbSet<Department> Departments => Set<Department>();
+        public DbSet<Budget> Budgets => Set<Budget>();
         public DbSet<ExpenseCategory> ExpenseCategories => Set<ExpenseCategory>();
         public DbSet<ExpenseOption> ExpenseOptions => Set<ExpenseOption>();
         public DbSet<ActivityCode> ActivityCodes => Set<ActivityCode>();
@@ -58,6 +59,7 @@ namespace DSC.Data
             {
                 b.HasKey(w => w.Id);
                 b.HasOne(w => w.Project).WithMany(p => p.WorkItems).HasForeignKey(w => w.ProjectId).OnDelete(DeleteBehavior.Cascade);
+                b.HasOne(w => w.Budget).WithMany(bu => bu.WorkItems).HasForeignKey(w => w.BudgetId).OnDelete(DeleteBehavior.SetNull);
             });
 
             modelBuilder.Entity<TimeEntry>(b =>
@@ -101,10 +103,17 @@ namespace DSC.Data
                 b.HasIndex(d => d.Name).IsUnique();
             });
 
+            modelBuilder.Entity<Budget>(b =>
+            {
+                b.HasKey(bu => bu.Id);
+                b.HasIndex(bu => bu.Description).IsUnique();
+            });
+
             modelBuilder.Entity<ExpenseCategory>(b =>
             {
                 b.HasKey(c => c.Id);
                 b.HasIndex(c => c.Name).IsUnique();
+                b.HasOne(c => c.Budget).WithMany(bu => bu.ExpenseCategories).HasForeignKey(c => c.BudgetId).OnDelete(DeleteBehavior.Restrict);
             });
 
             modelBuilder.Entity<ExpenseOption>(b =>

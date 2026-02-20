@@ -65,6 +65,10 @@ See [tests/howto.md](tests/howto.md) for comprehensive testing documentation, in
 - ✅ **Project Dropdown**: Loads all projects from database with "ProjectNo — Name" format
 - ✅ **Activity Code Dropdown**: Selects from 6 test codes (DEV, TEST, DOC, ADMIN, MEET, TRAIN)
 - ✅ **Network Number Dropdown**: Selects from 6 test numbers (101, 102, 103, 201, 202, 203)
+- ✅ **Budget Classification (CAPEX/OPEX)** (NEW 2026-02-21):
+  - Activity create form requires a budget selection
+  - Activity table displays the budget classification for each work item
+  - Uses `/api/catalog/budgets` for lookup
 - ✅ **Catalog Service**: New public `/api/catalog` endpoints for activity codes and network numbers
 - ✅ **Test Data Seeding**: Activity Codes and Network Numbers automatically seeded with test data
 - ✅ **Legacy Activity ID**: Optional integer field for backward compatibility with Java system Activity IDs
@@ -241,9 +245,9 @@ API update: The API now exposes legacy Java model fields via DTOs so the fronten
 - Admin UI scaffolding: `AdminUsers` now mirrors the legacy form fields (employee info, position/department assignment, role) with placeholder actions. Other admin pages include planned action lists and back links.
 - Admin UI build-out: positions, departments, projects, expense, and activity options pages now include draft forms and placeholder tables based on intended legacy workflows.
 - Admin Users wiring: `/api/admin/users` endpoints are available and `AdminUsers` now uses real API calls for list/create/update/delete (other admin pages still use placeholders).
-- Admin catalog wiring: positions, departments, projects, expense categories/options, activity codes, and network numbers are now backed by `/api/admin/*` endpoints and wired in the UI via `AdminCatalogService`.
-- Admin catalog edit workflows: admin pages now reuse create forms for edits and call update/deactivate APIs for positions, departments, projects, expense categories/options, activity codes, and network numbers.
-- Admin Expense improvements: Expense Options now validate category selection, persist reliably, and display associated category names in the table.
+- Admin catalog wiring: positions, departments, projects, budgets, expense categories, activity codes, and network numbers are now backed by `/api/admin/*` endpoints and wired in the UI via `AdminCatalogService`.
+- Admin catalog edit workflows: admin pages now reuse create forms for edits and call update/deactivate APIs for positions, departments, projects, budgets, expense categories, activity codes, and network numbers.
+- Admin Expense improvements: Admin Expense now manages budgets (CAPEX/OPEX) and categories, with budget assignment required for categories.
 - Frontend design system: the React UI now uses the B.C. Design System component library with BC Sans and design tokens for layout, navigation, forms, and tables.
 - Admin landing page: updated copy to reflect the admin sections are wired to APIs.
 - Security notes: see `AI/securityNextSteps.md` for current risks and hardening actions.

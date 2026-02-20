@@ -8,6 +8,8 @@ namespace DSC.Data.Models
         public Guid Id { get; set; }
         public Guid ProjectId { get; set; }
         public Project Project { get; set; } = null!;
+        public Guid? BudgetId { get; set; }
+        public Budget? Budget { get; set; }
 
         // Legacy mapping fields from Java `Activity`
         public int? LegacyActivityId { get; set; }

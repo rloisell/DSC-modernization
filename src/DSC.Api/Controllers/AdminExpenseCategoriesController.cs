@@ -30,10 +30,13 @@ namespace DSC.Api.Controllers
         public async Task<ActionResult<ExpenseCategoryDto[]>> GetAll()
         {
             var categories = await _db.ExpenseCategories.AsNoTracking()
+                .Include(c => c.Budget)
                 .OrderBy(c => c.Name)
                 .Select(c => new ExpenseCategoryDto
                 {
                     Id = c.Id,
+                    BudgetId = c.BudgetId,
+                    BudgetDescription = c.Budget != null ? c.Budget.Description : null,
                     Name = c.Name,
                     IsActive = c.IsActive
                 })
@@ -47,14 +50,21 @@ namespace DSC.Api.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Create([FromBody] ExpenseCategoryCreateRequest request)
         {
-            if (string.IsNullOrWhiteSpace(request.Name))
+            if (request.BudgetId == Guid.Empty || string.IsNullOrWhiteSpace(request.Name))
             {
-                return BadRequest(new { error = "Name is required." });
+                return BadRequest(new { error = "BudgetId and Name are required." });
+            }
+
+            var budgetExists = await _db.Budgets.AnyAsync(b => b.Id == request.BudgetId);
+            if (!budgetExists)
+            {
+                return BadRequest(new { error = "Budget not found" });
             }
 
             var entity = new ExpenseCategory
             {
                 Id = Guid.NewGuid(),
+                BudgetId = request.BudgetId,
                 Name = request.Name.Trim(),
                 IsActive = true
             };
@@ -73,6 +83,18 @@ namespace DSC.Api.Controllers
             var entity = await _db.ExpenseCategories.FirstOrDefaultAsync(c => c.Id == id);
             if (entity == null) return NotFound();
 
+            if (request.BudgetId == Guid.Empty)
+            {
+                return BadRequest(new { error = "BudgetId is required." });
+            }
+
+            var budgetExists = await _db.Budgets.AnyAsync(b => b.Id == request.BudgetId);
+            if (!budgetExists)
+            {
+                return BadRequest(new { error = "Budget not found" });
+            }
+
+            entity.BudgetId = request.BudgetId;
             entity.Name = request.Name.Trim();
             entity.IsActive = request.IsActive;
 

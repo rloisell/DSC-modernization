@@ -26,11 +26,14 @@ namespace DSC.Api.Controllers
         public async Task<ActionResult<WorkItemDto[]>> GetAll()
         {
             var items = await _db.WorkItems.AsNoTracking()
+                .Include(w => w.Budget)
                 .OrderByDescending(w => w.Date ?? DateTime.MinValue)
                 .Select(w => new WorkItemDto
                 {
                     Id = w.Id,
                     ProjectId = w.ProjectId,
+                    BudgetId = w.BudgetId,
+                    BudgetDescription = w.Budget != null ? w.Budget.Description : null,
                     LegacyActivityId = w.LegacyActivityId,
                     Date = w.Date,
                     StartTime = w.StartTime,
@@ -56,7 +59,9 @@ namespace DSC.Api.Controllers
             [FromQuery] DateTime? endDate,
             [FromQuery] string? period)
         {
-            var query = _db.WorkItems.AsNoTracking().Include(w => w.Project);
+            IQueryable<WorkItem> query = _db.WorkItems.AsNoTracking()
+                .Include(w => w.Project)
+                .Include(w => w.Budget);
 
             // Apply date filtering based on period or explicit date range
             if (!string.IsNullOrWhiteSpace(period))
@@ -107,6 +112,8 @@ namespace DSC.Api.Controllers
                 {
                     Id = w.Id,
                     ProjectId = w.ProjectId,
+                    BudgetId = w.BudgetId,
+                    BudgetDescription = w.Budget != null ? w.Budget.Description : null,
                     ProjectNo = w.Project.ProjectNo,
                     ProjectName = w.Project.Name,
                     ProjectEstimatedHours = w.Project.EstimatedHours,
@@ -133,12 +140,14 @@ namespace DSC.Api.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<WorkItemDto>> Get(Guid id)
         {
-            var item = await _db.WorkItems.AsNoTracking().FirstOrDefaultAsync(w => w.Id == id);
+            var item = await _db.WorkItems.AsNoTracking().Include(w => w.Budget).FirstOrDefaultAsync(w => w.Id == id);
             if (item == null) return NotFound();
             var dto = new WorkItemDto
             {
                 Id = item.Id,
                 ProjectId = item.ProjectId,
+                BudgetId = item.BudgetId,
+                BudgetDescription = item.Budget != null ? item.Budget.Description : null,
                 LegacyActivityId = item.LegacyActivityId,
                 Date = item.Date,
                 StartTime = item.StartTime,
@@ -161,9 +170,9 @@ namespace DSC.Api.Controllers
         public async Task<IActionResult> Post([FromBody] WorkItemCreateRequest request)
         {
             // Basic server-side validation
-            if (string.IsNullOrWhiteSpace(request.Title) || request.ProjectId == Guid.Empty)
+            if (string.IsNullOrWhiteSpace(request.Title) || request.ProjectId == Guid.Empty || request.BudgetId == null || request.BudgetId == Guid.Empty)
             {
-                return BadRequest(new { error = "Missing required fields: Title and ProjectId" });
+                return BadRequest(new { error = "Missing required fields: Title, ProjectId, and BudgetId" });
             }
 
             // Verify project exists
@@ -173,10 +182,17 @@ namespace DSC.Api.Controllers
                 return BadRequest(new { error = "Project not found" });
             }
 
+            var budgetExists = await _db.Budgets.AnyAsync(b => b.Id == request.BudgetId);
+            if (!budgetExists)
+            {
+                return BadRequest(new { error = "Budget not found" });
+            }
+
             var workItem = new WorkItem
             {
                 Id = Guid.NewGuid(),
                 ProjectId = request.ProjectId,
+                BudgetId = request.BudgetId,
                 Title = request.Title,
                 Description = request.Description,
                 LegacyActivityId = request.LegacyActivityId,
@@ -194,10 +210,17 @@ namespace DSC.Api.Controllers
             await _db.WorkItems.AddAsync(workItem);
             await _db.SaveChangesAsync();
 
+            var budgetDescription = await _db.Budgets.AsNoTracking()
+                .Where(b => b.Id == workItem.BudgetId)
+                .Select(b => b.Description)
+                .FirstOrDefaultAsync();
+
             var responseDto = new WorkItemDto
             {
                 Id = workItem.Id,
                 ProjectId = workItem.ProjectId,
+                BudgetId = workItem.BudgetId,
+                BudgetDescription = budgetDescription,
                 Title = workItem.Title,
                 Description = workItem.Description,
                 LegacyActivityId = workItem.LegacyActivityId,

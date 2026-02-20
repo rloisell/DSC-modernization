@@ -14,77 +14,67 @@ import { AdminCatalogService } from '../api/AdminCatalogService';
 
 export default function AdminExpense() {
   const [message, setMessage] = useState('');
+  const [budgets, setBudgets] = useState([]);
   const [categories, setCategories] = useState([]);
-  const [options, setOptions] = useState([]);
-  const [selectedCategoryId, setSelectedCategoryId] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [categoryForm, setCategoryForm] = useState({ name: '', status: 'active' });
-  const [optionForm, setOptionForm] = useState({ categoryId: '', name: '' });
+  const [budgetForm, setBudgetForm] = useState({ description: '', status: 'active' });
+  const [categoryForm, setCategoryForm] = useState({ budgetId: '', name: '', status: 'active' });
   const [editingCategoryId, setEditingCategoryId] = useState('');
-  const [editingOptionId, setEditingOptionId] = useState('');
+  const [editingBudgetId, setEditingBudgetId] = useState('');
   const navigate = useNavigate();
 
   const statusItems = [
     { id: 'active', label: 'Active' },
     { id: 'inactive', label: 'Inactive' }
   ];
-  const categoryItems = categories.map(category => ({
-    id: category.id,
-    label: category.name
+  const budgetItems = budgets.map(budget => ({
+    id: budget.id,
+    label: budget.description
   }));
-  const categoryLookup = categories.reduce((acc, category) => {
-    acc[category.id] = category.name;
-    return acc;
-  }, {});
 
   useEffect(() => {
-    AdminCatalogService.getExpenseCategories()
-      .then(data => {
-        setCategories(data);
-        return data;
+    Promise.all([
+      AdminCatalogService.getBudgets(),
+      AdminCatalogService.getExpenseCategories()
+    ])
+      .then(([budgetData, categoryData]) => {
+        setBudgets(budgetData);
+        setCategories(categoryData);
       })
       .catch(e => setError(e.message))
       .finally(() => setLoading(false));
   }, []);
 
-  useEffect(() => {
-    if (!selectedCategoryId) {
-      setOptions([]);
-      return;
-    }
-
-    AdminCatalogService.getExpenseOptions(selectedCategoryId)
-      .then(setOptions)
-      .catch(e => setError(e.message));
-  }, [selectedCategoryId]);
-
   function updateCategoryForm(field, value) {
     setCategoryForm(prev => ({ ...prev, [field]: value }));
   }
 
-  function updateOptionForm(field, value) {
-    setOptionForm(prev => ({ ...prev, [field]: value }));
-  }
 
   async function handleCategorySubmit(e) {
     e.preventDefault();
     setMessage('');
     setError(null);
+    if (!categoryForm.budgetId) {
+      setError('Select a budget before saving a category.');
+      return;
+    }
     try {
       if (editingCategoryId) {
         await AdminCatalogService.updateExpenseCategory(editingCategoryId, {
+          budgetId: categoryForm.budgetId,
           name: categoryForm.name,
           isActive: categoryForm.status === 'active'
         });
       } else {
         await AdminCatalogService.createExpenseCategory({
+          budgetId: categoryForm.budgetId,
           name: categoryForm.name
         });
       }
       const refreshed = await AdminCatalogService.getExpenseCategories();
       setCategories(refreshed);
-      setCategoryForm({ name: '', status: 'active' });
+      setCategoryForm({ budgetId: categoryForm.budgetId, name: '', status: 'active' });
       setEditingCategoryId('');
       setMessage(editingCategoryId ? 'Expense category updated.' : 'Expense category created.');
     } catch (e) {
@@ -92,35 +82,26 @@ export default function AdminExpense() {
     }
   }
 
-  async function handleOptionSubmit(e) {
+  async function handleBudgetSubmit(e) {
     e.preventDefault();
     setMessage('');
     setError(null);
-    const categoryId = optionForm.categoryId || selectedCategoryId;
-    if (!categoryId) {
-      setError('Select a category before adding an expense option.');
-      return;
-    }
     try {
-      if (editingOptionId) {
-        await AdminCatalogService.updateExpenseOption(editingOptionId, {
-          name: optionForm.name,
-          isActive: true
+      if (editingBudgetId) {
+        await AdminCatalogService.updateBudget(editingBudgetId, {
+          description: budgetForm.description,
+          isActive: budgetForm.status === 'active'
         });
       } else {
-        await AdminCatalogService.createExpenseOption({
-          expenseCategoryId: categoryId,
-          name: optionForm.name
+        await AdminCatalogService.createBudget({
+          description: budgetForm.description
         });
       }
-      if (categoryId) {
-        const refreshed = await AdminCatalogService.getExpenseOptions(categoryId);
-        setOptions(refreshed);
-      }
-      setSelectedCategoryId(categoryId);
-      setOptionForm({ categoryId, name: '' });
-      setEditingOptionId('');
-      setMessage(editingOptionId ? 'Expense option updated.' : 'Expense option created.');
+      const refreshed = await AdminCatalogService.getBudgets();
+      setBudgets(refreshed);
+      setBudgetForm({ description: '', status: 'active' });
+      setEditingBudgetId('');
+      setMessage(editingBudgetId ? 'Budget updated.' : 'Budget created.');
     } catch (e) {
       setError(e.message);
     }
@@ -142,19 +123,17 @@ export default function AdminExpense() {
     }
   }
 
-  async function handleDeactivateOption(option) {
+  async function handleDeactivateBudget(budget) {
     setMessage('');
     setError(null);
     try {
-      await AdminCatalogService.updateExpenseOption(option.id, {
-        name: option.name,
+      await AdminCatalogService.updateBudget(budget.id, {
+        description: budget.description,
         isActive: false
       });
-      if (selectedCategoryId) {
-        const refreshed = await AdminCatalogService.getExpenseOptions(selectedCategoryId);
-        setOptions(refreshed);
-      }
-      setMessage('Expense option deactivated.');
+      const refreshed = await AdminCatalogService.getBudgets();
+      setBudgets(refreshed);
+      setMessage('Budget deactivated.');
     } catch (e) {
       setError(e.message);
     }
@@ -163,29 +142,102 @@ export default function AdminExpense() {
   function handleEditCategory(category) {
     setEditingCategoryId(category.id);
     setCategoryForm({
+      budgetId: category.budgetId || '',
       name: category.name,
       status: category.isActive ? 'active' : 'inactive'
     });
   }
 
-  function handleEditOption(option) {
-    setEditingOptionId(option.id);
-    setOptionForm({ categoryId: option.expenseCategoryId, name: option.name });
-    setSelectedCategoryId(option.expenseCategoryId);
+  function handleEditBudget(budget) {
+    setEditingBudgetId(budget.id);
+    setBudgetForm({
+      description: budget.description,
+      status: budget.isActive ? 'active' : 'inactive'
+    });
   }
 
   return (
     <div className="page">
       <section className="section stack">
         <Heading level={1}>Admin Expense</Heading>
-        <Text elementType="p">Legacy servlet: AdminExpense. This page will manage expense categories and options.</Text>
+        <Text elementType="p">Legacy servlet: AdminExpense. This page will manage budgets (CAPEX/OPEX) and expense categories.</Text>
         <div className="page-actions">
           <Button variant="link" onPress={() => navigate('/admin')}>Back to Administrator</Button>
         </div>
       </section>
       <section className="section stack">
+        <Heading level={2}>{editingBudgetId ? 'Edit Budget' : 'Add Budget'}</Heading>
+        <Form onSubmit={handleBudgetSubmit} className="form-grid">
+          <TextField
+            label="Budget Description"
+            value={budgetForm.description}
+            onChange={value => setBudgetForm(prev => ({ ...prev, description: value }))}
+            isRequired
+          />
+          <Select
+            label="Status"
+            items={statusItems}
+            selectedKey={budgetForm.status}
+            onSelectionChange={key => setBudgetForm(prev => ({ ...prev, status: String(key) }))}
+          />
+          <ButtonGroup alignment="start" ariaLabel="Budget actions">
+            <Button type="submit" variant="primary">
+              {editingBudgetId ? 'Save Budget' : 'Create Budget'}
+            </Button>
+            {editingBudgetId ? (
+              <Button
+                type="button"
+                variant="tertiary"
+                onPress={() => {
+                  setEditingBudgetId('');
+                  setBudgetForm({ description: '', status: 'active' });
+                }}
+              >
+                Cancel
+              </Button>
+            ) : null}
+          </ButtonGroup>
+        </Form>
+      </section>
+      <section className="section stack">
+        <Heading level={2}>Budgets</Heading>
+        <table className="bcds-table">
+          <thead>
+            <tr>
+              <th>Description</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {budgets.map(budget => (
+              <tr key={budget.id}>
+                <td>{budget.description}</td>
+                <td>{budget.isActive ? 'Active' : 'Inactive'}</td>
+                <td>
+                  <div className="actions">
+                    <Button size="small" variant="tertiary" onPress={() => handleEditBudget(budget)}>Edit</Button>
+                    <Button size="small" variant="tertiary" danger onPress={() => handleDeactivateBudget(budget)}>
+                      Deactivate
+                    </Button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </section>
+      <section className="section stack">
         <Heading level={2}>{editingCategoryId ? 'Edit Expense Category' : 'Add Expense Category'}</Heading>
         <Form onSubmit={handleCategorySubmit} className="form-grid">
+          <Select
+            label="Budget"
+            placeholder="Select budget"
+            items={budgetItems}
+            selectedKey={categoryForm.budgetId || null}
+            onSelectionChange={key => updateCategoryForm('budgetId', key ? String(key) : '')}
+            isRequired
+          />
           <TextField
             label="Category Name"
             value={categoryForm.name}
@@ -222,6 +274,7 @@ export default function AdminExpense() {
         <table className="bcds-table">
           <thead>
             <tr>
+              <th>Budget</th>
               <th>Name</th>
               <th>Status</th>
               <th>Actions</th>
@@ -230,82 +283,13 @@ export default function AdminExpense() {
           <tbody>
             {categories.map(category => (
               <tr key={category.id}>
+                <td>{category.budgetDescription || '—'}</td>
                 <td>{category.name}</td>
                 <td>{category.isActive ? 'Active' : 'Inactive'}</td>
                 <td>
                   <div className="actions">
                     <Button size="small" variant="tertiary" onPress={() => handleEditCategory(category)}>Edit</Button>
                     <Button size="small" variant="tertiary" danger onPress={() => handleDeactivateCategory(category)}>
-                      Deactivate
-                    </Button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </section>
-      <section className="section stack">
-        <Heading level={2}>{editingOptionId ? 'Edit Expense Option' : 'Add Expense Option'}</Heading>
-        <Form onSubmit={handleOptionSubmit} className="form-grid">
-          <Select
-            label="Category"
-            placeholder="Select category"
-            items={categoryItems}
-            selectedKey={optionForm.categoryId || null}
-            onSelectionChange={key => {
-              const nextValue = key ? String(key) : '';
-              updateOptionForm('categoryId', nextValue);
-              setSelectedCategoryId(nextValue);
-            }}
-            isRequired
-          />
-          <TextField
-            label="Option Name"
-            value={optionForm.name}
-            onChange={value => updateOptionForm('name', value)}
-            isRequired
-          />
-          <ButtonGroup alignment="start" ariaLabel="Expense option actions">
-            <Button type="submit" variant="primary">
-              {editingOptionId ? 'Save Option' : 'Add Option'}
-            </Button>
-            {editingOptionId ? (
-              <Button
-                type="button"
-                variant="tertiary"
-                onPress={() => {
-                  setEditingOptionId('');
-                  setOptionForm({ categoryId: '', name: '' });
-                }}
-              >
-                Cancel
-              </Button>
-            ) : null}
-          </ButtonGroup>
-        </Form>
-      </section>
-      <section className="section stack">
-        <Heading level={2}>Expense Options</Heading>
-        <table className="bcds-table">
-          <thead>
-            <tr>
-              <th>Category</th>
-              <th>Name</th>
-              <th>Status</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {options.map(option => (
-              <tr key={option.id}>
-                <td>{option.expenseCategoryName || categoryLookup[option.expenseCategoryId] || '—'}</td>
-                <td>{option.name}</td>
-                <td>{option.isActive ? 'Active' : 'Inactive'}</td>
-                <td>
-                  <div className="actions">
-                    <Button size="small" variant="tertiary" onPress={() => handleEditOption(option)}>Edit</Button>
-                    <Button size="small" variant="tertiary" danger onPress={() => handleDeactivateOption(option)}>
                       Deactivate
                     </Button>
                   </div>

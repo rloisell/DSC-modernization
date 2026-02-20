@@ -68,18 +68,40 @@ namespace DSC.Api.DTOs
     public class ExpenseCategoryDto
     {
         public Guid Id { get; set; }
+        public Guid BudgetId { get; set; }
+        public string? BudgetDescription { get; set; }
         public string Name { get; set; } = string.Empty;
         public bool IsActive { get; set; }
     }
 
     public class ExpenseCategoryCreateRequest
     {
+        public Guid BudgetId { get; set; }
         public string Name { get; set; } = string.Empty;
     }
 
     public class ExpenseCategoryUpdateRequest
     {
+        public Guid BudgetId { get; set; }
         public string Name { get; set; } = string.Empty;
+        public bool IsActive { get; set; }
+    }
+
+    public class BudgetDto
+    {
+        public Guid Id { get; set; }
+        public string Description { get; set; } = string.Empty;
+        public bool IsActive { get; set; }
+    }
+
+    public class BudgetCreateRequest
+    {
+        public string Description { get; set; } = string.Empty;
+    }
+
+    public class BudgetUpdateRequest
+    {
+        public string Description { get; set; } = string.Empty;
         public bool IsActive { get; set; }
     }
 

@@ -13,7 +13,7 @@ import {
 } from '@bcgov/design-system-react-components';
 import { getWorkItems, createWorkItemWithLegacy, getDetailedWorkItems } from '../api/WorkItemService';
 import { getProjects } from '../api/ProjectService';
-import { getActivityCodes, getNetworkNumbers } from '../api/CatalogService';
+import { getActivityCodes, getNetworkNumbers, getBudgets } from '../api/CatalogService';
 import axios from 'axios';
 
 export default function Activity() {
@@ -21,6 +21,7 @@ export default function Activity() {
   const [detailedItems, setDetailedItems] = useState([]);
   const [timePeriod, setTimePeriod] = useState('month');
   const [projects, setProjects] = useState([]);
+  const [budgets, setBudgets] = useState([]);
   const [activityCodes, setActivityCodes] = useState([]);
   const [networkNumbers, setNetworkNumbers] = useState([]);
   const [projectOptions, setProjectOptions] = useState(null);
@@ -30,6 +31,7 @@ export default function Activity() {
   const [title, setTitle] = useState('');
   const [desc, setDesc] = useState('');
   const [projectId, setProjectId] = useState('');
+  const [budgetId, setBudgetId] = useState('');
   const [legacyActivityId, setLegacyActivityId] = useState('');
   const [date, setDate] = useState('');
   const [startTime, setStartTime] = useState('');
@@ -55,6 +57,11 @@ export default function Activity() {
     label: project.projectNo ? `${project.projectNo} — ${project.name}` : project.name
   }));
 
+  const budgetItems = budgets.map(budget => ({
+    id: budget.id,
+    label: budget.description
+  }));
+
   // Use project-specific options if a project is selected, otherwise use all codes/numbers
   const availableActivityCodes = projectOptions?.activityCodes || activityCodes;
   const availableNetworkNumbers = projectOptions?.networkNumbers || networkNumbers;
@@ -73,12 +80,14 @@ export default function Activity() {
     Promise.all([
       getWorkItems(),
       getProjects(),
+      getBudgets(),
       getActivityCodes(),
       getNetworkNumbers()
     ])
-      .then(([workItems, projects, codes, numbers]) => {
+      .then(([workItems, projects, budgets, codes, numbers]) => {
         setItems(workItems);
         setProjects(projects);
+        setBudgets(budgets);
         setActivityCodes(codes);
         setNetworkNumbers(numbers);
       })
@@ -130,6 +139,7 @@ export default function Activity() {
       const payload = {
         title,
         projectId: projectId || undefined,
+        budgetId: budgetId || undefined,
         description: desc,
         legacyActivityId: legacyActivityId ? Number(legacyActivityId) : undefined,
         date: date || undefined,
@@ -150,6 +160,7 @@ export default function Activity() {
       setTitle('');
       setDesc('');
       setProjectId('');
+      setBudgetId('');
       setLegacyActivityId('');
       setDate('');
       setStartTime('');
@@ -196,6 +207,7 @@ export default function Activity() {
             <thead>
               <tr>
                 <th>Project</th>
+                <th>Budget</th>
                 <th>Title</th>
                 <th>Activity Code</th>
                 <th>Network</th>
@@ -225,6 +237,7 @@ export default function Activity() {
                         {item.projectNo ? `${item.projectNo} — ${item.projectName}` : item.projectName}
                       </strong>
                     </td>
+                    <td>{item.budgetDescription || '—'}</td>
                     <td>{item.title}</td>
                     <td>{item.activityCode || '—'}</td>
                     <td>{item.networkNumber || '—'}</td>
@@ -250,6 +263,14 @@ export default function Activity() {
             items={projectItems}
             selectedKey={projectId || null}
             onSelectionChange={key => setProjectId(key ? String(key) : '')}
+            isRequired
+          />
+          <Select
+            label="Budget"
+            placeholder="Select budget"
+            items={budgetItems}
+            selectedKey={budgetId || null}
+            onSelectionChange={key => setBudgetId(key ? String(key) : '')}
             isRequired
           />
           <TextField label="Legacy Activity ID" value={legacyActivityId} onChange={setLegacyActivityId} />

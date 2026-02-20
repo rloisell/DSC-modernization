@@ -11,3 +11,8 @@ export async function getNetworkNumbers() {
   const res = await axios.get(`${CATALOG_URL}/network-numbers`);
   return res.data;
 }
+
+export async function getBudgets() {
+  const res = await axios.get(`${CATALOG_URL}/budgets`);
+  return res.data;
+}

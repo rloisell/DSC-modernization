@@ -6,6 +6,8 @@ namespace DSC.Api.DTOs
     {
         public Guid Id { get; set; }
         public Guid ProjectId { get; set; }
+        public Guid? BudgetId { get; set; }
+        public string? BudgetDescription { get; set; }
 
         // Legacy mapping fields
         public int? LegacyActivityId { get; set; }
@@ -27,6 +29,8 @@ namespace DSC.Api.DTOs
     {
         public Guid Id { get; set; }
         public Guid ProjectId { get; set; }
+        public Guid? BudgetId { get; set; }
+        public string? BudgetDescription { get; set; }
         public string? ProjectNo { get; set; }
         public string ProjectName { get; set; } = null!;
         public decimal? ProjectEstimatedHours { get; set; }
@@ -50,6 +54,7 @@ namespace DSC.Api.DTOs
     public class WorkItemCreateRequest
     {
         public Guid ProjectId { get; set; }
+        public Guid? BudgetId { get; set; }
         public string Title { get; set; } = string.Empty;
         public string? Description { get; set; }
 

@@ -58,6 +58,24 @@ namespace DSC.Api.Controllers
             return Ok(numbers);
         }
 
+        [HttpGet("budgets")]
+        [ProducesResponseType(typeof(BudgetDto[]), StatusCodes.Status200OK)]
+        public async Task<ActionResult<BudgetDto[]>> GetBudgets()
+        {
+            var budgets = await _db.Budgets.AsNoTracking()
+                .Where(b => b.IsActive)
+                .OrderBy(b => b.Description)
+                .Select(b => new BudgetDto
+                {
+                    Id = b.Id,
+                    Description = b.Description,
+                    IsActive = b.IsActive
+                })
+                .ToArrayAsync();
+
+            return Ok(budgets);
+        }
+
         [HttpGet("project-options/{projectId}")]
         [ProducesResponseType(typeof(ProjectActivityOptionsResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]

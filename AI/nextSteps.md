@@ -1,5 +1,54 @@
 # Remaining Work (2026-02-21)
 
+## ✅ COMPLETED: Budget Classification (CAPEX/OPEX) Port (2026-02-20)
+
+**Status**: COMPLETE ✅
+
+### Changes Made
+
+#### 1. Budget Domain Model ✅
+- **Added**: `Budget` entity (CAPEX/OPEX)
+- **Linked**: `WorkItem.BudgetId` and `ExpenseCategory.BudgetId`
+- **Migration**: `AddBudgetModel`
+
+#### 2. Admin & Catalog APIs ✅
+- **Admin**: `/api/admin/budgets` CRUD for CAPEX/OPEX
+- **Catalog**: `/api/catalog/budgets` for Activity page selection
+- **DTOs**: Budget DTOs + budget fields on expense categories and work items
+
+#### 3. Activity Workflow ✅
+- **Budget selector** added to Activity create form (required)
+- **Budget column** added to Activity table
+- Work item create now requires `BudgetId`
+
+#### 4. Admin Expense Updates ✅
+- Admin Expense page now manages budgets and categories
+- Categories require a budget assignment
+- Category table displays budget description
+
+### Seed Data ✅
+- CAPEX/OPEX budgets seeded for local testing
+
+**Files Modified**:
+- `src/DSC.Data/Models/Budget.cs`
+- `src/DSC.Data/Models/WorkItem.cs`
+- `src/DSC.Data/Models/ExpenseCategory.cs`
+- `src/DSC.Data/ApplicationDbContext.cs`
+- `src/DSC.Data/Migrations/20260220104233_AddBudgetModel.cs`
+- `src/DSC.Api/Controllers/AdminBudgetsController.cs`
+- `src/DSC.Api/Controllers/AdminExpenseCategoriesController.cs`
+- `src/DSC.Api/Controllers/ItemsController.cs`
+- `src/DSC.Api/Controllers/CatalogController.cs`
+- `src/DSC.Api/DTOs/AdminCatalogDtos.cs`
+- `src/DSC.Api/DTOs/WorkItemDto.cs`
+- `src/DSC.Api/Seeding/TestDataSeeder.cs`
+- `src/DSC.WebClient/src/pages/Activity.jsx`
+- `src/DSC.WebClient/src/pages/AdminExpense.jsx`
+
+**Commit**: Current - feat: port CAPEX/OPEX budget classification
+
+---
+
 ## ✅ COMPLETED: Admin Expense Options Fixes (2026-02-20)
 
 **Status**: COMPLETE ✅
@@ -74,13 +123,9 @@
 - **New**: `WorkItemDetailDto` includes:
   - All WorkItem fields
   - ProjectNo, ProjectName, ProjectEstimatedHours (from Project entity)
-  - Enables rich display without additional API calls
-
-### Technical Implementation
 - ✅ Backend eager loading: `.Include(w => w.Project)` for efficient queries
 - ✅ Frontend state management: separate `detailedItems` state from create form
-- ✅ Auto-refresh on create: calls `getDetailedWorkItems()` after successful submission
-- ✅ Default period: "month" for most relevant view
+- ✅ Auto-refresh on create: calls `getDetailedWorkItems()` after submission
 
 **Files Modified**:
 - `src/DSC.Api/DTOs/WorkItemDto.cs`
@@ -92,10 +137,7 @@
 
 ---
 
-# Remaining Work (2026-02-21)
-
 ## ✅ COMPLETED: Project Activity Options Assignment & Filtering (2026-02-20)
-
 **Status**: COMPLETE ✅  
 **Issues**: All 3 issues FULLY RESOLVED
 
@@ -104,25 +146,18 @@
 #### 1. Activity Page 400 Error on Work Item Creation ✅
 - **Issue**: Creating new activities returned "Request failed with status code 400"
 - **Root Cause**: API expected `WorkItem` entity but frontend sent different payload; type mismatch on `networkNumber`
-- **Solution**:
-  - Created `WorkItemCreateRequest` DTO with proper field types
   - Fixed `networkNumber` type mapping (frontend sends `int`, backend stores as `string`)
   - Added project existence validation
   - Returns full `WorkItemDto` in response
 - **Files Modified**: `ItemsController.cs`, `WorkItemDto.cs`
-
 #### 2. AdminProjects Assignment Button Not Persisting Data ✅
 - **Issue**: "Assign Activity Codes / Network Numbers" showed success but created no database records
 - **Root Cause**: Frontend called basic create endpoint (1 assignment) instead of bulk assignment
 - **Solution**:
   - Added `POST /api/admin/project-activity-options/assign-all` endpoint
   - Creates all combinations (activity codes × network numbers) for a project
-  - Added "Assign All Options" button to AdminProjects page
-  - Returns count of assignments created
 - **Validation**: Successfully created 144 assignments (12 codes × 12 numbers) ✅
 - **Files Modified**: `AdminProjectActivityOptionsController.cs`, `AdminCatalogDtos.cs`, `AdminProjects.jsx`, `AdminCatalogService.js`
-
-#### 3. Activity Page Dropdowns Not Filtered by Project ✅
 - **Issue**: Activity codes and network numbers should filter based on selected project (as paired tuples)
 - **Root Cause**: No API endpoint or frontend logic for project-specific filtering
 - **Solution**:
@@ -130,34 +165,22 @@
   - Returns project-specific codes, numbers, and valid pairs
   - Updated Activity page with conditional dropdown filtering
   - Dropdowns disabled until project selected
-  - Bidirectional filtering: selecting code filters numbers (and vice versa)
   - Auto-clears invalid selections when project changes
 - **Files Modified**: `CatalogController.cs`, `AdminCatalogDtos.cs`, `Activity.jsx`
 
 ### New DTOs Created
-- `WorkItemCreateRequest` - for creating work items with proper validation
 - `ProjectActivityOptionDetailDto` - with nested ActivityCode and NetworkNumber objects
 - `ProjectActivityOptionsResponse` - returns filtered codes, numbers, and valid pairs
-- `ProjectActivityCodeNetworkPair` - represents valid activity code + network number combinations
 
 ### Testing & Validation
 - ✅ Built API successfully (no errors)
 - ✅ Verified 144 project activity option assignments created
 - ✅ Confirmed project-options endpoint returns correct filtered data
-- ✅ Successfully created work item with code "DEV" and number 99
-- ✅ Verified dropdowns filter correctly based on project selection
-
-### Additional Enhancement: Table Views for Project Activity Options ✅
 - ✅ Added comprehensive table to AdminProjects page listing all project activity option assignments
 - ✅ Added "Available Options" table to Activity page showing valid pairs for selected project
-- ✅ Implemented DELETE endpoint for removing individual assignments
-- ✅ Added delete functionality to AdminProjects table with confirmation
-- ✅ Tables display full project names, activity codes, and network numbers with descriptions
-
 **Commits**: 
 - `80a0841` - feat: implement project activity options assignment and filtering
 - `2b7e885` - feat: add project activity options table views with delete functionality
-- Current - refactor: enhance Projects page with interactive table and activity options viewer
 
 ---
 
@@ -166,47 +189,19 @@
 **Status**: COMPLETE ✅
 
 ### Changes Made
-
-#### 1. Removed Add Project Form ✅
-- **Issue**: Projects page had project creation form which should be admin-only
 - **Solution**: Removed "Add Project" section entirely from user-facing Projects page
 - **Location**: Project creation now exclusively in Admin Projects section
-
-#### 2. Interactive Projects Table with Estimated Hours ✅
-- **Enhancement**: Replaced simple list with interactive table
 - **Columns**:
   - Project No (legacy identifier)
-  - Name (bold for emphasis)
-  - Description
-  - Estimated Hours (new column showing project time estimates)
 - **Features**:
   - Clickable rows to select project
-  - Visual feedback: selected row highlighted, hover effects
-  - Placeholder "—" for empty values
-
 #### 3. Project Activity Options Viewer ✅
 - **Enhancement**: When user clicks a project row, displays dedicated section showing:
-  - All valid activity code + network number combinations for that project
   - Full descriptions for codes and numbers
   - Clear messaging when no options assigned (directs to admin)
-- **Benefits**:
-  - Users can browse available options before creating work items
-  - No need to navigate to Activity page to discover valid combinations
-  - Better understanding of project scope and available categorizations
-
-### User Experience Improvements
-- ✅ Clean separation of user functions (browse/view) from admin functions (create/edit)
-- ✅ Project estimated hours now visible for planning purposes
-- ✅ One-click access to project activity options
-- ✅ Improved discoverability of valid activity code + network number pairs
-
-**Files Modified**: `src/DSC.WebClient/src/pages/Project.jsx`
-
-**Commit**: `dc4567c` - refactor: enhance Projects page with interactive table and activity options viewer
 
 ---
 
-## ✅ COMPLETED: Admin Users Table Enhancement (2026-02-20)
 
 **Status**: COMPLETE ✅
 

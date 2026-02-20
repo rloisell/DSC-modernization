@@ -8,7 +8,7 @@ using DSC.Data.Models;
 
 namespace DSC.Api.Seeding
 {
-public record TestSeedResult(int UsersCreated, int UserAuthCreated, int ProjectsCreated, int DepartmentsCreated, int RolesCreated, int ActivityCodesCreated, int NetworkNumbersCreated);
+public record TestSeedResult(int UsersCreated, int UserAuthCreated, int ProjectsCreated, int DepartmentsCreated, int RolesCreated, int ActivityCodesCreated, int NetworkNumbersCreated, int BudgetsCreated);
 
     public class TestDataSeeder
     {
@@ -30,6 +30,7 @@ public record TestSeedResult(int UsersCreated, int UserAuthCreated, int Projects
             var rolesCreated = 0;
             var activityCodesCreated = 0;
             var networkNumbersCreated = 0;
+            var budgetsCreated = 0;
 
             await using var transaction = await _db.Database.BeginTransactionAsync(ct);
 
@@ -211,6 +212,27 @@ public record TestSeedResult(int UsersCreated, int UserAuthCreated, int Projects
                 }
             }
 
+            var budgetSeeds = new[]
+            {
+                new BudgetSeed("CAPEX"),
+                new BudgetSeed("OPEX")
+            };
+
+            foreach (var seed in budgetSeeds)
+            {
+                var existing = await _db.Budgets.FirstOrDefaultAsync(b => b.Description == seed.Description, ct);
+                if (existing == null)
+                {
+                    _db.Budgets.Add(new Budget
+                    {
+                        Id = Guid.NewGuid(),
+                        Description = seed.Description,
+                        IsActive = true
+                    });
+                    budgetsCreated++;
+                }
+            }
+
             // Seed test roles (from database schema)
             var roleSeeds = new[]
             {
@@ -305,7 +327,7 @@ public record TestSeedResult(int UsersCreated, int UserAuthCreated, int Projects
             await _db.SaveChangesAsync(ct);
             await transaction.CommitAsync(ct);
 
-            return new TestSeedResult(usersCreated, userAuthCreated, projectsCreated, departmentsCreated, rolesCreated, activityCodesCreated, networkNumbersCreated);
+                return new TestSeedResult(usersCreated, userAuthCreated, projectsCreated, departmentsCreated, rolesCreated, activityCodesCreated, networkNumbersCreated, budgetsCreated);
         }
 
         private record UserSeed(int EmpId, string Username, string Email, string FirstName, string LastName, string? Password);
@@ -314,6 +336,7 @@ public record TestSeedResult(int UsersCreated, int UserAuthCreated, int Projects
         private record ActivityCodeSeed(string Code, string? Description);
         private record NetworkNumberSeed(int Number, string? Description);
         private record DepartmentSeed(string Name, string ManagerName);
+        private record BudgetSeed(string Description);
         private record ProjectSeed(string ProjectNo, string Name, string? Description);
     }
 }

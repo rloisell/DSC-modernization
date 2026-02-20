@@ -29,7 +29,7 @@ namespace DSC.Api.Controllers
         [ProducesResponseType(typeof(ExpenseOptionDto[]), StatusCodes.Status200OK)]
         public async Task<ActionResult<ExpenseOptionDto[]>> GetAll([FromQuery] Guid? categoryId)
         {
-            var query = _db.ExpenseOptions.AsNoTracking().Include(o => o.Category);
+            IQueryable<ExpenseOption> query = _db.ExpenseOptions.AsNoTracking().Include(o => o.Category);
             if (categoryId.HasValue && categoryId.Value != Guid.Empty)
             {
                 query = query.Where(o => o.ExpenseCategoryId == categoryId);

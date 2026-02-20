@@ -22,6 +22,7 @@ namespace DSC.Api.Swagger
                 {
                     ["title"] = new OpenApiString("Site visit - inspect panel"),
                     ["projectId"] = new OpenApiString("33333333-3333-3333-3333-333333333333"),
+                    ["budgetId"] = new OpenApiString("55555555-5555-5555-5555-555555555555"),
                     ["description"] = new OpenApiString("Performed inspection and noted minor corrosion."),
                     ["legacyActivityId"] = new OpenApiString("ACT-12345"),
                     ["date"] = new OpenApiString("2026-02-19"),
@@ -64,6 +65,8 @@ namespace DSC.Api.Swagger
                 {
                     ["id"] = new OpenApiString("44444444-4444-4444-4444-444444444444"),
                     ["projectId"] = new OpenApiString("33333333-3333-3333-3333-333333333333"),
+                    ["budgetId"] = new OpenApiString("55555555-5555-5555-5555-555555555555"),
+                    ["budgetDescription"] = new OpenApiString("CAPEX"),
                     ["legacyActivityId"] = new OpenApiString("ACT-12345"),
                     ["date"] = new OpenApiString("2026-02-19"),
                     ["startTime"] = new OpenApiString("09:00"),
