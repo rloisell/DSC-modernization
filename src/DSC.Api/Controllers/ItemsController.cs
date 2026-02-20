@@ -20,6 +20,34 @@ namespace DSC.Api.Controllers
             _db = db;
         }
 
+        [HttpGet]
+        [ProducesResponseType(typeof(WorkItemDto[]), StatusCodes.Status200OK)]
+        public async Task<ActionResult<WorkItemDto[]>> GetAll()
+        {
+            var items = await _db.WorkItems.AsNoTracking()
+                .OrderByDescending(w => w.Date ?? DateTime.MinValue)
+                .Select(w => new WorkItemDto
+                {
+                    Id = w.Id,
+                    ProjectId = w.ProjectId,
+                    LegacyActivityId = w.LegacyActivityId,
+                    Date = w.Date,
+                    StartTime = w.StartTime,
+                    EndTime = w.EndTime,
+                    PlannedDuration = w.PlannedDuration,
+                    ActualDuration = w.ActualDuration,
+                    ActivityCode = w.ActivityCode,
+                    NetworkNumber = w.NetworkNumber,
+                    Title = w.Title,
+                    Description = w.Description,
+                    EstimatedHours = w.EstimatedHours,
+                    RemainingHours = w.RemainingHours
+                })
+                .ToArrayAsync();
+
+            return Ok(items);
+        }
+
         [HttpGet("{id}")]
         [ProducesResponseType(typeof(WorkItemDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]

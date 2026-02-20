@@ -13,10 +13,13 @@ import {
 } from '@bcgov/design-system-react-components';
 import { getWorkItems, createWorkItemWithLegacy } from '../api/WorkItemService';
 import { getProjects } from '../api/ProjectService';
+import { getActivityCodes, getNetworkNumbers } from '../api/CatalogService';
 
 export default function Activity() {
   const [items, setItems] = useState([]);
   const [projects, setProjects] = useState([]);
+  const [activityCodes, setActivityCodes] = useState([]);
+  const [networkNumbers, setNetworkNumbers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [title, setTitle] = useState('');
@@ -39,11 +42,28 @@ export default function Activity() {
     label: project.projectNo ? `${project.projectNo} — ${project.name}` : project.name
   }));
 
+  const activityCodeItems = activityCodes.map(code => ({
+    id: code.code,
+    label: code.description ? `${code.code} — ${code.description}` : code.code
+  }));
+
+  const networkNumberItems = networkNumbers.map(nn => ({
+    id: String(nn.number),
+    label: nn.description ? `${nn.number} — ${nn.description}` : String(nn.number)
+  }));
+
   useEffect(() => {
-    Promise.all([getWorkItems(), getProjects()])
-      .then(([workItems, projects]) => {
+    Promise.all([
+      getWorkItems(),
+      getProjects(),
+      getActivityCodes(),
+      getNetworkNumbers()
+    ])
+      .then(([workItems, projects, codes, numbers]) => {
         setItems(workItems);
         setProjects(projects);
+        setActivityCodes(codes);
+        setNetworkNumbers(numbers);
       })
       .catch(e => setError(e.message))
       .finally(() => setLoading(false));
@@ -58,7 +78,7 @@ export default function Activity() {
         title,
         projectId: projectId || undefined,
         description: desc,
-        legacyActivityId: legacyActivityId || undefined,
+        legacyActivityId: legacyActivityId ? Number(legacyActivityId) : undefined,
         date: date || undefined,
         startTime: startTime || undefined,
         endTime: endTime || undefined,
@@ -148,11 +168,21 @@ export default function Activity() {
             />
           </div>
           <div className="form-columns">
-            <TextField label="Activity Code" value={activityCode} onChange={setActivityCode} />
-            <NumberField
+            <Select
+              label="Activity Code"
+              placeholder="Select activity code"
+              items={activityCodeItems}
+              selectedKey={activityCode || null}
+              onSelectionChange={key => setActivityCode(key ? String(key) : '')}
+              description="Optional: select an activity code for this work item"
+            />
+            <Select
               label="Network Number"
-              value={networkNumber ? Number(networkNumber) : undefined}
-              onChange={value => setNetworkNumber(value == null ? '' : String(value))}
+              placeholder="Select network number"
+              items={networkNumberItems}
+              selectedKey={networkNumber || null}
+              onSelectionChange={key => setNetworkNumber(key ? String(key) : '')}
+              description="Optional: select a network number for this work item"
             />
           </div>
           <div className="form-columns">
