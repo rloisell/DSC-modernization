@@ -33,6 +33,7 @@ These tables use composite primary keys and preserve the original Java naming co
 - ✅ Integration tests (1 test): validates complete data pipeline from seeding to frontend data binding
 - ✅ Framework: xUnit with Entity Framework Core InMemory database (isolated, no external database required)
 - ✅ Execution time: ~1 second for all tests
+- ✅ Security: System.Drawing.Common pinned to 8.0.8 to address NU1904
 
 **How to run**:
 ```bash

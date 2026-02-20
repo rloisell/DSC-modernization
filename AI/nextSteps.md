@@ -2,21 +2,15 @@
 
 ## Next Steps
 
-### 1. Merge Legacy Model Ports PR
-- **PR**: #2 - Legacy Model Ports: Department_User, User_Position, User_User, Project_Activity, Expense_Activity
-- **Branch**: `feature/department-user-model`
-- **Status**: Ready for review
-- **Tests**: All 21 tests passing
-- **Warnings**: Resolved CS0618 (ISystemClock) and NU1902 (XML security)
-
-### 2. Continue Admin Endpoint Development
-- Review [kitty-specs/001-modernize-api/tasks.md](../kitty-specs/001-modernize-api/tasks.md) for remaining admin endpoints
-- Implement any outstanding CRUD operations for admin entities
-
-### 3. Frontend Integration
-- Connect admin UI to remaining admin endpoints
+### 1. Frontend Integration
+- Connect admin UI to delete endpoints for departments, positions, projects, activity codes, network numbers, budgets, expense categories, and expense options
 - Add validation and error handling for admin operations
 - Test full workflow for user/department/position/project management
+
+### 2. End-to-End Verification
+- Seed test data and validate admin CRUD from UI
+- Verify activity page filtering and legacy activity ID behavior
+- Re-run `dotnet test` after UI wiring changes
 
 ## ✅ COMPLETED: Legacy Model Ports (2026-02-20 - 2026-02-21)
 
@@ -38,6 +32,7 @@
 ### Bug Fixes
 - **CS0618**: Removed obsolete `ISystemClock` from `AdminTokenAuthenticationHandler`
 - **NU1902**: Pinned `System.Security.Cryptography.Xml` to 4.7.1
+- **NU1904**: Pinned `System.Drawing.Common` to 8.0.8
 
 ### Commits
 - feat: port department user mapping (d12c5e5)
@@ -47,6 +42,9 @@
 
 ### Pull Request
 - #2 - https://github.com/rloisell/DSC-modernization/pull/2
+
+### Admin Endpoints
+- Added DELETE endpoints for departments, positions, projects, activity codes, network numbers, budgets, expense categories, and expense options
 
 ---
 

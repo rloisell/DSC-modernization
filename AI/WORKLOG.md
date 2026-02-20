@@ -1,3 +1,25 @@
+## 2026-02-21 — NU1904 System.Drawing.Common Remediation (COMPLETED ✓)
+
+**Problem Statement**:
+1. Resolve NU1904 security warning for System.Drawing.Common 4.7.0 in test project
+2. Document the remediation in AI logs and README/next steps
+
+**Implementation & Resolution**:
+
+### NU1904 - System.Drawing.Common
+- ✅ Added explicit `System.Drawing.Common` package reference in `DSC.Tests.csproj`
+- ✅ Pinned to version 8.0.8 to override vulnerable transitive dependency
+- ✅ Verified test build and execution after update
+
+**Files Modified**:
+- `tests/DSC.Tests/DSC.Tests.csproj`
+- `README.md`
+- `AI/nextSteps.md`
+
+**Commit**: Pending
+
+---
+
 ## 2026-02-21 — Warning Triage and Documentation Updates (COMPLETED ✓)
 
 **Problem Statement**:
