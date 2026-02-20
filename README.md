@@ -1,3 +1,26 @@
+## Unit Testing — 2026-02-21 ✅ NEW
+
+**16 unit tests implemented and passing**:
+- ✅ Test data seeding validation (9 tests): validates TestDataSeeder creates correct activity codes, network numbers, and marks them as active
+- ✅ API endpoint tests (4 tests): validates CatalogController and ItemsController endpoints return expected data
+- ✅ Integration tests (1 test): validates complete data pipeline from seeding to frontend data binding
+- ✅ Framework: xUnit with Entity Framework Core InMemory database (isolated, no external database required)
+- ✅ Execution time: ~1 second for all tests
+
+**How to run**:
+```bash
+# Run all tests
+dotnet test tests/DSC.Tests/DSC.Tests.csproj
+
+# Run Activity page tests only
+dotnet test tests/DSC.Tests/DSC.Tests.csproj --filter "ActivityPageTests"
+
+# Run with verbose output
+dotnet test tests/DSC.Tests/DSC.Tests.csproj --verbosity detailed
+```
+
+See [tests/howto.md](tests/howto.md) for comprehensive testing documentation, infrastructure details, and how to add new tests.
+
 ## WebClient (React) Progress — 2026-02-21
 
 - All static assets from legacy `WebContent` (CSS, JS, images, calendar libs) are now in `src/DSC.WebClient/public`.
