@@ -1,5 +1,77 @@
 # Remaining work (2026-02-20)
 
+## COMPLETED: Admin Departments Manager Field Fix ✅
+
+**Status**: DONE
+
+1. ✅ **Manager Field Converted to Dropdown**:
+   - Changed from plain TextField to Select dropdown
+   - Loads all active users from `/api/admin/users`
+   - Displays user full name with email as description
+   - Bidirectional mapping: selected user ID converted to name for storage
+   - When editing: stored manager name matched back to user ID for dropdown pre-selection
+
+2. ✅ **User Selection Integration**:
+   - Parallel loading of both users and departments on component mount
+   - Optional field (can leave manager unselected)
+   - Proper null/empty handling throughout
+
+3. ✅ **Testing**: AdminDepartments page now allows proper manager assignment from system users
+
+**Files Modified**:
+- `src/DSC.WebClient/src/pages/AdminDepartments.jsx`
+
+**Commits**:
+- `1c09b82` - fix: convert Manager field to user selection dropdown in AdminDepartments
+- `f26c723` - docs: update WORKLOG with AdminDepartments Manager field bug fix
+
+---
+
+## COMPLETED: Activity Page Fixes & Catalog Endpoints ✅
+
+**Status**: DONE
+
+1. ✅ **Fixed 405 Error**:
+   - Added `ItemsController.GetAll()` endpoint (was missing)
+   - Now lists all work items from database
+   - Returns WorkItemDto array with all legacy fields
+
+2. ✅ **Created Catalog Service Endpoints**:
+   - New `CatalogController` at `/api/catalog` (public, no auth required)
+   - Endpoint: `GET /api/catalog/activity-codes` - returns active codes
+   - Endpoint: `GET /api/catalog/network-numbers` - returns active numbers
+   - Filter to active records only, ordered by code/number
+
+3. ✅ **Converted Activity Code & Network Number to Dropdowns**:
+   - Replaced TextField and NumberField with Select components
+   - Activity Code: displays code with optional description
+   - Network Number: displays number with optional description
+   - Both fields optional for new work items
+   - All catalog data loaded in parallel on component mount
+
+4. ✅ **Project Dropdown Verification**:
+   - Confirmed projects load correctly from `/api/projects`
+   - Displays "ProjectNo — Name" format
+
+5. ✅ **Legacy Activity ID Clarification**:
+   - Type: int? (nullable integer)
+   - Purpose: Backward compat field linking to original Java Activity IDs
+   - Optional for new items; populated during legacy data migration
+   - Stored in `WorkItem.LegacyActivityId`
+
+**Files Created**:
+- `src/DSC.Api/Controllers/CatalogController.cs`
+- `src/DSC.WebClient/src/api/CatalogService.js`
+
+**Files Modified**:
+- `src/DSC.Api/Controllers/ItemsController.cs` (added GetAll endpoint)
+- `src/DSC.WebClient/src/pages/Activity.jsx` (added catalog dropdowns)
+
+**Commits**:
+- `f899ca9` - feat: fix Activity page with dropdown catalogs
+
+---
+
 ## COMPLETED: Admin Users & Role Management System ✅
 
 **All tasks finished!**
@@ -14,7 +86,7 @@
    - Fixed AdminUsers dropdowns to load real data from database
    - Form now sends role/position/department when creating/updating users
    - Administrator page includes link to role management
-4. ✅ **Database Migrations**: Two migrations created and ready
+4. ✅ **Database Migrations**: Two new migrations created and ready
    - `20260220071710_AddRoleEntity.cs` - adds Role table with unique index on Name
    - `20260220073552_AddPositionDepartmentToUser.cs` - adds FK columns to Users
 5. ✅ **Automatic Migration Application**: 

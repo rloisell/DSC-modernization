@@ -1,4 +1,4 @@
-## WebClient (React) Progress — 2026-02-19
+## WebClient (React) Progress — 2026-02-21
 
 - All static assets from legacy `WebContent` (CSS, JS, images, calendar libs) are now in `src/DSC.WebClient/public`.
 - React page stubs for `Activity`, `Project`, `Administrator`, and `Login` are in `src/DSC.WebClient/src/pages/`.
@@ -8,25 +8,65 @@
 - All required npm dependencies installed.
 - Docs updated and changes pushed.
 
-## Admin User Management & Role System — 2026-02-19 (NEW)
+## Activity Page — 2026-02-21 (NEW)
 
 **What's new:**
-- ✅ **Role Management**: New `AdminRoles` page allows admins to create, edit, and deactivate roles.
-- ✅ **Position & Department Dropdowns**: `AdminUsers` now loads positions and departments from the database (no longer empty placeholders).
-- ✅ **User Role Assignment**: Users can now be assigned to roles when creating or editing.
-- ✅ **Comprehensive Data Model**: 
-  - New `Role` entity with Id, Name, Description, IsActive fields.
-  - `User` entity now has `RoleId`, `PositionId`, `DepartmentId` foreign keys.
-  - Full relationship configuration in `ApplicationDbContext`.
-- ✅ **API Endpoints**: 
-  - New `/api/admin/roles` CRUD endpoints.
-  - Updated `/api/admin/users` to accept and persist role, position, and department assignments.
-- ✅ **Database Migrations**: Two new migrations created (Role entity, Position/Department FKs).
+- ✅ **Fixed 405 Error**: Added `ItemsController.GetAll()` endpoint to list work items (was missing, caused page error)
+- ✅ **Project Dropdown**: Loads all projects from database with "ProjectNo — Name" format
+- ✅ **Activity Code Dropdown**: Select from active activity codes in system (replaced text field)
+- ✅ **Network Number Dropdown**: Select from active network numbers in system (replaced number field)
+- ✅ **Catalog Service**: New public `/api/catalog` endpoints for activity codes and network numbers
+- ✅ **Legacy Activity ID**: Integer field for backward compatibility, links to original Java system Activity IDs
 
-**Still Required:**
-- Apply database migrations (`dotnet ef database update`) — blocked by MariaDB SSL configuration issue.
-- See `AI/nextSteps.md` for details on the SSL issue and workarounds.
-- Manual end-to-end testing of role, position, and department selection in AdminUsers form.
+**How to test**:
+1. Start API: `cd src/DSC.Api && dotnet run`
+2. Start WebClient: `cd src/DSC.WebClient && npm run dev`
+3. Navigate to Activity page
+4. Create a work item:
+   - Select project from dropdown
+   - (Optional) Enter Legacy Activity ID if linking to original system
+   - Select activity code from dropdown
+   - Select network number from dropdown
+   - Fill date, times, durations as needed
+   - Submit to create work item
+5. Verify work item appears in list without errors
+
+## Admin Management — 2026-02-21 (UPDATED)
+
+### Manager Field Bug Fix in AdminDepartments
+- **Fixed**: Manager field is now a user selection dropdown (was plain text input)
+- **How it works**: 
+  - Dropdown loads all active users from system
+  - Users display with full name and email as description
+  - Selected user is stored with their full name
+  - When editing, stored name is matched back to user ID for dropdown pre-selection
+  - Manager assignment is optional
+
+### User Management & Role System
+- ✅ **Role Management**: `AdminRoles` page allows admins to create, edit, and deactivate roles
+- ✅ **Position & Department Dropdowns**: `AdminUsers` loads positions and departments from database (no longer empty)
+- ✅ **User Role Assignment**: Users can be assigned to roles when creating or editing
+- ✅ **Comprehensive Data Model**:
+  - `Role` entity with Id, Name, Description, IsActive fields
+  - `User` entity with RoleId, PositionId, DepartmentId foreign keys
+  - Full relationship configuration in `ApplicationDbContext`
+- ✅ **API Endpoints**:
+  - `/api/admin/roles` CRUD endpoints
+  - `/api/admin/users` accepts and persists role/position/department assignments
+- ✅ **Database Migrations**: Automatic migration execution on API startup
+- ✅ **Test Data Seeding**: 4 system roles created (Administrator, Manager, Developer, Viewer)
+
+**How to test**:
+1. Start API: `cd src/DSC.Api && dotnet run` (migrations execute automatically)
+2. Seed test data: `curl -X POST http://localhost:5005/api/admin/seed/test-data -H "X-Admin-Token: local-admin-token"`
+3. Start WebClient: `cd src/DSC.WebClient && npm run dev`
+4. Test admin workflows:
+   - [http://localhost:5173/admin/roles](http://localhost:5173/admin/roles) - create/edit/deactivate roles
+   - [http://localhost:5173/admin/users](http://localhost:5173/admin/users) - assign roles, positions, departments
+   - [http://localhost:5173/admin/departments](http://localhost:5173/admin/departments) - assign department managers
+   - [http://localhost:5173/admin/positions](http://localhost:5173/admin/positions) - manage positions
+
+## Admin User Management & Role System — 2026-02-19
 
 # DSC-modernization
 

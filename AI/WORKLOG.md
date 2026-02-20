@@ -1,3 +1,74 @@
+## 2026-02-21 — Activity Page Fixes & Catalog Endpoints
+
+**Completed**:
+1. ✅ Fixed 405 Method Not Allowed error in Activity page
+   - **Issue**: Activity page was showing error "Request failed with status code 405"
+   - **Root Cause**: `ItemsController` only had a parameterized `Get(id)` endpoint, no `GetAll()` for listing work items
+   - **Solution**: Added `ItemsController.GetAll()` endpoint to return array of work items
+   - **Implementation**: 
+     - Maps WorkItem entities to WorkItemDto in same format as Get(id)
+     - Ordered by date descending for recent items first
+     - Returns 200 OK with array of WorkItemDto
+
+2. ✅ Created public Catalog service endpoints
+   - **New Controller**: `CatalogController` at `/api/catalog` (public, no auth required)
+   - **Endpoints**:
+     - `GET /api/catalog/activity-codes` - returns active ActivityCode records with Code, Description, IsActive
+     - `GET /api/catalog/network-numbers` - returns active NetworkNumber records with Number, Description, IsActive
+   - **Frontend Service**: Created `CatalogService.js` with `getActivityCodes()` and `getNetworkNumbers()` functions
+
+3. ✅ Converted Activity Code & Network Number fields to dropdowns
+   - **Replaced**: TextField and NumberField with Select components
+   - **Display**: Shows code/number with optional description in parentheses
+   - **Data Binding**: 
+     - Activity Code stored as string (code value)
+     - Network Number stored as numeric string
+   - **Optional**: Both fields are optional for work items
+   - **Performance**: All catalog data loaded in parallel on component mount
+
+4. ✅ Verified project dropdown loads correctly
+   - Projects dropdown now populates correctly from `/api/projects` endpoint
+   - Displays "ProjectNo — Name" format for clarity
+   - Works alongside new activity code and network number selectors
+
+5. ✅ Builds and tests passed
+   - API builds successfully with no errors
+   - WebClient builds successfully 
+   - All components import/export correctly
+   - Component handles empty/null selections gracefully
+
+**Status**: Activity page now fully functional with:
+- Error resolved (405 fixed)
+- All dropdowns loading and working
+- Data sources properly wired to database catalogs
+
+**How to test**:
+1. Start API: `cd src/DSC.Api && dotnet run`
+2. Start WebClient: `cd src/DSC.WebClient && npm run dev`
+3. Navigate to Activity page
+4. Verify no error at top
+5. Create a work item:
+   - Select a project from dropdown
+   - Select an activity code from dropdown
+   - Select a network number from dropdown
+   - Fill remaining fields and submit
+6. Verify work item appears in list below
+
+**Technical details**:
+- Component: `src/DSC.WebClient/src/pages/Activity.jsx`
+- New Controller: `src/DSC.Api/Controllers/CatalogController.cs`
+- Service: `src/DSC.WebClient/src/api/CatalogService.js`
+- Modified Controller: `src/DSC.Api/Controllers/ItemsController.cs` (added GetAll)
+- API endpoints are public (no authorization required)
+- Catalog endpoints filter to active records only
+
+**Legacy Activity ID Clarification**:
+- Type: Integer (nullable)
+- Purpose: Backward compatibility field for linking to original Java system Activity IDs
+- When migrating legacy activities: populate this field with the original Activity.id from Java system
+- For new work items: leave empty (optional)
+- Stored in `WorkItem.LegacyActivityId` column
+
 ## 2026-02-21 — Manager Field Bug Fix in AdminDepartments
 
 **Completed**:
