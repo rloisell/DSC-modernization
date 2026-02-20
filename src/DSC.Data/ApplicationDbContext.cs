@@ -19,11 +19,15 @@ namespace DSC.Data
         public DbSet<ExternalIdentity> ExternalIdentities => Set<ExternalIdentity>();
         public DbSet<Position> Positions => Set<Position>();
         public DbSet<Department> Departments => Set<Department>();
+<<<<<<< HEAD
         public DbSet<DepartmentUser> DepartmentUsers => Set<DepartmentUser>();
         public DbSet<UserPosition> UserPositions => Set<UserPosition>();
         public DbSet<UserUser> UserUsers => Set<UserUser>();
         public DbSet<ProjectActivity> ProjectActivities => Set<ProjectActivity>();
         public DbSet<ExpenseActivity> ExpenseActivities => Set<ExpenseActivity>();
+        public DbSet<ActivityCategory> ActivityCategories => Set<ActivityCategory>();
+        public DbSet<CalendarCategory> CalendarCategories => Set<CalendarCategory>();
+        public DbSet<CalendarEntry> Calendars => Set<CalendarEntry>();
         public DbSet<Budget> Budgets => Set<Budget>();
         public DbSet<ExpenseCategory> ExpenseCategories => Set<ExpenseCategory>();
         public DbSet<ExpenseOption> ExpenseOptions => Set<ExpenseOption>();
@@ -109,6 +113,7 @@ namespace DSC.Data
                 b.HasIndex(d => d.Name).IsUnique();
             });
 
+<<<<<<< HEAD
             modelBuilder.Entity<DepartmentUser>(b =>
             {
                 b.ToTable("Department_User");
@@ -157,6 +162,32 @@ namespace DSC.Data
                 b.Property(e => e.DirectorCode).HasColumnName("Director_CodedirectorCode");
                 b.Property(e => e.ReasonCode).HasColumnName("Reason_CodereasonCode");
                 b.Property(e => e.CpcCode).HasColumnName("CPC_CodecpcCode");
+            });
+
+            modelBuilder.Entity<ActivityCategory>(b =>
+            {
+                b.ToTable("Category");
+                b.HasKey(c => c.Id);
+                b.Property(c => c.Id).HasColumnName("categoryID").ValueGeneratedOnAdd();
+                b.Property(c => c.Name).HasColumnName("categoryName").IsRequired();
+            });
+
+            modelBuilder.Entity<CalendarCategory>(b =>
+            {
+                b.ToTable("Calendar_Category");
+                b.HasKey(c => c.Id);
+                b.Property(c => c.Id).HasColumnName("calendarCategory").ValueGeneratedOnAdd();
+                b.Property(c => c.Name).HasColumnName("calendarCatName").IsRequired();
+                b.Property(c => c.Description).HasColumnName("description");
+            });
+
+            modelBuilder.Entity<CalendarEntry>(b =>
+            {
+                b.ToTable("Calendar");
+                b.HasKey(c => c.Date);
+                b.Property(c => c.Date).HasColumnName("date").HasColumnType("date");
+                b.Property(c => c.CalendarCategoryId).HasColumnName("Calendar_CategorycalendarCategory");
+                b.HasOne(c => c.CalendarCategory).WithMany(c => c.Calendars).HasForeignKey(c => c.CalendarCategoryId).OnDelete(DeleteBehavior.Restrict);
             });
 
             modelBuilder.Entity<Budget>(b =>
