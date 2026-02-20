@@ -1,3 +1,30 @@
+## DSC Modernization Overview
+
+**Application Purpose**: This project modernizes the legacy Java-based DSC (Director Support Center) time tracking and project management system to a modern .NET 10 stack while preserving historical data structures and maintaining backward compatibility.
+
+**Tech Stack**:
+- **Backend**: ASP.NET Core 10 Web API with Entity Framework Core
+- **Frontend**: Vite-based JavaScript client with vanilla JS
+- **Database**: MySQL with EF Core migrations
+- **Testing**: xUnit with InMemory database provider
+
+**Key Features**:
+- Activity-based time tracking with project, activity code, and network number assignments
+- Project management with budget classifications (CAPEX/OPEX)
+- Catalog-driven dropdowns for activity codes and network numbers
+- Legacy activity ID preservation for Java system traceability
+- Comprehensive admin endpoints for managing users, departments, positions, projects, and catalog data
+
+**Legacy Model Preservation**:
+This modernization preserves five key legacy mapping tables from the original Java system:
+- `Department_User`: Many-to-many relationship between users and departments with time periods
+- `User_Position`: Many-to-many relationship between users and positions with time periods
+- `User_User`: User hierarchy/relationship mapping with time periods
+- `Project_Activity`: Maps activity codes and network numbers to projects
+- `Expense_Activity`: Maps expense-related activity metadata (director codes, reason codes, CPC codes)
+
+These tables use composite primary keys and preserve the original Java naming conventions for seamless data migration.
+
 ## Unit Testing — 2026-02-21 ✅ NEW
 
 **16 unit tests implemented and passing**:
@@ -63,8 +90,8 @@ See [tests/howto.md](tests/howto.md) for comprehensive testing documentation, in
   - Uses new `/api/items/detailed?period={period}` endpoint
 - ✅ **Fixed 405 Error**: Added `ItemsController.GetAll()` endpoint to list work items (was missing, caused page error)
 - ✅ **Project Dropdown**: Loads all projects from database with "ProjectNo — Name" format
-- ✅ **Activity Code Dropdown**: Selects from 6 test codes (DEV, TEST, DOC, ADMIN, MEET, TRAIN)
-- ✅ **Network Number Dropdown**: Selects from 6 test numbers (101, 102, 103, 201, 202, 203)
+- ✅ **Activity Code Dropdown**: Selects from 12 seeded test codes (DEV, TEST, DOC, ADMIN, MEET, TRAIN and additional codes)
+- ✅ **Network Number Dropdown**: Selects from 12 seeded test numbers (101, 102, 103, 201, 202, 203 and additional numbers)
 - ✅ **Budget Classification (CAPEX/OPEX)** (NEW 2026-02-21):
   - Activity create form requires a budget selection
   - Activity table displays the budget classification for each work item
