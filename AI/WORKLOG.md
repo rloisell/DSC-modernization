@@ -1,3 +1,156 @@
+## 2026-02-20 — Feature Branch Consolidation & Merge to Main (COMPLETED ✓)
+
+**Problem Statement**:
+1. Multiple feature branches had unmerged commits that needed to be integrated into main
+2. Feature branches contained new models and catalog endpoints for Activity, Calendar, and various catalog entities
+3. All user isolation and expense activity features needed to be deployed together
+4. Need to ensure all features compile and work together after merging
+
+**Implementation & Resolution**:
+
+### Git Operations
+
+#### 1. Branch Analysis & Merge Strategy
+- ✅ Identified 8 feature branches: 6 with unmerged commits, 2 already integrated
+- ✅ Feature branches merged:
+  1. **feature/activity-calendar-models** - Activity and Calendar domain models
+  2. **feature/cpc-code-model** - CPC Code catalog for expense activities
+  3. **feature/director-code-model** - Director Code catalog for expense activities
+  4. **feature/reason-code-model** - Reason Code catalog for expense activities
+  5. **feature/union-model** - Union catalog
+  6. **feature/activity-type-split** - Project vs Expense activity type separation
+- ✅ Sequential merge approach to isolate conflicts
+- ✅ All 6 branches successfully merged with commit hashes preserved
+
+#### 2. Merge Conflict Resolution
+- ✅ **ApplicationDbContext.cs conflicts**:
+  - Multiple DbSet declarations conflicted across branches
+  - OnModelCreating entity configurations overlapped
+  - Resolved by keeping all DbSet declarations and entity configurations from all branches
+  - Removed residual conflict markers (<<<<<<< HEAD) at lines 22 and 120
+- ✅ **AdminCatalogDtos.cs conflicts**:
+  - Duplicate UnionDto definitions (int Id vs Guid Id versions)
+  - Missing DTOs for CpcCode, ActivityCategory, CalendarCategory
+  - Resolved by keeping correct int Id version and adding all missing DTOs
+- ✅ **CatalogService.js conflicts**:
+  - Multiple catalog query methods from different branches
+  - Consolidated all methods: getDirectorCodes, getReasonCodes, getCpcCodes, getProjectOptions
+- ✅ **Documentation conflicts**:
+  - AI/WORKLOG.md and AI/nextSteps.md had competing entries
+  - Accepted "theirs" (feature branch) versions for documentation files
+
+### Build Fixes
+
+#### 1. Removed Merge Conflict Markers
+- ✅ Cleaned up ApplicationDbContext.cs lines 22 and 120
+- ✅ Verified no remaining <<<<<<< HEAD, =======, or >>>>>>> markers in codebase
+
+#### 2. Resolved Duplicate DTO Definitions
+- ✅ **UnionDto duplication**: Removed Guid Id version, kept int Id version (matches database schema)
+- ✅ **UnionCreateRequest/UnionUpdateRequest**: Removed duplicate Guid-based versions
+
+#### 3. Added Missing DTOs
+- ✅ **CpcCodeDto** (string Code, string? Description)
+- ✅ **CpcCodeCreateRequest** and **CpcCodeUpdateRequest**
+- ✅ **ActivityCategoryDto** (int Id, string Name)
+- ✅ **ActivityCategoryCreateRequest** and **ActivityCategoryUpdateRequest**
+- ✅ **CalendarCategoryDto** (int Id, string Name, string? Description)
+- ✅ **CalendarCategoryCreateRequest** and **CalendarCategoryUpdateRequest**
+
+### Database Models Integrated
+
+#### 1. Activity & Calendar Models (feature/activity-calendar-models)
+- ✅ ActivityCategory - category classifications for activities
+- ✅ CalendarCategory - calendar event categories  
+- ✅ CalendarEntry - calendar events and date tracking
+- ✅ Migration: `20260220105914_AddActivityCalendarModels`
+
+#### 2. Catalog Models
+- ✅ **CpcCode** (feature/cpc-code-model) - CPC codes for expense activities
+- ✅ **DirectorCode** (feature/director-code-model) - Director codes for expense routing
+- ✅ **ReasonCode** (feature/reason-code-model) - Reason codes for expenses
+- ✅ **Union** (feature/union-model) - Union classifications
+- ✅ Migrations: Individual migrations per catalog model
+
+#### 3. Legacy Junction Table Models
+- ✅ **DepartmentUser** - User-Department associations with start/end dates
+- ✅ **UserPosition** - User-Position assignments with temporal tracking
+- ✅ **UserUser** - User-User relationships (supervisor/subordinate)
+- ✅ **ProjectActivity** - Legacy project activity mapping
+- ✅ **ExpenseActivity** - Legacy expense activity mapping
+- ✅ All mapped to existing legacy database tables
+
+### API Endpoints Verified
+
+#### 1. Catalog Endpoints (Public)
+- ✅ `GET /api/catalog/cpc-codes` - CPC code lookup
+- ✅ `GET /api/catalog/director-codes` - Director code lookup
+- ✅ `GET /api/catalog/reason-codes` - Reason code lookup
+- ✅ All endpoints responding with empty arrays (awaiting seed data)
+
+#### 2. Admin Endpoints
+- ✅ `GET /api/admin/unions` - Union management
+- ✅ All admin catalog endpoints operational
+
+### Testing & Validation
+
+#### 1. Build Verification
+- ✅ Initial build failed with CS8300 (merge conflict markers)
+- ✅ Second build failed with 17 errors (duplicate DTOs, missing DTOs)
+- ✅ Final build succeeded with 0 errors
+- ✅ Both DSC.Data and DSC.Api projects compile successfully
+
+#### 2. Runtime Verification
+- ✅ API server starts successfully on port 5115
+- ✅ All new catalog endpoints accessible
+- ✅ No runtime errors in startup logs
+- ✅ Database migrations in sync with code
+
+### Git Commits & Push
+
+#### 1. Merge Commits (6 total)
+- ✅ 444c9fd - Merge feature/activity-calendar-models
+- ✅ fa67205 - Merge feature/cpc-code-model  
+- ✅ f4f11aa - Merge feature/director-code-model
+- ✅ 891818f - Merge feature/reason-code-model
+- ✅ 4fc24f7 - Merge feature/union-model
+- ✅ cb99b35 - Merge feature/activity-type-split
+
+#### 2. Fix Commit
+- ✅ 5e9db61 - fix: remove merge conflict markers and resolve duplicate DTOs
+  - Removed <<<<<<< HEAD markers from ApplicationDbContext.cs
+  - Removed duplicate UnionDto definitions (kept int Id version)
+  - Added missing CpcCodeDto, ActivityCategoryDto, CalendarCategoryDto
+  - Build now succeeds with all feature branches merged
+
+#### 3. Remote Push
+- ✅ All 7 commits pushed to GitHub (origin/main)
+- ✅ 96+ objects processed and pushed
+- ✅ Remote repository up to date with local main branch
+
+**Benefits**:
+- ✅ All feature work consolidated on main branch
+- ✅ Complete catalog system integrated (CPC, Director, Reason, Union codes)
+- ✅ Activity and Calendar models ready for use
+- ✅ Legacy junction table models mapped for backward compatibility
+- ✅ Clean build with zero errors
+- ✅ API fully functional with all merged features
+- ✅ Foundation for Activity Type Split (Project vs Expense) complete
+
+**Files Modified**:
+- `src/DSC.Data/ApplicationDbContext.cs` - integrated all DbSet declarations and entity configurations
+- `src/DSC.Api/DTOs/AdminCatalogDtos.cs` - consolidated all catalog DTOs and removed duplicates
+- `src/DSC.Data/Models/WorkItem.cs` - merged ActivityType and UserId changes
+- `src/DSC.WebClient/src/api/CatalogService.js` - consolidated all catalog query methods
+- `src/DSC.WebClient/src/pages/Activity.jsx` - preserved user isolation changes
+- Multiple migration files applied for new models
+
+**Commits**: 
+- 444c9fd through cb99b35 - Six feature branch merges
+- 5e9db61 - Build fix (conflict markers and DTO resolution)
+
+---
+
 ## 2026-02-20 — Activity Type Split (Project vs Expense) (COMPLETED ✓)
 
 **Problem Statement**:

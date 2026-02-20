@@ -1,15 +1,139 @@
-# UML Diagram Update Guide - 2026-02-21
+# UML Diagram Update Guide - 2026-02-20 (UPDATED)
 
-This document outlines which diagrams need to be updated based on the recent Project Activity Options implementation (commit `80a0841`).
+This document outlines which diagrams need to be updated based on:
+1. **Feature Branch Consolidation** (2026-02-20) - 12 new entities merged to main
+2. Project Activity Options implementation (2026-02-20)
+
+## 🆕 NEW: Feature Branch Consolidation Updates Required (2026-02-20)
+
+### New Entities Added (12 total)
+
+The following entities were merged from feature branches and need to be added to diagrams:
+
+#### Catalog Entities
+1. **CpcCode** (CPC_Code table)
+   - Properties: Code (PK, string), Description (string?)
+   - Used by: ExpenseActivity, WorkItem
+   - Merged from: feature/cpc-code-model
+
+2. **DirectorCode** (Director_Code table)
+   - Properties: Code (PK, string), Description (string?)
+   - Used by: ExpenseActivity, WorkItem
+   - Merged from: feature/director-code-model
+
+3. **ReasonCode** (Reason_Code table)
+   - Properties: Code (PK, string), Description (string?)
+   - Used by: ExpenseActivity, WorkItem
+   - Merged from: feature/reason-code-model
+
+4. **Union** (Union table)
+   - Properties: Id (PK, int), Name (string)
+   - Merged from: feature/union-model
+
+#### Activity & Calendar Entities
+5. **ActivityCategory** (Category table)
+   - Properties: Id (PK, int), Name (string, required)
+   - Merged from: feature/activity-calendar-models
+
+6. **CalendarCategory** (Calendar_Category table)
+   - Properties: Id (PK, int), Name (string, required), Description (string?)
+   - Relationship: One-to-Many with CalendarEntry
+   - Merged from: feature/activity-calendar-models
+
+7. **CalendarEntry** (Calendar table)
+   - Properties: Date (PK, DateOnly), CalendarCategoryId (FK, int)
+   - Relationship: Many-to-One with CalendarCategory
+   - Merged from: feature/activity-calendar-models
+
+#### Legacy Junction Tables
+8. **DepartmentUser** (Department_User table)
+   - Properties: UserEmpId (PK, int), DepartmentId (PK, Guid), StartDate (PK, DateOnly), EndDate (DateOnly?)
+   - Temporal user-department assignments
+   - Merged from: feature/department-user-model
+
+9. **UserPosition** (User_Position table)
+   - Properties: UserEmpId (PK, int), PositionId (PK, Guid), StartDate (PK, DateOnly), EndDate (DateOnly?)
+   - Temporal user-position assignments
+   - Merged from: feature/activity-calendar-models
+
+10. **UserUser** (User_User table)
+    - Properties: UserEmpId (PK, int), UserEmpId2 (PK, int), StartDate (PK, DateOnly), EndDate (DateOnly?)
+    - User-to-user relationships (supervisor/subordinate)
+    - Merged from: feature/activity-calendar-models
+
+#### Legacy Activity Mappings
+11. **ProjectActivity** (Project_Activity table)
+    - Properties: ActivityId (PK, int), ProjectNo (string), NetworkNumber (string?), ActivityCode (string?)
+    - Maps legacy project activities to modern WorkItem
+    - Merged from: feature/activity-calendar-models
+
+12. **ExpenseActivity** (Expense_Activity table)
+    - Properties: ActivityId (PK, int), DirectorCode (string?), ReasonCode (string?), CpcCode (string?)
+    - Maps legacy expense activities to modern WorkItem
+    - Merged from: feature/activity-calendar-models
+
+### Diagrams Requiring Updates
+
+#### 🔴 HIGH PRIORITY: domain-model.drawio.svg
+**Status**: NEEDS UPDATE
+
+**Add to Catalog Domain section:**
+- CpcCode, DirectorCode, ReasonCode entities
+- Union entity
+- ActivityCategory entity
+- Show relationships between WorkItem and expense catalogs
+
+**Add new Calendar Domain section:**
+- CalendarCategory entity
+- CalendarEntry entity
+- Show one-to-many relationship (CalendarCategory → CalendarEntry)
+
+**Add new Legacy Junction Tables section:**
+- DepartmentUser, UserPosition, UserUser with composite keys
+- ProjectActivity, ExpenseActivity with legacy mappings
+- Show temporal (start/end date) patterns
+
+**Update WorkItem entity:**
+- Add ActivityType field
+- Add DirectorCode, ReasonCode, CpcCode fields (nullable, for expense activities)
+
+#### 🔴 HIGH PRIORITY: erd.drawio.svg
+**Status**: NEEDS UPDATE
+
+**Add tables with full schema:**
+- CPC_Code (cpcCode PK, description)
+- Director_Code (directorCode PK, description)
+- Reason_Code (reasonCode PK, description)
+- Union (unionId PK, unionName)
+- Category (categoryID PK, categoryName)
+- Calendar_Category (calendarCategory PK, calendarCatName, description)
+- Calendar (date PK, Calendar_CategorycalendarCategory FK)
+- Department_User (composite PK: UserempId, DepartmentdeptID, startDate, endDate)
+- User_Position (composite PK: UserempId, PositionpositionID, startDate, endDate)
+- User_User (composite PK: UserempId, UserempId2, startDate, endDate)
+- Project_Activity (ActivityactivityID PK, ProjectprojectNo, Network_NumbersnetworkNumber, Activity_CodesactivityCode)
+- Expense_Activity (ActivityactivityID PK, Director_CodedirectorCode, Reason_CodereasonCode, CPC_CodecpcCode)
+
+**Add relationships:**
+- Calendar → Calendar_Category (FK)
+- Expense_Activity → Director_Code, Reason_Code, CPC_Code (FKs)
+- Project_Activity → Project, Network_Numbers, Activity_Codes (FKs)
+
+**Update WorkItems table:**
+- Add ActivityType column
+- Add DirectorCode, ReasonCode, CpcCode columns (nullable)
+
+---
 
 ## Documentation Status ✅
 
 The following documentation files have been **updated**:
-- ✅ **AI/WORKLOG.md** - Added comprehensive entry for 2026-02-20 session
-- ✅ **AI/nextSteps.md** - Added completed tasks section at the top
-- ✅ **README.md** - Updated Activity Page and Admin Management sections with new features
+- ✅ **AI/WORKLOG.md** - Added comprehensive entry for feature branch consolidation
+- ✅ **AI/nextSteps.md** - Moved completed legacy models from ToDo to Completed section
+- ✅ **README.md** - Added Feature Branch Consolidation section with all new entities
+- ✅ **AI/DIAGRAM_UPDATE_GUIDE.md** - Updated with new entities requiring diagram updates
 
-## Diagram Review Results
+## Previous Updates (2026-02-21)
 
 All diagrams are located in `diagrams/drawio/` and are in **Draw.io SVG format** (not PlantUML). They can be edited using [Draw.io](https://app.diagrams.net/) or VS Code with the Draw.io Integration extension.
 

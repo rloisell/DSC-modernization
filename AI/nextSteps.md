@@ -1,15 +1,87 @@
 # Remaining Work (2026-02-21)
 
-## ToDo: Remaining Legacy Models
-- Activity category (`Category`)
-- Calendar (`Calendar`)
-- Calendar category (`Calendar_Category`)
-- Union (`Union`)
-- Department user (`Department_User`)
-- User position (`User_Position`)
-- User user (`User_User`)
-- Project activity (`Project_Activity`)
-- Expense activity (`Expense_Activity`)
+## ✅ COMPLETED: Feature Branch Consolidation (2026-02-20)
+
+**Status**: COMPLETE ✅
+
+### All Feature Branches Merged to Main
+
+#### 1. Merged Feature Branches (6 total) ✅
+- ✅ **feature/activity-calendar-models** - Activity and Calendar domain models
+- ✅ **feature/cpc-code-model** - CPC Code catalog
+- ✅ **feature/director-code-model** - Director Code catalog
+- ✅ **feature/reason-code-model** - Reason Code catalog
+- ✅ **feature/union-model** - Union catalog
+- ✅ **feature/activity-type-split** - Project vs Expense activity type split
+
+#### 2. Models Now Integrated ✅
+- ✅ Activity category (`ActivityCategory`)
+- ✅ Calendar (`CalendarEntry`)
+- ✅ Calendar category (`CalendarCategory`)
+- ✅ Union (`Union`)
+- ✅ Department user (`DepartmentUser`)
+- ✅ User position (`UserPosition`)
+- ✅ User user (`UserUser`)
+- ✅ Project activity (`ProjectActivity`)
+- ✅ Expense activity (`ExpenseActivity`)
+- ✅ CPC Code (`CpcCode`)
+- ✅ Director Code (`DirectorCode`)
+- ✅ Reason Code (`ReasonCode`)
+
+#### 3. Build & Deployment ✅
+- ✅ Resolved all merge conflicts in ApplicationDbContext and DTOs
+- ✅ Removed duplicate UnionDto definitions
+- ✅ Added missing CpcCodeDto, ActivityCategoryDto, CalendarCategoryDto
+- ✅ Build succeeds with 0 errors
+- ✅ API server running with all features functional
+- ✅ All changes pushed to GitHub (commits 444c9fd through 5e9db61)
+
+#### 4. API Endpoints Verified ✅
+- ✅ `/api/catalog/cpc-codes` - CPC code lookup
+- ✅ `/api/catalog/director-codes` - Director code lookup
+- ✅ `/api/catalog/reason-codes` - Reason code lookup
+- ✅ `/api/admin/unions` - Union management
+- ✅ All catalog endpoints operational and responding
+
+**Files Modified**:
+- `src/DSC.Data/ApplicationDbContext.cs`
+- `src/DSC.Api/DTOs/AdminCatalogDtos.cs`
+- `src/DSC.Data/Models/*` (all new model classes)
+- Multiple EF Core migrations applied
+
+**Git Commits**:
+- 444c9fd - Merge feature/activity-calendar-models
+- fa67205 - Merge feature/cpc-code-model
+- f4f11aa - Merge feature/director-code-model
+- 891818f - Merge feature/reason-code-model
+- 4fc24f7 - Merge feature/union-model
+- cb99b35 - Merge feature/activity-type-split
+- 5e9db61 - fix: remove merge conflict markers and resolve duplicate DTOs
+
+---
+
+## ToDo: Remaining Work
+
+### 1. Seed Data for New Catalogs
+- Add seed data for CPC codes
+- Add seed data for Director codes
+- Add seed data for Reason codes
+- Add seed data for Unions
+- Add seed data for Activity categories
+- Add seed data for Calendar categories
+
+### 2. Admin UI for New Catalogs
+- Create AdminActivityCategories page for Activity Category CRUD
+- Create AdminCalendarCategories page for Calendar Category CRUD
+- Create AdminCpcCodes page for CPC Code CRUD
+- Wire up existing AdminUnions controller to frontend
+
+### 3. Testing & Documentation
+- End-to-end testing of all merged features
+- Update UML diagrams with new entities
+- Comprehensive seed data based on actual usage patterns
+
+---
 
 ## ✅ COMPLETED: Budget Classification (CAPEX/OPEX) Port (2026-02-20)
 

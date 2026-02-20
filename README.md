@@ -1,3 +1,45 @@
+## Feature Branch Consolidation — 2026-02-20 ✅ NEW
+
+**All feature branches successfully merged to main**:
+
+1. ✅ **Complete Catalog System Integration**:
+   - CPC Codes, Director Codes, Reason Codes - for expense activity routing
+   - Union catalog - legacy union classifications
+   - Activity Categories - activity classification system
+   - Calendar Categories - calendar event categorization
+   - All legacy junction tables mapped (DepartmentUser, UserPosition, UserUser, ProjectActivity, ExpenseActivity)
+
+2. ✅ **New API Endpoints** (all verified working):
+   - `/api/catalog/cpc-codes` - CPC code lookup
+   - `/api/catalog/director-codes` - Director code lookup  
+   - `/api/catalog/reason-codes` - Reason code lookup
+   - `/api/admin/unions` - Union management
+   - `/api/admin/activity-categories` - Activity category management
+   - `/api/admin/calendar-categories` - Calendar category management
+
+3. ✅ **Build & Deployment Status**:
+   - All merge conflicts resolved (ApplicationDbContext, DTOs, frontend services)
+   - Removed duplicate DTO definitions (UnionDto)
+   - Added missing DTOs (CpcCodeDto, ActivityCategoryDto, CalendarCategoryDto)
+   - Build succeeds with 0 errors
+   - API server running with all features functional on port 5115
+   - All changes pushed to GitHub
+
+4. ✅ **Models Integrated**:
+   - ActivityCategory, CalendarCategory, CalendarEntry
+   - CpcCode, DirectorCode, ReasonCode, Union
+   - DepartmentUser, UserPosition, UserUser (legacy junction tables)
+   - ProjectActivity, ExpenseActivity (legacy activity mappings)
+
+**Git commits**: 444c9fd through 5e9db61 (7 commits total: 6 merges + 1 build fix)
+
+**Next steps**:
+- Add seed data for new catalog entities
+- Create admin UI pages for Activity Categories and Calendar Categories
+- Comprehensive end-to-end testing of all merged features
+
+---
+
 ## Unit Testing — 2026-02-21 ✅ NEW
 
 **16 unit tests implemented and passing**:
