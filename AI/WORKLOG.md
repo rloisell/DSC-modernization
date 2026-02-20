@@ -22,7 +22,7 @@
 - `README.md`
 - `AI/nextSteps.md`
 
-**Commit**: Pending
+**Commit**: 77d7280 - fix: harden activity catalog loading
 
 ---
 
