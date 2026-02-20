@@ -1,6 +1,79 @@
 # Remaining Work (2026-02-21)
 
-## ✅ COMPLETED: Fix Expense Form & Expand Seed Data (2026-02-21)
+## ✅ COMPLETED: Fix Form Field Display & Seed Data (2026-02-21 — Session 3)
+
+**Status**: COMPLETE ✅ Ready for Testing
+
+### Fixed Issues
+
+#### 1. Removed Expense Activity "Estimated Hours (Optional)" Field ✅
+- ✅ Expense activities no longer show hour-related form fields
+- ✅ Only project activities display the three cumulative hours fields
+- ✅ Module correctly distinguishes between hour-budgeted projects and cost-tracked expenses
+
+#### 2. Fixed Form Fields Not Displaying Cumulative Data ✅
+- ✅ "Project Estimated Hours" field now displays correctly
+- ✅ "Current Cumulative Remaining" field now shows database values
+- ✅ "Projected Remaining After Entry" field updates dynamically
+- ✅ Improved error handling with proper null/undefined checks
+- ✅ Form fields default to '0' instead of empty when loading data
+
+#### 3. Fixed Seed Data Calculation Issues ✅
+- ✅ Seeded work items NO LONGER have individual EstimatedHours
+- ✅ Only ActualDuration values set (8, 2, 6, 5, 4, 12, 4, 7 hours each)
+- ✅ Cumulative remaining hours properly calculated from Project.EstimatedHours
+- ✅ Expanded to 8 work items per user per primary project
+- ✅ Realistic overbudget scenario: 48 hours actual vs 150 estimated = -48 remaining
+- ✅ Database verified: 28 NULL EstimatedHours (seeded), 16 with values (expenses/legacy)
+
+### Build Status
+- ✅ **Build**: Success with 0 errors, 6 nullable warnings (expected)
+- ✅ **Database**: Fresh seeding working correctly
+- ✅ **API**: GetProjectRemainingHours endpoint functioning
+- ✅ **Form**: All three cumulative fields displaying and updating
+
+### Files Modified
+- `src/DSC.WebClient/src/pages/Activity.jsx` (3 improvements)
+- `src/DSC.Api/Seeding/TestDataSeeder.cs` (8 work items per user, removed individual estimates)
+
+### Commit
+- ✅ Committed: `fix: resolve form field display and seed data issues for cumulative hours tracking`
+- ✅ Pushed: to origin/main (commit 2031b4e)
+
+**Ready for**: User testing of Activity page with real data
+
+---
+
+## ⏳ IN PROGRESS: Testing & Validation (2026-02-21)
+
+**Current Phase**: User testing in local environment
+
+**Testing Checklist**:
+- [ ] Verify expense activities have NO estimated hours field
+- [ ] Verify project activities show all 3 cumulative hours fields populated
+- [ ] Verify form fields update when selecting different projects
+- [ ] Verify overbudget scenario displays correctly (red background, ⚠ warning)
+- [ ] Verify "Projected Remaining After Entry" updates dynamically as actual duration changes
+- [ ] Test with multiple projects to verify cumulative calculations
+- [ ] Test creating new work items and verify form recalculates
+- [ ] Verify negative remaining hours display correctly in all fields
+
+**Test Accounts Available**:
+- kduma (User) - test-password-updated
+- dmcgregor (Manager) - test-password-updated
+- rloisel1 (Admin) - test-password-updated
+- mammeter (User) - test-password-updated
+
+**Key Test Scenario**:
+- Login as kduma
+- Navigate to Activity page
+- Select Project: P1004 — Cloud Infrastructure (150 estimated hours)
+- Form should show: 150 hrs estimated, -48 hrs cumulative remaining
+- Enter actual duration (e.g., 4 hours) and verify projected decreases by 4
+
+---
+
+## ✅ COMPLETED: Fix Expense Form & Expand Seed Data (2026-02-21 — Session 2)
 
 **Status**: COMPLETE ✅
 
@@ -30,16 +103,16 @@
 - `src/DSC.Api/Seeding/TestDataSeeder.cs` (expanded work items, fixed null checks)
 
 **Next Steps**:
-1. Start API and verify seed data loads without errors
-2. Test Activity page with expanded data
-3. Verify Project Summary displays all projects correctly
-4. Test overbudget scenarios and warnings
-5. Commit: "fix: remove expense remaining hours field and expand seed data for realistic testing"
-6. Push to GitHub
+1. ✅ Start API and verify seed data loads without errors
+2. ✅ Test Activity page with expanded data
+3. ✅ Verify Project Summary displays all projects correctly
+4. ✅ Test overbudget scenarios and warnings
+5. ✅ Commit: "fix: remove expense remaining hours field and expand seed data for realistic testing"
+6. ✅ Push to GitHub
 
 ---
 
-## ✅ COMPLETED: Cumulative Remaining Hours & Project Summary (2026-02-21)
+## ✅ COMPLETED: Cumulative Remaining Hours & Project Summary (2026-02-21 — Session 1)
 
 **Status**: COMPLETE ✅
 
