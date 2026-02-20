@@ -33,6 +33,10 @@ export default function AdminExpense() {
     id: category.id,
     label: category.name
   }));
+  const categoryLookup = categories.reduce((acc, category) => {
+    acc[category.id] = category.name;
+    return acc;
+  }, {});
 
   useEffect(() => {
     AdminCatalogService.getExpenseCategories()
@@ -92,6 +96,11 @@ export default function AdminExpense() {
     e.preventDefault();
     setMessage('');
     setError(null);
+    const categoryId = optionForm.categoryId || selectedCategoryId;
+    if (!categoryId) {
+      setError('Select a category before adding an expense option.');
+      return;
+    }
     try {
       if (editingOptionId) {
         await AdminCatalogService.updateExpenseOption(editingOptionId, {
@@ -100,15 +109,16 @@ export default function AdminExpense() {
         });
       } else {
         await AdminCatalogService.createExpenseOption({
-          expenseCategoryId: optionForm.categoryId,
+          expenseCategoryId: categoryId,
           name: optionForm.name
         });
       }
-      if (selectedCategoryId) {
-        const refreshed = await AdminCatalogService.getExpenseOptions(selectedCategoryId);
+      if (categoryId) {
+        const refreshed = await AdminCatalogService.getExpenseOptions(categoryId);
         setOptions(refreshed);
       }
-      setOptionForm({ categoryId: '', name: '' });
+      setSelectedCategoryId(categoryId);
+      setOptionForm({ categoryId, name: '' });
       setEditingOptionId('');
       setMessage(editingOptionId ? 'Expense option updated.' : 'Expense option created.');
     } catch (e) {
@@ -280,6 +290,7 @@ export default function AdminExpense() {
         <table className="bcds-table">
           <thead>
             <tr>
+              <th>Category</th>
               <th>Name</th>
               <th>Status</th>
               <th>Actions</th>
@@ -288,6 +299,7 @@ export default function AdminExpense() {
           <tbody>
             {options.map(option => (
               <tr key={option.id}>
+                <td>{option.expenseCategoryName || categoryLookup[option.expenseCategoryId] || '—'}</td>
                 <td>{option.name}</td>
                 <td>{option.isActive ? 'Active' : 'Inactive'}</td>
                 <td>

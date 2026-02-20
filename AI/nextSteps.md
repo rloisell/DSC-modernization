@@ -1,5 +1,35 @@
 # Remaining Work (2026-02-21)
 
+## ✅ COMPLETED: Admin Expense Options Fixes (2026-02-20)
+
+**Status**: COMPLETE ✅
+
+### Changes Made
+
+#### 1. Expense Option Save Fix ✅
+- **Issue**: "Add Expense Option" appeared to submit but did not persist data
+- **Solution**: Added category validation and enforced refresh using selected category
+- **Result**: Options now save reliably and remain visible after creation
+
+#### 2. Category Display in Options Table ✅
+- **Issue**: Expense Options table did not show associated category
+- **Solution**: Added `ExpenseCategoryName` to API DTO and Category column in table
+- **Result**: Admins can see which category each option belongs to
+
+### Technical Implementation
+- ✅ `ExpenseOptionDto` now includes `ExpenseCategoryName`
+- ✅ `AdminExpenseOptionsController.GetAll()` joins category data
+- ✅ `AdminExpense` page validates category selection and displays category column
+
+**Files Modified**:
+- `src/DSC.Api/DTOs/AdminCatalogDtos.cs`
+- `src/DSC.Api/Controllers/AdminExpenseOptionsController.cs`
+- `src/DSC.WebClient/src/pages/AdminExpense.jsx`
+
+**Commit**: Current - fix: persist expense options and show category in table
+
+---
+
 ## ✅ COMPLETED: Activity Page Tracking Table Enhancement (2026-02-20)
 
 **Status**: COMPLETE ✅

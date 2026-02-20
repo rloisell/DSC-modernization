@@ -87,6 +87,7 @@ namespace DSC.Api.DTOs
     {
         public Guid Id { get; set; }
         public Guid ExpenseCategoryId { get; set; }
+        public string? ExpenseCategoryName { get; set; }
         public string Name { get; set; } = string.Empty;
         public bool IsActive { get; set; }
     }

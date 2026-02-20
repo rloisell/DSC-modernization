@@ -1,3 +1,37 @@
+## 2026-02-20 — Admin Expense Options Fixes (COMPLETED ✓)
+
+**Problem Statement**:
+1. Admin Expense "Add Expense Option" form appeared to succeed but did not persist new options
+2. Expense Options table lacked the category name for each option
+
+**Implementation & Resolution**:
+
+### Backend Changes
+
+#### 1. Expense Option DTO Enhancement
+- ✅ Added `ExpenseCategoryName` to `ExpenseOptionDto` for display
+- ✅ Expense options query now includes category name via navigation join
+
+### Frontend Changes
+
+#### 1. Save Guardrails for Expense Options
+- ✅ Added validation to require a category before creating an option
+- ✅ Uses selected category for refresh after create/update
+- ✅ Keeps the selected category after submit for quick multi-add
+
+#### 2. Expense Options Table Improvements
+- ✅ Added Category column to the options table
+- ✅ Uses `expenseCategoryName` from API with fallback to local category lookup
+
+**Files Modified**:
+- `src/DSC.Api/DTOs/AdminCatalogDtos.cs`
+- `src/DSC.Api/Controllers/AdminExpenseOptionsController.cs`
+- `src/DSC.WebClient/src/pages/AdminExpense.jsx`
+
+**Commit**: Current - fix: persist expense options and show category in table
+
+---
+
 ## 2026-02-20 — Activity Page Tracking Table Enhancement (COMPLETED ✓)
 
 **Problem Statement**:

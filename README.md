@@ -243,6 +243,7 @@ API update: The API now exposes legacy Java model fields via DTOs so the fronten
 - Admin Users wiring: `/api/admin/users` endpoints are available and `AdminUsers` now uses real API calls for list/create/update/delete (other admin pages still use placeholders).
 - Admin catalog wiring: positions, departments, projects, expense categories/options, activity codes, and network numbers are now backed by `/api/admin/*` endpoints and wired in the UI via `AdminCatalogService`.
 - Admin catalog edit workflows: admin pages now reuse create forms for edits and call update/deactivate APIs for positions, departments, projects, expense categories/options, activity codes, and network numbers.
+- Admin Expense improvements: Expense Options now validate category selection, persist reliably, and display associated category names in the table.
 - Frontend design system: the React UI now uses the B.C. Design System component library with BC Sans and design tokens for layout, navigation, forms, and tables.
 - Admin landing page: updated copy to reflect the admin sections are wired to APIs.
 - Security notes: see `AI/securityNextSteps.md` for current risks and hardening actions.
