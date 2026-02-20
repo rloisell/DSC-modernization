@@ -10,6 +10,8 @@ export default function AdminActivityOptions() {
   const [error, setError] = useState(null);
   const [codeForm, setCodeForm] = useState({ code: '', description: '' });
   const [networkForm, setNetworkForm] = useState({ number: '', description: '' });
+  const [editingCodeId, setEditingCodeId] = useState('');
+  const [editingNetworkId, setEditingNetworkId] = useState('');
 
   useEffect(() => {
     Promise.all([
@@ -37,14 +39,23 @@ export default function AdminActivityOptions() {
     setMessage('');
     setError(null);
     try {
-      await AdminCatalogService.createActivityCode({
-        code: codeForm.code,
-        description: codeForm.description
-      });
+      if (editingCodeId) {
+        await AdminCatalogService.updateActivityCode(editingCodeId, {
+          code: codeForm.code,
+          description: codeForm.description,
+          isActive: true
+        });
+      } else {
+        await AdminCatalogService.createActivityCode({
+          code: codeForm.code,
+          description: codeForm.description
+        });
+      }
       const refreshed = await AdminCatalogService.getActivityCodes();
       setActivityCodes(refreshed);
       setCodeForm({ code: '', description: '' });
-      setMessage('Activity code created.');
+      setEditingCodeId('');
+      setMessage(editingCodeId ? 'Activity code updated.' : 'Activity code created.');
     } catch (e) {
       setError(e.message);
     }
@@ -55,14 +66,23 @@ export default function AdminActivityOptions() {
     setMessage('');
     setError(null);
     try {
-      await AdminCatalogService.createNetworkNumber({
-        number: Number(networkForm.number),
-        description: networkForm.description
-      });
+      if (editingNetworkId) {
+        await AdminCatalogService.updateNetworkNumber(editingNetworkId, {
+          number: Number(networkForm.number),
+          description: networkForm.description,
+          isActive: true
+        });
+      } else {
+        await AdminCatalogService.createNetworkNumber({
+          number: Number(networkForm.number),
+          description: networkForm.description
+        });
+      }
       const refreshed = await AdminCatalogService.getNetworkNumbers();
       setNetworkNumbers(refreshed);
       setNetworkForm({ number: '', description: '' });
-      setMessage('Network number created.');
+      setEditingNetworkId('');
+      setMessage(editingNetworkId ? 'Network number updated.' : 'Network number created.');
     } catch (e) {
       setError(e.message);
     }
@@ -102,13 +122,23 @@ export default function AdminActivityOptions() {
     }
   }
 
+  function handleEditCode(code) {
+    setEditingCodeId(code.id);
+    setCodeForm({ code: code.code, description: code.description || '' });
+  }
+
+  function handleEditNetwork(network) {
+    setEditingNetworkId(network.id);
+    setNetworkForm({ number: String(network.number), description: network.description || '' });
+  }
+
   return (
     <div>
       <h1>Admin Activity Options</h1>
       <p>Legacy servlet: AdminActivityOptions. This page will manage activity codes and network numbers.</p>
       <p><Link to="/admin">Back to Administrator</Link></p>
       <section>
-        <h2>Add Activity Code</h2>
+        <h2>{editingCodeId ? 'Edit Activity Code' : 'Add Activity Code'}</h2>
         <form onSubmit={handleCodeSubmit}>
           <div>
             <label>
@@ -133,7 +163,13 @@ export default function AdminActivityOptions() {
               />
             </label>
           </div>
-          <button type="submit">Create Activity Code</button>
+          <button type="submit">{editingCodeId ? 'Save Activity Code' : 'Create Activity Code'}</button>
+          {editingCodeId ? (
+            <button type="button" onClick={() => {
+              setEditingCodeId('');
+              setCodeForm({ code: '', description: '' });
+            }}>Cancel</button>
+          ) : null}
         </form>
       </section>
       <section>
@@ -152,7 +188,7 @@ export default function AdminActivityOptions() {
                 <td>{code.code}</td>
                 <td>{code.description}</td>
                 <td>
-                  <button type="button" onClick={() => setMessage('Edit activity code is not wired to the API yet.')}>Edit</button>
+                  <button type="button" onClick={() => handleEditCode(code)}>Edit</button>
                   <button type="button" onClick={() => handleDeactivateCode(code)}>Deactivate</button>
                 </td>
               </tr>
@@ -161,7 +197,7 @@ export default function AdminActivityOptions() {
         </table>
       </section>
       <section>
-        <h2>Add Network Number</h2>
+        <h2>{editingNetworkId ? 'Edit Network Number' : 'Add Network Number'}</h2>
         <form onSubmit={handleNetworkSubmit}>
           <div>
             <label>
@@ -186,7 +222,13 @@ export default function AdminActivityOptions() {
               />
             </label>
           </div>
-          <button type="submit">Create Network Number</button>
+          <button type="submit">{editingNetworkId ? 'Save Network Number' : 'Create Network Number'}</button>
+          {editingNetworkId ? (
+            <button type="button" onClick={() => {
+              setEditingNetworkId('');
+              setNetworkForm({ number: '', description: '' });
+            }}>Cancel</button>
+          ) : null}
         </form>
       </section>
       <section>
@@ -205,7 +247,7 @@ export default function AdminActivityOptions() {
                 <td>{network.number}</td>
                 <td>{network.description}</td>
                 <td>
-                  <button type="button" onClick={() => setMessage('Edit network number is not wired to the API yet.')}>Edit</button>
+                  <button type="button" onClick={() => handleEditNetwork(network)}>Edit</button>
                   <button type="button" onClick={() => handleDeactivateNetwork(network)}>Deactivate</button>
                 </td>
               </tr>

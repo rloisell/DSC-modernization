@@ -8,6 +8,7 @@ export default function AdminDepartments() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [form, setForm] = useState({ name: '', manager: '', status: 'active' });
+  const [editingId, setEditingId] = useState('');
 
   useEffect(() => {
     AdminCatalogService.getDepartments()
@@ -25,17 +26,35 @@ export default function AdminDepartments() {
     setMessage('');
     setError(null);
     try {
-      await AdminCatalogService.createDepartment({
-        name: form.name,
-        managerName: form.manager
-      });
+      if (editingId) {
+        await AdminCatalogService.updateDepartment(editingId, {
+          name: form.name,
+          managerName: form.manager,
+          isActive: form.status === 'active'
+        });
+      } else {
+        await AdminCatalogService.createDepartment({
+          name: form.name,
+          managerName: form.manager
+        });
+      }
       const refreshed = await AdminCatalogService.getDepartments();
       setDepartments(refreshed);
       setForm({ name: '', manager: '', status: 'active' });
-      setMessage('Department created.');
+      setEditingId('');
+      setMessage(editingId ? 'Department updated.' : 'Department created.');
     } catch (e) {
       setError(e.message);
     }
+  }
+
+  function handleEdit(dept) {
+    setEditingId(dept.id);
+    setForm({
+      name: dept.name,
+      manager: dept.managerName || '',
+      status: dept.isActive ? 'active' : 'inactive'
+    });
   }
 
   async function handleDeactivate(dept) {
@@ -61,7 +80,7 @@ export default function AdminDepartments() {
       <p>Legacy servlet: AdminDepartments. This page will manage department records.</p>
       <p><Link to="/admin">Back to Administrator</Link></p>
       <section>
-        <h2>Add Department</h2>
+        <h2>{editingId ? 'Edit Department' : 'Add Department'}</h2>
         <form onSubmit={handleSubmit}>
           <div>
             <label>
@@ -97,6 +116,12 @@ export default function AdminDepartments() {
             </label>
           </div>
           <button type="submit">Create Department</button>
+          {editingId ? (
+            <button type="button" onClick={() => {
+              setEditingId('');
+              setForm({ name: '', manager: '', status: 'active' });
+            }}>Cancel</button>
+          ) : null}
         </form>
       </section>
       <section>
@@ -117,7 +142,7 @@ export default function AdminDepartments() {
                 <td>{dept.managerName || '-'}</td>
                 <td>{dept.isActive ? 'Active' : 'Inactive'}</td>
                 <td>
-                  <button type="button" onClick={() => setMessage('Edit department is not wired to the API yet.')}>Edit</button>
+                  <button type="button" onClick={() => handleEdit(dept)}>Edit</button>
                   <button type="button" onClick={() => handleDeactivate(dept)}>Deactivate</button>
                 </td>
               </tr>

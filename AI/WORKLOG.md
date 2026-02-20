@@ -124,6 +124,12 @@ Actions (2026-02-19) — API smoke test
 	- `src/DSC.Api/Controllers/ItemsController.cs` now annotates 200/404 responses for `WorkItemDto`.
 Next: run integration tests or create controllers for other resources (Projects, Users) as needed.
 
+## 2026-02-19 — Admin catalog edit workflows
+
+- Added edit workflows for admin catalog pages so create and edit share the same forms (positions, departments, projects, expense categories/options, activity codes, network numbers).
+- Activity Options now supports edit/update flows for activity codes and network numbers in the UI.
+- Smoke-tested the Admin Activity Options page via the Vite dev server route (`/admin/activity-options`).
+
 Notes: The `root` password reset was performed non-interactively to allow scripting the setup; if you want a different root password or to re-run the secure setup, run `mysql_secure_installation` and change credentials.
 
 # AI Worklog — DSC-modernization

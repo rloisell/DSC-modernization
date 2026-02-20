@@ -11,6 +11,8 @@ export default function AdminExpense() {
   const [error, setError] = useState(null);
   const [categoryForm, setCategoryForm] = useState({ name: '', status: 'active' });
   const [optionForm, setOptionForm] = useState({ categoryId: '', name: '' });
+  const [editingCategoryId, setEditingCategoryId] = useState('');
+  const [editingOptionId, setEditingOptionId] = useState('');
 
   useEffect(() => {
     AdminCatalogService.getExpenseCategories()
@@ -46,13 +48,21 @@ export default function AdminExpense() {
     setMessage('');
     setError(null);
     try {
-      await AdminCatalogService.createExpenseCategory({
-        name: categoryForm.name
-      });
+      if (editingCategoryId) {
+        await AdminCatalogService.updateExpenseCategory(editingCategoryId, {
+          name: categoryForm.name,
+          isActive: categoryForm.status === 'active'
+        });
+      } else {
+        await AdminCatalogService.createExpenseCategory({
+          name: categoryForm.name
+        });
+      }
       const refreshed = await AdminCatalogService.getExpenseCategories();
       setCategories(refreshed);
       setCategoryForm({ name: '', status: 'active' });
-      setMessage('Expense category created.');
+      setEditingCategoryId('');
+      setMessage(editingCategoryId ? 'Expense category updated.' : 'Expense category created.');
     } catch (e) {
       setError(e.message);
     }
@@ -63,16 +73,24 @@ export default function AdminExpense() {
     setMessage('');
     setError(null);
     try {
-      await AdminCatalogService.createExpenseOption({
-        expenseCategoryId: optionForm.categoryId,
-        name: optionForm.name
-      });
+      if (editingOptionId) {
+        await AdminCatalogService.updateExpenseOption(editingOptionId, {
+          name: optionForm.name,
+          isActive: true
+        });
+      } else {
+        await AdminCatalogService.createExpenseOption({
+          expenseCategoryId: optionForm.categoryId,
+          name: optionForm.name
+        });
+      }
       if (selectedCategoryId) {
         const refreshed = await AdminCatalogService.getExpenseOptions(selectedCategoryId);
         setOptions(refreshed);
       }
       setOptionForm({ categoryId: '', name: '' });
-      setMessage('Expense option created.');
+      setEditingOptionId('');
+      setMessage(editingOptionId ? 'Expense option updated.' : 'Expense option created.');
     } catch (e) {
       setError(e.message);
     }
@@ -112,13 +130,27 @@ export default function AdminExpense() {
     }
   }
 
+  function handleEditCategory(category) {
+    setEditingCategoryId(category.id);
+    setCategoryForm({
+      name: category.name,
+      status: category.isActive ? 'active' : 'inactive'
+    });
+  }
+
+  function handleEditOption(option) {
+    setEditingOptionId(option.id);
+    setOptionForm({ categoryId: option.expenseCategoryId, name: option.name });
+    setSelectedCategoryId(option.expenseCategoryId);
+  }
+
   return (
     <div>
       <h1>Admin Expense</h1>
       <p>Legacy servlet: AdminExpense. This page will manage expense categories and options.</p>
       <p><Link to="/admin">Back to Administrator</Link></p>
       <section>
-        <h2>Add Expense Category</h2>
+        <h2>{editingCategoryId ? 'Edit Expense Category' : 'Add Expense Category'}</h2>
         <form onSubmit={handleCategorySubmit}>
           <div>
             <label>
@@ -142,6 +174,12 @@ export default function AdminExpense() {
             </label>
           </div>
           <button type="submit">Create Category</button>
+          {editingCategoryId ? (
+            <button type="button" onClick={() => {
+              setEditingCategoryId('');
+              setCategoryForm({ name: '', status: 'active' });
+            }}>Cancel</button>
+          ) : null}
         </form>
       </section>
       <section>
@@ -160,7 +198,7 @@ export default function AdminExpense() {
                 <td>{category.name}</td>
                 <td>{category.isActive ? 'Active' : 'Inactive'}</td>
                 <td>
-                  <button type="button" onClick={() => setMessage('Edit category is not wired to the API yet.')}>Edit</button>
+                  <button type="button" onClick={() => handleEditCategory(category)}>Edit</button>
                   <button type="button" onClick={() => handleDeactivateCategory(category)}>Deactivate</button>
                 </td>
               </tr>
@@ -169,7 +207,7 @@ export default function AdminExpense() {
         </table>
       </section>
       <section>
-        <h2>Add Expense Option</h2>
+        <h2>{editingOptionId ? 'Edit Expense Option' : 'Add Expense Option'}</h2>
         <form onSubmit={handleOptionSubmit}>
           <div>
             <label>
@@ -205,6 +243,12 @@ export default function AdminExpense() {
             </label>
           </div>
           <button type="submit">Add Option</button>
+          {editingOptionId ? (
+            <button type="button" onClick={() => {
+              setEditingOptionId('');
+              setOptionForm({ categoryId: '', name: '' });
+            }}>Cancel</button>
+          ) : null}
         </form>
       </section>
       <section>
@@ -223,7 +267,7 @@ export default function AdminExpense() {
                 <td>{option.name}</td>
                 <td>{option.isActive ? 'Active' : 'Inactive'}</td>
                 <td>
-                  <button type="button" onClick={() => setMessage('Edit option is not wired to the API yet.')}>Edit</button>
+                  <button type="button" onClick={() => handleEditOption(option)}>Edit</button>
                   <button type="button" onClick={() => handleDeactivateOption(option)}>Deactivate</button>
                 </td>
               </tr>

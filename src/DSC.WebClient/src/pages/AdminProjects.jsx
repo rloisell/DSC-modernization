@@ -11,6 +11,7 @@ export default function AdminProjects() {
   const [error, setError] = useState(null);
   const [form, setForm] = useState({ projectNo: '', name: '', description: '', estimatedHours: '' });
   const [assignForm, setAssignForm] = useState({ projectId: '', activityCodeId: '', networkNumberId: '' });
+  const [editingId, setEditingId] = useState('');
 
   useEffect(() => {
     Promise.all([
@@ -40,19 +41,40 @@ export default function AdminProjects() {
     setMessage('');
     setError(null);
     try {
-      await AdminCatalogService.createProject({
-        projectNo: form.projectNo || null,
-        name: form.name,
-        description: form.description || null,
-        estimatedHours: form.estimatedHours ? Number(form.estimatedHours) : null
-      });
+      if (editingId) {
+        await AdminCatalogService.updateProject(editingId, {
+          projectNo: form.projectNo || null,
+          name: form.name,
+          description: form.description || null,
+          estimatedHours: form.estimatedHours ? Number(form.estimatedHours) : null,
+          isActive: true
+        });
+      } else {
+        await AdminCatalogService.createProject({
+          projectNo: form.projectNo || null,
+          name: form.name,
+          description: form.description || null,
+          estimatedHours: form.estimatedHours ? Number(form.estimatedHours) : null
+        });
+      }
       const refreshed = await AdminCatalogService.getProjects();
       setProjects(refreshed);
       setForm({ projectNo: '', name: '', description: '', estimatedHours: '' });
-      setMessage('Project created.');
+      setEditingId('');
+      setMessage(editingId ? 'Project updated.' : 'Project created.');
     } catch (e) {
       setError(e.message);
     }
+  }
+
+  function handleEdit(project) {
+    setEditingId(project.id);
+    setForm({
+      projectNo: project.projectNo || '',
+      name: project.name,
+      description: project.description || '',
+      estimatedHours: project.estimatedHours ?? ''
+    });
   }
 
   async function handleArchive(project) {
@@ -97,7 +119,7 @@ export default function AdminProjects() {
       <p>Legacy servlet: AdminProjects. This page will manage project metadata and assignments.</p>
       <p><Link to="/admin">Back to Administrator</Link></p>
       <section>
-        <h2>Add Project</h2>
+        <h2>{editingId ? 'Edit Project' : 'Add Project'}</h2>
         <form onSubmit={handleSubmit}>
           <div>
             <label>
@@ -146,6 +168,12 @@ export default function AdminProjects() {
             </label>
           </div>
           <button type="submit">Create Project</button>
+          {editingId ? (
+            <button type="button" onClick={() => {
+              setEditingId('');
+              setForm({ projectNo: '', name: '', description: '', estimatedHours: '' });
+            }}>Cancel</button>
+          ) : null}
         </form>
       </section>
       <section>
@@ -166,7 +194,7 @@ export default function AdminProjects() {
                 <td>{project.name}</td>
                 <td>{project.isActive ? 'Active' : 'Inactive'}</td>
                 <td>
-                  <button type="button" onClick={() => setMessage('Edit project is not wired to the API yet.')}>Edit</button>
+                  <button type="button" onClick={() => handleEdit(project)}>Edit</button>
                   <button type="button" onClick={() => handleArchive(project)}>Archive</button>
                 </td>
               </tr>

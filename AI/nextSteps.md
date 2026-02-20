@@ -47,6 +47,7 @@ Next steps (recommended, prioritized):
 9. Expand admin pages with forms/tables based on intended legacy workflows. — Completed: positions, departments, projects, expenses, and activity options include draft forms and placeholder lists.
 10. Wire Admin Users to a basic API (list/create/update/delete). — Completed: `/api/admin/users` controller + React wiring.
 11. Wire admin catalog pages (positions, departments, projects, expense, activity options) to APIs. — Completed: admin controllers + React wiring via `AdminCatalogService`.
+12. Add edit workflows for admin catalog pages (create/edit reuse with update/deactivate). — Completed: positions, departments, projects, expense categories/options, activity codes, and network numbers.
 
 Spec-Kitty / Migration next steps (explicit)
 

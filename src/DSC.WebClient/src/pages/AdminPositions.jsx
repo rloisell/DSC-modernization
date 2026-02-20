@@ -8,6 +8,7 @@ export default function AdminPositions() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [form, setForm] = useState({ title: '', description: '', status: 'active' });
+  const [editingId, setEditingId] = useState('');
 
   useEffect(() => {
     AdminCatalogService.getPositions()
@@ -25,17 +26,35 @@ export default function AdminPositions() {
     setMessage('');
     setError(null);
     try {
-      await AdminCatalogService.createPosition({
-        title: form.title,
-        description: form.description
-      });
+      if (editingId) {
+        await AdminCatalogService.updatePosition(editingId, {
+          title: form.title,
+          description: form.description,
+          isActive: form.status === 'active'
+        });
+      } else {
+        await AdminCatalogService.createPosition({
+          title: form.title,
+          description: form.description
+        });
+      }
       const refreshed = await AdminCatalogService.getPositions();
       setPositions(refreshed);
       setForm({ title: '', description: '', status: 'active' });
-      setMessage('Position created.');
+      setEditingId('');
+      setMessage(editingId ? 'Position updated.' : 'Position created.');
     } catch (e) {
       setError(e.message);
     }
+  }
+
+  function handleEdit(position) {
+    setEditingId(position.id);
+    setForm({
+      title: position.title,
+      description: position.description || '',
+      status: position.isActive ? 'active' : 'inactive'
+    });
   }
 
   async function handleDeactivate(position) {
@@ -61,7 +80,7 @@ export default function AdminPositions() {
       <p>Legacy servlet: AdminPositions. This page will manage position records.</p>
       <p><Link to="/admin">Back to Administrator</Link></p>
       <section>
-        <h2>Add Position</h2>
+        <h2>{editingId ? 'Edit Position' : 'Add Position'}</h2>
         <form onSubmit={handleSubmit}>
           <div>
             <label>
@@ -96,6 +115,12 @@ export default function AdminPositions() {
             </label>
           </div>
           <button type="submit">Create Position</button>
+          {editingId ? (
+            <button type="button" onClick={() => {
+              setEditingId('');
+              setForm({ title: '', description: '', status: 'active' });
+            }}>Cancel</button>
+          ) : null}
         </form>
       </section>
       <section>
@@ -116,7 +141,7 @@ export default function AdminPositions() {
                 <td>{position.description}</td>
                 <td>{position.isActive ? 'Active' : 'Inactive'}</td>
                 <td>
-                  <button type="button" onClick={() => setMessage('Edit position is not wired to the API yet.')}>Edit</button>
+                  <button type="button" onClick={() => handleEdit(position)}>Edit</button>
                   <button type="button" onClick={() => handleDeactivate(position)}>Deactivate</button>
                 </td>
               </tr>
