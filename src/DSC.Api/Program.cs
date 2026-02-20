@@ -17,7 +17,8 @@ builder.Services.AddSwaggerGen(options =>
     options.OperationFilter<DSC.Api.Swagger.WorkItemExamplesOperationFilter>();
 });
 
-builder.Services.AddAuthentication("AdminToken")
+builder.Services.AddAuthentication("UserId")
+    .AddScheme<AuthenticationSchemeOptions, UserIdAuthenticationHandler>("UserId", null)
     .AddScheme<AuthenticationSchemeOptions, AdminTokenAuthenticationHandler>("AdminToken", null);
 builder.Services.AddAuthorization(options =>
 {

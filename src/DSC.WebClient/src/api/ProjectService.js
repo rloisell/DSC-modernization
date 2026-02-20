@@ -1,15 +1,10 @@
 import axios from 'axios';
+import { getAuthConfig } from './AuthConfig';
 
 const API_URL = '/api/projects';
 
 export async function getProjects() {
-  const res = await axios.get(API_URL, {
-    headers: {
-      'Content-Type': 'application/json',
-      'Accept': 'application/json'
-    },
-    withCredentials: true
-  });
+  const res = await axios.get(API_URL, getAuthConfig());
   return res.data;
 }
 

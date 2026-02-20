@@ -1,19 +1,12 @@
 import axios from 'axios';
+import { getAuthConfig } from './AuthConfig';
 
 const API_URL = '/api/items';
-
-const axiosConfig = {
-  headers: {
-    'Content-Type': 'application/json',
-    'Accept': 'application/json'
-  },
-  withCredentials: true
-};
 
 export async function getWorkItems(userId) {
   const params = {};
   if (userId) params.userId = userId;
-  const res = await axios.get(API_URL, { params, ...axiosConfig });
+  const res = await axios.get(API_URL, { params, ...getAuthConfig() });
   return res.data;
 }
 
@@ -22,13 +15,13 @@ export async function getDetailedWorkItems(period = 'all', userId) {
   if (userId) params.userId = userId;
   const res = await axios.get(`${API_URL}/detailed`, {
     params,
-    ...axiosConfig
+    ...getAuthConfig()
   });
   return res.data;
 }
 
 export async function createWorkItem(item) {
-  const res = await axios.post(API_URL, item, axiosConfig);
+  const res = await axios.post(API_URL, item, getAuthConfig());
   return res.data;
 }
 
@@ -71,6 +64,6 @@ export async function createWorkItemWithLegacy({
     estimatedHours,
     remainingHours
   };
-  const res = await axios.post(API_URL, payload, axiosConfig);
+  const res = await axios.post(API_URL, payload, getAuthConfig());
   return res.data;
 }

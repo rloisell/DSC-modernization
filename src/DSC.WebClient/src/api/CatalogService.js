@@ -1,32 +1,25 @@
 import axios from 'axios';
+import { getAuthConfig } from './AuthConfig';
 
 const CATALOG_URL = '/api/catalog';
 
-const axiosConfig = {
-  headers: {
-    'Content-Type': 'application/json',
-    'Accept': 'application/json'
-  },
-  withCredentials: true
-};
-
 export async function getActivityCodes() {
-  const res = await axios.get(`${CATALOG_URL}/activity-codes`, axiosConfig);
+  const res = await axios.get(`${CATALOG_URL}/activity-codes`, getAuthConfig());
   return res.data;
 }
 
 export async function getNetworkNumbers() {
-  const res = await axios.get(`${CATALOG_URL}/network-numbers`, axiosConfig);
+  const res = await axios.get(`${CATALOG_URL}/network-numbers`, getAuthConfig());
   return res.data;
 }
 
 export async function getBudgets() {
-  const res = await axios.get(`${CATALOG_URL}/budgets`, axiosConfig);
+  const res = await axios.get(`${CATALOG_URL}/budgets`, getAuthConfig());
   return res.data;
 }
 
 export async function getProjectOptions(projectId) {
-  const res = await axios.get(`${CATALOG_URL}/project-options/${projectId}`, axiosConfig);
+  const res = await axios.get(`${CATALOG_URL}/project-options/${projectId}`, getAuthConfig());
   return res.data;
 }
 
