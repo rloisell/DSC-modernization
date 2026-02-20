@@ -168,6 +168,30 @@ export const AdminCatalogService = {
     await axios.put(`/api/admin/director-codes/${code}`, payload);
   },
 
+  async getReasonCodes() {
+    const res = await axios.get('/api/admin/reason-codes');
+    return res.data;
+  },
+  async createReasonCode(payload) {
+    const res = await axios.post('/api/admin/reason-codes', payload);
+    return res.data;
+  },
+  async updateReasonCode(code, payload) {
+    await axios.put(`/api/admin/reason-codes/${code}`, payload);
+  },
+
+  async getUnions() {
+    const res = await axios.get('/api/admin/unions');
+    return res.data;
+  },
+  async createUnion(payload) {
+    const res = await axios.post('/api/admin/unions', payload);
+    return res.data;
+  },
+  async updateUnion(code, payload) {
+    await axios.put(`/api/admin/unions/${code}`, payload);
+  },
+
   async getNetworkNumbers() {
     const res = await axios.get('/api/admin/network-numbers');
     return res.data;

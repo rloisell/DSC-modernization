@@ -1,37 +1,37 @@
-## 2026-02-20 — Director Codes Catalog Port (COMPLETED ✓)
+## 2026-02-20 — Reason Codes Catalog Port (COMPLETED ✓)
 
 **Problem Statement**:
-1. Port the legacy `Director_Code` catalog table from the Java system
-2. Provide admin endpoints for managing director codes
+1. Port the legacy `Reason_Code` catalog table from the Java system
+2. Provide admin endpoints for managing reason codes
 
 **Implementation & Resolution**:
 
 ### Backend Changes
 
-#### 1. Director Code Domain Model
-- ✅ Added `DirectorCode` entity mapped to `Director_Code` (`directorCode`, `description`)
-- ✅ Added EF Core migration `AddDirectorCodeModel`
+#### 1. Reason Code Domain Model
+- ✅ Added `ReasonCode` entity mapped to `Reason_Code` (`reasonCode`, `description`)
+- ✅ Added EF Core migration `AddReasonCodeModel`
 
 #### 2. Admin API Endpoints & DTOs
-- ✅ Added `AdminDirectorCodesController` for admin CRUD
-- ✅ Added DTOs: `DirectorCodeDto`, `DirectorCodeCreateRequest`, `DirectorCodeUpdateRequest`
+- ✅ Added `AdminReasonCodesController` for admin CRUD
+- ✅ Added DTOs: `ReasonCodeDto`, `ReasonCodeCreateRequest`, `ReasonCodeUpdateRequest`
 
 ### Frontend Support
 
 #### 1. Admin Catalog Service
-- ✅ Added `getDirectorCodes`, `createDirectorCode`, `updateDirectorCode` API helpers
+- ✅ Added `getReasonCodes`, `createReasonCode`, `updateReasonCode` API helpers
 
 **Files Modified**:
-- `src/DSC.Data/Models/DirectorCode.cs`
+- `src/DSC.Data/Models/ReasonCode.cs`
 - `src/DSC.Data/ApplicationDbContext.cs`
-- `src/DSC.Data/Migrations/20260220110559_AddDirectorCodeModel.cs`
-- `src/DSC.Data/Migrations/20260220110559_AddDirectorCodeModel.Designer.cs`
+- `src/DSC.Data/Migrations/20260220111112_AddReasonCodeModel.cs`
+- `src/DSC.Data/Migrations/20260220111112_AddReasonCodeModel.Designer.cs`
 - `src/DSC.Data/Migrations/ApplicationDbContextModelSnapshot.cs`
-- `src/DSC.Api/Controllers/AdminDirectorCodesController.cs`
+- `src/DSC.Api/Controllers/AdminReasonCodesController.cs`
 - `src/DSC.Api/DTOs/AdminCatalogDtos.cs`
 - `src/DSC.WebClient/src/api/AdminCatalogService.js`
 
-**Commit**: Pending - feat: port director code catalog
+**Commit**: Pending - feat: port reason code catalog
 
 ---
 

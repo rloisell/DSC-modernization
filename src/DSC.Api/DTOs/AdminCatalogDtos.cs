@@ -164,6 +164,40 @@ namespace DSC.Api.DTOs
         public string? Description { get; set; }
     }
 
+    public class ReasonCodeDto
+    {
+        public string Code { get; set; } = string.Empty;
+        public string? Description { get; set; }
+    }
+
+    public class ReasonCodeCreateRequest
+    {
+        public string Code { get; set; } = string.Empty;
+        public string? Description { get; set; }
+    }
+
+    public class ReasonCodeUpdateRequest
+    {
+        public string? Description { get; set; }
+    }
+
+    public class UnionDto
+    {
+        public string Code { get; set; } = string.Empty;
+        public string? Description { get; set; }
+    }
+
+    public class UnionCreateRequest
+    {
+        public string Code { get; set; } = string.Empty;
+        public string? Description { get; set; }
+    }
+
+    public class UnionUpdateRequest
+    {
+        public string? Description { get; set; }
+    }
+
     public class NetworkNumberDto
     {
         public Guid Id { get; set; }
