@@ -145,6 +145,35 @@ public record TestSeedResult(int UsersCreated, int UserAuthCreated, int Projects
                 projectsCreated++;
             }
 
+            // Add supplemental projects
+            var projectSeeds = new[]
+            {
+                new ProjectSeed("P1001", "Website Modernization", "Migrate legacy website to modern stack"),
+                new ProjectSeed("P1002", "Mobile App Development", "Build iOS and Android applications"),
+                new ProjectSeed("P1003", "Database Migration", "Migrate from Oracle to PostgreSQL"),
+                new ProjectSeed("P1004", "Cloud Infrastructure", "Move on-premises workloads to AWS"),
+                new ProjectSeed("P1005", "Security Hardening", "Implement security best practices"),
+                new ProjectSeed("P2001", "API Gateway Implementation", "Build unified API gateway for microservices"),
+                new ProjectSeed("P2002", "Analytics Platform", "Implement real-time analytics dashboard")
+            };
+
+            foreach (var seed in projectSeeds)
+            {
+                var proj = await _db.Projects.FirstOrDefaultAsync(p => p.ProjectNo == seed.ProjectNo, ct);
+                if (proj == null)
+                {
+                    _db.Projects.Add(new Project
+                    {
+                        Id = Guid.NewGuid(),
+                        ProjectNo = seed.ProjectNo,
+                        Name = seed.Name,
+                        Description = seed.Description,
+                        IsActive = true
+                    });
+                    projectsCreated++;
+                }
+            }
+
             var department = await _db.Departments.FirstOrDefaultAsync(d => d.Name == "OSS Operations", ct);
             if (department == null)
             {
@@ -158,13 +187,35 @@ public record TestSeedResult(int UsersCreated, int UserAuthCreated, int Projects
                 departmentsCreated++;
             }
 
-            // Seed test roles
+            // Add supplemental departments
+            var departmentSeeds = new[]
+            {
+                new DepartmentSeed("Engineering", "Ryan Loiselle"),
+                new DepartmentSeed("Quality Assurance", "Matthew Ammeter"),
+                new DepartmentSeed("Product Management", "Duncan McGregor")
+            };
+
+            foreach (var seed in departmentSeeds)
+            {
+                var dept = await _db.Departments.FirstOrDefaultAsync(d => d.Name == seed.Name, ct);
+                if (dept == null)
+                {
+                    _db.Departments.Add(new Department
+                    {
+                        Id = Guid.NewGuid(),
+                        Name = seed.Name,
+                        ManagerName = seed.ManagerName,
+                        IsActive = true
+                    });
+                    departmentsCreated++;
+                }
+            }
+
+            // Seed test roles (from database schema)
             var roleSeeds = new[]
             {
-                new RoleSeed("Administrator", "System administrator with full access"),
-                new RoleSeed("Manager", "Project manager role"),
-                new RoleSeed("Developer", "Development team member"),
-                new RoleSeed("Viewer", "Read-only access to projects")
+                new RoleSeed("Admin", "Administrator"),
+                new RoleSeed("User", "DSC User")
             };
 
             foreach (var seed in roleSeeds)
@@ -185,15 +236,21 @@ public record TestSeedResult(int UsersCreated, int UserAuthCreated, int Projects
                 }
             }
 
-            // Seed test activity codes
+            // Seed test activity codes (from database schema + supplemental)
             var activityCodeSeeds = new[]
             {
+                new ActivityCodeSeed("10", "Diagramming"),
+                new ActivityCodeSeed("11", "Project Meeting"),
                 new ActivityCodeSeed("DEV", "Development work"),
                 new ActivityCodeSeed("TEST", "Testing and QA"),
                 new ActivityCodeSeed("DOC", "Documentation"),
                 new ActivityCodeSeed("ADMIN", "Administrative work"),
                 new ActivityCodeSeed("MEET", "Meetings and planning"),
-                new ActivityCodeSeed("TRAIN", "Training activities")
+                new ActivityCodeSeed("TRAIN", "Training activities"),
+                new ActivityCodeSeed("BUG", "Bug fixing and maintenance"),
+                new ActivityCodeSeed("REV", "Code review"),
+                new ActivityCodeSeed("ARCH", "Architecture and design"),
+                new ActivityCodeSeed("DEPLOY", "Deployment and release")
             };
 
             foreach (var seed in activityCodeSeeds)
@@ -212,15 +269,21 @@ public record TestSeedResult(int UsersCreated, int UserAuthCreated, int Projects
                 }
             }
 
-            // Seed test network numbers
+            // Seed test network numbers (from database schema + supplemental)
             var networkNumberSeeds = new[]
             {
-                new NetworkNumberSeed(101, "Network Infrastructure"),
-                new NetworkNumberSeed(102, "Data Center Operations"),
-                new NetworkNumberSeed(103, "Customer Support"),
-                new NetworkNumberSeed(201, "Engineering"),
-                new NetworkNumberSeed(202, "Security Operations"),
-                new NetworkNumberSeed(203, "Cloud Services")
+                new NetworkNumberSeed(99, "Dev"),
+                new NetworkNumberSeed(100, "Test"),
+                new NetworkNumberSeed(101, "Prod"),
+                new NetworkNumberSeed(110, "Infrastructure"),
+                new NetworkNumberSeed(111, "Database Services"),
+                new NetworkNumberSeed(120, "Security Operations"),
+                new NetworkNumberSeed(121, "Threat Detection"),
+                new NetworkNumberSeed(130, "Network Engineering"),
+                new NetworkNumberSeed(200, "Customer Support"),
+                new NetworkNumberSeed(201, "Sales Engineering"),
+                new NetworkNumberSeed(210, "Product Development"),
+                new NetworkNumberSeed(220, "Quality Assurance")
             };
 
             foreach (var seed in networkNumberSeeds)
@@ -250,5 +313,7 @@ public record TestSeedResult(int UsersCreated, int UserAuthCreated, int Projects
         private record RoleSeed(string Name, string? Description);
         private record ActivityCodeSeed(string Code, string? Description);
         private record NetworkNumberSeed(int Number, string? Description);
+        private record DepartmentSeed(string Name, string ManagerName);
+        private record ProjectSeed(string ProjectNo, string Name, string? Description);
     }
 }
