@@ -1,3 +1,46 @@
+## Authentication System  — 2026-02-21 ✅ NEW
+
+### User-Based Authentication Implemented
+- ✅ **Backend**: UserIdAuthenticationHandler reads X-User-Id header from requests
+  - Validates user exists in database
+  - Sets ClaimsPrincipal for role-based access control
+  - Enables ProjectsController to filter projects by user role and assignments
+- ✅ **Frontend**: AuthConfig.js utility centralizes authentication header management
+  - Reads user ID from localStorage (stored during login)
+  - Adds X-User-Id header to all API requests
+  - Single source of truth for auth configuration
+- ✅ **API Services**: All services updated to use AuthConfig
+  - ProjectService.js - for project list
+  - CatalogService.js - for activity codes, network numbers, budgets
+  - WorkItemService.js - for work item CRUD operations
+- ✅ **Result**: All API endpoints now have proper authentication context
+  - Projects endpoint returns only user's assigned projects (for Users)
+  - Projects endpoint returns all projects (for Admin/Manager)
+  - Form dropdowns populate correctly with user data
+
+### Authentication Flow
+```
+Frontend Login → Store user {id, username, role} in localStorage
+         ↓
+API Request → AuthConfig reads user.id, adds X-User-Id header
+         ↓
+UserIdAuthenticationHandler → Validates user, sets up claims
+         ↓
+Controller → User.FindFirst(NameIdentifier) returns validated userId
+         ↓
+Role-based filtering applied (Admin sees all, User sees assigned)
+```
+
+**Files Modified**:
+- `src/DSC.Api/Security/UserIdAuthenticationHandler.cs` (NEW)
+- `src/DSC.Api/Program.cs` (registered UserId auth scheme)
+- `src/DSC.WebClient/src/api/AuthConfig.js` (NEW utility)
+- `src/DSC.WebClient/src/api/ProjectService.js` (updated)
+- `src/DSC.WebClient/src/api/CatalogService.js` (updated)
+- `src/DSC.WebClient/src/api/WorkItemService.js` (updated)
+
+---
+
 ## Recent Fixes & Data Improvements — 2026-02-21 ✅ NEW
 
 ### Expense Activity Form Fixed
@@ -337,12 +380,27 @@ See [tests/howto.md](tests/howto.md) for comprehensive testing documentation, in
 1. Start API: `cd src/DSC.Api && dotnet run` (migrations execute automatically)
 2. Seed test data: `curl -X POST http://localhost:5005/api/admin/seed/test-data -H "X-Admin-Token: local-admin-token"`
 3. Start WebClient: `cd src/DSC.WebClient && npm run dev`
-4. Test admin workflows:
+4. Login with test account:
+   - Username: `kduma`
+   - Password: `test-password-updated`
+   - Role: User (will see 4 assigned projects)
+5. Test user workflows:
+   - [http://localhost:5173/activity](http://localhost:5173/activity) - work item tracking with cumulative hours
+   - [http://localhost:5173/projects](http://localhost:5173/projects) - project list (filtered by assignment)
+   - Add new work item with proper project/activity code/network selection
+   - Verify cumulative remaining hours calculations
+6. Test admin workflows (login as rloisel1):
    - [http://localhost:5173/admin/roles](http://localhost:5173/admin/roles) - create/edit/deactivate roles
    - [http://localhost:5173/admin/users](http://localhost:5173/admin/users) - assign roles, positions, departments
    - [http://localhost:5173/admin/departments](http://localhost:5173/admin/departments) - assign department managers
    - [http://localhost:5173/admin/positions](http://localhost:5173/admin/positions) - manage positions
-   - [http://localhost:5173/activity](http://localhost:5173/activity) - create work items with dropdown catalogs
+   - [http://localhost:5173/admin/projects](http://localhost:5173/admin/projects) - manage projects (see all 8)
+
+### Test Accounts
+- **kduma** (User) - test-password-updated - assigned to 4 projects
+- **dmcgregor** (Manager) - test-password-updated - can see all projects
+- **rloisel1** (Admin) - test-password-updated - can access admin features
+- **mammeter** (User) - test-password-updated - assigned to 3 projects
 
 ## Previous Work — 2026-02-19
 

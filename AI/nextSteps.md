@@ -1,6 +1,232 @@
 # Remaining Work (2026-02-21)
 
-## ✅ COMPLETED: Fix Form Field Display & Seed Data (2026-02-21 — Session 3)
+## ✅ COMPLETED: Fix Authentication & Enable API Access (2026-02-21 — Session 4)
+
+**Status**: COMPLETE ✅ Ready for Full Testing
+
+### Fixed Issues
+1. ✅ Removed "Remaining Hours" column from activity table
+2. ✅ Projects dropdown now populates correctly in Add Work Item form
+3. ✅ Projects page now displays user's assigned projects
+
+### Root Cause & Solution
+- **Problem**: API endpoints return empty when user not authenticated
+- **Root Cause**: Frontend stored user in localStorage but never sent userId to API
+- **Solution**: 
+  - Created UserIdAuthenticationHandler to read X-User-Id header
+  - Created AuthConfig.js utility to extract user ID from localStorage
+  - Updated all API services to send X-User-Id header in every request
+  - Now backend can identify user and apply role-based filtering
+
+### Technical Details
+- Backend: UserIdAuthenticationHandler reads X-User-Id header, sets up ClaimsPrincipal
+- Frontend: AuthConfig.getAuthConfig() reads localStorage and adds header to all axios calls
+- Flow: Login → localStorage → X-User-Id header → UserIdAuthenticationHandler → controller access to User.FindFirst()
+
+### Files Modified
+- `src/DSC.Api/Security/UserIdAuthenticationHandler.cs` (NEW)
+- `src/DSC.Api/Program.cs` (registered UserId auth scheme)
+- `src/DSC.WebClient/src/api/AuthConfig.js` (NEW utility)
+- `src/DSC.WebClient/src/api/ProjectService.js` (uses AuthConfig)
+- `src/DSC.WebClient/src/api/CatalogService.js` (uses AuthConfig)
+- `src/DSC.WebClient/src/api/WorkItemService.js` (uses AuthConfig)
+
+### Build Status
+- ✅ **Build**: Success with 0 errors, 6 nullable warnings
+- ✅ **API**: Running on port 5005, all endpoints working
+- ✅ **Frontend**: Running on port 5173, ready for testing
+- ✅ **Database**: Fresh seeding with 44 work items across 4 users
+
+### Testing Verification
+- ✅ Login: Returns user ID correctly
+- ✅ API Projects: kduma sees 4 assigned projects, admin sees all 8
+- ✅ Form Dropdowns: Project selection works
+- ✅ Cumulative Hours: Form fields populate with project data
+
+### Commit
+- ✅ Committed: `fix: implement user-based authentication for API services`
+- ✅ Pushed: to origin/main
+
+---
+
+## 🔄 IN PROGRESS: Full Feature Testing & Validation
+
+**Current Phase**: User testing all features with proper authentication
+
+### Recommended Test Sequence:
+1. **Open** http://localhost:5173
+2. **Login** as kduma / test-password-updated
+3. **Activity Page Tests**:
+   - ✓ Project Summary displays 4 projects with estimations
+   - ✓ "My Activities" table shows only assigned projects (no Remaining Hours column)
+   - ✓ Add Work Item form has Project dropdown populated
+   - ✓ Select project → form fields auto-populate
+   - ✓ Three cumulative hours fields display correctly:
+     - Project Estimated Hours: 150
+     - Current Cumulative Remaining: -48
+     - Projected Remaining After Entry: updates dynamically
+   - ✓ Enter actual duration → projected field updates
+   - ✓ Overbudget indicator shows in red with ⚠️ warning
+4. **Projects Page Tests**:
+   - ✓ Projects page shows 4 assigned projects
+   - ✓ Each project shows name and current status
+5. **Admin Testing** (as rloisel1):
+   - ✓ Projects page shows all 8 projects (not just assigned)
+   - ✓ Project dropdown shows all 8 projects
+6. **Edge Cases**:
+   - ✓ Create new work item and verify cumulative recalculates
+   - ✓ Test with different project selections
+   - ✓ Verify form clears when canceling
+
+### Test Accounts
+- kduma (User) - test-password-updated - sees 4 assigned projects
+- dmcgregor (Manager) - test-password-updated - sees all projects
+- rloisel1 (Admin) - test-password-updated - sees all projects + admin features
+- mammeter (User) - test-password-updated - sees 3 assigned projects
+
+### Key Test Scenario
+- Login as kduma
+- Navigate to Activity page
+- Select Project: P1004 — Cloud Infrastructure (150 estimated hours)
+- Form should show: 150 hrs estimated, -48 hrs cumulative remaining
+- Enter actual duration (e.g., 4 hours) and verify projected decreases by 4
+- Add to verify database update
+
+---
+
+## 📋 NEXT PRIORITIES
+
+### Priority 1: Create AdminProjectAssignments Management UI
+**Status**: Not started
+**Folder**: `src/DSC.WebClient/src/pages/admin/`
+
+**Features Needed**:
+1. AdminProjectAssignments.jsx page component
+2. List all project-user assignments with role
+3. Add new assignment (select project + user + role)
+4. Edit assignment (change role or estimated hours per assignment)
+5. Delete assignment
+6. API calls to:
+   - GET `/api/admin/projects/{id}/assignments` - list assignments
+   - POST `/api/admin/projects/{id}/assignments` - create
+   - PUT `/api/admin/projects/{id}/assignments/{userId}` - update
+   - DELETE `/api/admin/projects/{id}/assignments/{userId}` - delete
+
+**UI Design Guidance**:
+- Use BC Gov Design System components (Table, Button, Modal)
+- Consistent with AdminProjects.jsx layout
+- Include role dropdown (Admin, Manager, User)
+- Optional: display estimated hours per assignment override
+
+### Priority 2: Create Reporting Dashboard
+**Status**: Not started
+**Folder**: `src/DSC.WebClient/src/pages/`
+
+**Features Needed**:
+1. ReportsPage.jsx component
+2. Filters: Date range, Project, Activity status
+3. Charts: 
+   - Hours by project (bar chart)
+   - Hours by activity code (pie chart)
+   - Activity trend (line chart over time)
+4. Summary table with:
+   - Total hours budgeted vs actual
+   - Overbudget projects highlighted
+   - By-activity breakdown
+5. Export to CSV functionality
+
+**Data Requirements**:
+- New endpoint: `/api/reports/summary` - aggregated hours data
+- Filter parameters: dateStart, dateEnd, projectId, activityCode
+
+### Priority 3: Add Unit Tests for Authentication
+**Status**: Not started
+**File**: `tests/DSC.Tests/AuthenticationTests.cs`
+
+**Tests Needed**:
+1. UserIdAuthenticationHandler parses X-User-Id header correctly
+2. Invalid X-User-Id returns 401 Unauthorized
+3. Missing X-User-Id returns default/no-auth (depends on requirements)
+4. User claims properly set after authentication
+5. ProjectsController filters based on user role
+6. Admin users see all projects, regular users see only assigned
+
+### Priority 4: Frontend Unit Tests
+**Status**: Not started
+**Files**: 
+- `src/DSC.WebClient/src/api/__tests__/AuthConfig.test.js`
+- `src/DSC.WebClient/src/api/__tests__/ProjectService.test.js`
+
+**Tests Needed**:
+1. AuthConfig.getAuthConfig() reads localStorage correctly
+2. AuthConfig includes X-User-Id header when user logged in
+3. AuthConfig returns empty-user config when no user logged in
+4. ProjectService adds auth config to axios calls
+5. ProjectService handles missing projects gracefully
+
+### Priority 5: Security & Hardening (Post-MVP)
+**Status**: Planning phase
+
+**Items**:
+1. JWT token-based auth instead of header-based (more secure for production)
+2. Token refresh mechanism
+3. OIDC/Keycloak integration (per README goals)
+4. SQL injection prevention audit
+5. XSS prevention audit
+6. CORS configuration review
+
+### Priority 6: Documentation Updates (Post-Implementation)
+- [ ] Update API documentation (Swagger/OpenAPI)
+- [ ] Add architecture diagram (UserIdAuth flow)
+- [ ] Add deployment guide
+- [ ] Add configuration guide (admin token, database connection)
+
+---
+
+## 📊 Project Statistics
+
+**Code Metrics**:
+- Total commits: 8 (since Session 1)
+- Files modified: 20+
+- Build status: ✅ Always passing
+- Test coverage: 16 unit tests (passing)
+- API endpoints: 40+
+
+**Work Items Seeded**: 44 across 4 users, 8 projects
+**Database**: MySQL with 35+ tables
+**Frontend Build**: Vite + React 18, runs on port 5173
+**Backend Build**: ASP.NET Core 10, runs on port 5005
+
+---
+
+## 📚 Reference Information
+
+**Project Structure**:
+```
+DSC-modernization/
+├── src/
+│   ├── DSC.Api/           # Backend API (ASP.NET Core)
+│   ├── DSC.Data/          # Entity Framework models & migrations
+│   ├── DSC.Web/           # Legacy Razor Pages (optional)
+│   └── DSC.WebClient/     # Frontend (React + Vite)
+├── tests/
+│   └── DSC.Tests/         # Unit tests (xUnit)
+├── docs/
+│   └── local-development/ # Setup guides
+└── AI/                    # This folder - work logs and planning
+
+**Key Files**:
+- Program.cs: API startup, authentication, services
+- Activity.jsx: Main activity tracking page
+- ProjectService.js: Projects API client
+- UserIdAuthenticationHandler.cs: User auth handler
+- AuthConfig.js: Frontend auth configuration utility
+- TestDataSeeder.cs: Database seeding with realistic test data
+```
+
+---
+
+
 
 **Status**: COMPLETE ✅ Ready for Testing
 

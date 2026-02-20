@@ -1,3 +1,102 @@
+## 2026-02-21 — Session 4: Fix Authentication & Enable API Access (COMPLETED ✓)
+
+**Objective**: Diagnose and fix why API endpoints (projects list, catalog endpoints) return empty data. Root cause was missing authentication context in frontend-to-API communication.
+
+**Issues Identified & Fixed**:
+
+### Root Cause Analysis ✅
+**Problem**: During testing, three issues appeared:
+1. "Remaining Hours" column needed removal from activity table
+2. Select Project dropdown in Add Work Item form not working
+3. Projects page showing "no projects found"
+
+**Root Cause Discovered**: API endpoints require authentication (userId) but frontend wasn't sending it
+- Backend has role-based filtering: Admin/Manager see all projects, Users see only assigned projects
+- ProjectsController.GetAll() calls `User.FindFirst(ClaimTypes.NameIdentifier)` to get userId
+- Frontend only stored user in localStorage but never sent it to API
+- Result: API couldn't identify the user, treated all requests as unauthenticated
+
+### Implementation: User-Based Authentication ✅
+
+**Backend Changes**:
+1. **Created UserIdAuthenticationHandler**
+   - File: [src/DSC.Api/Security/UserIdAuthenticationHandler.cs](src/DSC.Api/Security/UserIdAuthenticationHandler.cs)
+   - Reads X-User-Id header from requests
+   - Looks up user in database with role information
+   - Sets ClaimsPrincipal with NameIdentifier claim
+   - Enables ProjectsController to identify authenticated users
+
+2. **Registered Authentication Handler**
+   - File: [src/DSC.Api/Program.cs](src/DSC.Api/Program.cs#L18-L19)
+   - Added "UserId" authentication scheme alongside existing "AdminToken" scheme
+   - Allows both admin token auth and user ID auth to work together
+
+**Frontend Changes**:
+1. **Created AuthConfig.js Utility**
+   - File: [src/DSC.WebClient/src/api/AuthConfig.js](src/DSC.WebClient/src/api/AuthConfig.js)
+   - Reads user object from localStorage (stored during login)
+   - Extracts userId and returns axios config with X-User-Id header
+   - Also sets Content-Type, Accept, and withCredentials headers
+   - Single source of truth for authentication configuration
+
+2. **Updated API Services**
+   - File: [src/DSC.WebClient/src/api/ProjectService.js](src/DSC.WebClient/src/api/ProjectService.js)
+     - getProjects() now uses getAuthConfig()
+   - File: [src/DSC.WebClient/src/api/CatalogService.js](src/DSC.WebClient/src/api/CatalogService.js)
+     - All 4 functions now use getAuthConfig() for consistency
+   - File: [src/DSC.WebClient/src/api/WorkItemService.js](src/DSC.WebClient/src/api/WorkItemService.js)
+     - All 4 functions standardized with getAuthConfig()
+
+### Authentication Flow (After Fix) ✅
+```
+1. User logs in → Frontend stores:
+   { id: "1e6c7276-e84c-46df-88a1-d2bc25bbce9d", username: "kduma", roleName: "User", ... }
+   in localStorage as 'dsc_user'
+
+2. Any API request → Frontend:
+   - Reads user object from localStorage via AuthConfig.getAuthConfig()
+   - Extracts user.id and adds X-User-Id header to request
+   - Sends: GET /api/projects with header X-User-Id: 1e6c7276-e84c-46df-88a1-d2bc25bbce9d
+
+3. Backend receives request → UserIdAuthenticationHandler:
+   - Reads X-User-Id header from request
+   - Queries database for User with that ID (includes Role data)
+   - Creates ClaimsPrincipal with NameIdentifier claim set to user ID
+
+4. Controller method → ProjectsController.GetAll():
+   - Calls User.FindFirst(ClaimTypes.NameIdentifier) → returns "1e6c7276..."
+   - Looks up user role (Role.Name = "User")
+   - Filters projects: only those in ProjectAssignments for this user
+   - Returns: 4 projects for kduma (P2001, P2002, P1002, P1001)
+```
+
+### Testing & Verification ✅
+
+**Manual API Tests**:
+- ✅ Login endpoint returns user ID: `"id": "1e6c7276-e84c-46df-88a1-d2bc25bbce9d"`
+- ✅ Projects endpoint with X-User-Id header returns: `[{id, projectNo: "P2001", name: "API Gateway Implementation", ...}]`
+- ✅ API logs show proper database queries for user lookup and project filtering
+- ✅ Admin user (rloisel1) can see all 8 projects, User (kduma) sees only 4 assigned
+
+**Issues Fixed**:
+- ✅ Issue #1: Removed "Remaining Hours" column from activity table (from Session 3)
+- ✅ Issue #2: Projects dropdown now works (Select Project field auto-populates)
+- ✅ Issue #3: Projects page now displays assigned projects correctly
+
+**Build Status**: ✅ Success (0 errors, 6 nullable warnings)
+
+**Files Modified**:
+- `src/DSC.Api/Security/UserIdAuthenticationHandler.cs` - NEW
+- `src/DSC.Api/Program.cs` - Added UserId auth scheme registration
+- `src/DSC.WebClient/src/api/AuthConfig.js` - NEW utility for auth headers
+- `src/DSC.WebClient/src/api/ProjectService.js` - Updated to use AuthConfig
+- `src/DSC.WebClient/src/api/CatalogService.js` - Updated to use AuthConfig
+- `src/DSC.WebClient/src/api/WorkItemService.js` - Updated to use AuthConfig
+
+**Commit**: `fix: implement user-based authentication for API services`
+
+---
+
 ## 2026-02-21 — Session 3: Fix Form Field Display & Seed Data Calculations (COMPLETED ✓)
 
 **Objective**: Resolve issues with cumulative remaining hours display and ensure seed data properly calculates cumulative totals without individual work item estimations.
