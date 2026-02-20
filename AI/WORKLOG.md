@@ -93,11 +93,67 @@
 
 **Commits**: 
 - `80a0841` - feat: implement project activity options assignment and filtering
-- Current - feat: add project activity options table views with delete functionality
+- `2b7e885` - feat: add project activity options table views with delete functionality
 
 ---
 
-## 2026-02-20 — Activity Codes & Network Numbers Dropout Issue (RESOLVED ✓)
+## 2026-02-20 — Projects Page Enhancement (COMPLETED ✓)
+
+**Problem Statement**:
+1. Projects page included "Add Project" form which should be admin-only
+2. No way for users to browse project activity options without going to Activity page
+3. Project estimated hours not displayed anywhere for user reference
+
+**Implementation & Resolution**:
+
+### Frontend Changes
+
+#### 1. Removed Add Project Form
+- ✅ Removed project creation form from user-facing Projects page
+- ✅ Project creation now exclusively in Admin Projects section
+- ✅ Removed unused imports: Button, ButtonGroup, Form, TextArea, TextField
+- ✅ Removed createProject from ProjectService imports
+
+#### 2. Enhanced Projects Table
+- ✅ Replaced simple list with interactive table displaying:
+  - Project No (with "—" placeholder if not set)
+  - Name (bold for emphasis)
+  - Description (with "—" placeholder if empty)
+  - Estimated Hours (formatted with "hrs" suffix, "—" if null)
+- ✅ Made table rows clickable to select project
+- ✅ Added visual feedback:
+  - Selected row highlighted with light blue background (#f0f9ff)
+  - Hover effect on non-selected rows (light gray #f8fafc)
+  - Pointer cursor on hover
+
+#### 3. Project Activity Options Viewer
+- ✅ Added `selectedProject` state to track user selection
+- ✅ Added `projectOptions` state to store project-specific activity options
+- ✅ When project row is clicked:
+  - Loads project activity options via `/api/catalog/project-options/{projectId}`
+  - Displays section titled "Project Activity Options: [ProjectNo — Name]"
+  - Shows table of valid activity code + network number pairs
+  - Includes full descriptions for codes and numbers
+- ✅ Handles edge cases:
+  - Loading state while fetching options
+  - Empty state message when no options assigned
+  - Error handling with inline alert
+
+**User Experience Improvements**:
+- ✅ Users can now browse all projects in a clean table format
+- ✅ Estimated hours visible at a glance for project planning
+- ✅ One-click access to view what activity codes and network numbers are available for each project
+- ✅ Clear messaging when projects have no assigned options (directs users to contact admin)
+- ✅ Page description: "Browse projects and view available activity codes and network numbers for each project."
+
+**Files Modified**:
+- `src/DSC.WebClient/src/pages/Project.jsx`
+
+**Commit**: Current - refactor: enhance Projects page with interactive table and activity options viewer
+
+---
+
+## 2026-02-20 — Project Activity Options Table Views (COMPLETED ✓)
 
 **Problem Statement**:
 Activity page and Admin pages were not displaying dropdown data for activity codes and network numbers, despite seeding code being implemented, API endpoints created, and tests validating functionality in isolation.

@@ -21,15 +21,34 @@ dotnet test tests/DSC.Tests/DSC.Tests.csproj --verbosity detailed
 
 See [tests/howto.md](tests/howto.md) for comprehensive testing documentation, infrastructure details, and how to add new tests.
 
-## WebClient (React) Progress — 2026-02-21
+## Projects Page — 2026-02-20 (UPDATED)
 
-- All static assets from legacy `WebContent` (CSS, JS, images, calendar libs) are now in `src/DSC.WebClient/public`.
-- React page stubs for `Activity`, `Project`, `Administrator`, and `Login` are in `src/DSC.WebClient/src/pages/`.
-- Routing matches legacy JSPs; see `src/DSC.WebClient/src/App.jsx`.
-- API service layer (`src/DSC.WebClient/src/api/`) uses `axios` for backend calls. Example: `ProjectService.js`.
-- `Project` page fetches and displays project data from `/api/projects`.
-- All required npm dependencies installed.
-- Docs updated and changes pushed.
+**What's working:**
+- ✅ **Interactive Projects Table**: Displays all projects in a tabular format with columns:
+  - Project No (legacy identifier from Java system)
+  - Name (primary project identifier)
+  - Description (project details)
+  - **Estimated Hours** (NEW) - Shows project time estimates for planning
+- ✅ **Clickable Project Rows**: Click any project row to view its activity options
+- ✅ **Visual Feedback**: Selected project highlighted; hover effects on all rows
+- ✅ **Project Activity Options Viewer** (NEW):
+  - When project is selected, displays all valid activity code + network number pairs
+  - Shows full descriptions for codes and numbers
+  - Helps users understand what options are available before creating work items
+  - Empty state message directs users to contact admin if no options assigned
+- ✅ **Admin-Only Project Creation**: "Add Project" form removed from user page (now in Admin Projects only)
+
+**How to use:**
+1. Navigate to Projects page
+2. Browse projects in the table (view name, description, estimated hours)
+3. Click any project row to see its activity options
+4. Review valid activity code + network number combinations
+5. Use this information when creating work items on the Activity page
+
+**For Admins:**
+- To create new projects: Use Admin Projects page
+- To assign activity options: Use "Assign All Options" button in Admin Projects
+- To manage individual assignments: Use Project Activity Options table in Admin Projects
 
 ## Activity Page — 2026-02-21 (UPDATED)
 

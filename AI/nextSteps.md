@@ -62,11 +62,55 @@
 
 **Commits**: 
 - `80a0841` - feat: implement project activity options assignment and filtering
-- Current - feat: add project activity options table views with delete functionality
+- `2b7e885` - feat: add project activity options table views with delete functionality
+- Current - refactor: enhance Projects page with interactive table and activity options viewer
 
 ---
 
-## ✅ RESOLVED: Activity Codes & Network Numbers Dropdowns Now Working
+## ✅ COMPLETED: Projects Page Enhancement (2026-02-20)
+
+**Status**: COMPLETE ✅
+
+### Changes Made
+
+#### 1. Removed Add Project Form ✅
+- **Issue**: Projects page had project creation form which should be admin-only
+- **Solution**: Removed "Add Project" section entirely from user-facing Projects page
+- **Location**: Project creation now exclusively in Admin Projects section
+
+#### 2. Interactive Projects Table with Estimated Hours ✅
+- **Enhancement**: Replaced simple list with interactive table
+- **Columns**:
+  - Project No (legacy identifier)
+  - Name (bold for emphasis)
+  - Description
+  - Estimated Hours (new column showing project time estimates)
+- **Features**:
+  - Clickable rows to select project
+  - Visual feedback: selected row highlighted, hover effects
+  - Placeholder "—" for empty values
+
+#### 3. Project Activity Options Viewer ✅
+- **Enhancement**: When user clicks a project row, displays dedicated section showing:
+  - All valid activity code + network number combinations for that project
+  - Full descriptions for codes and numbers
+  - Clear messaging when no options assigned (directs to admin)
+- **Benefits**:
+  - Users can browse available options before creating work items
+  - No need to navigate to Activity page to discover valid combinations
+  - Better understanding of project scope and available categorizations
+
+### User Experience Improvements
+- ✅ Clean separation of user functions (browse/view) from admin functions (create/edit)
+- ✅ Project estimated hours now visible for planning purposes
+- ✅ One-click access to project activity options
+- ✅ Improved discoverability of valid activity code + network number pairs
+
+**Files Modified**: `src/DSC.WebClient/src/pages/Project.jsx`
+
+---
+
+## ✅ COMPLETED: Project Activity Options Table Views (2026-02-20)
 
 **Issue**: Dropdowns not showing seed data due to database connection issue  
 **Resolution**: Fixed connection string and API port mismatch  
