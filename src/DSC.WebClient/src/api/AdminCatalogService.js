@@ -99,6 +99,18 @@ export const AdminCatalogService = {
     await axios.put(`/api/admin/activity-codes/${id}`, payload);
   },
 
+  async getCpcCodes() {
+    const res = await axios.get('/api/admin/cpc-codes');
+    return res.data;
+  },
+  async createCpcCode(payload) {
+    const res = await axios.post('/api/admin/cpc-codes', payload);
+    return res.data;
+  },
+  async updateCpcCode(code, payload) {
+    await axios.put(`/api/admin/cpc-codes/${code}`, payload);
+  },
+
   async getNetworkNumbers() {
     const res = await axios.get('/api/admin/network-numbers');
     return res.data;

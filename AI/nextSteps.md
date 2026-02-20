@@ -1,5 +1,35 @@
 # Remaining Work (2026-02-21)
 
+## ✅ COMPLETED: CPC Code Catalog Port (2026-02-20)
+
+**Status**: COMPLETE ✅
+
+### Changes Made
+
+#### 1. CPC Code Model ✅
+- **Added**: `CpcCode` entity mapped to legacy `CPC_Code`
+- **Mapped Columns**: `cpcCode`, `description`
+- **Migration**: `AddCpcCodeModel`
+
+#### 2. Admin API & DTOs ✅
+- **Admin**: `/api/admin/cpc-codes` CRUD endpoints
+- **DTOs**: `CpcCodeDto`, create/update requests
+
+#### 3. WebClient Admin Service ✅
+- **AdminCatalogService**: `getCpcCodes`, `createCpcCode`, `updateCpcCode`
+
+**Files Modified**:
+- `src/DSC.Data/Models/CpcCode.cs`
+- `src/DSC.Data/ApplicationDbContext.cs`
+- `src/DSC.Data/Migrations/20260220111513_AddCpcCodeModel.cs`
+- `src/DSC.Data/Migrations/20260220111513_AddCpcCodeModel.Designer.cs`
+- `src/DSC.Data/Migrations/ApplicationDbContextModelSnapshot.cs`
+- `src/DSC.Api/Controllers/AdminCpcCodesController.cs`
+- `src/DSC.Api/DTOs/AdminCatalogDtos.cs`
+- `src/DSC.WebClient/src/api/AdminCatalogService.js`
+
+**Commit**: Pending - feat: port CPC code catalog
+
 ## ✅ COMPLETED: Budget Classification (CAPEX/OPEX) Port (2026-02-20)
 
 **Status**: COMPLETE ✅
