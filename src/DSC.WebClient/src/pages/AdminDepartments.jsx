@@ -10,11 +10,13 @@ import {
   Text,
   TextField
 } from '@bcgov/design-system-react-components';
+import { getAdminUsers } from '../api/AdminUserService';
 import { AdminCatalogService } from '../api/AdminCatalogService';
 
 export default function AdminDepartments() {
   const [message, setMessage] = useState('');
   const [departments, setDepartments] = useState([]);
+  const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [form, setForm] = useState({ name: '', manager: '', status: 'active' });
@@ -26,11 +28,31 @@ export default function AdminDepartments() {
     { id: 'inactive', label: 'Inactive' }
   ];
 
+  const userItems = users.map(u => {
+    const displayName = `${u.firstName || ''} ${u.lastName || ''}`.trim() || u.username || u.email;
+    return {
+      id: u.id,
+      label: displayName,
+      description: u.email || undefined
+    };
+  });
+
   useEffect(() => {
-    AdminCatalogService.getDepartments()
-      .then(setDepartments)
-      .catch(e => setError(e.message))
-      .finally(() => setLoading(false));
+    const loadData = async () => {
+      try {
+        const [deptsData, usersData] = await Promise.all([
+          AdminCatalogService.getDepartments(),
+          getAdminUsers()
+        ]);
+        setDepartments(deptsData);
+        setUsers(usersData);
+      } catch (e) {
+        setError(e.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadData();
   }, []);
 
   function updateForm(field, value) {
@@ -42,16 +64,25 @@ export default function AdminDepartments() {
     setMessage('');
     setError(null);
     try {
+      // Look up the selected user's name if manager is a user ID
+      let managerName = form.manager || '';
+      if (form.manager && form.manager !== '') {
+        const selectedUser = users.find(u => u.id === form.manager);
+        if (selectedUser) {
+          managerName = `${selectedUser.firstName || ''} ${selectedUser.lastName || ''}`.trim() || selectedUser.username;
+        }
+      }
+
       if (editingId) {
         await AdminCatalogService.updateDepartment(editingId, {
           name: form.name,
-          managerName: form.manager,
+          managerName: managerName,
           isActive: form.status === 'active'
         });
       } else {
         await AdminCatalogService.createDepartment({
           name: form.name,
-          managerName: form.manager
+          managerName: managerName
         });
       }
       const refreshed = await AdminCatalogService.getDepartments();
@@ -66,9 +97,18 @@ export default function AdminDepartments() {
 
   function handleEdit(dept) {
     setEditingId(dept.id);
+    // Try to find the user by name when editing
+    let managerId = '';
+    if (dept.managerName) {
+      const matchedUser = users.find(u => {
+        const fullName = `${u.firstName || ''} ${u.lastName || ''}`.trim();
+        return fullName === dept.managerName || u.username === dept.managerName;
+      });
+      managerId = matchedUser ? matchedUser.id : '';
+    }
     setForm({
       name: dept.name,
-      manager: dept.managerName || '',
+      manager: managerId,
       status: dept.isActive ? 'active' : 'inactive'
     });
   }
@@ -108,11 +148,13 @@ export default function AdminDepartments() {
             onChange={value => updateForm('name', value)}
             isRequired
           />
-          <TextField
+          <Select
             label="Manager"
-            value={form.manager}
-            onChange={value => updateForm('manager', value)}
-            placeholder="Select user"
+            placeholder="Select a manager"
+            items={userItems}
+            selectedKey={form.manager || null}
+            onSelectionChange={key => updateForm('manager', key ? String(key) : '')}
+            description="Optional: assign a user as department manager"
           />
           <Select
             label="Status"
@@ -131,6 +173,8 @@ export default function AdminDepartments() {
                 onPress={() => {
                   setEditingId('');
                   setForm({ name: '', manager: '', status: 'active' });
+                  setMessage('');
+                  setError(null);
                 }}
               >
                 Cancel
