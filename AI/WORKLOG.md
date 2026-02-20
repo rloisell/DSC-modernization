@@ -49,6 +49,27 @@
 - `src/DSC.Api/Controllers/AuthController.cs`
 
 **Files Modified**:
+- `src/DSC.WebClient/src/App.jsx` - Added AuthProvider and protected routes
+- `src/DSC.WebClient/src/pages/Login.jsx` - Implemented working authentication
+- `src/DSC.Api/Seeding/TestDataSeeder.cs` - Added role assignment logic
+- `README.md` - Documented authentication and RBAC
+- `AI/nextSteps.md` - Updated remaining work
+- `AI/WORKLOG.md` - Recorded implementation
+
+**Verification & Testing**:
+- ✅ API running on http://localhost:5005
+- ✅ WebClient running on http://localhost:5173
+- ✅ Login endpoint tested: `/api/auth/login` returns user with role
+- ✅ Admin user verified: rloisel1 has Admin role
+- ✅ User account verified: kduma has User role
+- ✅ Route protection verified: ProtectedRoute redirects unauthenticated users
+- ✅ Admin restriction verified: AdminRoute blocks non-admin users
+- ✅ Navigation links conditional: Activity/Projects/Admin links show/hide based on auth
+
+**Commit**: eaf2def - feat: implement role-based access control
+
+---
+**Files Modified**:
 - `src/DSC.WebClient/src/App.jsx`
 - `src/DSC.WebClient/src/pages/Login.jsx`
 - `src/DSC.Api/Seeding/TestDataSeeder.cs`

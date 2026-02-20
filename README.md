@@ -42,15 +42,24 @@ These tables use composite primary keys and preserve the original Java naming co
 - **Admin user**: username `rloisel1`, password `test-password-updated`
 - **Regular user**: username `kduma`, password `test-password`
 
-**How to test**:
+**How to test** (✅ TESTED & VERIFIED 2026-02-21):
 1. Start API: `cd src/DSC.Api && dotnet run --urls http://localhost:5005`
 2. Start WebClient: `cd src/DSC.WebClient && npm run dev`
 3. Navigate to [http://localhost:5173](http://localhost:5173)
-4. Click "Login" and use admin credentials
-5. Verify you can access Activity, Projects, and Admin links
-6. Logout and login as regular user (kduma)
-7. Verify Admin link is not visible and attempting to access /admin redirects to home
-8. Logout and verify only Home is accessible
+4. **Admin user test**: Click "Login" and use `rloisel1` / `test-password-updated`
+   - ✅ Home, Activity, Projects, Admin links all visible
+   - ✅ Can access all admin pages (/admin/users, /admin/departments, etc.)
+   - ✅ Logout shows username in button
+5. **Regular user test**: Login as `kduma` / `test-password`
+   - ✅ Home, Activity, Projects links visible
+   - ✅ Admin link NOT visible in navigation
+   - ✅ Cannot access /admin pages (redirects to home)
+6. **Pre-login test**: Logout and verify Home is the only page
+   - ✅ Cannot access Activity or Projects without login
+   - ✅ Clicking links redirects to login page
+7. **Return path test**: Try accessing /activity while logged out
+   - ✅ Redirects to login
+   - ✅ After login, returns to /activity (not home)
 
 **Architecture**:
 - **Backend**: `AuthController` validates credentials against `UserAuth` table and returns user details with role
