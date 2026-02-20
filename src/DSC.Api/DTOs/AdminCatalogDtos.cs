@@ -65,6 +65,23 @@ namespace DSC.Api.DTOs
         public bool IsActive { get; set; }
     }
 
+    public class UnionDto
+    {
+        public int Id { get; set; }
+        public string? Name { get; set; }
+    }
+
+    public class UnionCreateRequest
+    {
+        public int Id { get; set; }
+        public string? Name { get; set; }
+    }
+
+    public class UnionUpdateRequest
+    {
+        public string? Name { get; set; }
+    }
+
     public class ExpenseCategoryDto
     {
         public Guid Id { get; set; }

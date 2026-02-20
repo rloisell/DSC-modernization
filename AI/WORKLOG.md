@@ -1,3 +1,40 @@
+## 2026-02-20 — Union Catalog Port (COMPLETED ✓)
+
+**Problem Statement**:
+1. Port the legacy `Union` catalog table from the Java system
+2. Provide admin endpoints for managing unions
+
+**Implementation & Resolution**:
+
+### Backend Changes
+
+#### 1. Union Domain Model
+- ✅ Added `Union` entity mapped to legacy `Union` (`unionId`, `unionName`)
+- ✅ Added EF Core migration `AddUnionModel`
+
+#### 2. Admin API Endpoints & DTOs
+- ✅ Added `AdminUnionsController` for admin CRUD
+- ✅ Added DTOs: `UnionDto`, `UnionCreateRequest`, `UnionUpdateRequest`
+
+### Frontend Support
+
+#### 1. Admin Catalog Service
+- ✅ Added `getUnions`, `createUnion`, `updateUnion` API helpers
+
+**Files Modified**:
+- `src/DSC.Data/Models/Union.cs`
+- `src/DSC.Data/ApplicationDbContext.cs`
+- `src/DSC.Data/Migrations/20260220114900_AddUnionModel.cs`
+- `src/DSC.Data/Migrations/20260220114900_AddUnionModel.Designer.cs`
+- `src/DSC.Data/Migrations/ApplicationDbContextModelSnapshot.cs`
+- `src/DSC.Api/Controllers/AdminUnionsController.cs`
+- `src/DSC.Api/DTOs/AdminCatalogDtos.cs`
+- `src/DSC.WebClient/src/api/AdminCatalogService.js`
+
+**Commit**: Current - feat: port union catalog
+
+---
+
 ## 2026-02-20 — Admin Expense Options Fixes (COMPLETED ✓)
 
 **Problem Statement**:

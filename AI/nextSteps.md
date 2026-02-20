@@ -1,5 +1,45 @@
 # Remaining Work (2026-02-21)
 
+## ToDo: Remaining Legacy Models
+- Activity category (`Category`)
+- Calendar (`Calendar`)
+- Calendar category (`Calendar_Category`)
+- Department user (`Department_User`)
+- User position (`User_Position`)
+- User user (`User_User`)
+- Project activity (`Project_Activity`)
+- Expense activity (`Expense_Activity`)
+
+## ✅ COMPLETED: Union Catalog Port (2026-02-20)
+
+**Status**: COMPLETE ✅
+
+### Changes Made
+
+#### 1. Union Model ✅
+- **Added**: `Union` entity mapped to legacy `Union`
+- **Mapped Columns**: `unionId`, `unionName`
+- **Migration**: `AddUnionModel`
+
+#### 2. Admin API & DTOs ✅
+- **Admin**: `/api/admin/unions` CRUD endpoints
+- **DTOs**: `UnionDto`, create/update requests
+
+#### 3. WebClient Admin Service ✅
+- **AdminCatalogService**: `getUnions`, `createUnion`, `updateUnion`
+
+**Files Modified**:
+- `src/DSC.Data/Models/Union.cs`
+- `src/DSC.Data/ApplicationDbContext.cs`
+- `src/DSC.Data/Migrations/20260220114900_AddUnionModel.cs`
+- `src/DSC.Data/Migrations/20260220114900_AddUnionModel.Designer.cs`
+- `src/DSC.Data/Migrations/ApplicationDbContextModelSnapshot.cs`
+- `src/DSC.Api/Controllers/AdminUnionsController.cs`
+- `src/DSC.Api/DTOs/AdminCatalogDtos.cs`
+- `src/DSC.WebClient/src/api/AdminCatalogService.js`
+
+**Commit**: Current - feat: port union catalog
+
 ## ✅ COMPLETED: Budget Classification (CAPEX/OPEX) Port (2026-02-20)
 
 **Status**: COMPLETE ✅

@@ -19,6 +19,7 @@ namespace DSC.Data
         public DbSet<ExternalIdentity> ExternalIdentities => Set<ExternalIdentity>();
         public DbSet<Position> Positions => Set<Position>();
         public DbSet<Department> Departments => Set<Department>();
+        public DbSet<Union> Unions => Set<Union>();
         public DbSet<Budget> Budgets => Set<Budget>();
         public DbSet<ExpenseCategory> ExpenseCategories => Set<ExpenseCategory>();
         public DbSet<ExpenseOption> ExpenseOptions => Set<ExpenseOption>();
@@ -101,6 +102,14 @@ namespace DSC.Data
             {
                 b.HasKey(d => d.Id);
                 b.HasIndex(d => d.Name).IsUnique();
+            });
+
+            modelBuilder.Entity<Union>(b =>
+            {
+                b.ToTable("Union");
+                b.HasKey(u => u.Id);
+                b.Property(u => u.Id).HasColumnName("unionId").ValueGeneratedNever();
+                b.Property(u => u.Name).HasColumnName("unionName").HasMaxLength(255);
             });
 
             modelBuilder.Entity<Budget>(b =>

@@ -148,6 +148,11 @@ See [tests/howto.md](tests/howto.md) for comprehensive testing documentation, in
   - Remove incorrect or obsolete assignments
   - Verify bulk assignments were created correctly
 
+### Unions Catalog (NEW 2026-02-20)
+- **Feature**: Admin management for legacy `Union` catalog entries
+- **API endpoint**: `GET/POST/PUT /api/admin/unions`
+- **Use case**: Maintain union entries referenced by legacy position data
+
 ### Manager Field Bug Fix in AdminDepartments
 - **Fixed**: Manager field is now a user selection dropdown (was plain text input)
 - **How it works**: 

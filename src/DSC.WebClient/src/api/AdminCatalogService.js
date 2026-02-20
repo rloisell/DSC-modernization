@@ -25,6 +25,18 @@ export const AdminCatalogService = {
     await axios.put(`/api/admin/departments/${id}`, payload);
   },
 
+  async getUnions() {
+    const res = await axios.get('/api/admin/unions');
+    return res.data;
+  },
+  async createUnion(payload) {
+    const res = await axios.post('/api/admin/unions', payload);
+    return res.data;
+  },
+  async updateUnion(id, payload) {
+    await axios.put(`/api/admin/unions/${id}`, payload);
+  },
+
   async getRoles() {
     const res = await axios.get('/api/admin/roles');
     return res.data;
