@@ -11,13 +11,17 @@ import {
   TextArea,
   TextField
 } from '@bcgov/design-system-react-components';
+import { useAuth } from '../contexts/AuthContext';
 import { getWorkItems, createWorkItemWithLegacy, getDetailedWorkItems } from '../api/WorkItemService';
 import { getProjects } from '../api/ProjectService';
 import { getActivityCodes, getNetworkNumbers, getBudgets, getProjectOptions } from '../api/CatalogService';
 
 export default function Activity() {
+  const { user } = useAuth();
   const [items, setItems] = useState([]);
   const [detailedItems, setDetailedItems] = useState([]);
+  const [timePeriod, setTimePeriod] = useState('month');
+  const [activityMode, setActivityMode] = useState('project'); // 'project' or 'expense'
   const [timePeriod, setTimePeriod] = useState('month');
   const [projects, setProjects] = useState([]);
   const [budgets, setBudgets] = useState([]);
@@ -31,7 +35,6 @@ export default function Activity() {
   const [desc, setDesc] = useState('');
   const [projectId, setProjectId] = useState('');
   const [budgetId, setBudgetId] = useState('');
-  const [legacyActivityId, setLegacyActivityId] = useState('');
   const [date, setDate] = useState('');
   const [startTime, setStartTime] = useState('');
   const [endTime, setEndTime] = useState('');
@@ -84,7 +87,7 @@ export default function Activity() {
     const loadCatalog = async () => {
       setLoading(true);
       const results = await Promise.allSettled([
-        getWorkItems(),
+        getWorkItems(user?.Id),
         getProjects(),
         getBudgets(),
         getActivityCodes(),
@@ -134,16 +137,16 @@ export default function Activity() {
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [user?.Id]);
 
   // Load detailed work items when time period changes
   useEffect(() => {
     setDetailedLoading(true);
-    getDetailedWorkItems(timePeriod)
+    getDetailedWorkItems(timePeriod, user?.Id)
       .then(data => setDetailedItems(data))
       .catch(e => console.error('Failed to load detailed work items:', e))
       .finally(() => setDetailedLoading(false));
-  }, [timePeriod]);
+  }, [timePeriod, user?.Id]);
 
   // When project changes, load project-specific options
   useEffect(() => {
@@ -183,7 +186,6 @@ export default function Activity() {
         projectId: projectId || undefined,
         budgetId: budgetId || undefined,
         description: desc,
-        legacyActivityId: legacyActivityId ? Number(legacyActivityId) : undefined,
         date: date || undefined,
         startTime: startTime || undefined,
         endTime: endTime || undefined,
@@ -198,12 +200,11 @@ export default function Activity() {
       const item = await createWorkItemWithLegacy(payload);
       setItems(i => [...i, item]);
       // Refresh detailed items table
-      getDetailedWorkItems(timePeriod).then(data => setDetailedItems(data));
+      getDetailedWorkItems(timePeriod, user?.Id).then(data => setDetailedItems(data));
       setTitle('');
       setDesc('');
       setProjectId('');
       setBudgetId('');
-      setLegacyActivityId('');
       setDate('');
       setStartTime('');
       setEndTime('');
@@ -315,7 +316,38 @@ export default function Activity() {
             onSelectionChange={key => setBudgetId(key ? String(key) : '')}
             isRequired
           />
-          <TextField label="Legacy Activity ID" value={legacyActivityId} onChange={setLegacyActivityId} />
+          
+          {/* Activity Mode Selection */}
+          <div style={{ gridColumn: '1 / -1', marginBottom: '1rem' }}>
+            <fieldset style={{ border: 'none', padding: 0 }}>
+              <legend style={{ marginBottom: '0.5rem', fontWeight: 'bold' }}>Activity Type</legend>
+              <div style={{ display: 'flex', gap: '1.5rem' }}>
+                <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
+                  <input
+                    type="radio"
+                    name="activityType"
+                    value="project"
+                    checked={activityMode === 'project'}
+                    onChange={(e) => setActivityMode(e.target.value)}
+                    style={{ marginRight: '0.5rem' }}
+                  />
+                  Project Activity
+                </label>
+                <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
+                  <input
+                    type="radio"
+                    name="activityType"
+                    value="expense"
+                    checked={activityMode === 'expense'}
+                    onChange={(e) => setActivityMode(e.target.value)}
+                    style={{ marginRight: '0.5rem' }}
+                  />
+                  Expense Activity
+                </label>
+              </div>
+            </fieldset>
+          </div>
+          
           <div className="form-columns">
             <TextField label="Date" type="date" value={date} onChange={setDate} />
             <TextField label="Start Time" type="time" value={startTime} onChange={setStartTime} />
@@ -333,6 +365,9 @@ export default function Activity() {
               onChange={value => setActualDuration(value == null ? '' : String(value))}
             />
           </div>
+          
+          {/* Project Activity Mode: Activity Code and Network Number */}
+          {activityMode === 'project' && (
           <div className="form-columns">
             <Select
               label="Activity Code"
@@ -377,6 +412,17 @@ export default function Activity() {
               isDisabled={!projectId}
             />
           </div>
+          )}
+          
+          {/* Expense Activity Mode: Placeholder for expense-specific fields */}
+          {activityMode === 'expense' && (
+          <div className="form-columns">
+            <Text elementType="p" className="muted" style={{ gridColumn: '1 / -1' }}>
+              Expense activity mode fields will be configured when expense catalog endpoints are available.
+            </Text>
+          </div>
+          )}
+          
           <div className="form-columns">
             <NumberField
               label="Estimated Hours"

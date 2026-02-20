@@ -2,14 +2,18 @@ import axios from 'axios';
 
 const API_URL = '/api/items';
 
-export async function getWorkItems() {
-  const res = await axios.get(API_URL);
+export async function getWorkItems(userId) {
+  const params = {};
+  if (userId) params.userId = userId;
+  const res = await axios.get(API_URL, { params });
   return res.data;
 }
 
-export async function getDetailedWorkItems(period = 'all') {
+export async function getDetailedWorkItems(period = 'all', userId) {
+  const params = { period };
+  if (userId) params.userId = userId;
   const res = await axios.get(`${API_URL}/detailed`, {
-    params: { period }
+    params
   });
   return res.data;
 }

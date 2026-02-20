@@ -51,6 +51,7 @@ namespace DSC.Api.Controllers
 
             return Ok(new LoginResponse
             {
+                Id = user.Id,
                 EmpId = user.EmpId ?? 0,
                 Username = user.Username,
                 Email = user.Email ?? string.Empty,
@@ -77,6 +78,7 @@ namespace DSC.Api.Controllers
 
             return Ok(new LoginResponse
             {
+                Id = user.Id,
                 EmpId = user.EmpId ?? 0,
                 Username = user.Username,
                 Email = user.Email ?? string.Empty,
@@ -96,6 +98,7 @@ namespace DSC.Api.Controllers
 
     public class LoginResponse
     {
+        public Guid Id { get; set; }
         public int EmpId { get; set; }
         public string Username { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
