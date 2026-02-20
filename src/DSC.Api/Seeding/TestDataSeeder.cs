@@ -38,8 +38,8 @@ public record TestSeedResult(int UsersCreated, int UserAuthCreated, int Projects
             {
                 new UserSeed(15298, "rloisel1", "ryan.loiselle@azonicnet.com", "Ryan", "Loiselle", "test-password-updated"),
                 new UserSeed(10101, "dmcgregor", "duncan.mcgregor@mtsallstream.com", "Duncan", "McGregor", null),
-                new UserSeed(15299, "kduma", "snipe_187@hotmail.com", "Keith", "Duma", "test-password"),
-                new UserSeed(99901, "mammeter", "acs-39093-and-mts-project-2009@googlegroups.com", "Matthew", "Ammeter", "test-password")
+                new UserSeed(15299, "kduma", "snipe_187@hotmail.com", "Keith", "Duma", "test-password-updated"),
+                new UserSeed(99901, "mammeter", "acs-39093-and-mts-project-2009@googlegroups.com", "Matthew", "Ammeter", "test-password-updated")
             };
 
             foreach (var seed in userSeeds)
@@ -87,7 +87,8 @@ public record TestSeedResult(int UsersCreated, int UserAuthCreated, int Projects
                         user.LastName = seed.LastName;
                     }
 
-                    if (string.IsNullOrWhiteSpace(user.PasswordHash) && !string.IsNullOrWhiteSpace(seed.Password))
+                    // Always update password hash from seed if provided (allows password resets during seeding)
+                    if (!string.IsNullOrWhiteSpace(seed.Password))
                     {
                         user.PasswordHash = _passwordHasher.HashPassword(user, seed.Password);
                     }
@@ -97,8 +98,8 @@ public record TestSeedResult(int UsersCreated, int UserAuthCreated, int Projects
             var userAuthSeeds = new[]
             {
                 new UserAuthSeed("rloisel1", 15298, "test-password-updated", true),
-                new UserAuthSeed("kduma", 15299, "test-password", false),
-                new UserAuthSeed("mammeter", 99901, "test-password", false)
+                new UserAuthSeed("kduma", 15299, "test-password-updated", true),
+                new UserAuthSeed("mammeter", 99901, "test-password-updated", true)
             };
 
             foreach (var seed in userAuthSeeds)
