@@ -257,7 +257,8 @@ namespace DSC.Api.Controllers
                 ReasonCode = request.ReasonCode?.Trim(),
                 CpcCode = request.CpcCode?.Trim(),
                 EstimatedHours = request.EstimatedHours,
-                RemainingHours = request.RemainingHours
+                // Auto-calculate RemainingHours: EstimatedHours - ActualDuration
+                RemainingHours = CalculateRemainingHours(request.EstimatedHours, request.ActualDuration)
             };
 
             await _db.WorkItems.AddAsync(workItem);
@@ -304,6 +305,27 @@ namespace DSC.Api.Controllers
 
             var normalized = description.Trim().ToLowerInvariant();
             return normalized.Contains("opex") || normalized.Contains("expense");
+        }
+
+        /// <summary>
+        /// Calculates remaining hours based on estimated hours and actual duration.
+        /// Formula: RemainingHours = EstimatedHours - ActualDuration
+        /// </summary>
+        /// <param name="estimatedHours">Total estimated hours for the work item</param>
+        /// <param name="actualDuration">Actual hours worked (from ActualDuration field)</param>
+        /// <returns>Remaining hours, or null if estimated hours is not set</returns>
+        private static decimal? CalculateRemainingHours(decimal? estimatedHours, int? actualDuration)
+        {
+            if (!estimatedHours.HasValue)
+            {
+                return null;
+            }
+
+            var actual = actualDuration ?? 0;
+            var remaining = estimatedHours.Value - actual;
+
+            // Ensure remaining hours doesn't go negative
+            return remaining < 0 ? 0 : remaining;
         }
     }
 }

@@ -713,8 +713,8 @@ public record TestSeedResult(
                                 NetworkNumber = userNetworkNumber.Number.ToString(),
                                 PlannedDuration = TimeSpan.FromHours(8),
                                 ActualDuration = 8,
-                                EstimatedHours = 8.0m,
-                                RemainingHours = 0.5m
+                                EstimatedHours = 10.0m,
+                                RemainingHours = 2.0m // 10.0 - 8 = 2.0 hours remaining
                             });
                             workItemsCreated++;
                         }
@@ -733,14 +733,14 @@ public record TestSeedResult(
                                 BudgetId = capex.Id,
                                 Title = "Team Meeting - Sprint Planning",
                                 Description = "Sprint planning and task assignments",
-                                Date = DateTime.Now.AddDays(-1),
+                                Date = DateTime.Now.AddDays(-5),
                                 ActivityType = "Project",
                                 ActivityCode = "MEET",
                                 NetworkNumber = userNetworkNumber.Number.ToString(),
                                 PlannedDuration = TimeSpan.FromHours(2),
                                 ActualDuration = 2,
                                 EstimatedHours = 2.0m,
-                                RemainingHours = 0m
+                                RemainingHours = 0m // 2.0 - 2 = 0 hours (completed)
                             });
                             workItemsCreated++;
                         }
@@ -764,9 +764,9 @@ public record TestSeedResult(
                                 ActivityCode = userActivityCode.Code,
                                 NetworkNumber = userNetworkNumber.Number.ToString(),
                                 PlannedDuration = TimeSpan.FromHours(8),
-                                ActualDuration = 4,
-                                EstimatedHours = 8.0m,
-                                RemainingHours = 4.0m
+                                ActualDuration = 6,
+                                EstimatedHours = 10.0m,
+                                RemainingHours = 4.0m // 10.0 - 6 = 4.0 hours remaining
                             });
                             workItemsCreated++;
                         }

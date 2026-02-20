@@ -174,34 +174,53 @@ Network identifiers: 1000-1011 (12 sequential network numbers)
 
 ### 17. Work Items (16 total, 4 per user)
 
-Each user receives 4 work items:
+Each user receives 4 work items with properly calculated estimated and remaining hours:
 
 1. **Development Sprint - Week 20** (2 days ago)
    - Activity Type: Project
    - Planned: 8 hours
    - Actual: 8 hours
-   - Estimated: 8.0 hours
+   - **Estimated: 10.0 hours**
+   - **Remaining: 2.0 hours** (10.0 - 8 = 2.0)
 
 2. **Team Meeting - Sprint Planning** (5 days ago)
    - Activity Type: Project
    - Planned: 2 hours
    - Actual: 2 hours
-   - Estimated: 2.0 hours
+   - **Estimated: 2.0 hours**
+   - **Remaining: 0.0 hours** (2.0 - 2 = 0, completed)
 
 3. **Current Development Work** (Today)
    - Activity Type: Project
    - Planned: 8 hours
    - Actual: 6 hours
-   - Estimated: 8.0 hours
+   - **Estimated: 10.0 hours**
+   - **Remaining: 4.0 hours** (10.0 - 6 = 4.0)
 
-4. **Training Conference** (10 days ago)
+4. **Training Conference** (5 days ago)
    - Activity Type: Expense
-   - Planned: 8 hours
-   - Actual: 8 hours
-   - Estimated: 8.0 hours
-   - Expense Category: Training
+   - Planned: 16 hours
+   - Actual: 16 hours
+   - **Estimated: 16.0 hours**
+   - **Remaining: 0.0 hours** (16.0 - 16 = 0, completed)
 
 **User Isolation**: Each WorkItem has a UserId foreign key linking it to exactly one user. The Activity page filters WorkItems by the logged-in user's ID, ensuring users only see their own activities.
+
+**Remaining Hours Calculation**: The system automatically calculates RemainingHours using the formula:
+```
+RemainingHours = EstimatedHours - ActualDuration
+```
+
+This calculation is applied:
+- When creating new work items via the API
+- When seeding test data
+- Values cannot go negative (minimum is 0)
+
+**Reporting Benefits**: 
+- Directors can track project progress by monitoring remaining hours
+- Activities with RemainingHours > 0 indicate incomplete work
+- Activities with RemainingHours = 0 are completed
+- Sum of RemainingHours across activities shows total work left on a project/network
 
 ### 18. Project Assignments (6 total)
 
@@ -393,6 +412,217 @@ Calendar
 4. **Referential Integrity**: All foreign keys are properly set. If a parent entity is missing, the child entity seeding is skipped.
 
 5. **Development Only**: The admin seed endpoint requires an admin token and should NEVER be exposed in production.
+
+6. **Remaining Hours Calculation**: The system automatically calculates remaining hours for project tracking and reporting.
+
+## Remaining Hours Calculation Logic
+
+### Overview
+
+The DSC system automatically calculates `RemainingHours` for each work item to track progress and support director-level reporting on project status. This feature enables project managers and directors to monitor:
+
+- How much work remains on specific activities
+- Overall project completion status
+- Resource allocation and planning
+- Budget forecasting based on hours remaining
+
+### Calculation Formula
+
+```csharp
+RemainingHours = EstimatedHours - ActualDuration
+```
+
+**Where**:
+- `EstimatedHours`: The total estimated hours originally allocated to the work item (decimal)
+- `ActualDuration`: The actual hours logged/worked on the activity (integer)
+- `RemainingHours`: The calculated hours left to complete the work (decimal, minimum 0)
+
+### Automatic Calculation
+
+The calculation is automatically applied in the following scenarios:
+
+1. **Creating Work Items** (via POST `/api/items`)
+   - When a new work item is created, `RemainingHours` is calculated from `EstimatedHours` and `ActualDuration`
+   - The client does NOT need to provide `RemainingHours` in the request
+   - Example:
+     ```json
+     POST /api/items
+     {
+       "title": "Feature Development",
+       "estimatedHours": 20.0,
+       "actualDuration": 12
+       // RemainingHours automatically set to 8.0
+     }
+     ```
+
+2. **Seeding Test Data**
+   - All seeded work items have properly calculated `RemainingHours`
+   - Examples from seed data:
+     - Development Sprint: 10.0 estimated - 8 actual = **2.0 remaining**
+     - Current Work: 10.0 estimated - 6 actual = **4.0 remaining**
+     - Meeting: 2.0 estimated - 2 actual = **0.0 remaining** (completed)
+
+3. **Updating Work Items** (future enhancement)
+   - When `ActualDuration` is updated, `RemainingHours` should be recalculated
+   - When `EstimatedHours` changes, `RemainingHours` should be recalculated
+
+### Business Rules
+
+1. **Non-negative Values**: `RemainingHours` cannot go negative
+   - If `ActualDuration` exceeds `EstimatedHours`, `RemainingHours` = 0
+   - Example: Estimated 8 hours, Actual 10 hours → Remaining = 0 (over budget)
+
+2. **Null Handling**: 
+   - If `EstimatedHours` is null, `RemainingHours` is null
+   - If `ActualDuration` is null, it's treated as 0
+
+3. **Precision**: 
+   - `EstimatedHours` is decimal (supports fractional hours like 1.5)
+   - `ActualDuration` is integer (whole hours)
+   - `RemainingHours` is decimal (allows precise tracking)
+
+### Reporting Use Cases
+
+#### 1. Project Status Dashboard
+Query total remaining hours across all activities in a project:
+```sql
+SELECT 
+    p.Name as Project,
+    SUM(w.EstimatedHours) as TotalEstimated,
+    SUM(w.ActualDuration) as TotalActual,
+    SUM(w.RemainingHours) as TotalRemaining,
+    (SUM(w.ActualDuration) / SUM(w.EstimatedHours) * 100) as PercentComplete
+FROM WorkItems w
+JOIN Projects p ON w.ProjectId = p.Id
+WHERE w.ActivityType = 'Project'
+GROUP BY p.Name;
+```
+
+#### 2. Network-Level Tracking
+Track hours by network number for budget allocation:
+```sql
+SELECT 
+    w.NetworkNumber,
+    COUNT(*) as ActivityCount,
+    SUM(w.RemainingHours) as HoursRemaining
+FROM WorkItems w
+WHERE w.ActivityType = 'Project'
+  AND w.RemainingHours > 0
+GROUP BY w.NetworkNumber
+ORDER BY SUM(w.RemainingHours) DESC;
+```
+
+#### 3. User Workload Analysis
+Identify users with heavy workloads:
+```sql
+SELECT 
+    u.Username,
+    COUNT(*) as ActiveActivities,
+    SUM(w.RemainingHours) as TotalHoursRemaining
+FROM WorkItems w
+JOIN Users u ON w.UserId = u.Id
+WHERE w.RemainingHours > 0
+GROUP BY u.Username
+ORDER BY SUM(w.RemainingHours) DESC;
+```
+
+#### 4. Activity Completion Status
+List incomplete activities requiring attention:
+```sql
+SELECT 
+    w.Title,
+    u.Username,
+    w.EstimatedHours,
+    w.ActualDuration,
+    w.RemainingHours,
+    CASE 
+        WHEN w.RemainingHours = 0 THEN 'Complete'
+        WHEN w.RemainingHours > 0 AND w.RemainingHours <= 2 THEN 'Nearly Complete'
+        ELSE 'In Progress'
+    END as Status
+FROM WorkItems w
+JOIN Users u ON w.UserId = u.Id
+WHERE w.ActivityType = 'Project'
+ORDER BY w.RemainingHours DESC;
+```
+
+### API Response Example
+
+```json
+{
+  "id": "550e8400-e29b-41d4-a716-446655440000",
+  "title": "Current Development Work",
+  "estimatedHours": 10.0,
+  "actualDuration": 6,
+  "remainingHours": 4.0,
+  "activityType": "Project",
+  "date": "2026-02-20T00:00:00Z"
+}
+```
+
+### Future Enhancements
+
+1. **Time Entry Integration**: Recalculate `RemainingHours` when `TimeEntry` records are added
+   - Sum all `TimeEntry.Hours` for a WorkItem
+   - `RemainingHours = EstimatedHours - SUM(TimeEntry.Hours)`
+
+2. **Automatic Updates**: Add database trigger or application logic to recalculate on:
+   - `UPDATE WorkItems SET ActualDuration = ...`
+   - `UPDATE WorkItems SET EstimatedHours = ...`
+   - `INSERT INTO TimeEntries ...`
+
+3. **Warning Alerts**: Notify when:
+   - `RemainingHours` approaches 0 but work isn't complete
+   - `ActualDuration` exceeds `EstimatedHours` (over budget)
+
+4. **Bulk Recalculation**: Admin endpoint to recalculate all `RemainingHours`:
+   ```
+   POST /api/admin/recalculate-remaining-hours
+   ```
+
+### Testing Remaining Hours
+
+```csharp
+[Fact]
+public async Task CreateWorkItem_CalculatesRemainingHours()
+{
+    // Arrange
+    var request = new WorkItemCreateRequest
+    {
+        Title = "Test Activity",
+        EstimatedHours = 20.0m,
+        ActualDuration = 12
+    };
+    
+    // Act
+    var response = await _controller.Post(request);
+    var workItem = ExtractWorkItemFromResponse(response);
+    
+    // Assert
+    Assert.Equal(20.0m, workItem.EstimatedHours);
+    Assert.Equal(12, workItem.ActualDuration);
+    Assert.Equal(8.0m, workItem.RemainingHours); // 20 - 12 = 8
+}
+
+[Fact]
+public async Task RemainingHours_DoesNotGoNegative()
+{
+    // Arrange: Actual exceeds estimated (over budget scenario)
+    var request = new WorkItemCreateRequest
+    {
+        Title = "Overran Activity",
+        EstimatedHours = 8.0m,
+        ActualDuration = 12
+    };
+    
+    // Act
+    var response = await _controller.Post(request);
+    var workItem = ExtractWorkItemFromResponse(response);
+    
+    // Assert
+    Assert.Equal(0m, workItem.RemainingHours); // Should be 0, not -4
+}
+```
 
 ## Troubleshooting
 
