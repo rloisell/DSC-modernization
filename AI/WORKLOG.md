@@ -25,7 +25,7 @@
 - `README.md`
 - `AI/nextSteps.md`
 
-**Commit**: Pending
+**Commit**: 43241dc - feat: wire admin delete actions in UI
 
 ---
 
