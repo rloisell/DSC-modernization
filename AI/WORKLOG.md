@@ -1,3 +1,107 @@
+## 2026-02-20 — Role-Based Project Visibility & Assignment Management (COMPLETED ✓)
+
+**Objective**: Implement role-based project visibility so that:
+- Admin/Manager/Director users see ALL projects
+- Regular users see ONLY projects they are assigned to
+- Managers can assign users to projects with estimated hours per user/project combination
+
+**Implementation Summary**:
+
+### 1. Enhanced Data Models
+**Files Modified**:
+- [src/DSC.Data/Models/ProjectAssignment.cs](src/DSC.Data/Models/ProjectAssignment.cs)
+  - Added `decimal? EstimatedHours` field to track hours allocated per user per project
+  - Composite primary key: (ProjectId, UserId)
+  
+- [src/DSC.Api/DTOs/AdminCatalogDtos.cs](src/DSC.Api/DTOs/AdminCatalogDtos.cs)
+  - Added `ProjectAssignmentDto` - data transfer object for viewing assignments
+  - Added `ProjectAssignmentCreateRequest` - for creating new assignments
+  - Added `ProjectAssignmentUpdateRequest` - for updating role and hours
+
+### 2. Database Migration
+**File Created**:
+- [src/DSC.Data/Migrations/20260220213648_AddEstimatedHoursToProjectAssignment.cs](src/DSC.Data/Migrations/20260220213648_AddEstimatedHoursToProjectAssignment.cs)
+  - Adds `EstimatedHours` column to `ProjectAssignments` table
+  - Type: `decimal(65,30)` nullable
+  - Will be applied when database is next started
+
+### 3. Role-Based Project Visibility Controller
+**File Modified**:
+- [src/DSC.Api/Controllers/ProjectsController.cs](src/DSC.Api/Controllers/ProjectsController.cs#L23-L58)
+  - Enhanced `GetAll()` method with role-based filtering:
+    - **Admin/Manager/Director roles**: Return ALL projects (no filtering)
+    - **User role**: Return only projects where user has a ProjectAssignment
+  - Uses Claims-based authentication to identify current user
+  - Includes user's role from database via eager loading
+
+### 4. Project Assignment Management API
+**File Created**:
+- [src/DSC.Api/Controllers/AdminProjectAssignmentsController.cs](src/DSC.Api/Controllers/AdminProjectAssignmentsController.cs)
+  
+**Endpoints**:
+- `GET /api/admin-project-assignments` - List all assignments (with optional project filter)
+- `GET /api/admin-project-assignments/project/{projectId}` - Get users assigned to specific project
+- `POST /api/admin-project-assignments` - Create new assignment (user + project + role + hours)
+- `PUT /api/admin-project-assignments/{projectId}/{userId}` - Update role and/or hours
+- `DELETE /api/admin-project-assignments/{projectId}/{userId}` - Remove assignment
+
+**Authorization**: All endpoints require Admin, Manager, or Director role
+
+**Data Validation**:
+- Verify project exists before assignment
+- Verify user exists before assignment
+- Prevent duplicate assignments (same user + project)
+- Prevent unauthorized users (non-Admin/Manager/Director) from managing assignments
+
+### 5. Enhanced Test Data
+**File Modified**:
+- [src/DSC.Api/Seeding/TestDataSeeder.cs](src/DSC.Api/Seeding/TestDataSeeder.cs)
+
+**User Role Assignments**:
+- `rloisel1` → Admin role (sees all projects)
+- `dmcgregor` → Manager role (sees all projects, can assign users)
+- `kduma` → User role (sees only assigned projects)
+- `mammeter` → User role (sees only assigned projects)
+
+**Project Assignments with Estimated Hours**:
+- `kduma`:
+  - P1001 (Website Modernization) - 120 hrs, Contributor
+  - P1002 (Mobile App Development) - 100 hrs, Lead
+- `mammeter`:
+  - P1003 (Database Migration) - 80 hrs, Contributor
+
+This test data enables validation of:
+- Regular users seeing only their 2 assigned projects
+- Managers/Directors seeing all 8 projects
+- Estimated hours correctly allocated per user per project
+
+**Build & Test Results**:
+- `dotnet build`: ✅ Success (3 nullable warnings only, no errors)
+- Migration created: ✅ Ready for deployment
+- All controllers compile: ✅ No breaking changes to existing endpoints
+
+**Git Status**:
+- Commit: `72354be` "feat: implement role-based project visibility and assignment management"
+- All changes pushed to `origin/main`: ✅
+
+**Next Steps**:
+1. Create admin UI page (`AdminProjectAssignments.jsx`) for managing user-to-project assignments
+2. Start database if testing locally and apply migration via `dotnet ef database update`
+3. Test role-based filtering:
+   - Login as `kduma` → should see P1001, P1002 only
+   - Login as `dmcgregor` → should see all 8 projects
+   - Login as `rloisel1` → should see all 8 projects
+4. Test assignment management API endpoints
+5. Create unit tests for role-based filtering logic
+6. Consider creating "Director" UI role separate from "Manager" if different permissions are needed
+
+**Technical Notes**:
+- Uses Claims-based authentication (`System.Security.Claims.ClaimTypes.NameIdentifier`)
+- ProjectAssignment uses composite key, so no separate Id needed
+- Role names are case-sensitive ("Admin", "Manager", "Director", "User")
+- Estimated hours are optional (nullable decimal) to support projects without per-user allocation
+- Manager can see/manage all projects but scope could be restricted per implementation requirement
+
 ## 2026-02-20 — Add Work Item Form & Activity Page Fixes (COMPLETED ✓)
 
 **Issue Summary**:

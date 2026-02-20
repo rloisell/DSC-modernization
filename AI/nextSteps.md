@@ -1,5 +1,70 @@
 # Remaining Work (2026-02-21)
 
+## ✅ COMPLETED: Role-Based Project Visibility & Assignment Management (2026-02-20)
+
+**Status**: COMPLETE ✅
+
+### Implementation Complete
+- ✅ Role-based project filtering in ProjectsController
+  - Admin/Manager/Director users see ALL projects
+  - Regular users see ONLY their assigned projects
+  - Uses Claims-based authentication for user identification
+  - Includes user role via eager loading from database
+
+### Project Assignment Management API
+- ✅ Created AdminProjectAssignmentsController with full CRUD:
+  - GET /api/admin-project-assignments → List all assignments
+  - GET /api/admin-project-assignments/project/{projectId} → Users on project
+  - POST /api/admin-project-assignments → Create assignment
+  - PUT /api/admin-project-assignments/{projectId}/{userId} → Update role/hours
+  - DELETE /api/admin-project-assignments/{projectId}/{userId} → Remove assignment
+- ✅ Authorization: Only Admin/Manager/Director can manage assignments
+- ✅ Data validation: Prevents duplicate assignments, validates project/user existence
+
+### Enhanced Data Model
+- ✅ ProjectAssignment now tracks EstimatedHours per user per project
+- ✅ Created ProjectAssignmentDto for API responses
+- ✅ Created ProjectAssignmentCreateRequest and ProjectAssignmentUpdateRequest DTOs
+
+### Database Migration
+- ✅ Created EF Core migration: `AddEstimatedHoursToProjectAssignment`
+- ✅ Adds EstimatedHours column to ProjectAssignments table
+- ✅ Ready for deployment when database starts
+
+### Test Data
+- ✅ User role assignments configured:
+  - rloisel1 → Admin (sees all projects)
+  - dmcgregor → Manager (sees all projects, can assign)
+  - kduma → User (sees only P1001, P1002)
+  - mammeter → User (sees only P1003)
+- ✅ Project assignments with estimated hours:
+  - kduma: P1001 (120 hrs, Contributor), P1002 (100 hrs, Lead)
+  - mammeter: P1003 (80 hrs, Contributor)
+
+**Files Modified**:
+- `src/DSC.Api/Controllers/ProjectsController.cs` (added role-based filtering)
+- `src/DSC.Api/Controllers/AdminProjectAssignmentsController.cs` (new)
+- `src/DSC.Api/DTOs/AdminCatalogDtos.cs` (added 3 new DTOs)
+- `src/DSC.Data/Models/ProjectAssignment.cs` (added EstimatedHours)
+- `src/DSC.Api/Seeding/TestDataSeeder.cs` (user roles, project assignments)
+- `src/DSC.Data/Migrations/20260220213648_AddEstimatedHoursToProjectAssignment.cs` (new)
+
+**Build Status**: ✅ Success (0 errors, 3 nullable warnings)
+
+**Git Status**: 
+- Commit: `72354be` "feat: implement role-based project visibility and assignment management"
+- All changes pushed to `origin/main`: ✅
+
+**Next Steps**:
+1. Create AdminProjectAssignments.jsx UI page for managing assignments
+2. Test role-based filtering with different user logins
+3. Run `dotnet ef database update` to apply migration when database is ready
+4. Create unit tests for role-based filtering logic
+5. Consider if managers should have limited project scope or full visibility
+6. Add project search/filter to AdminProjectAssignments UI
+
+---
+
 ## ✅ COMPLETED: Add Work Item Form & Activity Page Fixes (2026-02-20)
 
 **Status**: COMPLETE ✅
