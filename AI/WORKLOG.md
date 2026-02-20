@@ -1,3 +1,163 @@
+## 2026-02-20 — Expense Activity Mapping Port (COMPLETED ✓)
+
+**Problem Statement**:
+1. Port the legacy `Expense_Activity` mapping table from the Java system
+2. Preserve expense activity links to Director/Reason/CPC codes
+
+**Implementation & Resolution**:
+
+### Backend Changes
+
+#### 1. Expense Activity Domain Model
+- ✅ Added `ExpenseActivity` entity mapped to `Expense_Activity`
+- ✅ Activity id mapped to `ActivityactivityID`
+- ✅ Added EF Core migration `AddExpenseActivityModel`
+
+### Tests
+
+#### 1. Mapping Coverage
+- ✅ Added `ExpenseActivityTests` to validate insert/query
+
+**Files Modified**:
+- `src/DSC.Data/Models/ExpenseActivity.cs`
+- `src/DSC.Data/ApplicationDbContext.cs`
+- `src/DSC.Data/Migrations/20260220120601_AddExpenseActivityModel.cs`
+- `src/DSC.Data/Migrations/20260220120601_AddExpenseActivityModel.Designer.cs`
+- `src/DSC.Data/Migrations/ApplicationDbContextModelSnapshot.cs`
+- `tests/DSC.Tests/ExpenseActivityTests.cs`
+
+**Commit**: Pending - feat: port expense activity mapping
+
+---
+
+## 2026-02-20 — Project Activity Mapping Port (COMPLETED ✓)
+
+**Problem Statement**:
+1. Port the legacy `Project_Activity` mapping table from the Java system
+2. Preserve project activity links to project, network, and activity codes
+
+**Implementation & Resolution**:
+
+### Backend Changes
+
+#### 1. Project Activity Domain Model
+- ✅ Added `ProjectActivity` entity mapped to `Project_Activity`
+- ✅ Activity id mapped to `ActivityactivityID`
+- ✅ Added EF Core migration `AddProjectActivityModel`
+
+### Tests
+
+#### 1. Mapping Coverage
+- ✅ Added `ProjectActivityTests` to validate insert/query
+
+**Files Modified**:
+- `src/DSC.Data/Models/ProjectActivity.cs`
+- `src/DSC.Data/ApplicationDbContext.cs`
+- `src/DSC.Data/Migrations/20260220120552_AddProjectActivityModel.cs`
+- `src/DSC.Data/Migrations/20260220120552_AddProjectActivityModel.Designer.cs`
+- `src/DSC.Data/Migrations/ApplicationDbContextModelSnapshot.cs`
+- `tests/DSC.Tests/ProjectActivityTests.cs`
+
+**Commit**: Pending - feat: port project activity mapping
+
+---
+
+## 2026-02-20 — User Relationship Mapping Port (COMPLETED ✓)
+
+**Problem Statement**:
+1. Port the legacy `User_User` mapping table from the Java system
+2. Preserve historical user relationships with effective dates
+
+**Implementation & Resolution**:
+
+### Backend Changes
+
+#### 1. User User Domain Model
+- ✅ Added `UserUser` entity mapped to `User_User`
+- ✅ Composite key mapped to `UserempId`, `UserempId2`, `startDate`
+- ✅ Added EF Core migration `AddUserUserModel`
+
+### Tests
+
+#### 1. Mapping Coverage
+- ✅ Added `UserUserTests` to validate insert/query with composite key
+
+**Files Modified**:
+- `src/DSC.Data/Models/UserUser.cs`
+- `src/DSC.Data/ApplicationDbContext.cs`
+- `src/DSC.Data/Migrations/20260220120416_AddUserUserModel.cs`
+- `src/DSC.Data/Migrations/20260220120416_AddUserUserModel.Designer.cs`
+- `src/DSC.Data/Migrations/ApplicationDbContextModelSnapshot.cs`
+- `tests/DSC.Tests/UserUserTests.cs`
+
+**Commit**: Pending - feat: port user user mapping
+
+---
+
+## 2026-02-20 — User Position Mapping Port (COMPLETED ✓)
+
+**Problem Statement**:
+1. Port the legacy `User_Position` mapping table from the Java system
+2. Preserve historical position assignments with effective dates
+
+**Implementation & Resolution**:
+
+### Backend Changes
+
+#### 1. User Position Domain Model
+- ✅ Added `UserPosition` entity mapped to `User_Position`
+- ✅ Composite key mapped to `UserempId`, `PositionpositionID`, `startDate`
+- ✅ Added EF Core migration `AddUserPositionModel`
+
+### Tests
+
+#### 1. Mapping Coverage
+- ✅ Added `UserPositionTests` to validate insert/query with composite key
+
+**Files Modified**:
+- `src/DSC.Data/Models/UserPosition.cs`
+- `src/DSC.Data/ApplicationDbContext.cs`
+- `src/DSC.Data/Migrations/20260220120314_AddUserPositionModel.cs`
+- `src/DSC.Data/Migrations/20260220120314_AddUserPositionModel.Designer.cs`
+- `src/DSC.Data/Migrations/ApplicationDbContextModelSnapshot.cs`
+- `tests/DSC.Tests/UserPositionTests.cs`
+
+**Commit**: Pending - feat: port user position mapping
+
+---
+
+## 2026-02-20 — Department User Mapping Port (COMPLETED ✓)
+
+**Problem Statement**:
+1. Port the legacy `Department_User` mapping table from the Java system
+2. Preserve historical department assignments with effective dates
+
+**Implementation & Resolution**:
+
+### Backend Changes
+
+#### 1. Department User Domain Model
+- ✅ Added `DepartmentUser` entity mapped to `Department_User`
+- ✅ Composite key mapped to `UserempId`, `DepartmentdeptID`, `startDate`
+- ✅ Added EF Core migration `AddDepartmentUserModel`
+
+### Tests
+
+#### 1. Mapping Coverage
+- ✅ Added `DepartmentUserTests` to validate insert/query with composite key
+
+**Files Modified**:
+- `src/DSC.Data/Models/DepartmentUser.cs`
+- `src/DSC.Data/ApplicationDbContext.cs`
+- `src/DSC.Data/Migrations/20260220115933_AddDepartmentUserModel.cs`
+- `src/DSC.Data/Migrations/20260220115933_AddDepartmentUserModel.Designer.cs`
+- `src/DSC.Data/Migrations/ApplicationDbContextModelSnapshot.cs`
+- `tests/DSC.Tests/DepartmentUserTests.cs`
+
+**Commit**: Pending - feat: port department user mapping
+
+---
+
 ## 2026-02-20 — Admin Expense Options Fixes (COMPLETED ✓)
 
 **Problem Statement**:

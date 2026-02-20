@@ -148,6 +148,26 @@ See [tests/howto.md](tests/howto.md) for comprehensive testing documentation, in
   - Remove incorrect or obsolete assignments
   - Verify bulk assignments were created correctly
 
+### Legacy Department Assignments (NEW 2026-02-20)
+- **Feature**: Legacy `Department_User` mapping preserved for historical assignments
+- **Use case**: Reference prior department history by effective dates
+
+### Legacy Position Assignments (NEW 2026-02-20)
+- **Feature**: Legacy `User_Position` mapping preserved for historical assignments
+- **Use case**: Reference prior position history by effective dates
+
+### Legacy User Relationships (NEW 2026-02-20)
+- **Feature**: Legacy `User_User` mapping preserved for historical user relationships
+- **Use case**: Reference prior user associations by effective dates
+
+### Legacy Project Activity Links (NEW 2026-02-20)
+- **Feature**: Legacy `Project_Activity` mapping preserved for historical project activity links
+- **Use case**: Reference prior activity assignments to project/activity/network codes
+
+### Legacy Expense Activity Links (NEW 2026-02-20)
+- **Feature**: Legacy `Expense_Activity` mapping preserved for historical expense activity links
+- **Use case**: Reference prior activity assignments to Director/Reason/CPC codes
+
 ### Manager Field Bug Fix in AdminDepartments
 - **Fixed**: Manager field is now a user selection dropdown (was plain text input)
 - **How it works**: 

@@ -43,8 +43,8 @@ namespace DSC.Tests
             var result = await seeder.SeedAsync(CancellationToken.None);
 
             // Assert
-            Assert.Equal(6, result.ActivityCodesCreated);
-            Assert.Equal(6, context.ActivityCodes.Count());
+            Assert.Equal(12, result.ActivityCodesCreated);
+            Assert.Equal(12, context.ActivityCodes.Count());
         }
 
         /// <summary>
@@ -57,7 +57,21 @@ namespace DSC.Tests
             var context = CreateDbContext();
             var passwordHasher = new PasswordHasher<User>();
             var seeder = new TestDataSeeder(context, passwordHasher);
-            var expectedCodes = new[] { "DEV", "TEST", "DOC", "ADMIN", "MEET", "TRAIN" };
+            var expectedCodes = new[]
+            {
+                "10",
+                "11",
+                "DEV",
+                "TEST",
+                "DOC",
+                "ADMIN",
+                "MEET",
+                "TRAIN",
+                "BUG",
+                "REV",
+                "ARCH",
+                "DEPLOY"
+            };
 
             // Act
             await seeder.SeedAsync(CancellationToken.None);
@@ -109,8 +123,8 @@ namespace DSC.Tests
             var result = await seeder.SeedAsync(CancellationToken.None);
 
             // Assert
-            Assert.Equal(6, result.NetworkNumbersCreated);
-            Assert.Equal(6, context.NetworkNumbers.Count());
+            Assert.Equal(12, result.NetworkNumbersCreated);
+            Assert.Equal(12, context.NetworkNumbers.Count());
         }
 
         /// <summary>
@@ -123,7 +137,7 @@ namespace DSC.Tests
             var context = CreateDbContext();
             var passwordHasher = new PasswordHasher<User>();
             var seeder = new TestDataSeeder(context, passwordHasher);
-            var expectedNumbers = new[] { 101, 102, 103, 201, 202, 203 };
+            var expectedNumbers = new[] { 99, 100, 101, 110, 111, 120, 121, 130, 200, 201, 210, 220 };
 
             // Act
             await seeder.SeedAsync(CancellationToken.None);
@@ -218,14 +232,14 @@ namespace DSC.Tests
             var result2 = await seeder.SeedAsync(CancellationToken.None);
 
             // Assert - second run should create 0 new codes and numbers
-            Assert.Equal(6, result1.ActivityCodesCreated);
+            Assert.Equal(12, result1.ActivityCodesCreated);
             Assert.Equal(0, result2.ActivityCodesCreated);
-            Assert.Equal(6, result1.NetworkNumbersCreated);
+            Assert.Equal(12, result1.NetworkNumbersCreated);
             Assert.Equal(0, result2.NetworkNumbersCreated);
             
             // Verify total counts remain the same
-            Assert.Equal(6, context.ActivityCodes.Count());
-            Assert.Equal(6, context.NetworkNumbers.Count());
+            Assert.Equal(12, context.ActivityCodes.Count());
+            Assert.Equal(12, context.NetworkNumbers.Count());
         }
 
         /// <summary>
@@ -256,7 +270,7 @@ namespace DSC.Tests
             
             var codes = okResult.Value as ActivityCodeDto[];
             Assert.NotNull(codes);
-            Assert.Equal(6, codes.Length);
+            Assert.Equal(12, codes.Length);
             Assert.All(codes, code => Assert.True(code.IsActive));
         }
 
@@ -287,7 +301,7 @@ namespace DSC.Tests
             
             var numbers = okResult.Value as NetworkNumberDto[];
             Assert.NotNull(numbers);
-            Assert.Equal(6, numbers.Length);
+            Assert.Equal(12, numbers.Length);
             Assert.All(numbers, number => Assert.True(number.IsActive));
         }
 
@@ -383,8 +397,8 @@ namespace DSC.Tests
             var networkNumbers = await context.NetworkNumbers.CountAsync();
 
             Assert.True(projects > 0, "Projects should be seeded");
-            Assert.Equal(6, activityCodes);
-            Assert.Equal(6, networkNumbers);
+            Assert.Equal(12, activityCodes);
+            Assert.Equal(12, networkNumbers);
 
             // Verify activity codes are properly structured for dropdown
             var codes = await context.ActivityCodes

@@ -38,11 +38,11 @@ namespace DSC.Tests
 
             // Assert - Log the result
             Assert.NotNull(result);
-            Assert.Equal(6, result.ActivityCodesCreated);
+            Assert.Equal(12, result.ActivityCodesCreated);
             
             // Verify codes are in database
             var count = await context.ActivityCodes.CountAsync();
-            Assert.Equal(6, count);
+            Assert.Equal(12, count);
         }
     }
 }

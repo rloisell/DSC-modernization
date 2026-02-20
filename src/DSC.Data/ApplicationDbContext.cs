@@ -19,6 +19,11 @@ namespace DSC.Data
         public DbSet<ExternalIdentity> ExternalIdentities => Set<ExternalIdentity>();
         public DbSet<Position> Positions => Set<Position>();
         public DbSet<Department> Departments => Set<Department>();
+        public DbSet<DepartmentUser> DepartmentUsers => Set<DepartmentUser>();
+        public DbSet<UserPosition> UserPositions => Set<UserPosition>();
+        public DbSet<UserUser> UserUsers => Set<UserUser>();
+        public DbSet<ProjectActivity> ProjectActivities => Set<ProjectActivity>();
+        public DbSet<ExpenseActivity> ExpenseActivities => Set<ExpenseActivity>();
         public DbSet<Budget> Budgets => Set<Budget>();
         public DbSet<ExpenseCategory> ExpenseCategories => Set<ExpenseCategory>();
         public DbSet<ExpenseOption> ExpenseOptions => Set<ExpenseOption>();
@@ -101,6 +106,56 @@ namespace DSC.Data
             {
                 b.HasKey(d => d.Id);
                 b.HasIndex(d => d.Name).IsUnique();
+            });
+
+            modelBuilder.Entity<DepartmentUser>(b =>
+            {
+                b.ToTable("Department_User");
+                b.HasKey(d => new { d.UserEmpId, d.DepartmentId, d.StartDate });
+                b.Property(d => d.UserEmpId).HasColumnName("UserempId");
+                b.Property(d => d.DepartmentId).HasColumnName("DepartmentdeptID");
+                b.Property(d => d.StartDate).HasColumnName("startDate").HasColumnType("date");
+                b.Property(d => d.EndDate).HasColumnName("endDate").HasColumnType("date");
+            });
+
+            modelBuilder.Entity<UserPosition>(b =>
+            {
+                b.ToTable("User_Position");
+                b.HasKey(u => new { u.UserEmpId, u.PositionId, u.StartDate });
+                b.Property(u => u.UserEmpId).HasColumnName("UserempId");
+                b.Property(u => u.PositionId).HasColumnName("PositionpositionID");
+                b.Property(u => u.StartDate).HasColumnName("startDate").HasColumnType("date");
+                b.Property(u => u.EndDate).HasColumnName("endDate").HasColumnType("date");
+            });
+
+            modelBuilder.Entity<UserUser>(b =>
+            {
+                b.ToTable("User_User");
+                b.HasKey(u => new { u.UserEmpId, u.UserEmpId2, u.StartDate });
+                b.Property(u => u.UserEmpId).HasColumnName("UserempId");
+                b.Property(u => u.UserEmpId2).HasColumnName("UserempId2");
+                b.Property(u => u.StartDate).HasColumnName("startDate").HasColumnType("date");
+                b.Property(u => u.EndDate).HasColumnName("endDate").HasColumnType("date");
+            });
+
+            modelBuilder.Entity<ProjectActivity>(b =>
+            {
+                b.ToTable("Project_Activity");
+                b.HasKey(p => p.ActivityId);
+                b.Property(p => p.ActivityId).HasColumnName("ActivityactivityID");
+                b.Property(p => p.ProjectNo).HasColumnName("ProjectprojectNo");
+                b.Property(p => p.NetworkNumber).HasColumnName("Network_NumbersnetworkNumber");
+                b.Property(p => p.ActivityCode).HasColumnName("Activity_CodesactivityCode");
+            });
+
+            modelBuilder.Entity<ExpenseActivity>(b =>
+            {
+                b.ToTable("Expense_Activity");
+                b.HasKey(e => e.ActivityId);
+                b.Property(e => e.ActivityId).HasColumnName("ActivityactivityID");
+                b.Property(e => e.DirectorCode).HasColumnName("Director_CodedirectorCode");
+                b.Property(e => e.ReasonCode).HasColumnName("Reason_CodereasonCode");
+                b.Property(e => e.CpcCode).HasColumnName("CPC_CodecpcCode");
             });
 
             modelBuilder.Entity<Budget>(b =>
