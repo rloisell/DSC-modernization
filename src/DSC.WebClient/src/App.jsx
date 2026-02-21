@@ -81,6 +81,7 @@ const AdminDepartments = React.lazy(() => import('./pages/AdminDepartments'))
 const AdminProjects = React.lazy(() => import('./pages/AdminProjects'))
 const AdminExpense = React.lazy(() => import('./pages/AdminExpense'))
 const AdminActivityOptions = React.lazy(() => import('./pages/AdminActivityOptions'))
+const Reports = React.lazy(() => import('./pages/Reports'))
 const Login = React.lazy(() => import('./pages/Login'))
 
 function NavButton({ to, children }) {
@@ -114,6 +115,7 @@ function AppContent() {
             <>
               <NavButton to="/activity">Activity</NavButton>
               <NavButton to="/projects">Projects</NavButton>
+              <NavButton to="/reports">Reports</NavButton>
             </>
           )}
           {isAuthenticated() && isAdmin() && (
@@ -141,6 +143,11 @@ function AppContent() {
             <Route path="/projects" element={
               <ProtectedRoute>
                 <Project />
+              </ProtectedRoute>
+            } />
+            <Route path="/reports" element={
+              <ProtectedRoute>
+                <Reports />
               </ProtectedRoute>
             } />
             <Route path="/admin" element={
