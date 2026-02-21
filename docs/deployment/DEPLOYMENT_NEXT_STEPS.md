@@ -12,8 +12,8 @@ provisioning and secret creation.
 
 | Repo | Branch | HEAD |
 |------|--------|------|
-| `rloisell/DSC-modernization` | `main` | `92deede` |
-| `bcgov-c/tenant-gitops-be808f` | `main` | `bd4229d` |
+| `rloisell/DSC-modernization` | `main` | `3af4c97` |
+| `bcgov-c/tenant-gitops-be808f` | `main` | `4272d83` |
 
 ---
 
@@ -38,6 +38,17 @@ first deployment to dev.
 | ArgoCD Application CRD — prod | `tenant-gitops-be808f/applications/argocd/be808f-dsc-prod.yaml` | ✅ committed — manual sync |
 | CI helm lint workflow | `tenant-gitops-be808f/.github/workflows/ci.yml` | ✅ committed |
 
+### Pending Code Changes (Not Yet Committed)
+
+The following items are identified but not yet implemented. They should be completed
+before promoting to test or prod:
+
+| Artefact | Location | Status |
+|---|---|---|
+| Datree policy enforcement workflow | `tenant-gitops-be808f/.github/workflows/policy-enforcement.yaml` | ❌ not yet created — see §7.2 of `EmeraldDeploymentAnalysis.md` |
+| Trivy image vulnerability scan | `.github/workflows/build-and-push.yml` (step after image push) | ❌ not yet added |
+| Build and unit test workflow | `.github/workflows/build-and-test.yml` | ❌ not yet created |
+
 ---
 
 ## 2. Blocking Steps — Must Complete Before First Sync
@@ -55,9 +66,8 @@ Actions before the build pipeline can run.
 | `ARTIFACTORY_USERNAME` | Artifactory service account username | Log in to `artifacts.developer.gov.bc.ca` to push images | `DSC-modernization` |
 | `ARTIFACTORY_PASSWORD` | Artifactory service account password / API key | As above | `DSC-modernization` |
 | `GITOPS_TOKEN` | GitHub PAT with `repo` write scope on `bcgov-c/tenant-gitops-be808f` | `update-gitops` job patches image tags; `create-prod-pr` job opens prod PR | `DSC-modernization` |
-| `DATREE_TOKEN` | Token obtained from ISB (Emerald platform team) | Authenticates the Datree security policy check in `ci.yml` | **`tenant-gitops-be808f`** |
 
-> **`DATREE_TOKEN` note:** This token is managed by ISB — contact the Emerald platform team to obtain it. It must be set as a GitHub Actions Secret in `bcgov-c/tenant-gitops-be808f` (**not** in DSC-modernization). Without this token the Datree step in `ci.yml` will fail and PRs to the gitops repo will be blocked.
+> **No `DATREE_TOKEN` required.** The correct Datree implementation uses the Helm plugin in offline mode (`helm datree config set offline local`) — no token is needed. See `EmeraldDeploymentAnalysis.md` §7.2 for the full `policy-enforcement.yaml` template.
 
 **Confirm:** Does an Artifactory service account already exist for `be808f`? The
 co-tenant (`jag-network-tools`) already uses one — check if it can be shared or if
@@ -163,8 +173,7 @@ Once applied, ArgoCD will immediately attempt to sync `charts/dsc-app` against
 If the namespace and Artifactory are already provisioned by the co-tenant, this is the
 minimal sequence:
 
-- [ ] **1a.** Add `ARTIFACTORY_USERNAME`, `ARTIFACTORY_PASSWORD`, `GITOPS_TOKEN` to GitHub Secrets in `DSC-modernization`
-- [ ] **1b.** Obtain `DATREE_TOKEN` from ISB; add to GitHub Secrets in `tenant-gitops-be808f`
+- [ ] **1.** Add `ARTIFACTORY_USERNAME`, `ARTIFACTORY_PASSWORD`, `GITOPS_TOKEN` to GitHub Secrets in `DSC-modernization`
 - [ ] **2.** Push `develop` branch → confirm `build-and-push.yml` green → confirm images appear in Artifactory
 - [ ] **3.** Confirm `dsc-dev_values.yaml` in gitops repo has been updated with a real image tag
 - [ ] **4.** `oc create secret docker-registry artifactory-pull-secret` in `be808f-dev`

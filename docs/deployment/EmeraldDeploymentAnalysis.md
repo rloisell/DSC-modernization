@@ -1,21 +1,28 @@
-# DSC Modernization — Emerald Deployment Analysis
+# BC Gov Emerald — Application Deployment Guide
 <!-- Author: Ryan Loiselle, Developer/Architect | GitHub Copilot | February 2026 -->
+<!-- Established from DSC Modernization project. Canonical copy maintained in rl-project-template. -->
 
 ## Purpose
 
-This document is the authoritative, consolidated record of every deployment-related
-decision, implementation, and outstanding action for the DSC Modernization project on
-the **BC Gov Private Cloud PaaS — Emerald Hosting Tier**. It synthesises information
-from `DEPLOYMENT_ANALYSIS.md`, `DEPLOYMENT_NEXT_STEPS.md`, `AI/WORKLOG.md`, and
+This is the reusable deployment reference for applications targeting the
+**BC Gov Private Cloud PaaS — Emerald Hosting Tier** using the standard stack:
+**.NET 10 API + React/Vite frontend + MariaDB or PostgreSQL**.
+
+It captures platform constraints, architecture principles, CI/CD pipeline patterns,
+secrets management, and the ISB EA Option 2 compliance requirements — drawn from
 direct study of peer ISB repositories (`bcgov-c/tenant-gitops-be808f`,
-`bcgov-c/jag-network-tools`, `bcgov-c/JAG-JAM-CORNET`, `bcgov-c/JAG-LEA`).
+`bcgov-c/jag-network-tools`, `bcgov-c/JAG-JAM-CORNET`, `bcgov-c/JAG-LEA`) and the
+ISB *OPTION 2 – Using GitHub Actions + GitOps in Emerald* EA document.
+
+For project-specific implementation details see the project's own
+`DEPLOYMENT_ANALYSIS.md` and `DEPLOYMENT_NEXT_STEPS.md`.
 
 ---
 
 ## 1. Target Platform — Emerald Tier
 
 **Cluster:** `console.apps.emerald.devops.gov.bc.ca`
-**Route URL pattern:** `<app>-<namespace>.apps.emerald.devops.gov.bc.ca`
+**Route URL pattern:** `<app>-<license>-<env>.apps.emerald.devops.gov.bc.ca`
 
 | Attribute | Value |
 |---|---|
@@ -33,7 +40,8 @@ direct study of peer ISB repositories (`bcgov-c/tenant-gitops-be808f`,
 ### Key Differences vs. Silver/Gold
 
 1. **No public cluster API** — GitHub Actions runners cannot `oc login` or
-   `kubectl apply`. Deployment **must** be ArgoCD (pull-based GitOps).
+   `kubectl apply` from the public internet. Deployment **must** be ArgoCD
+   (pull-based GitOps).
 2. **Proxy-only internet** — pods pulling images from Docker Hub or GHCR will fail.
    All images must be pre-mirrored to **Artifactory**.
 3. **Protected C data** — stronger network-policy requirements; mandatory
@@ -42,164 +50,163 @@ direct study of peer ISB repositories (`bcgov-c/tenant-gitops-be808f`,
 
 ---
 
-## 2. DSC Application — What Was Built
+## 2. Standard Application Stack
 
-DSC (Department Staff Codes) is a time-entry and reporting application for BC
-Government staff. It was rewritten from a Java/Hibernate monolith to a modern
-.NET 10 + React/Vite stack.
-
-### Stack Summary
+The following stack is used as the reference for this deployment guide. Future
+projects that diverge from it should note the differences in their own
+`DEPLOYMENT_ANALYSIS.md`.
 
 | Component | Technology |
 |---|---|
-| API | ASP.NET Core 10, EF Core 9, MariaDB 10.11 |
+| API | ASP.NET Core 10, EF Core 9, Pomelo MariaDB or Npgsql PostgreSQL |
 | Frontend | React 18 + Vite, BC Gov Design System |
-| Auth | Custom `X-User-Id` header scheme (Keycloak migration planned) |
-| Database | MariaDB 10.11 — StatefulSet with PVC on Emerald |
-| Testing | xUnit (36 tests) — Services, Auth, Reports, Catalog CRUD |
+| Auth | Custom header scheme (`X-User-Id`) for dev; OIDC/Keycloak for production |
+| Database | MariaDB 10.11 StatefulSet (initial); PostgreSQL + CrunchyDB (recommended for production HA) |
+| Testing | xUnit — Services, Auth, domain logic |
+| Container runtime (local) | Podman + podman-compose |
 
 ### Data Classification
 
-**DSC is confirmed `Low` (DataClass: "Low").**  
-The application handles internal staff time-entry records only. No sensitive personal
-information; no Protected B/C data. This is reflected across all Helm values files
-and Route AVI annotations.
+The `DataClass` label must be confirmed with Information Security before any
+workload is deployed to Emerald. The value drives both pod labels and AVI
+InfraSetting routing annotations:
+
+```yaml
+podLabels:
+  DataClass: "Low"   # or Medium / High / Critical
+
+route:
+  annotations:
+    aviinfrasetting.ako.vmware.com/name: "dataclass-low"
+```
 
 ---
 
 ## 3. Namespace Structure
 
-The DSC project shares the existing `be808f` license plate with co-tenant services
-(`emerald-app`, `telnet`) operated by another team. Four namespaces exist:
+BC Gov Platform Registry provisions four namespaces per project:
 
 | Namespace | Purpose |
 |---|---|
-| `be808f-tools` | Build pipelines, image mirroring, Artifactory auth |
-| `be808f-dev` | DSC development environment |
-| `be808f-test` | DSC test / QA environment |
-| `be808f-prod` | DSC production environment |
+| `<license>-tools` | Build pipelines, image mirroring, Artifactory auth |
+| `<license>-dev` | Development environment |
+| `<license>-test` | Test / QA environment |
+| `<license>-prod` | Production environment |
+
+The license plate (e.g., `be808f`) is assigned at registration via the
+[Platform Product Registry](https://digital.gov.bc.ca/technology/cloud/private/products-tools/registry/).
 
 ---
 
-## 4. Repository Layout
+## 4. Two-Repo GitOps Layout
 
-Two repositories carry all DSC deployment artefacts:
+All Emerald projects use a two-repo pattern. The canonical structure is:
 
-### 4.1 — `rloisell/DSC-modernization` (App Repo)
+### App Repo (`<project-name>`)
 
 ```
 .github/workflows/
   build-and-push.yml        ← Build images; push to Artifactory; update gitops
+  build-and-test.yml        ← Unit tests + frontend build (gated on PR)
 containerization/
   Containerfile.api         ← .NET 10 multistage build (sdk → aspnet, port 8080)
   Containerfile.frontend    ← Node 22-alpine build → nginx:alpine runtime
-  nginx.conf                ← SPA try_files + /api/ proxy; envsubst template
-  podman-compose.yml        ← Local dev: API + Frontend + MariaDB (ports 5005/5173/3307)
+  nginx.conf                ← SPA try_files + /api/ proxy template
+  podman-compose.yml        ← Local dev: API + Frontend + DB
 ```
 
-### 4.2 — `bcgov-c/tenant-gitops-be808f` (GitOps Repo)
+### GitOps Repo (`<project-name>-gitops` or shared `tenant-gitops-<license>`)
 
 ```
 charts/
-  gitops/                   ← Shared umbrella chart — co-tenant services ONLY (untouched)
-  emerald-app/              ← Co-tenant service (untouched)
-  dsc-app/                  ← DSC Helm chart (16 templates) — standalone
+  <app>/                    ← Application Helm chart (standalone per project)
     Chart.yaml
-    values.yaml             ← Defaults + DataClass: "Low"
+    values.yaml             ← Defaults
     templates/
       _helpers.tpl
       api-deployment.yaml
       api-service.yaml
       api-route.yaml
-      frontend-configmap.yaml   ← Helm-rendered nginx.conf with API proxy target
+      frontend-configmap.yaml   ← Helm-rendered nginx.conf
       frontend-deployment.yaml
       frontend-service.yaml
       frontend-route.yaml
-      db-statefulset.yaml       ← MariaDB 10.11, PVC via volumeClaimTemplates
-      db-service.yaml           ← Headless ClusterIP
+      db-statefulset.yaml
+      db-service.yaml
       secret.yaml               ← Shape-only; real values from Vault
-      networkpolicies.yaml      ← deny-all + 5 explicit allow rules
+      networkpolicies.yaml      ← deny-all + explicit allow rules
       serviceaccount.yaml       ← automountServiceAccountToken: false
-      hpa.yaml                  ← HPA on API; enabled in prod values only
+      hpa.yaml                  ← HPA; enabled in prod values only
 deploy/
-  dev_values.yaml           ← Shared co-tenant dev values (untouched by DSC)
-  dsc-dev_values.yaml       ← DSC dev — DataClass: "Low", 1Gi DB, auto-sync
-  dsc-test_values.yaml      ← DSC test — DataClass: "Low"
-  dsc-prod_values.yaml      ← DSC prod — DataClass: "Low", HPA enabled
+  <app>-dev_values.yaml
+  <app>-test_values.yaml
+  <app>-prod_values.yaml
 applications/argocd/
-  be808f-dsc-dev.yaml       ← Standalone ArgoCD Application CRD (auto-sync)
-  be808f-dsc-test.yaml      ← Standalone ArgoCD Application CRD (manual sync)
-  be808f-dsc-prod.yaml      ← Standalone ArgoCD Application CRD (manual sync)
+  <license>-<app>-dev.yaml  ← Standalone ArgoCD Application CRD (auto-sync)
+  <license>-<app>-test.yaml ← Standalone ArgoCD Application CRD (manual sync)
+  <license>-<app>-prod.yaml ← Standalone ArgoCD Application CRD (manual sync)
 .github/
-  policies.yaml             ← Full ISB Datree policy set (committed by ISB)
+  policies.yaml             ← ISB Datree policy set (provided by ISB/platform team)
   workflows/
-    ci.yml                  ← Helm lint + template for all envs (both charts)
-    policy-enforcement.yaml ← Datree Helm plugin offline (TO BE CREATED — see §7.2)
+    ci.yml                  ← Helm lint + template for all envs
+    policy-enforcement.yaml ← Datree Helm plugin offline security check
 ```
 
 ---
 
-## 5. Architecture Decisions
+## 5. Architecture Principles
 
-### 5.1 — Standalone ArgoCD Applications (Not Umbrella Sub-chart)
+### 5.1 — Standalone ArgoCD Application per Project (Key Rule)
 
-**Decision:** DSC is deployed via three **standalone ArgoCD Application CRDs**, one
-per environment, pointing directly at `charts/dsc-app/`.
+Each project **must** have its own standalone ArgoCD Application CRDs — one per
+environment — pointing directly at its own Helm chart. Never add a new project as a
+sub-chart dependency of another team's ArgoCD-watched umbrella chart.
 
-**Why:** During the initial implementation sprint, DSC was first added as a sub-chart
-dependency of the shared `charts/gitops/` umbrella chart. This was immediately
-reverted after identifying a critical collision risk:
+**Why this matters:** In a shared GitOps namespace, if project A's Helm is a
+sub-chart of project B's umbrella chart, then:
+- A broken Helm render in project A immediately blocks project B's ArgoCD sync
+- `file://` local dependencies require committed tarballs — ArgoCD cannot resolve
+  them on-the-fly
+- Both projects share the same sync lifecycle and failure domain
 
-- `be808f-app-prod` (the co-tenant's ArgoCD Application) watches the `main` branch of
-  the gitops repo. A broken DSC Helm dependency would be immediately live in co-tenant
-  production.
-- `file://` local dependencies require committed `charts/` tarballs — ArgoCD cannot
-  resolve them on-the-fly.
-- If DSC Helm rendering fails, co-tenant services (`emerald-app`, `telnet`) also fail
-  to sync.
+The correct pattern: three standalone Application CRDs per project
+(`<license>-<app>-dev.yaml`, `...-test.yaml`, `...-prod.yaml`), each pointing
+directly at `charts/<app>/`.
 
-**Rule established:** In a shared GitOps namespace, each application must have its own
-standalone ArgoCD Application CRD with an independent sync lifecycle. Never add a
-new team's application as a sub-chart dependency of another team's ArgoCD-watched
-umbrella chart.
+### 5.2 — Nginx Reverse Proxy (No Build-Time API URL Injection)
 
-### 5.2 — Nginx Reverse Proxy (No VITE_API_URL Injection)
+All frontend API calls should use **relative paths** (`/api/items`, `/api/reports`,
+etc.). Nginx proxies `/api/` to the API ClusterIP Service within the same namespace.
 
-**Decision:** All DSC WebClient API calls use **relative paths** (`/api/items`,
-`/api/reports`, etc.). Nginx proxies `/api/` to the `dsc-api` ClusterIP Service.
+**Why:** Vite bakes `import.meta.env` values at build time. A per-environment build
+is wasteful and a `/config.json` runtime injection adds complexity. Nginx proxying
+eliminates both problems — one container image works across all environments, and
+requests appear same-origin to the browser (no CORS configuration required).
 
-**Why:** Vite bakes `import.meta.env` values at build time. A single-image-per-env
-approach would require either a per-environment build (wasteful) or a runtime
-`config.json` injection (additional complexity). Nginx proxying eliminates the
-problem entirely — requests appear same-origin to the browser, no CORS configuration
-required, one container image works across all environments.
+The nginx configuration is rendered by Helm into a ConfigMap mounted at
+`/etc/nginx/conf.d/default.conf` in the frontend pod. The API service hostname is
+injected via a Helm helper template at deploy time.
 
-The nginx configuration is rendered by Helm into a ConfigMap:
-```
-frontend-configmap.yaml → dsc-frontend-nginx-config (ConfigMap)
-                        → mounted at /etc/nginx/conf.d/default.conf
-```
-The API service hostname is injected at deploy time via `{{ include "dsc-app.apiServiceName" . }}`.
+### 5.3 — Database: MariaDB StatefulSet vs. CrunchyDB
 
-### 5.3 — MariaDB StatefulSet (Not CrunchyDB)
+MariaDB in a StatefulSet with a PVC (`storageClassName: netapp-file-standard`) is
+acceptable for an initial deployment. However:
 
-**Decision:** MariaDB 10.11, deployed as an OpenShift StatefulSet with a 1Gi PVC
-(`storageClassName: netapp-file-standard`).
+**Recommended path for production workloads:** Migrate to PostgreSQL + CrunchyDB
+operator for automatic HA, backups, and point-in-time recovery. CrunchyDB is a
+supported operator on Emerald and eliminates the need to manage backup strategies
+manually.
 
-**Why for now:** Migrating from MariaDB to PostgreSQL (to unlock CrunchyDB HA
-operator support) is a significant schema migration effort. For the initial Emerald
-deployment, MariaDB-in-StatefulSet is acceptable.
+### 5.4 — Non-Root Containers
 
-**Recommended medium-term path:** Migrate to PostgreSQL + CrunchyDB for automatic
-HA, backups, and point-in-time recovery — especially before a production workload
-is established.
+All containers must run as non-root. OpenShift assigns a random UID from the
+namespace's SCC. The recommended pattern:
 
-### 5.4 — DataClass: "Low" (Confirmed)
-
-Confirmed by product owner. Applied consistently across:
-- `charts/dsc-app/values.yaml` — default `podLabels.DataClass: "Low"`
-- `deploy/dsc-dev_values.yaml`, `dsc-test_values.yaml`, `dsc-prod_values.yaml`
-  — `podLabels.DataClass: "Low"` + route annotation `dataclass-low`
+- Create an `appuser`/`appgroup` in the Containerfile
+- Set file system permissions using group `0` (root group) with group-writable access
+- End with `USER appuser`
+- API: set `ASPNETCORE_URLS=http://+:8080` — always port 8080 (never 80, 443, or
+  the dev port)
 
 ---
 
@@ -207,12 +214,12 @@ Confirmed by product owner. Applied consistently across:
 
 ### Triggers
 
-| Trigger | Action |
-|---|---|
-| Push to `develop` | Build images → push to Artifactory → direct commit to `dsc-dev_values.yaml` |
-| Push to `test` | Build images → push to Artifactory → direct commit to `dsc-test_values.yaml` |
-| Push to `main` or `v*` tag | Build images → push to Artifactory → **open PR** to `dsc-prod_values.yaml` |
-| Pull request to `main`/`develop` | Build images only (no push) |
+| Source | GitOps update method | Target namespace |
+|---|---|---|
+| Push to `develop` | Direct commit to `<app>-dev_values.yaml` | `<license>-dev` (ArgoCD auto-sync) |
+| Push to `test` | Direct commit to `<app>-test_values.yaml` | `<license>-test` (ArgoCD auto-sync) |
+| Push to `main` or `v*` tag | **Open PR** to `<app>-prod_values.yaml` | `<license>-prod` (manual ArgoCD sync after merge) |
+| Pull request | Build images only — no push | — |
 
 ### Image Tag Strategy (ISB EA Option 2)
 
@@ -225,59 +232,61 @@ Confirmed by product owner. Applied consistently across:
 
 All images push to:
 ```
-artifacts.developer.gov.bc.ca/be808f-docker-local/dsc-api:<tag>
-artifacts.developer.gov.bc.ca/be808f-docker-local/dsc-frontend:<tag>
+artifacts.developer.gov.bc.ca/<license>-docker-local/<image-name>:<tag>
 ```
 
 ### Production Deployment Gate (ISB EA Requirement)
 
 Production deployments **must not** be direct commits. The `create-prod-pr` job:
-1. Creates branch `chore/dsc-prod-<tag>` in `tenant-gitops-be808f`
-2. Patches `deploy/dsc-prod_values.yaml` with the new image tag
+1. Creates branch `chore/<app>-prod-<tag>` in the gitops repo
+2. Patches `deploy/<app>-prod_values.yaml` with the new image tag
 3. Opens a PR via `gh pr create` targeting `main`
-4. A reviewer must approve and merge; ArgoCD syncs `be808f-prod` on merge
+4. A reviewer must approve and merge; ArgoCD syncs `<license>-prod` on merge
 
-### Required GitHub Secrets
+### Required GitHub Secrets (App Repo)
 
-| Secret | Repo | Purpose |
-|---|---|---|
-| `ARTIFACTORY_USERNAME` | `DSC-modernization` | Artifactory login (push images) |
-| `ARTIFACTORY_PASSWORD` | `DSC-modernization` | Artifactory login (push images) |
-| `GITOPS_TOKEN` | `DSC-modernization` | PAT with `repo` write to `tenant-gitops-be808f` |
+| Secret | Purpose |
+|---|---|
+| `ARTIFACTORY_USERNAME` | Artifactory login (push images) |
+| `ARTIFACTORY_PASSWORD` | Artifactory login (push images) |
+| `GITOPS_TOKEN` | GitHub PAT with `repo` write access to the gitops repo |
 
 ---
 
-## 7. CI/CD Pipeline — GitOps Repo (`ci.yml` + `policy-enforcement.yaml`)
+## 7. CI/CD Pipeline — GitOps Repo
 
 ### 7.1 — Helm Lint and Template (`ci.yml`)
 
 Runs on push/PR to `main`, `develop`, `test` when `charts/` or `deploy/` changes.
+Must lint and fully `helm template` the chart for every environment. Example steps:
 
-| Step | What it validates |
-|---|---|
-| `helm lint charts/emerald-app` | Co-tenant chart still intact |
-| `helm lint charts/dsc-app --values deploy/dsc-dev_values.yaml` | DSC chart + dev values |
-| `helm lint charts/dsc-app --values deploy/dsc-test_values.yaml` | DSC chart + test values |
-| `helm lint charts/dsc-app --values deploy/dsc-prod_values.yaml` | DSC chart + prod values |
-| `helm template dsc-dev/test/prod ...` | Full manifest render for all environments |
-| `helm dependency build charts/gitops` + lint + template × 3 | Co-tenant umbrella chart |
+```yaml
+- name: Lint chart (dev values)
+  run: helm lint charts/<app> --values deploy/<app>-dev_values.yaml
+
+- name: Template chart (dev)
+  run: helm template <app>-dev charts/<app> --namespace <license>-dev \
+       --values deploy/<app>-dev_values.yaml > /dev/null
+```
+
+Repeat for test and prod value files.
 
 ### 7.2 — Datree Security Policy Enforcer (`policy-enforcement.yaml`)
 
-**Status: TO BE IMPLEMENTED** (see also §10 — Pending Work)
+**Required for ISB EA compliance.** Datree enforces security policies defined in
+`.github/policies.yaml` (provided by ISB/platform team), including
+`CUSTOM_WORKLOAD_INCORRECT_DATACLASS_LABELS` and
+`CONTAINERS_INCORRECT_PRIVILEGED_VALUE_TRUE`.
 
-Datree is part of the ISB EA requirement for Emerald. It enforces security policies
-including `CUSTOM_WORKLOAD_INCORRECT_DATACLASS_LABELS`, `CONTAINERS_INCORRECT_PRIVILEGED_VALUE_TRUE`,
-and others defined in `.github/policies.yaml`.
+**Correct implementation pattern** (confirmed from study of all active ISB
+`tenant-gitops-*` repos — `e648d1`, `a56f0d`, `cc9b4e`, `ca61f6`, `dead5e`,
+`a239c6`):
 
-**Correct implementation pattern** (confirmed from `bcgov-c/tenant-gitops-e648d1`,
-`tenant-gitops-a56f0d`, and all other ISB repos studied):
-
-- **Separate file:** `policy-enforcement.yaml` — a standalone workflow, **not** a
-  step in `ci.yml`
-- **Helm plugin, offline mode** — no `DATREE_TOKEN` required
-- **Working directory trick:** set `working-directory: ./.github/workflows`; all
-  paths are relative from there (`../policies.yaml`, `../../charts/dsc-app`)
+- **Standalone file:** `.github/workflows/policy-enforcement.yaml` — not a step
+  in `ci.yml`
+- **Helm plugin, offline mode** — **no `DATREE_TOKEN` required**
+- **Working directory:** set to `./.github/workflows`; all paths are relative from
+  there (`../policies.yaml` → `.github/policies.yaml`, `../../charts/<app>`)
 
 ```yaml
 # .github/workflows/policy-enforcement.yaml
@@ -297,7 +306,9 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: azure/setup-helm@v3
-        with: { version: 'latest ', token: "${{ secrets.GITHUB_TOKEN }}" }
+        with:
+          version: 'latest '
+          token: ${{ secrets.GITHUB_TOKEN }}
         id: install
       - name: Policy Enforcement
         run: |
@@ -306,157 +317,158 @@ jobs:
           helm datree config set offline local
           if [[ "$GITHUB_REF" == "refs/heads/main" ]] || [[ "$GITHUB_REF" == refs/tags/* ]]; then
             helm datree test --ignore-missing-schemas --policy-config ../policies.yaml \
-              --include-tests ../../charts/dsc-app -- \
-              --namespace be808f-prod --values ../../deploy/dsc-prod_values.yaml dsc-prod
+              --include-tests ../../charts/<app> -- \
+              --namespace <license>-prod --values ../../deploy/<app>-prod_values.yaml <app>-prod
           elif [[ "$GITHUB_REF" == "refs/heads/test" ]]; then
             helm datree test --ignore-missing-schemas --policy-config ../policies.yaml \
-              --include-tests ../../charts/dsc-app -- \
-              --namespace be808f-test --values ../../deploy/dsc-test_values.yaml dsc-test
+              --include-tests ../../charts/<app> -- \
+              --namespace <license>-test --values ../../deploy/<app>-test_values.yaml <app>-test
           else
             helm datree test --ignore-missing-schemas --policy-config ../policies.yaml \
-              --include-tests ../../charts/dsc-app -- \
-              --namespace be808f-dev --values ../../deploy/dsc-dev_values.yaml dsc-dev
+              --include-tests ../../charts/<app> -- \
+              --namespace <license>-dev --values ../../deploy/<app>-dev_values.yaml <app>-dev
           fi
         working-directory: ${{env.policy-directory}}
 ```
 
-> **Note on earlier implementation:** A previous attempt added `datreeio/action-datree@main`
-> as a step inside `ci.yml`. This was incorrect — the GitHub Action approach requires a
-> `DATREE_TOKEN` secret and does not match the offline Helm plugin pattern used across
-> all ISB `tenant-gitops-*` repos. That step has been commented out in `ci.yml` pending
-> creation of the proper `policy-enforcement.yaml` workflow.
+> **Important:** An earlier incorrect pattern used `datreeio/action-datree@main`
+> as a step inside `ci.yml` with a `DATREE_TOKEN` secret. This does not match any
+> active ISB repo. The Helm plugin offline approach above requires **no token** and
+> is the confirmed correct pattern.
 
 ---
 
-## 8. CI/CD Gap Analysis — Peer Repo Comparison
+## 8. Recommended Additional CI Practices
 
-A survey of peer ISB repositories (`JAG-JAM-CORNET`, `JAG-LEA`) identified two
-additional CI/CD practices present in those stacks that are currently absent from DSC.
+These patterns are present in `bcgov-c/JAG-JAM-CORNET` and `bcgov-c/JAG-LEA` and
+are recommended for all projects:
 
 ### 8.1 — Trivy Image Vulnerability Scan
 
-**Present in:** `bcgov-c/JAG-JAM-CORNET` (`build-push-backend.yaml`),
-`bcgov-c/JAG-LEA` (`build-push-backend.yaml`)
+Add after image push in `build-and-push.yml`. Informational — does not fail the
+pipeline, but surfaces HIGH/CRITICAL CVEs for awareness:
 
-**Pattern:**
 ```yaml
 - name: Run Trivy vulnerability scanner
   uses: aquasecurity/trivy-action@master
   with:
     scan-type: image
-    image-ref: artifacts.developer.gov.bc.ca/<project>/<image>:<tag>
+    image-ref: artifacts.developer.gov.bc.ca/<license>-docker-local/<image>:<tag>
     format: 'table'
     ignore-unfixed: true
     limit-severities-for-sarif: true
     severity: HIGH,CRITICAL
 ```
 
-Runs after image push, as an informational step (does not fail the pipeline). Scans
-for HIGH and CRITICAL CVEs in the pushed image.
+Run for every image pushed (API image and frontend image separately).
 
-**DSC status:** **Not yet implemented.** Recommended addition to `build-and-push.yml`
-after image push, covering both `dsc-api` and `dsc-frontend`.
+### 8.2 — Automated Unit / Integration Test Workflow (`build-and-test.yml`)
 
-### 8.2 — Automated Unit / Integration Test Run
+```yaml
+# Triggers on PR/push to develop
+on:
+  push:
+    branches: [develop]
+  pull_request:
+    branches: [main, develop]
 
-**Present in:** `bcgov-c/JAG-JAM-CORNET` (`build-test-apps.yaml`),
-`bcgov-c/JAG-LEA` (`build-test-apps.yaml`)
+jobs:
+  test-api:
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with: { dotnet-version: '10.x' }
+      - run: dotnet restore
+      - run: dotnet build --no-restore
+      - run: dotnet test --no-build --verbosity normal
 
-**Pattern:** A separate `build-test-apps.yaml` workflow, triggered on PR/push to
-`develop`, runs:
-- `.NET`: `dotnet restore` → `dotnet build` → `dotnet test`
-- `React/Node`: `npm install` → `npm run build` → `npm test`
-
-**DSC status:** **Not yet implemented as a CI workflow.** DSC has 36 xUnit tests
-covering Services, Auth, Reports, and Catalog CRUD. These run locally (`dotnet test`)
-but are not yet gated in CI. A `build-and-test.yml` workflow should be created.
+  test-frontend:
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '22' }
+      - run: npm ci
+      - run: npm run build
+      - run: npm test
+```
 
 ---
 
-## 9. Secrets — Full Inventory
+## 9. Secrets Management
 
-### 9.1 — GitHub Actions Secrets
+### 9.1 — GitHub Actions Secrets (App Repo)
 
-| Secret | Repo | Required by | Status |
-|---|---|---|---|
-| `ARTIFACTORY_USERNAME` | `DSC-modernization` | `build-and-push.yml` — image push | ❌ Not yet set |
-| `ARTIFACTORY_PASSWORD` | `DSC-modernization` | `build-and-push.yml` — image push | ❌ Not yet set |
-| `GITOPS_TOKEN` | `DSC-modernization` | `build-and-push.yml` — gitops update + prod PR | ❌ Not yet set |
+| Secret | Required by |
+|---|---|
+| `ARTIFACTORY_USERNAME` | `build-and-push.yml` — image push |
+| `ARTIFACTORY_PASSWORD` | `build-and-push.yml` — image push |
+| `GITOPS_TOKEN` | `build-and-push.yml` — gitops update + prod PR |
 
-> **Datree note:** No `DATREE_TOKEN` is required. The correct Helm plugin offline
-> implementation does not need a token. Earlier documentation stating a `DATREE_TOKEN`
-> is needed for `tenant-gitops-be808f` is superseded by this finding.
+> **No `DATREE_TOKEN` required.** The correct Helm plugin offline Datree
+> implementation does not need a token.
 
-### 9.2 — Kubernetes Secrets in `be808f-dev`
-
-These must be created manually before ArgoCD can successfully start pods. They are
-**never committed** to the GitOps repo.
+### 9.2 — Kubernetes Secrets (per namespace, never committed)
 
 #### Artifactory pull secret
 ```bash
-oc -n be808f-dev create secret docker-registry artifactory-pull-secret \
+oc -n <license>-dev create secret docker-registry artifactory-pull-secret \
   --docker-server=artifacts.developer.gov.bc.ca \
   --docker-username=<ARTIFACTORY_USERNAME> \
   --docker-password=<ARTIFACTORY_PASSWORD>
 ```
 
-#### Database secret
+#### Database credentials
 ```bash
-oc -n be808f-dev create secret generic dsc-db-secret \
+oc -n <license>-dev create secret generic <app>-db-secret \
   --from-literal=MARIADB_ROOT_PASSWORD=<root-password> \
-  --from-literal=MARIADB_USER=dscapp \
-  --from-literal=MARIADB_PASSWORD=<app-password> \
-  --from-literal=MARIADB_DATABASE=dscdb
+  --from-literal=MARIADB_USER=<app-db-user> \
+  --from-literal=MARIADB_PASSWORD=<app-db-password> \
+  --from-literal=MARIADB_DATABASE=<app-db-name>
 ```
 
-The connection string injected into the API pod:
-```
-Server=dsc-db;Port=3306;Database=dscdb;Uid=dscapp;Pwd=<MARIADB_PASSWORD>;
-```
-
-#### Admin token secret
+#### Application token / admin secret
 ```bash
-oc -n be808f-dev create secret generic dsc-admin-secret \
-  --from-literal=ADMIN_TOKEN=<admin-token>
+oc -n <license>-dev create secret generic <app>-admin-secret \
+  --from-literal=ADMIN_TOKEN=<token>
 ```
 
-Passed as `X-Admin-Token` header to seed/admin API endpoints. A UUID is sufficient for dev.
+### 9.3 — Vault (Production Hardening)
 
-### 9.3 — Vault (Medium-Term)
-
-For production hardening, secrets should be migrated to HashiCorp Vault:
-- Vault paths: `secret/be808f/dev/dsc-db`, `secret/be808f/dev/dsc-admin`
+For production, secrets should be migrated to HashiCorp Vault:
+- Vault paths: `secret/<license>/<env>/<key>`
+  (e.g., `secret/be808f/prod/db-password`)
 - Injection: External Secrets Operator or Vault Agent Injector
-- DSC Helm chart `secret.yaml` is shape-only; it is already structured to receive
-  values externally
+- Helm chart `secret.yaml` should be shape-only so Vault can populate values
 
 ---
 
-## 10. Network Policy Summary
+## 10. Network Policies
 
-`charts/dsc-app/templates/networkpolicies.yaml` defines six policies:
+Emerald enforces default-deny. The following policies are required for every project:
 
-| Policy | Rule |
+| Policy name | Rule |
 |---|---|
 | `deny-all` | Default deny all ingress and egress |
 | `allow-router-to-frontend` | Ingress from `ingress` namespace to Frontend port 8080 |
 | `allow-router-to-api` | Ingress from `ingress` namespace to API port 8080 |
-| `allow-frontend-to-api` | Ingress to API from pods with `app: dsc-frontend` label |
-| `allow-api-to-db` | Ingress to DB from pods with `app: dsc-api` label (port 3306) |
+| `allow-frontend-to-api` | Ingress to API from pods matching frontend selector |
+| `allow-api-to-db` | Ingress to DB from pods matching API selector (port 3306/5432) |
 | `allow-egress-dns` | Egress UDP/TCP port 53 for DNS resolution |
+
+Add `allow-egress-https` if the API needs to reach Vault or an external service.
 
 ---
 
 ## 11. Health Check Endpoints
 
-`DSC.Api` exposes two endpoints used by OpenShift liveness and readiness probes:
+All APIs must expose two health check paths for OpenShift probes:
 
-| Probe | Path | Behaviour |
+| Probe | Path | Minimum behaviour |
 |---|---|---|
 | Liveness | `GET /health/live` | Returns 200 when the process is alive |
-| Readiness | `GET /health/ready` | Returns 200 when EF Core DB `CanConnectAsync()` succeeds |
+| Readiness | `GET /health/ready` | Returns 200 when the database connection is healthy |
 
-These are configured in `api-deployment.yaml`:
+Helm chart `api-deployment.yaml` configures these as:
 ```yaml
 livenessProbe:
   httpGet: { path: /health/live, port: 8080 }
@@ -470,110 +482,99 @@ readinessProbe:
 
 ## 12. ArgoCD Sync Policies
 
-| Application | Sync Policy | Branch Watched |
+| Environment | Sync policy | Rationale |
 |---|---|---|
-| `be808f-dsc-dev` | **Auto-sync** — `prune: true`, `selfHeal: true` | `main` of gitops repo |
-| `be808f-dsc-test` | **Manual sync** | `main` of gitops repo |
-| `be808f-dsc-prod` | **Manual sync** — `CreateNamespace: false` | `main` of gitops repo |
-
-> Dev uses auto-sync to allow developers to iterate quickly. Test and Prod require
-> a human to initiate the sync in the ArgoCD UI after values files are updated.
+| dev | **Auto-sync** — `prune: true`, `selfHeal: true` | Fast iteration; drift is automatically corrected |
+| test | **Manual sync** | Intentional gate — humans decide when to promote |
+| prod | **Manual sync** — `CreateNamespace: false` | Always requires human action + namespace must pre-exist |
 
 ---
 
-## 13. Resources Created After First ArgoCD Sync (`be808f-dev`)
+## 13. ISB EA Option 2 — Required Compliance Checklist
 
-| Kind | Name |
-|---|---|
-| `ServiceAccount` | `dsc-app` |
-| `Deployment` | `dsc-api` (1 replica) |
-| `Deployment` | `dsc-frontend` (1 replica) |
-| `StatefulSet` | `dsc-db` (MariaDB 10.11, 1Gi PVC) |
-| `Service` | `dsc-api` (ClusterIP, 8080) |
-| `Service` | `dsc-frontend` (ClusterIP, 8080) |
-| `Service` | `dsc-db` (Headless ClusterIP) |
-| `Route` | `dsc-api` → `dsc-api-be808f-dev.apps.emerald.devops.gov.bc.ca` |
-| `Route` | `dsc-frontend` → `dsc-frontend-be808f-dev.apps.emerald.devops.gov.bc.ca` |
-| `ConfigMap` | `dsc-frontend-nginx-config` (rendered nginx.conf) |
-| `NetworkPolicy` × 6 | deny-all + 5 allow rules |
+The following items are required by the ISB *OPTION 2* EA guidance. Use this as a
+pre-launch checklist for any new Emerald project:
+
+| Requirement | How to implement | Notes |
+|---|---|---|
+| Standalone ArgoCD Application per environment | Three Application CRDs: dev, test, prod | Never a sub-chart of another team's umbrella |
+| GitOps folder structure | `charts/`, `deploy/`, `applications/argocd/` | As per §4 layout |
+| Artifactory image registry | All images at `artifacts.developer.gov.bc.ca/<license>-docker-local/` | No Docker Hub or GHCR at runtime |
+| Artifactory pull secret | `imagePullSecrets: [{name: artifactory-pull-secret}]` in all Deployments/StatefulSets | Must be created in each namespace |
+| Vault for secrets | Helm `secret.yaml` shape-only; values injected at runtime | Never commit real secret values |
+| NetworkPolicies | deny-all + explicit allow rules (see §10) | Required for all workloads |
+| DataClass label | `DataClass: "<classification>"` on all pods; matching AVI route annotation | Confirm classification with InfoSec |
+| Manual sync for test/prod | No `automated: {}` block in test/prod Application CRDs | Required |
+| Production deployment via PR | `create-prod-pr` job in app repo CI; no direct commit to prod gitops | Branch protection on `main` in gitops repo recommended |
+| Semver image tags for production | `v*` tag → tag name as image tag; branch → short SHA | Enables clear rollback targets |
+| Helm lint + template in CI | `ci.yml` runs lint + template for all three environments | Must include all value files |
+| Datree policy enforcement | Standalone `policy-enforcement.yaml` workflow (Helm plugin offline) | See §7.2 — no DATREE_TOKEN needed |
 
 ---
 
-## 14. ISB EA Option 2 Compliance — Gap Analysis
+## 14. New Project Setup Checklist
 
-**Reference document:** *OPTION 2 – Using GitHub Actions + GitOps in Emerald (ISB
-preferred)*. Reviewed February 2026.
+### Platform Provisioning (human steps)
 
-### 14.1 — Conformant Items
+- [ ] Register in [Platform Product Registry](https://digital.gov.bc.ca/technology/cloud/private/products-tools/registry/) — receive license plate
+- [ ] Request Artifactory project + Docker repository (`<license>-docker-local`)
+- [ ] Create Artifactory service account; store as GitHub Secrets (`ARTIFACTORY_USERNAME`, `ARTIFACTORY_PASSWORD`) in app repo
+- [ ] Create `GITOPS_TOKEN` (GitHub PAT with `repo` write scope on gitops repo); store as GitHub Secret in app repo
+- [ ] Onboard to Vault; provision paths: `secret/<license>/<env>/<key>`
+- [ ] Enable ArgoCD for the project (self-serve or platform team request)
+- [ ] Add team members to OpenShift namespaces (edit/admin roles)
+- [ ] Confirm `DataClass` label value with Information Security
+- [ ] Enable branch protection on `main` in the gitops repo (require PR review)
 
-| EA Requirement | Implementation | Status |
-|---|---|---|
-| Standalone ArgoCD Applications per environment | `be808f-dsc-{dev,test,prod}.yaml` — three separate CRDs | ✅ |
-| GitOps folder structure | `charts/`, `deploy/`, `applications/argocd/` | ✅ |
-| Artifactory image registry | `artifacts.developer.gov.bc.ca/be808f-docker-local/` | ✅ |
-| Artifactory pull secret | `imagePullSecrets: [name: artifactory-pull-secret]` in Helm | ✅ |
-| Vault for secrets | `secret.yaml` shape-only; real values from Vault at runtime | ✅ |
-| NetworkPolicies | deny-all + 5 explicit allow rules | ✅ |
-| DataClass label | `DataClass: "Low"` on all workloads, all environments | ✅ |
-| Manual sync for test/prod | `automated: {}` omitted in test + prod CRDs | ✅ |
-| Production deployment via PR | `create-prod-pr` job; no direct commit to prod | ✅ |
-| Semver image tags for production | `v*` tag → uses tag name; branch → short SHA | ✅ |
-| Helm lint + template in CI | `ci.yml` runs all three value sets | ✅ |
+### GitOps Repo Setup
 
-### 14.2 — Gaps Previously Identified (2 Resolved, 1 In Progress)
+- [ ] Create gitops repo (standalone, not a fork of another team's repo)
+- [ ] Copy Helm chart skeleton from `rl-project-template/gitops/charts/`
+- [ ] Replace all `<APP_NAME>` and `<LICENSE>` placeholders
+- [ ] Populate `deploy/<app>-dev_values.yaml`, `...-test_values.yaml`, `...-prod_values.yaml`
+- [ ] Copy `.github/policies.yaml` from ISB or another `tenant-gitops-*` repo
+- [ ] Create `.github/workflows/ci.yml` (Helm lint + template)
+- [ ] Create `.github/workflows/policy-enforcement.yaml` (Datree Helm plugin — see §7.2)
+- [ ] Grant ArgoCD SSH deploy key read access to the gitops repo
+- [ ] Apply ArgoCD Application CRDs: `oc apply -f applications/argocd/<app>-dev.yaml -n <argocd-namespace>`
 
-| Gap | Status | Notes |
-|---|---|---|
-| Production must be a PR — not a direct commit | ✅ **Resolved** | `create-prod-pr` job added to `build-and-push.yml` |
-| Semver image tags for production | ✅ **Resolved** | Image tag strategy branches on `github.ref_type` |
-| Datree K8s policy enforcement | 🔄 **In Progress** | `datreeio/action-datree@main` (wrong approach) removed from `ci.yml`; `policy-enforcement.yaml` with Helm plugin offline to be created |
+### App Repo Setup
 
-### 14.3 — CA/CD Gaps vs. Peer Repos (Not in EA Document)
+- [ ] Update Containerfiles — replace `<PROJECT_NAME>` placeholders
+- [ ] Verify `GET /health/live` and `GET /health/ready` endpoints exist and return 200
+- [ ] Update `build-and-push.yml` — set `<LICENSE>`, `<APP_NAME>`, `<GITOPS_REPO>`
+- [ ] Create `build-and-test.yml` (unit tests + frontend build)
+- [ ] Remove `localhost` references from `appsettings.json` (all connection strings → env vars)
 
-| Gap | Source | Status |
-|---|---|---|
-| Trivy image vulnerability scan | JAG-CORNET, JAG-LEA | ❌ Not yet implemented |
-| Automated unit test workflow in CI | JAG-CORNET, JAG-LEA | ❌ Not yet implemented |
+### First Deployment Verification
 
----
-
-## 15. Pending Work — Ordered Checklist
-
-### Code Changes (Developer)
-
-- [ ] **Create `policy-enforcement.yaml`** in `tenant-gitops-be808f/.github/workflows/`
-  (see §7.2 for exact content)
-- [ ] **Add Trivy scan** to `.github/workflows/build-and-push.yml` after image push
-  for both `dsc-api` and `dsc-frontend` (see §8.1 for pattern)
-- [ ] **Create `build-and-test.yml`** in `.github/workflows/` — `dotnet test` + Vite
-  build on PR/push to `develop` (see §8.2 for pattern)
-
-### Platform Provisioning (Human Steps)
-
-- [ ] **Set GitHub Secrets** in `rloisell/DSC-modernization`:
-  - `ARTIFACTORY_USERNAME`
-  - `ARTIFACTORY_PASSWORD`
-  - `GITOPS_TOKEN` (PAT with `repo` write to `bcgov-c/tenant-gitops-be808f`)
-- [ ] **Confirm** `be808f-docker-local` Docker repo exists in Artifactory and the
-  service account has push rights
-- [ ] **Confirm** `mariadb:10.11` is available in Artifactory (or remote-cached
-  virtual repo) — Emerald pods cannot pull from Docker Hub directly
-- [ ] **Push `develop` branch** to trigger `build-and-push.yml`; confirm images
-  appear in Artifactory and `dsc-dev_values.yaml` is updated with a real tag
-- [ ] **Create Kubernetes secrets** in `be808f-dev` (see §9.2):
-  - `artifactory-pull-secret`
-  - `dsc-db-secret`
-  - `dsc-admin-secret`
-- [ ] **Register ArgoCD Application** — apply `be808f-dsc-dev.yaml` to the ArgoCD
-  namespace (developer if cluster access exists; otherwise request from platform team)
-- [ ] **Verify first sync** — visit `dsc-frontend-be808f-dev.apps.emerald.devops.gov.bc.ca`
+- [ ] Push `develop` branch → confirm `build-and-push.yml` green → confirm images in Artifactory
+- [ ] Confirm gitops `<app>-dev_values.yaml` has been updated with a real image tag (not placeholder)
+- [ ] Create Kubernetes secrets in `<license>-dev` (pull secret + app secrets)
+- [ ] Verify ArgoCD syncs and all pods go green
+- [ ] Visit the frontend Route URL and verify the app loads
+- [ ] Hit `GET /health/ready` → expect `{"status":"Healthy"}`
 
 ### Path to Production
 
-- [ ] Confirm `ag-pssg-emerald` GitHub team has reviewer access to `tenant-gitops-be808f`
-  (required to assign prod PRs to a reviewer)
-- [ ] Enable branch protection on `main` in `tenant-gitops-be808f` requiring PR approval
-- [ ] Tag and release `v1.0.0` to validate the semver prod PR flow end-to-end
+- [ ] Confirm `ag-pssg-emerald` (or equivalent) GitHub team has reviewer access to the gitops repo
+- [ ] Run `git tag v1.0.0 && git push --tags` to trigger the first prod PR flow
+- [ ] Review and merge the auto-generated PR in the gitops repo
+- [ ] Confirm ArgoCD syncs `<license>-prod`
+
+---
+
+## 15. Troubleshooting Reference
+
+| Symptom | Most Likely Cause | Fix |
+|---|---|---|
+| Pods stuck in `ImagePullBackOff` | `artifactory-pull-secret` missing or wrong credentials | Re-create the pull secret in the namespace |
+| API pod in `CrashLoopBackOff` | DB secret missing, or DB not yet running | `oc logs <pod>` — check connection string error |
+| ArgoCD `ComparisonError` | Image tag is still a placeholder value | Re-run `build-and-push.yml` |
+| ArgoCD Application not visible | CRD was not applied to ArgoCD namespace | Apply `applications/argocd/<app>-dev.yaml` |
+| Route returns 503 | Pod readiness probe failing | `oc logs <pod>` — DB likely not healthy yet |
+| DB PVC in `Pending` | Storage class name wrong or unavailable | `oc get sc` — confirm `netapp-file-standard` exists |
+| Datree CI step failing | Helm chart fails policy check | Read Datree output — most common: missing `DataClass` label |
 
 ---
 
@@ -590,7 +591,7 @@ preferred)*. Reviewed February 2026.
 | Provision New OpenShift Project | https://developer.gov.bc.ca/docs/default/component/platform-developer-docs/docs/openshift-projects-and-access/provision-new-openshift-project/ |
 | OpenShift Network Policies | https://developer.gov.bc.ca/docs/default/component/platform-developer-docs/docs/platform-architecture-reference/openshift-network-policies/ |
 | Database Backup Best Practices | https://developer.gov.bc.ca/docs/default/component/platform-developer-docs/docs/database-and-api-management/database-backup-best-practices/ |
-| Reference App Repo (same stack) | https://github.com/bcgov-c/jag-network-tools |
+| Reference App Repo (.NET + React/Vite) | https://github.com/bcgov-c/jag-network-tools |
 | Reference GitOps Repo | https://github.com/bcgov-c/tenant-gitops-be808f |
 | Peer CI/CD Pattern (CORNET) | https://github.com/bcgov-c/JAG-JAM-CORNET |
 | Peer CI/CD Pattern (LEA) | https://github.com/bcgov-c/JAG-LEA |
