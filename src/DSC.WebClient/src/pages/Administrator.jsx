@@ -7,6 +7,7 @@ import AdminDepartments from './AdminDepartments';
 import AdminProjects from './AdminProjects';
 import AdminExpense from './AdminExpense';
 import AdminActivityOptions from './AdminActivityOptions';
+import AdminProjectAssignments from './AdminProjectAssignments';
 
 const TABS = [
   { id: 'users',            label: 'Users' },
@@ -14,6 +15,7 @@ const TABS = [
   { id: 'positions',        label: 'Positions' },
   { id: 'departments',      label: 'Departments' },
   { id: 'projects',         label: 'Projects' },
+  { id: 'assignments',      label: 'Assignments' },
   { id: 'expense',          label: 'Expense' },
   { id: 'activity-options', label: 'Activity Options' },
 ];
@@ -24,6 +26,7 @@ const TAB_COMPONENTS = {
   'positions':        AdminPositions,
   'departments':      AdminDepartments,
   'projects':         AdminProjects,
+  'assignments':      AdminProjectAssignments,
   'expense':          AdminExpense,
   'activity-options': AdminActivityOptions,
 };
