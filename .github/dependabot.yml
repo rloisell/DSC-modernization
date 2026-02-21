@@ -1,0 +1,33 @@
+# .github/dependabot.yml
+# Ryan Loisell - Developer / Architect | GitHub Copilot | February 2026
+# AI-assisted: reviewed and directed by Ryan Loisell.
+#
+# Weekly dependency update PRs for NuGet (.NET), npm (frontend),
+# and GitHub Actions (supply-chain integrity).
+
+version: 2
+updates:
+
+  # .NET / NuGet
+  - package-ecosystem: nuget
+    directory: /src/DSC.Api
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+
+  # Node / npm (frontend)
+  - package-ecosystem: npm
+    directory: /src/DSC.WebClient
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+
+  # GitHub Actions
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5

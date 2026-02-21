@@ -103,6 +103,31 @@ jobs:
             ${{ env.REGISTRY }}/${{ env.NAMESPACE }}/${{ env.WEB_IMAGE }}:${{ steps.meta.outputs.image_tag }}
             ${{ env.REGISTRY }}/${{ env.NAMESPACE }}/${{ env.WEB_IMAGE }}:${{ github.ref_name }}
 
+      # ── Trivy vulnerability scans ──────────────────────────────────────────
+      # Informational only — does not fail the pipeline.
+      # Must run after docker/login-action so Trivy can pull from Artifactory.
+      - name: Trivy scan — API image
+        if: github.event_name != 'pull_request'
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type:                  image
+          image-ref:                  ${{ env.REGISTRY }}/${{ env.NAMESPACE }}/${{ env.API_IMAGE }}:${{ steps.meta.outputs.image_tag }}
+          format:                     table
+          ignore-unfixed:             true
+          limit-severities-for-sarif: true
+          severity:                   HIGH,CRITICAL
+
+      - name: Trivy scan — Frontend image
+        if: github.event_name != 'pull_request'
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type:                  image
+          image-ref:                  ${{ env.REGISTRY }}/${{ env.NAMESPACE }}/${{ env.WEB_IMAGE }}:${{ steps.meta.outputs.image_tag }}
+          format:                     table
+          ignore-unfixed:             true
+          limit-severities-for-sarif: true
+          severity:                   HIGH,CRITICAL
+
   # ── Update gitops (dev/test) ───────────────────────────────────────────────
   # Direct commit to the gitops repo for develop and test branches.
   # ArgoCD detects the change and auto-syncs to the matching namespace.

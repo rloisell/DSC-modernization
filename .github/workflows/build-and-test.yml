@@ -1,0 +1,69 @@
+# .github/workflows/build-and-test.yml
+# Ryan Loisell - Developer / Architect | GitHub Copilot | February 2026
+# AI-assisted: reviewed and directed by Ryan Loisell.
+#
+# CI workflow: build + unit-test on every push to develop and every PR
+# to main or develop.  Keeps the build green before anything reaches main.
+
+name: Build and Test
+
+on:
+  push:
+    branches:
+      - develop
+  pull_request:
+    branches:
+      - main
+      - develop
+
+permissions:
+  contents: read
+
+jobs:
+
+  # ---------------------------------------------------------------------------
+  dotnet-test:
+    name: .NET Build & Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.x'
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build
+        run: dotnet build --no-restore
+
+      - name: Run tests
+        run: dotnet test tests/DSC.Tests --no-build --verbosity normal
+
+  # ---------------------------------------------------------------------------
+  frontend-build:
+    name: Frontend Build & Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: src/DSC.WebClient/package-lock.json
+
+      - name: Install dependencies
+        working-directory: src/DSC.WebClient
+        run: npm ci
+
+      - name: Build
+        working-directory: src/DSC.WebClient
+        run: npm run build
+
+      - name: Run tests
+        working-directory: src/DSC.WebClient
+        run: npm test
