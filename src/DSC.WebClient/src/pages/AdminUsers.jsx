@@ -15,7 +15,9 @@ import {
   getAdminUsers,
   createAdminUser,
   updateAdminUser,
-  deleteAdminUser
+  deleteAdminUser,
+  deactivateAdminUser,
+  activateAdminUser
 } from '../api/AdminUserService';
 import { AdminCatalogService } from '../api/AdminCatalogService';
 import SubTabs from '../components/SubTabs';
@@ -241,6 +243,32 @@ export default function AdminUsers() {
     }
   }
 
+  async function handleDeactivateUser(user) {
+    setMessage('');
+    setError(null);
+    try {
+      await deactivateAdminUser(user.id);
+      const refreshed = await getAdminUsers();
+      setUsers(refreshed);
+      setMessage(`${user.firstName || user.username} deactivated.`);
+    } catch (e) {
+      setError(e.message);
+    }
+  }
+
+  async function handleActivateUser(user) {
+    setMessage('');
+    setError(null);
+    try {
+      await activateAdminUser(user.id);
+      const refreshed = await getAdminUsers();
+      setUsers(refreshed);
+      setMessage(`${user.firstName || user.username} reactivated.`);
+    } catch (e) {
+      setError(e.message);
+    }
+  }
+
   return (
     <div className="page">
       <SubTabs
@@ -321,7 +349,7 @@ export default function AdminUsers() {
       {subTab === 'edit' && (
       <section className="section stack">
         <Heading level={2}>Edit User</Heading>
-        <Text elementType="p">Select a user from the dropdown below or click a user in the table.</Text>
+        <Text elementType="p">Select a user from the dropdown below or click Edit in the table.</Text>
         <Select
           label="Select User"
           placeholder="Select user"
@@ -399,7 +427,13 @@ export default function AdminUsers() {
           />
           <ButtonGroup alignment="start" ariaLabel="Update user actions">
             <Button type="submit" variant="primary">Update User</Button>
-            <Button type="button" variant="tertiary" danger onPress={handleDeleteUser}>Delete User</Button>
+            {selectedUserId && (() => {
+              const selectedUser = users.find(u => u.id === selectedUserId);
+              return selectedUser?.isActive
+                ? <Button type="button" variant="tertiary" onPress={() => handleDeactivateUser(selectedUser)}>Deactivate User</Button>
+                : <Button type="button" variant="tertiary" onPress={() => handleActivateUser(selectedUser)}>Activate User</Button>;
+            })()}
+            <Button type="button" variant="tertiary" onPress={handleDeleteUser}>Delete User</Button>
           </ButtonGroup>
         </Form>
       </section>
@@ -407,7 +441,6 @@ export default function AdminUsers() {
       {subTab === 'current' && (
       <section className="section stack">
         <Heading level={2}>Current Users</Heading>
-        <Text elementType="p">Click a user to edit their information.</Text>
         {loading ? <Text elementType="p">Loading...</Text> : null}
         {users.length > 0 ? (
           <table className="bcds-table">
@@ -418,34 +451,20 @@ export default function AdminUsers() {
                 <th>Email</th>
                 <th>LAN ID</th>
                 <th>Role</th>
-                <th>Position</th>
-                <th>Department</th>
+                <th>Status</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
               {users.map(user => {
                 const role = roles.find(r => r.id === user.roleId);
-                const position = positions.find(p => p.id === user.positionId);
-                const department = departments.find(d => d.id === user.departmentId);
                 const fullName = `${user.firstName || ''} ${user.lastName || ''}`.trim() || '—';
                 
                 return (
                   <tr 
                     key={user.id}
-                    onClick={() => handleSelectUser(user.id)}
                     style={{ 
-                      cursor: 'pointer', 
                       backgroundColor: selectedUserId === user.id ? '#f0f9ff' : 'transparent' 
-                    }}
-                    onMouseEnter={(e) => {
-                      if (selectedUserId !== user.id) {
-                        e.currentTarget.style.backgroundColor = '#f8fafc';
-                      }
-                    }}
-                    onMouseLeave={(e) => {
-                      if (selectedUserId !== user.id) {
-                        e.currentTarget.style.backgroundColor = 'transparent';
-                      }
                     }}
                   >
                     <td>{user.empId ?? '—'}</td>
@@ -453,8 +472,20 @@ export default function AdminUsers() {
                     <td>{user.email || '—'}</td>
                     <td>{user.username || '—'}</td>
                     <td>{role?.name || '—'}</td>
-                    <td>{position?.title || '—'}</td>
-                    <td>{department?.name || '—'}</td>
+                    <td>
+                      <span style={{ color: user.isActive ? '#1a7f37' : '#b91c1c', fontWeight: 500, fontSize: '0.85em' }}>
+                        {user.isActive ? 'Active' : 'Inactive'}
+                      </span>
+                    </td>
+                    <td>
+                      <ButtonGroup ariaLabel="User actions">
+                        <Button size="small" variant="secondary" onPress={() => handleSelectUser(user.id)}>Edit</Button>
+                        {user.isActive
+                          ? <Button size="small" variant="tertiary" onPress={() => handleDeactivateUser(user)}>Deactivate</Button>
+                          : <Button size="small" variant="tertiary" onPress={() => handleActivateUser(user)}>Activate</Button>
+                        }
+                      </ButtonGroup>
+                    </td>
                   </tr>
                 );
               })}

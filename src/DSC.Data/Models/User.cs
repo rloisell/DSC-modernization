@@ -14,6 +14,9 @@ namespace DSC.Data.Models
         public string? FirstName { get; set; }
         public string? LastName { get; set; }
 
+        // Account status
+        public bool IsActive { get; set; } = true;
+
         // Local authentication fields (will be deprecated when moving to OIDC)
         public string? PasswordHash { get; set; }
 

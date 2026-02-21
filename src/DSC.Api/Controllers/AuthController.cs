@@ -49,6 +49,11 @@ namespace DSC.Api.Controllers
                 return Unauthorized(new { message = "User not found" });
             }
 
+            if (!user.IsActive)
+            {
+                return Unauthorized(new { message = "Account is deactivated" });
+            }
+
             return Ok(new LoginResponse
             {
                 Id = user.Id,

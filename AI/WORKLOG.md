@@ -2785,3 +2785,18 @@ npm run dev
 This will start the Vite dev server for the client. After installing dependencies, copy static assets from the legacy `WebContent` (css, js, images) into `src/DSC.WebClient/public` and begin porting JSPs to React components.
 
 	- When ready, use Spec-Kitty CLI to build the Spec; I will pause after this step per your instructions.
+
+## 2026-02-21 — Admin Users: deactivation + active-only login
+
+### Changes applied
+
+**Backend**
+- User.cs: Added IsActive (default true).
+- Migration 20260221011541_AddUserIsActive applied via SQL ALTER TABLE.
+- AdminUserDtos.cs: Added IsActive to AdminUserDto.
+- AdminUsersController.cs: GetAll+Get project IsActive; new PATCH deactivate/activate endpoints.
+- AuthController.cs: Login rejects deactivated users (401).
+
+**Frontend**
+- AdminUserService.js: Added deactivateAdminUser, activateAdminUser.
+- AdminUsers.jsx: Current Users table has explicit Edit + Deactivate/Activate buttons and Status column. Edit tab has Deactivate/Activate toggle.

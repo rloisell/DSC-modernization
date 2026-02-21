@@ -43,6 +43,7 @@ namespace DSC.Api.Controllers
                     Email = u.Email,
                     FirstName = u.FirstName,
                     LastName = u.LastName,
+                    IsActive = u.IsActive,
                     RoleId = u.RoleId,
                     PositionId = u.PositionId,
                     DepartmentId = u.DepartmentId
@@ -68,6 +69,7 @@ namespace DSC.Api.Controllers
                 Email = user.Email,
                 FirstName = user.FirstName,
                 LastName = user.LastName,
+                IsActive = user.IsActive,
                 RoleId = user.RoleId,
                 PositionId = user.PositionId,
                 DepartmentId = user.DepartmentId
@@ -135,6 +137,32 @@ namespace DSC.Api.Controllers
                 user.PasswordHash = _passwordHasher.HashPassword(user, request.Password);
             }
 
+            await _db.SaveChangesAsync();
+            return NoContent();
+        }
+
+        [HttpPatch("{id}/deactivate")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> Deactivate(Guid id)
+        {
+            var user = await _db.Users.FirstOrDefaultAsync(u => u.Id == id);
+            if (user == null) return NotFound();
+
+            user.IsActive = false;
+            await _db.SaveChangesAsync();
+            return NoContent();
+        }
+
+        [HttpPatch("{id}/activate")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> Activate(Guid id)
+        {
+            var user = await _db.Users.FirstOrDefaultAsync(u => u.Id == id);
+            if (user == null) return NotFound();
+
+            user.IsActive = true;
             await _db.SaveChangesAsync();
             return NoContent();
         }

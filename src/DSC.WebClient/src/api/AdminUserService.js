@@ -19,3 +19,11 @@ export async function updateAdminUser(id, payload) {
 export async function deleteAdminUser(id) {
   await axios.delete(`${API_URL}/${id}`);
 }
+
+export async function deactivateAdminUser(id) {
+  await axios.patch(`${API_URL}/${id}/deactivate`);
+}
+
+export async function activateAdminUser(id) {
+  await axios.patch(`${API_URL}/${id}/activate`);
+}
