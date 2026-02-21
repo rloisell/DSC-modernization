@@ -70,23 +70,17 @@ Actor -> Actor : Reads report data
 
 alt Invalid date range (to < from)
     Controller --> Browser : 400 ProblemDetails\n"Date range invalid"
-else projectId not a valid GUID
-    note over Controller : ASP.NET model binding\nrejects malformed value
+else projectId not a valid GUID (model binding rejects malformed value)
     Controller --> Browser : 400 ProblemDetails\n"The value 'x' is not valid."
-    note right of Browser
-      Frontend strips blank / sentinel
-      values before sending request —\n      avoids '0'-key bug on filter clear
-    end note
 else Non-admin requesting another user's data
-    Service ..> GEH : ForbiddenException
+    Service --> GEH : ForbiddenException
     GEH --> Browser : 403 ProblemDetails
 end
 
-note bottom
+note over Actor, DB
   Regular users see only their own WorkItems (userId filter applied).
   Admin / Manager role sees all users when no userId filter is passed.
-  Aggregation happens in-process after a single wide JOIN query — no
-  N+1 queries.
+  Aggregation happens in-process after a single wide JOIN query — no N+1 queries.
 end note
 
 @enduml

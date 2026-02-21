@@ -34,6 +34,18 @@ diagrams/
 │   ├── service-layer.drawio
 │   └── use-cases.drawio
 ├── plantuml/                  ← PlantUML source files (.puml)
+│   ├── png/                   ← exported PNG files — native GitHub rendering
+│   │   ├── api-architecture.png
+│   │   ├── component-diagram.png
+│   │   ├── deployment.png
+│   │   ├── domain-model.png
+│   │   ├── health-check-sequence.png
+│   │   ├── sequence-admin-crud.png
+│   │   ├── sequence-admin-seed.png
+│   │   ├── sequence-reporting-dashboard.png
+│   │   ├── sequence-time-entry.png
+│   │   ├── service-layer.png
+│   │   └── use-cases.png
 │   ├── api-architecture.puml
 │   ├── component-diagram.puml
 │   ├── deployment.puml
@@ -45,10 +57,13 @@ diagrams/
 │   ├── sequence-time-entry.puml
 │   ├── service-layer.puml
 │   └── use-cases.puml
-└── data-model/                ← ERD source files + exported SVGs
+└── data-model/                ← ERD source files + exported SVGs and PNGs
     ├── svg/
     │   ├── erd-current.svg
     │   └── erd-java-legacy.svg
+    ├── png/
+    │   ├── erd-current.png
+    │   └── erd-java-legacy.png
     ├── erd-current.drawio
     ├── erd-current.puml
     ├── erd-java-legacy.drawio
@@ -204,15 +219,20 @@ Visit [https://app.diagrams.net](https://app.diagrams.net) and drag/drop any `.d
 Install the [`hediet.vscode-drawio`](https://marketplace.visualstudio.com/items?itemName=hediet.vscode-drawio) extension.
 
 ### Viewing on GitHub
-The rendered SVG files in `drawio/svg/` and `data-model/svg/` display natively in GitHub's file browser and can be embedded in Markdown:
+- **Draw.io → SVG** (`drawio/svg/`, `data-model/svg/`): white background, heavier lines, embedded XML (re-openable in Draw.io)
+- **PlantUML → PNG** (`plantuml/png/`, `data-model/png/`): rasterised, best for Markdown embeds that need consistent rendering
 
+Embed in Markdown:
 ```markdown
 ![Domain Model](diagrams/drawio/svg/domain-model.svg)
+![Domain Model](diagrams/plantuml/png/DSC%20Domain%20Model.png)
 ```
 
 ---
 
-## Regenerating SVG Exports
+## Regenerating Exports
+
+### Draw.io → SVG
 
 After editing a `.drawio` source file, regenerate its SVG export:
 
@@ -238,6 +258,24 @@ for f in diagrams/data-model/*.drawio; do
     --output "diagrams/data-model/svg/$name.svg" "$f"
 done
 ```
+
+### PlantUML → PNG
+
+After editing a `.puml` source file, regenerate its PNG:
+
+```bash
+# Single file
+plantuml -tpng -o diagrams/plantuml/png diagrams/plantuml/my-diagram.puml
+
+# All plantuml/ sources at once
+plantuml -tpng -o diagrams/plantuml/png diagrams/plantuml/*.puml
+
+# data-model/ sources
+plantuml -tpng -o diagrams/data-model/png diagrams/data-model/*.puml
+```
+
+> **Note:** PlantUML uses the `@startuml <title>` declaration as the output filename, not the source filename.
+> The `png/` directory ships pre-generated so GitHub can render them inline.
 
 ---
 

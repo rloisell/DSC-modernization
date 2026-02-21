@@ -1,133 +1,133 @@
 <mxfile host="app.diagrams.net" modified="2026-02-20T00:00:00.000Z" agent="GitHub Copilot" version="24.5.2">
   <diagram id="seq-reporting" name="Reporting Dashboard — Sequence">
-    <mxGraphModel dx="1400" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1700" pageHeight="1300" math="0" shadow="0">
+    <mxGraphModel dx="1400" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1700" pageHeight="1300" math="0" shadow="0" background="#ffffff">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
 
-        <!-- TITLE -->
+        
         <mxCell id="title" value="Reporting Dashboard — Sequence Diagram" style="text;html=1;fontStyle=1;fontSize=14;strokeColor=none;fillColor=none;align=center;" vertex="1" parent="1">
           <mxGeometry x="100" y="10" width="1400" height="30" as="geometry" />
         </mxCell>
 
-        <!-- ═══ PARTICIPANT HEADERS ═══ -->
+        
         <mxCell id="p_actor" value="User / Admin" style="shape=mxgraph.sequence.actor;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="50" y="50" width="80" height="80" as="geometry" /></mxCell>
-        <mxCell id="p_ui" value="Reports.jsx&#xa;(Browser)" style="rounded=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;fontSize=9;" vertex="1" parent="1"><mxGeometry x="190" y="90" width="110" height="30" as="geometry" /></mxCell>
-        <mxCell id="p_pc" value="Projects&#xa;Controller" style="rounded=1;fillColor=#ffe6cc;strokeColor=#d6b656;fontStyle=1;fontSize=9;" vertex="1" parent="1"><mxGeometry x="360" y="90" width="100" height="30" as="geometry" /></mxCell>
-        <mxCell id="p_rc" value="Reports&#xa;Controller" style="rounded=1;fillColor=#ffe6cc;strokeColor=#d6b656;fontStyle=1;fontSize=9;" vertex="1" parent="1"><mxGeometry x="520" y="90" width="100" height="30" as="geometry" /></mxCell>
-        <mxCell id="p_rs" value="Report&#xa;Service" style="rounded=1;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;fontSize=9;" vertex="1" parent="1"><mxGeometry x="680" y="90" width="100" height="30" as="geometry" /></mxCell>
-        <mxCell id="p_dbctx" value="Db&#xa;Context" style="rounded=1;fillColor=#fff2cc;strokeColor=#d6b656;fontStyle=1;fontSize=9;" vertex="1" parent="1"><mxGeometry x="840" y="90" width="100" height="30" as="geometry" /></mxCell>
-        <mxCell id="p_geh" value="Global&#xa;Exception&#xa;Handler" style="rounded=1;fillColor=#f8cecc;strokeColor=#b85450;fontStyle=1;fontSize=9;" vertex="1" parent="1"><mxGeometry x="1000" y="90" width="100" height="30" as="geometry" /></mxCell>
+        <mxCell id="p_ui" value="Reports.jsx&#10;(Browser)" style="rounded=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;fontSize=9;" vertex="1" parent="1"><mxGeometry x="190" y="90" width="110" height="30" as="geometry" /></mxCell>
+        <mxCell id="p_pc" value="Projects&#10;Controller" style="rounded=1;fillColor=#ffe6cc;strokeColor=#d6b656;fontStyle=1;fontSize=9;" vertex="1" parent="1"><mxGeometry x="360" y="90" width="100" height="30" as="geometry" /></mxCell>
+        <mxCell id="p_rc" value="Reports&#10;Controller" style="rounded=1;fillColor=#ffe6cc;strokeColor=#d6b656;fontStyle=1;fontSize=9;" vertex="1" parent="1"><mxGeometry x="520" y="90" width="100" height="30" as="geometry" /></mxCell>
+        <mxCell id="p_rs" value="Report&#10;Service" style="rounded=1;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;fontSize=9;" vertex="1" parent="1"><mxGeometry x="680" y="90" width="100" height="30" as="geometry" /></mxCell>
+        <mxCell id="p_dbctx" value="Db&#10;Context" style="rounded=1;fillColor=#fff2cc;strokeColor=#d6b656;fontStyle=1;fontSize=9;" vertex="1" parent="1"><mxGeometry x="840" y="90" width="100" height="30" as="geometry" /></mxCell>
+        <mxCell id="p_geh" value="Global&#10;Exception&#10;Handler" style="rounded=1;fillColor=#f8cecc;strokeColor=#b85450;fontStyle=1;fontSize=9;" vertex="1" parent="1"><mxGeometry x="1000" y="90" width="100" height="30" as="geometry" /></mxCell>
         <mxCell id="p_db" value="MariaDB" style="shape=mxgraph.flowchart.database;fillColor=#f5f5f5;strokeColor=#666;fontStyle=1;fontSize=9;" vertex="1" parent="1"><mxGeometry x="1150" y="80" width="80" height="50" as="geometry" /></mxCell>
 
-        <!-- ═══ LIFELINES ═══ -->
-        <mxCell id="ll_actor" style="endArrow=none;dashed=1;strokeColor=#6c8ebf;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="90" y="130" /><mxPoint x="90" y="1250" /></Array></mxGeometry></mxCell>
-        <mxCell id="ll_ui" style="endArrow=none;dashed=1;strokeColor=#6c8ebf;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="245" y="120" /><mxPoint x="245" y="1250" /></Array></mxGeometry></mxCell>
-        <mxCell id="ll_pc" style="endArrow=none;dashed=1;strokeColor=#d6b656;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="410" y="120" /><mxPoint x="410" y="1250" /></Array></mxGeometry></mxCell>
-        <mxCell id="ll_rc" style="endArrow=none;dashed=1;strokeColor=#d6b656;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="570" y="120" /><mxPoint x="570" y="1250" /></Array></mxGeometry></mxCell>
-        <mxCell id="ll_rs" style="endArrow=none;dashed=1;strokeColor=#82b366;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="730" y="120" /><mxPoint x="730" y="1250" /></Array></mxGeometry></mxCell>
-        <mxCell id="ll_dbctx" style="endArrow=none;dashed=1;strokeColor=#d6b656;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="890" y="120" /><mxPoint x="890" y="1250" /></Array></mxGeometry></mxCell>
-        <mxCell id="ll_geh" style="endArrow=none;dashed=1;strokeColor=#b85450;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="1050" y="120" /><mxPoint x="1050" y="1250" /></Array></mxGeometry></mxCell>
-        <mxCell id="ll_db" style="endArrow=none;dashed=1;strokeColor=#666;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="1190" y="130" /><mxPoint x="1190" y="1250" /></Array></mxGeometry></mxCell>
+        
+        <mxCell id="ll_actor" style="endArrow=none;dashed=1;strokeColor=#6c8ebf;strokeWidth=2;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="90" y="130" /><mxPoint x="90" y="1250" /></Array></mxGeometry></mxCell>
+        <mxCell id="ll_ui" style="endArrow=none;dashed=1;strokeColor=#6c8ebf;strokeWidth=2;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="245" y="120" /><mxPoint x="245" y="1250" /></Array></mxGeometry></mxCell>
+        <mxCell id="ll_pc" style="endArrow=none;dashed=1;strokeColor=#d6b656;strokeWidth=2;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="410" y="120" /><mxPoint x="410" y="1250" /></Array></mxGeometry></mxCell>
+        <mxCell id="ll_rc" style="endArrow=none;dashed=1;strokeColor=#d6b656;strokeWidth=2;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="570" y="120" /><mxPoint x="570" y="1250" /></Array></mxGeometry></mxCell>
+        <mxCell id="ll_rs" style="endArrow=none;dashed=1;strokeColor=#82b366;strokeWidth=2;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="730" y="120" /><mxPoint x="730" y="1250" /></Array></mxGeometry></mxCell>
+        <mxCell id="ll_dbctx" style="endArrow=none;dashed=1;strokeColor=#d6b656;strokeWidth=2;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="890" y="120" /><mxPoint x="890" y="1250" /></Array></mxGeometry></mxCell>
+        <mxCell id="ll_geh" style="endArrow=none;dashed=1;strokeColor=#b85450;strokeWidth=2;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="1050" y="120" /><mxPoint x="1050" y="1250" /></Array></mxGeometry></mxCell>
+        <mxCell id="ll_db" style="endArrow=none;dashed=1;strokeColor=#666;strokeWidth=2;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="1190" y="130" /><mxPoint x="1190" y="1250" /></Array></mxGeometry></mxCell>
 
-        <!-- ═══ SECTION: PAGE LOAD ═══ -->
+        
         <mxCell id="sec1" value="Page Load — Project Filter" style="swimlane;startSize=18;fillColor=#f0f0f0;strokeColor=#666;fontStyle=2;fontSize=9;" vertex="1" parent="1">
           <mxGeometry x="60" y="145" width="1260" height="20" as="geometry" />
         </mxCell>
 
-        <!-- 1: Actor navigates -->
-        <mxCell id="m1" value="1. Navigate to /reports" style="edgeStyle=orthogonalEdgeStyle;endArrow=open;endFill=1;fontSize=9;" edge="1" parent="1">
+        
+        <mxCell id="m1" value="1. Navigate to /reports" style="edgeStyle=orthogonalEdgeStyle;endArrow=open;endFill=1;fontSize=9;strokeWidth=2;" edge="1" parent="1">
           <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="90" y="185" /><mxPoint x="245" y="185" /></Array></mxGeometry>
         </mxCell>
 
-        <!-- 2: UI → ProjectsController -->
-        <mxCell id="m2" value="2. GET /api/projects (X-User-Id)" style="edgeStyle=orthogonalEdgeStyle;endArrow=open;endFill=1;fontSize=9;" edge="1" parent="1">
+        
+        <mxCell id="m2" value="2. GET /api/projects (X-User-Id)" style="edgeStyle=orthogonalEdgeStyle;endArrow=open;endFill=1;fontSize=9;strokeWidth=2;" edge="1" parent="1">
           <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="245" y="215" /><mxPoint x="410" y="215" /></Array></mxGeometry>
         </mxCell>
 
-        <!-- 3: ProjectsController → DB (simplified) -->
-        <mxCell id="m3" value="3. SELECT Projects WHERE IsActive" style="edgeStyle=orthogonalEdgeStyle;endArrow=open;endFill=1;fontSize=9;" edge="1" parent="1">
+        
+        <mxCell id="m3" value="3. SELECT Projects WHERE IsActive" style="edgeStyle=orthogonalEdgeStyle;endArrow=open;endFill=1;fontSize=9;strokeWidth=2;" edge="1" parent="1">
           <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="410" y="240" /><mxPoint x="1190" y="240" /></Array></mxGeometry>
         </mxCell>
-        <mxCell id="m3r" value="ProjectDto[]" style="edgeStyle=orthogonalEdgeStyle;endArrow=open;endFill=1;fontSize=9;dashed=1;" edge="1" parent="1">
+        <mxCell id="m3r" value="ProjectDto[]" style="edgeStyle=orthogonalEdgeStyle;endArrow=open;endFill=1;fontSize=9;dashed=1;strokeWidth=2;" edge="1" parent="1">
           <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="1190" y="260" /><mxPoint x="245" y="260" /></Array></mxGeometry>
         </mxCell>
 
-        <!-- 4: Populate dropdown -->
-        <mxCell id="m4" value="4. Populate Project dropdown (+ 'All Projects')" style="edgeStyle=orthogonalEdgeStyle;endArrow=open;endFill=1;strokeColor=#d6b656;fontSize=9;" edge="1" parent="1">
+        
+        <mxCell id="m4" value="4. Populate Project dropdown (+ 'All Projects')" style="edgeStyle=orthogonalEdgeStyle;endArrow=open;endFill=1;strokeColor=#d6b656;fontSize=9;strokeWidth=2;" edge="1" parent="1">
           <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="245" y="290" /><mxPoint x="245" y="290" /></Array></mxGeometry>
         </mxCell>
 
-        <!-- ═══ SECTION: REPORT GENERATION ═══ -->
+        
         <mxCell id="sec2" value="Report Generation" style="swimlane;startSize=18;fillColor=#f0f0f0;strokeColor=#666;fontStyle=2;fontSize=9;" vertex="1" parent="1">
           <mxGeometry x="60" y="310" width="1260" height="20" as="geometry" />
         </mxCell>
 
-        <!-- 5: Actor selects + generates -->
-        <mxCell id="m5" value="5. Select date range + optional project → Generate" style="edgeStyle=orthogonalEdgeStyle;endArrow=open;endFill=1;fontSize=9;" edge="1" parent="1">
+        
+        <mxCell id="m5" value="5. Select date range + optional project → Generate" style="edgeStyle=orthogonalEdgeStyle;endArrow=open;endFill=1;fontSize=9;strokeWidth=2;" edge="1" parent="1">
           <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="90" y="350" /><mxPoint x="245" y="350" /></Array></mxGeometry>
         </mxCell>
 
-        <!-- Key note -->
-        <mxCell id="keynote" value="Frontend strips empty/sentinel values&#xa;(avoids '0'-key GUID parse errors) before&#xa;building query string" style="shape=note;whiteSpace=wrap;fontSize=9;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+        
+        <mxCell id="keynote" value="Frontend strips empty/sentinel values&#10;(avoids '0'-key GUID parse errors) before&#10;building query string" style="shape=note;whiteSpace=wrap;fontSize=9;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
           <mxGeometry x="60" y="360" width="180" height="55" as="geometry" />
         </mxCell>
 
-        <!-- 6: UI → ReportsController -->
-        <mxCell id="m6" value="6. GET /api/reports/summary?from=…&amp;to=…[&amp;projectId=UUID]" style="edgeStyle=orthogonalEdgeStyle;endArrow=open;endFill=1;fontSize=9;" edge="1" parent="1">
+        
+        <mxCell id="m6" value="6. GET /api/reports/summary?from=…&amp;to=…[&amp;projectId=UUID]" style="edgeStyle=orthogonalEdgeStyle;endArrow=open;endFill=1;fontSize=9;strokeWidth=2;" edge="1" parent="1">
           <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="245" y="430" /><mxPoint x="570" y="430" /></Array></mxGeometry>
         </mxCell>
 
-        <!-- rate-limit note -->
-        <mxCell id="rlnote" value="Rate limited: 30 req/min&#xa;Auth validates X-User-Id" style="shape=note;whiteSpace=wrap;fontSize=9;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+        
+        <mxCell id="rlnote" value="Rate limited: 30 req/min&#10;Auth validates X-User-Id" style="shape=note;whiteSpace=wrap;fontSize=9;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
           <mxGeometry x="530" y="440" width="150" height="35" as="geometry" />
         </mxCell>
 
-        <!-- 7: Controller → Service -->
-        <mxCell id="m7" value="7. GetSummaryAsync(from, to, projectId?, userId, requesterId)" style="edgeStyle=orthogonalEdgeStyle;endArrow=open;endFill=1;fontSize=9;" edge="1" parent="1">
+        
+        <mxCell id="m7" value="7. GetSummaryAsync(from, to, projectId?, userId, requesterId)" style="edgeStyle=orthogonalEdgeStyle;endArrow=open;endFill=1;fontSize=9;strokeWidth=2;" edge="1" parent="1">
           <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="570" y="490" /><mxPoint x="730" y="490" /></Array></mxGeometry>
         </mxCell>
 
-        <!-- 8: Service → DbCtx -->
-        <mxCell id="m8" value="8. WorkItems.Include(Project).Include(User).Include(TimeEntries).Where(filters)" style="edgeStyle=orthogonalEdgeStyle;endArrow=open;endFill=1;fontSize=9;" edge="1" parent="1">
+        
+        <mxCell id="m8" value="8. WorkItems.Include(Project).Include(User).Include(TimeEntries).Where(filters)" style="edgeStyle=orthogonalEdgeStyle;endArrow=open;endFill=1;fontSize=9;strokeWidth=2;" edge="1" parent="1">
           <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="730" y="530" /><mxPoint x="890" y="530" /></Array></mxGeometry>
         </mxCell>
 
-        <!-- 9: DbCtx → DB -->
-        <mxCell id="m9" value="9. SELECT wi.*, p.*, u.*, te.* FROM WorkItems wi&#xa;JOIN Projects, Users, LEFT JOIN TimeEntries&#xa;WHERE date BETWEEN @from AND @to [AND projectId / userId]" style="edgeStyle=orthogonalEdgeStyle;endArrow=open;endFill=1;fontSize=9;" edge="1" parent="1">
+        
+        <mxCell id="m9" value="9. SELECT wi.*, p.*, u.*, te.* FROM WorkItems wi&#10;JOIN Projects, Users, LEFT JOIN TimeEntries&#10;WHERE date BETWEEN @from AND @to [AND projectId / userId]" style="edgeStyle=orthogonalEdgeStyle;endArrow=open;endFill=1;fontSize=9;strokeWidth=2;" edge="1" parent="1">
           <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="890" y="570" /><mxPoint x="1190" y="570" /></Array></mxGeometry>
         </mxCell>
-        <mxCell id="m9r" value="WorkItem + TimeEntry rows" style="edgeStyle=orthogonalEdgeStyle;endArrow=open;endFill=1;fontSize=9;dashed=1;" edge="1" parent="1">
+        <mxCell id="m9r" value="WorkItem + TimeEntry rows" style="edgeStyle=orthogonalEdgeStyle;endArrow=open;endFill=1;fontSize=9;dashed=1;strokeWidth=2;" edge="1" parent="1">
           <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="1190" y="610" /><mxPoint x="730" y="610" /></Array></mxGeometry>
         </mxCell>
 
-        <!-- Aggregation box within Service -->
-        <mxCell id="agg" value="10. Aggregate in-process (no N+1 queries):&#xa;  • totalHours = SUM(te.Hours)&#xa;  • byProject[ ] — hours + itemCount per project&#xa;  • byUser[ ] — hours per user (admin only)&#xa;  • byActivityCode[ ] — hours per code" style="rounded=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;align=left;" vertex="1" parent="1">
+        
+        <mxCell id="agg" value="10. Aggregate in-process (no N+1 queries):&#10;  • totalHours = SUM(te.Hours)&#10;  • byProject[ ] — hours + itemCount per project&#10;  • byUser[ ] — hours per user (admin only)&#10;  • byActivityCode[ ] — hours per code" style="rounded=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;align=left;" vertex="1" parent="1">
           <mxGeometry x="650" y="630" width="330" height="80" as="geometry" />
         </mxCell>
 
-        <!-- 11: Service → Controller return -->
-        <mxCell id="m11" value="11. ReportSummaryDto { summary, byProject[], byUser[], byActivityCode[] }" style="edgeStyle=orthogonalEdgeStyle;endArrow=open;endFill=1;fontSize=9;dashed=1;" edge="1" parent="1">
+        
+        <mxCell id="m11" value="11. ReportSummaryDto { summary, byProject[], byUser[], byActivityCode[] }" style="edgeStyle=orthogonalEdgeStyle;endArrow=open;endFill=1;fontSize=9;dashed=1;strokeWidth=2;" edge="1" parent="1">
           <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="730" y="725" /><mxPoint x="570" y="725" /></Array></mxGeometry>
         </mxCell>
 
-        <!-- 12: Controller → Browser -->
-        <mxCell id="m12" value="12. 200 OK — ReportSummaryDto" style="edgeStyle=orthogonalEdgeStyle;endArrow=open;endFill=1;fontSize=9;dashed=1;" edge="1" parent="1">
+        
+        <mxCell id="m12" value="12. 200 OK — ReportSummaryDto" style="edgeStyle=orthogonalEdgeStyle;endArrow=open;endFill=1;fontSize=9;dashed=1;strokeWidth=2;" edge="1" parent="1">
           <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="570" y="755" /><mxPoint x="245" y="755" /></Array></mxGeometry>
         </mxCell>
 
-        <!-- Frontend render -->
-        <mxCell id="render" value="13. Render dashboard:&#xa;  • Summary cards (total hours, items, projects)&#xa;  • Project breakdown table&#xa;  • User breakdown table (admin only)&#xa;  • Activity code breakdown" style="rounded=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=9;align=left;" vertex="1" parent="1">
+        
+        <mxCell id="render" value="13. Render dashboard:&#10;  • Summary cards (total hours, items, projects)&#10;  • Project breakdown table&#10;  • User breakdown table (admin only)&#10;  • Activity code breakdown" style="rounded=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=9;align=left;" vertex="1" parent="1">
           <mxGeometry x="200" y="770" width="250" height="75" as="geometry" />
         </mxCell>
 
-        <!-- ═══ ERROR CASES SECTION ═══ -->
+        
         <mxCell id="sec3" value="Error Cases" style="swimlane;startSize=18;fillColor=#f8cecc;strokeColor=#b85450;fontStyle=2;fontSize=9;" vertex="1" parent="1">
           <mxGeometry x="60" y="870" width="1260" height="20" as="geometry" />
         </mxCell>
 
-        <!-- Alt error block -->
-        <mxCell id="errnote" value="alt [invalid date range] → 400 ProblemDetails 'Date range invalid'&#xa;alt [invalid GUID in projectId] → 400 ProblemDetails (ASP.NET model binding)&#xa;alt [non-admin requests another user's data] → ForbiddenException → 403 ProblemDetails" style="rounded=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=9;align=left;whiteSpace=wrap;" vertex="1" parent="1">
+        
+        <mxCell id="errnote" value="alt [invalid date range] → 400 ProblemDetails 'Date range invalid'&#10;alt [invalid GUID in projectId] → 400 ProblemDetails (ASP.NET model binding)&#10;alt [non-admin requests another user's data] → ForbiddenException → 403 ProblemDetails" style="rounded=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=9;align=left;whiteSpace=wrap;" vertex="1" parent="1">
           <mxGeometry x="90" y="900" width="900" height="55" as="geometry" />
         </mxCell>
       </root>

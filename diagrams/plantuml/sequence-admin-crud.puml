@@ -106,7 +106,7 @@ deactivate Controller
 Browser -> Browser : Update row in assignments state
 
 alt Assignment not found
-    Controller ..> GEH : NotFoundException
+    Controller --> GEH : NotFoundException
     GEH --> Browser : 404 ProblemDetails
 end
 
@@ -132,7 +132,7 @@ deactivate Controller
 Browser -> Browser : Remove row from assignments state
 Browser --> Admin : Assignment removed
 
-note bottom
+note over Admin, DB
   All admin endpoints share the same AdminToken authentication handler.
   In Development (ASPNETCORE_ENVIRONMENT=Development), the token check
   can be bypassed for local testing by setting Admin:RequireToken=false.

@@ -1,48 +1,48 @@
 <mxfile host="app.diagrams.net" modified="2026-02-20T00:00:00.000Z" agent="GitHub Copilot" version="24.5.2">
   <diagram id="seq-admin-seed" name="Admin Seed — Sequence">
-    <mxGraphModel dx="1400" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1700" pageHeight="1400" math="0" shadow="0">
+    <mxGraphModel dx="1400" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1700" pageHeight="1400" math="0" shadow="0" background="#ffffff">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
 
-        <!-- TITLE -->
+        
         <mxCell id="title" value="Admin Seed Test Data — Sequence Diagram" style="text;html=1;fontStyle=1;fontSize=14;strokeColor=none;fillColor=none;align=center;" vertex="1" parent="1">
           <mxGeometry x="100" y="10" width="1500" height="30" as="geometry" />
         </mxCell>
 
-        <!-- ═══ PARTICIPANT HEADERS ═══ -->
+        
         <mxCell id="p_admin" value="Administrator" style="shape=mxgraph.sequence.actor;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="60" y="50" width="80" height="80" as="geometry" /></mxCell>
         <mxCell id="p_browser" value="Browser" style="rounded=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;fontSize=10;" vertex="1" parent="1"><mxGeometry x="190" y="90" width="100" height="30" as="geometry" /></mxCell>
-        <mxCell id="p_auth" value="AdminToken&#xa;AuthHandler" style="rounded=1;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;fontSize=9;" vertex="1" parent="1"><mxGeometry x="340" y="90" width="100" height="30" as="geometry" /></mxCell>
-        <mxCell id="p_ctrl" value="AdminSeed&#xa;Controller" style="rounded=1;fillColor=#ffe6cc;strokeColor=#d6b656;fontStyle=1;fontSize=9;" vertex="1" parent="1"><mxGeometry x="490" y="90" width="100" height="30" as="geometry" /></mxCell>
-        <mxCell id="p_seeder" value="TestData&#xa;Seeder" style="rounded=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontStyle=1;fontSize=9;" vertex="1" parent="1"><mxGeometry x="640" y="90" width="100" height="30" as="geometry" /></mxCell>
-        <mxCell id="p_db" value="Db&#xa;Context" style="rounded=1;fillColor=#fff2cc;strokeColor=#d6b656;fontStyle=1;fontSize=9;" vertex="1" parent="1"><mxGeometry x="790" y="90" width="100" height="30" as="geometry" /></mxCell>
-        <mxCell id="p_geh" value="Global&#xa;Exception&#xa;Handler" style="rounded=1;fillColor=#f8cecc;strokeColor=#b85450;fontStyle=1;fontSize=9;" vertex="1" parent="1"><mxGeometry x="940" y="90" width="100" height="30" as="geometry" /></mxCell>
+        <mxCell id="p_auth" value="AdminToken&#10;AuthHandler" style="rounded=1;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;fontSize=9;" vertex="1" parent="1"><mxGeometry x="340" y="90" width="100" height="30" as="geometry" /></mxCell>
+        <mxCell id="p_ctrl" value="AdminSeed&#10;Controller" style="rounded=1;fillColor=#ffe6cc;strokeColor=#d6b656;fontStyle=1;fontSize=9;" vertex="1" parent="1"><mxGeometry x="490" y="90" width="100" height="30" as="geometry" /></mxCell>
+        <mxCell id="p_seeder" value="TestData&#10;Seeder" style="rounded=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontStyle=1;fontSize=9;" vertex="1" parent="1"><mxGeometry x="640" y="90" width="100" height="30" as="geometry" /></mxCell>
+        <mxCell id="p_db" value="Db&#10;Context" style="rounded=1;fillColor=#fff2cc;strokeColor=#d6b656;fontStyle=1;fontSize=9;" vertex="1" parent="1"><mxGeometry x="790" y="90" width="100" height="30" as="geometry" /></mxCell>
+        <mxCell id="p_geh" value="Global&#10;Exception&#10;Handler" style="rounded=1;fillColor=#f8cecc;strokeColor=#b85450;fontStyle=1;fontSize=9;" vertex="1" parent="1"><mxGeometry x="940" y="90" width="100" height="30" as="geometry" /></mxCell>
         <mxCell id="p_maria" value="MariaDB" style="shape=mxgraph.flowchart.database;fillColor=#f5f5f5;strokeColor=#666;fontStyle=1;fontSize=9;" vertex="1" parent="1"><mxGeometry x="1090" y="80" width="80" height="50" as="geometry" /></mxCell>
 
-        <!-- ═══ LIFELINES ═══ -->
-        <mxCell id="ll_admin" style="endArrow=none;dashed=1;strokeColor=#6c8ebf;edgeStyle=none;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="100" y="130" /><mxPoint x="100" y="1350" /></Array></mxGeometry></mxCell>
-        <mxCell id="ll_browser" style="endArrow=none;dashed=1;strokeColor=#6c8ebf;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="240" y="120" /><mxPoint x="240" y="1350" /></Array></mxGeometry></mxCell>
-        <mxCell id="ll_auth" style="endArrow=none;dashed=1;strokeColor=#82b366;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="390" y="120" /><mxPoint x="390" y="1350" /></Array></mxGeometry></mxCell>
-        <mxCell id="ll_ctrl" style="endArrow=none;dashed=1;strokeColor=#d6b656;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="540" y="120" /><mxPoint x="540" y="1350" /></Array></mxGeometry></mxCell>
-        <mxCell id="ll_seeder" style="endArrow=none;dashed=1;strokeColor=#9673a6;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="690" y="120" /><mxPoint x="690" y="1350" /></Array></mxGeometry></mxCell>
-        <mxCell id="ll_dbctx" style="endArrow=none;dashed=1;strokeColor=#d6b656;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="840" y="120" /><mxPoint x="840" y="1350" /></Array></mxGeometry></mxCell>
-        <mxCell id="ll_geh" style="endArrow=none;dashed=1;strokeColor=#b85450;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="990" y="120" /><mxPoint x="990" y="1350" /></Array></mxGeometry></mxCell>
-        <mxCell id="ll_maria" style="endArrow=none;dashed=1;strokeColor=#666;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="1130" y="130" /><mxPoint x="1130" y="1350" /></Array></mxGeometry></mxCell>
+        
+        <mxCell id="ll_admin" style="endArrow=none;dashed=1;strokeColor=#6c8ebf;edgeStyle=none;strokeWidth=2;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="100" y="130" /><mxPoint x="100" y="1350" /></Array></mxGeometry></mxCell>
+        <mxCell id="ll_browser" style="endArrow=none;dashed=1;strokeColor=#6c8ebf;strokeWidth=2;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="240" y="120" /><mxPoint x="240" y="1350" /></Array></mxGeometry></mxCell>
+        <mxCell id="ll_auth" style="endArrow=none;dashed=1;strokeColor=#82b366;strokeWidth=2;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="390" y="120" /><mxPoint x="390" y="1350" /></Array></mxGeometry></mxCell>
+        <mxCell id="ll_ctrl" style="endArrow=none;dashed=1;strokeColor=#d6b656;strokeWidth=2;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="540" y="120" /><mxPoint x="540" y="1350" /></Array></mxGeometry></mxCell>
+        <mxCell id="ll_seeder" style="endArrow=none;dashed=1;strokeColor=#9673a6;strokeWidth=2;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="690" y="120" /><mxPoint x="690" y="1350" /></Array></mxGeometry></mxCell>
+        <mxCell id="ll_dbctx" style="endArrow=none;dashed=1;strokeColor=#d6b656;strokeWidth=2;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="840" y="120" /><mxPoint x="840" y="1350" /></Array></mxGeometry></mxCell>
+        <mxCell id="ll_geh" style="endArrow=none;dashed=1;strokeColor=#b85450;strokeWidth=2;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="990" y="120" /><mxPoint x="990" y="1350" /></Array></mxGeometry></mxCell>
+        <mxCell id="ll_maria" style="endArrow=none;dashed=1;strokeColor=#666;strokeWidth=2;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="1130" y="130" /><mxPoint x="1130" y="1350" /></Array></mxGeometry></mxCell>
 
-        <!-- ═══ MESSAGES ═══ -->
+        
 
-        <!-- 1: Admin → Browser -->
-        <mxCell id="m1" value="1. POST /api/admin/seed/test-data" style="edgeStyle=orthogonalEdgeStyle;endArrow=open;endFill=1;fontSize=9;" edge="1" parent="1">
+        
+        <mxCell id="m1" value="1. POST /api/admin/seed/test-data" style="edgeStyle=orthogonalEdgeStyle;endArrow=open;endFill=1;fontSize=9;strokeWidth=2;" edge="1" parent="1">
           <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="100" y="175" /><mxPoint x="240" y="175" /></Array></mxGeometry>
         </mxCell>
 
-        <!-- 2: Browser → Auth -->
-        <mxCell id="m2" value="2. X-Admin-Token header" style="edgeStyle=orthogonalEdgeStyle;endArrow=open;endFill=1;fontSize=9;" edge="1" parent="1">
+        
+        <mxCell id="m2" value="2. X-Admin-Token header" style="edgeStyle=orthogonalEdgeStyle;endArrow=open;endFill=1;fontSize=9;strokeWidth=2;" edge="1" parent="1">
           <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="240" y="210" /><mxPoint x="390" y="210" /></Array></mxGeometry>
         </mxCell>
 
-        <!-- Alt block: Token validation -->
+        
         <mxCell id="alt1" value="alt [RequireToken=true] / [dev bypass]" style="swimlane;startSize=20;fillColor=#f5f5f5;strokeColor=#666;fontStyle=2;fontSize=9;" vertex="1" parent="1">
           <mxGeometry x="350" y="225" width="810" height="70" as="geometry" />
         </mxCell>
@@ -50,22 +50,22 @@
           <mxGeometry x="10" y="30" width="790" height="30" as="geometry" />
         </mxCell>
 
-        <!-- 3: Auth → Controller -->
-        <mxCell id="m3" value="3. pass-through" style="edgeStyle=orthogonalEdgeStyle;endArrow=open;endFill=1;fontSize=9;" edge="1" parent="1">
+        
+        <mxCell id="m3" value="3. pass-through" style="edgeStyle=orthogonalEdgeStyle;endArrow=open;endFill=1;fontSize=9;strokeWidth=2;" edge="1" parent="1">
           <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="390" y="320" /><mxPoint x="540" y="320" /></Array></mxGeometry>
         </mxCell>
 
-        <!-- 4: Controller → Seeder -->
-        <mxCell id="m4" value="4. SeedAsync(cancellationToken)" style="edgeStyle=orthogonalEdgeStyle;endArrow=open;endFill=1;fontSize=9;" edge="1" parent="1">
+        
+        <mxCell id="m4" value="4. SeedAsync(cancellationToken)" style="edgeStyle=orthogonalEdgeStyle;endArrow=open;endFill=1;fontSize=9;strokeWidth=2;" edge="1" parent="1">
           <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="540" y="360" /><mxPoint x="690" y="360" /></Array></mxGeometry>
         </mxCell>
 
-        <!-- 5: Seeder → DbCtx (begin tx) -->
-        <mxCell id="m5" value="5. BeginTransactionAsync()" style="edgeStyle=orthogonalEdgeStyle;endArrow=open;endFill=1;fontSize=9;" edge="1" parent="1">
+        
+        <mxCell id="m5" value="5. BeginTransactionAsync()" style="edgeStyle=orthogonalEdgeStyle;endArrow=open;endFill=1;fontSize=9;strokeWidth=2;" edge="1" parent="1">
           <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="690" y="400" /><mxPoint x="840" y="400" /></Array></mxGeometry>
         </mxCell>
 
-        <!-- Loop: Users -->
+        
         <mxCell id="loop1" value="loop [for each of 4 user seeds]" style="swimlane;startSize=20;fillColor=#fff2cc;strokeColor=#d6b656;fontStyle=2;fontSize=9;" vertex="1" parent="1">
           <mxGeometry x="640" y="420" width="530" height="120" as="geometry" />
         </mxCell>
@@ -73,56 +73,56 @@
         <mxCell id="m6b" value="6b. Add new user OR update existing fields" style="text;html=1;fontSize=9;" vertex="1" parent="loop1"><mxGeometry x="10" y="50" width="510" height="20" as="geometry" /></mxCell>
         <mxCell id="m6c" value="6c. PasswordHasher applied for new users" style="text;html=1;fontSize=9;" vertex="1" parent="loop1"><mxGeometry x="10" y="75" width="510" height="20" as="geometry" /></mxCell>
 
-        <!-- Loop: UserAuth -->
+        
         <mxCell id="loop2" value="loop [for each of 3 UserAuth seeds]" style="swimlane;startSize=20;fillColor=#fff2cc;strokeColor=#d6b656;fontStyle=2;fontSize=9;" vertex="1" parent="1">
           <mxGeometry x="640" y="560" width="530" height="80" as="geometry" />
         </mxCell>
         <mxCell id="m7a" value="7a. SELECT UserAuth by userName" style="text;html=1;fontSize=9;" vertex="1" parent="loop2"><mxGeometry x="10" y="25" width="510" height="20" as="geometry" /></mxCell>
         <mxCell id="m7b" value="7b. Add new OR re-hash if UpdatePassword=true" style="text;html=1;fontSize:9;" vertex="1" parent="loop2"><mxGeometry x="10" y="50" width="510" height="20" as="geometry" /></mxCell>
 
-        <!-- 8: Seed project + department -->
-        <mxCell id="m8" value="8. Upsert Project P99999 + Department 'OSS Operations'" style="edgeStyle=orthogonalEdgeStyle;endArrow=open;endFill=1;fontSize=9;" edge="1" parent="1">
+        
+        <mxCell id="m8" value="8. Upsert Project P99999 + Department 'OSS Operations'" style="edgeStyle=orthogonalEdgeStyle;endArrow=open;endFill=1;fontSize=9;strokeWidth=2;" edge="1" parent="1">
           <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="690" y="665" /><mxPoint x="840" y="665" /></Array></mxGeometry>
         </mxCell>
-        <mxCell id="m8b" value="(SELECT existing, INSERT if not found)" style="edgeStyle=orthogonalEdgeStyle;endArrow=open;endFill=1;fontSize=9;dashed=1;" edge="1" parent="1">
+        <mxCell id="m8b" value="(SELECT existing, INSERT if not found)" style="edgeStyle=orthogonalEdgeStyle;endArrow=open;endFill=1;fontSize=9;dashed=1;strokeWidth=2;" edge="1" parent="1">
           <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="840" y="690" /><mxPoint x="1130" y="690" /></Array></mxGeometry>
         </mxCell>
 
-        <!-- 9: SaveChanges -->
-        <mxCell id="m9" value="9. SaveChangesAsync() → INSERT/UPDATE batch" style="edgeStyle=orthogonalEdgeStyle;endArrow=open;endFill=1;fontSize=9;" edge="1" parent="1">
+        
+        <mxCell id="m9" value="9. SaveChangesAsync() → INSERT/UPDATE batch" style="edgeStyle=orthogonalEdgeStyle;endArrow=open;endFill=1;fontSize=9;strokeWidth=2;" edge="1" parent="1">
           <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="840" y="730" /><mxPoint x="1130" y="730" /></Array></mxGeometry>
         </mxCell>
-        <mxCell id="m9r" value="rows affected" style="edgeStyle=orthogonalEdgeStyle;endArrow=open;endFill=1;fontSize=9;dashed=1;" edge="1" parent="1">
+        <mxCell id="m9r" value="rows affected" style="edgeStyle=orthogonalEdgeStyle;endArrow=open;endFill=1;fontSize=9;dashed=1;strokeWidth=2;" edge="1" parent="1">
           <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="1130" y="750" /><mxPoint x="840" y="750" /></Array></mxGeometry>
         </mxCell>
 
-        <!-- 10: Commit -->
-        <mxCell id="m10" value="10. CommitAsync() → COMMIT" style="edgeStyle=orthogonalEdgeStyle;endArrow=open;endFill=1;fontSize=9;" edge="1" parent="1">
+        
+        <mxCell id="m10" value="10. CommitAsync() → COMMIT" style="edgeStyle=orthogonalEdgeStyle;endArrow=open;endFill=1;fontSize=9;strokeWidth=2;" edge="1" parent="1">
           <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="840" y="790" /><mxPoint x="1130" y="790" /></Array></mxGeometry>
         </mxCell>
 
-        <!-- 11: Seeder → Controller return -->
-        <mxCell id="m11" value="11. TestSeedResult { usersCreated, userAuthCreated, projectsCreated, departmentsCreated }" style="edgeStyle=orthogonalEdgeStyle;endArrow=open;endFill=1;fontSize=9;dashed=1;" edge="1" parent="1">
+        
+        <mxCell id="m11" value="11. TestSeedResult { usersCreated, userAuthCreated, projectsCreated, departmentsCreated }" style="edgeStyle=orthogonalEdgeStyle;endArrow=open;endFill=1;fontSize=9;dashed=1;strokeWidth=2;" edge="1" parent="1">
           <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="690" y="840" /><mxPoint x="540" y="840" /></Array></mxGeometry>
         </mxCell>
 
-        <!-- 12: Controller → Browser -->
-        <mxCell id="m12" value="12. 200 OK { usersCreated: 4, userAuthCreated: 3, projectsCreated: 1, departmentsCreated: 1 }" style="edgeStyle=orthogonalEdgeStyle;endArrow=open;endFill=1;fontSize=9;dashed=1;" edge="1" parent="1">
+        
+        <mxCell id="m12" value="12. 200 OK { usersCreated: 4, userAuthCreated: 3, projectsCreated: 1, departmentsCreated: 1 }" style="edgeStyle=orthogonalEdgeStyle;endArrow=open;endFill=1;fontSize=9;dashed=1;strokeWidth=2;" edge="1" parent="1">
           <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="540" y="880" /><mxPoint x="240" y="880" /></Array></mxGeometry>
         </mxCell>
 
-        <!-- 13: Browser → Admin -->
-        <mxCell id="m13" value="13. &quot;Seed completed: 4 users, 1 project, 1 department&quot;" style="edgeStyle=orthogonalEdgeStyle;endArrow=open;endFill=1;fontSize=9;dashed=1;" edge="1" parent="1">
+        
+        <mxCell id="m13" value="13. &quot;Seed completed: 4 users, 1 project, 1 department&quot;" style="edgeStyle=orthogonalEdgeStyle;endArrow=open;endFill=1;fontSize=9;dashed=1;strokeWidth=2;" edge="1" parent="1">
           <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="240" y="920" /><mxPoint x="100" y="920" /></Array></mxGeometry>
         </mxCell>
 
-        <!-- Error note -->
-        <mxCell id="note1" value="On any unhandled error:&#xa;GlobalExceptionHandler catches exception&#xa;→ returns RFC 7807 ProblemDetails JSON&#xa;(not the raw ASP.NET HTML error page)" style="shape=note;whiteSpace=wrap;fontSize=9;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+        
+        <mxCell id="note1" value="On any unhandled error:&#10;GlobalExceptionHandler catches exception&#10;→ returns RFC 7807 ProblemDetails JSON&#10;(not the raw ASP.NET HTML error page)" style="shape=note;whiteSpace=wrap;fontSize=9;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
           <mxGeometry x="930" y="880" width="240" height="80" as="geometry" />
         </mxCell>
 
-        <!-- Rate limit note -->
-        <mxCell id="note2" value="Rate limited: 60 req/min per IP&#xa;(AdminRateLimit policy)" style="shape=note;whiteSpace=wrap;fontSize=9;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+        
+        <mxCell id="note2" value="Rate limited: 60 req/min per IP&#10;(AdminRateLimit policy)" style="shape=note;whiteSpace=wrap;fontSize=9;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
           <mxGeometry x="490" y="340" width="180" height="40" as="geometry" />
         </mxCell>
       </root>

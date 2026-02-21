@@ -1,16 +1,16 @@
 <mxfile host="app.diagrams.net" modified="2026-02-20T00:00:00.000Z" agent="GitHub Copilot" version="24.5.2">
   <diagram id="deployment" name="Deployment Architecture">
-    <mxGraphModel dx="1422" dy="762" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1654" pageHeight="1169" math="0" shadow="0">
+    <mxGraphModel dx="1422" dy="762" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1654" pageHeight="1169" math="0" shadow="0" background="#ffffff">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
 
-        <!-- ═══ DEV WORKSTATION ═══ -->
+        
         <mxCell id="10" value="Developer Workstation (macOS)" style="swimlane;startSize=30;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;fontSize=13;" vertex="1" parent="1">
           <mxGeometry x="30" y="30" width="880" height="440" as="geometry" />
         </mxCell>
 
-        <!-- Browser -->
+        
         <mxCell id="11" value="Developer Browser" style="shape=mxgraph.cisco.computers_and_peripherals.pc;html=1;pointerEvents=1;dashed=0;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="10">
           <mxGeometry x="30" y="60" width="60" height="60" as="geometry" />
         </mxCell>
@@ -18,35 +18,35 @@
           <mxGeometry x="10" y="125" width="100" height="20" as="geometry" />
         </mxCell>
 
-        <!-- Frontend node -->
+        
         <mxCell id="12" value="Frontend — localhost:5173" style="swimlane;startSize=25;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="10">
           <mxGeometry x="160" y="50" width="220" height="160" as="geometry" />
         </mxCell>
         <mxCell id="12a" value="Vite Dev Server" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="12">
           <mxGeometry x="10" y="35" width="200" height="40" as="geometry" />
         </mxCell>
-        <mxCell id="12b" value="React 18 SPA&#xa;TanStack Query v5&#xa;B.C. Design System" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="12">
+        <mxCell id="12b" value="React 18 SPA&#10;TanStack Query v5&#10;B.C. Design System" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="12">
           <mxGeometry x="10" y="85" width="200" height="60" as="geometry" />
         </mxCell>
 
-        <!-- Backend node -->
+        
         <mxCell id="13" value="Backend API — localhost:5005" style="swimlane;startSize=25;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" vertex="1" parent="10">
           <mxGeometry x="420" y="50" width="220" height="280" as="geometry" />
         </mxCell>
         <mxCell id="13a" value="Kestrel / ASP.NET Core .NET 10" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="13">
           <mxGeometry x="10" y="35" width="200" height="35" as="geometry" />
         </mxCell>
-        <mxCell id="13b" value="GlobalExceptionHandler (first)&#xa;CORS / RateLimiter / SecurityHeaders&#xa;Auth (UserId + AdminToken)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="13">
+        <mxCell id="13b" value="GlobalExceptionHandler (first)&#10;CORS / RateLimiter / SecurityHeaders&#10;Auth (UserId + AdminToken)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="13">
           <mxGeometry x="10" y="80" width="200" height="60" as="geometry" />
         </mxCell>
-        <mxCell id="13c" value="Service Layer&#xa;WorkItemSvc / ReportSvc&#xa;ProjectSvc / AuthSvc" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=10;" vertex="1" parent="13">
+        <mxCell id="13c" value="Service Layer&#10;WorkItemSvc / ReportSvc&#10;ProjectSvc / AuthSvc" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=10;" vertex="1" parent="13">
           <mxGeometry x="10" y="150" width="200" height="55" as="geometry" />
         </mxCell>
-        <mxCell id="13d" value="EF Core 9 + Pomelo&#xa;Migrate() on startup" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="13">
+        <mxCell id="13d" value="EF Core 9 + Pomelo&#10;Migrate() on startup" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="13">
           <mxGeometry x="10" y="215" width="200" height="45" as="geometry" />
         </mxCell>
 
-        <!-- DB node -->
+        
         <mxCell id="14" value="Database — localhost:3306" style="swimlane;startSize=25;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" vertex="1" parent="10">
           <mxGeometry x="670" y="50" width="180" height="160" as="geometry" />
         </mxCell>
@@ -57,85 +57,85 @@
           <mxGeometry x="30" y="120" width="120" height="25" as="geometry" />
         </mxCell>
 
-        <!-- Dev notes -->
-        <mxCell id="15" value="Dev Config&#xa;─ Swagger UI enabled&#xa;─ Admin:RequireToken=false&#xa;─ CORS: localhost:5173&#xa;─ No HTTPS enforcement" style="text;html=1;strokeColor=#6c8ebf;fillColor=#dae8fc;align=left;verticalAlign=top;spacingLeft=5;fontSize=10;" vertex="1" parent="10">
+        
+        <mxCell id="15" value="Dev Config&#10;─ Swagger UI enabled&#10;─ Admin:RequireToken=false&#10;─ CORS: localhost:5173&#10;─ No HTTPS enforcement" style="text;html=1;strokeColor=#6c8ebf;fillColor=#dae8fc;align=left;verticalAlign=top;spacingLeft=5;fontSize=10;" vertex="1" parent="10">
           <mxGeometry x="160" y="260" width="220" height="100" as="geometry" />
         </mxCell>
 
-        <!-- ═══ PRODUCTION ═══ -->
+        
         <mxCell id="20" value="Production — BC Gov OpenShift / Pathfinder (Future)" style="swimlane;startSize=30;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;fontSize=13;" vertex="1" parent="1">
           <mxGeometry x="30" y="510" width="1200" height="400" as="geometry" />
         </mxCell>
 
-        <!-- Load Balancer / Route -->
-        <mxCell id="21" value="OpenShift Route / NGINX&#xa;(HTTPS termination)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="20">
+        
+        <mxCell id="21" value="OpenShift Route / NGINX&#10;(HTTPS termination)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="20">
           <mxGeometry x="20" y="60" width="200" height="60" as="geometry" />
         </mxCell>
 
-        <!-- Static Assets -->
-        <mxCell id="22" value="Static Assets Pod&#xa;React Build (Vite prod)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="20">
+        
+        <mxCell id="22" value="Static Assets Pod&#10;React Build (Vite prod)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="20">
           <mxGeometry x="260" y="60" width="200" height="60" as="geometry" />
         </mxCell>
 
-        <!-- API Pod -->
+        
         <mxCell id="23" value="API Pod" style="swimlane;startSize=25;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" vertex="1" parent="20">
           <mxGeometry x="500" y="50" width="240" height="230" as="geometry" />
         </mxCell>
         <mxCell id="23a" value="ASP.NET Core Kestrel" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="23">
           <mxGeometry x="10" y="35" width="220" height="35" as="geometry" />
         </mxCell>
-        <mxCell id="23b" value="Middleware + Service Layer&#xa;GlobalExceptionHandler (first)&#xa;HTTPS + HSTS + SecurityHeaders&#xa;Rate Limiter / Auth Schemes" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="23">
+        <mxCell id="23b" value="Middleware + Service Layer&#10;GlobalExceptionHandler (first)&#10;HTTPS + HSTS + SecurityHeaders&#10;Rate Limiter / Auth Schemes" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="23">
           <mxGeometry x="10" y="80" width="220" height="70" as="geometry" />
         </mxCell>
-        <mxCell id="23c" value="Health Endpoints&#xa;GET /health/live  (liveness probe)&#xa;GET /health/ready (readiness probe)&#xa;GET /health/details (JSON dashboard)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=10;" vertex="1" parent="23">
+        <mxCell id="23c" value="Health Endpoints&#10;GET /health/live  (liveness probe)&#10;GET /health/ready (readiness probe)&#10;GET /health/details (JSON dashboard)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=10;" vertex="1" parent="23">
           <mxGeometry x="10" y="160" width="220" height="60" as="geometry" />
         </mxCell>
 
-        <!-- DB Tier -->
+        
         <mxCell id="24" value="Database Tier" style="swimlane;startSize=25;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" vertex="1" parent="20">
           <mxGeometry x="780" y="50" width="200" height="130" as="geometry" />
         </mxCell>
-        <mxCell id="24a" value="MariaDB / MySQL&#xa;(encrypted connection)" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=12;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="24">
+        <mxCell id="24a" value="MariaDB / MySQL&#10;(encrypted connection)" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=12;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="24">
           <mxGeometry x="30" y="35" width="140" height="80" as="geometry" />
         </mxCell>
 
-        <!-- IdP -->
-        <mxCell id="25" value="Identity Provider&#xa;Keycloak / OIDC&#xa;(planned)" style="rounded=1;dashed=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=10;" vertex="1" parent="20">
+        
+        <mxCell id="25" value="Identity Provider&#10;Keycloak / OIDC&#10;(planned)" style="rounded=1;dashed=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=10;" vertex="1" parent="20">
           <mxGeometry x="1020" y="60" width="160" height="80" as="geometry" />
         </mxCell>
 
-        <!-- Probes -->
-        <mxCell id="26" value="OpenShift Health Probes&#xa;livenessProbe → /health/live&#xa;readinessProbe → /health/ready" style="text;html=1;strokeColor=#d79b00;fillColor=#ffe6cc;align=left;verticalAlign=top;spacingLeft=5;fontSize=10;" vertex="1" parent="20">
+        
+        <mxCell id="26" value="OpenShift Health Probes&#10;livenessProbe → /health/live&#10;readinessProbe → /health/ready" style="text;html=1;strokeColor=#d79b00;fillColor=#ffe6cc;align=left;verticalAlign=top;spacingLeft=5;fontSize=10;" vertex="1" parent="20">
           <mxGeometry x="500" y="300" width="240" height="70" as="geometry" />
         </mxCell>
 
-        <!-- Prod notes -->
-        <mxCell id="27" value="Prod Config&#xa;─ Admin:RequireToken=true&#xa;─ Swagger disabled&#xa;─ HTTPS enforced + HSTS&#xa;─ Secrets via OpenShift Secrets&#xa;─ OIDC (planned)" style="text;html=1;strokeColor=#82b366;fillColor=#d5e8d4;align=left;verticalAlign=top;spacingLeft=5;fontSize=10;" vertex="1" parent="20">
+        
+        <mxCell id="27" value="Prod Config&#10;─ Admin:RequireToken=true&#10;─ Swagger disabled&#10;─ HTTPS enforced + HSTS&#10;─ Secrets via OpenShift Secrets&#10;─ OIDC (planned)" style="text;html=1;strokeColor=#82b366;fillColor=#d5e8d4;align=left;verticalAlign=top;spacingLeft=5;fontSize=10;" vertex="1" parent="20">
           <mxGeometry x="20" y="180" width="220" height="120" as="geometry" />
         </mxCell>
 
-        <!-- ═══ CONNECTIONS ═══ -->
-        <mxCell id="e1" value="http://localhost:5173" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="11" target="12a" parent="10">
+        
+        <mxCell id="e1" value="http://localhost:5173" style="edgeStyle=orthogonalEdgeStyle;strokeWidth=2;" edge="1" source="11" target="12a" parent="10">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="e2" value="proxy /api → 5005" style="edgeStyle=orthogonalEdgeStyle;dashed=1;" edge="1" source="12b" target="13a" parent="10">
+        <mxCell id="e2" value="proxy /api → 5005" style="edgeStyle=orthogonalEdgeStyle;dashed=1;strokeWidth=2;" edge="1" source="12b" target="13a" parent="10">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="e3" value="Pomelo.MySQL" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="13d" target="14a" parent="10">
+        <mxCell id="e3" value="Pomelo.MySQL" style="edgeStyle=orthogonalEdgeStyle;strokeWidth=2;" edge="1" source="13d" target="14a" parent="10">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
 
-        <!-- Prod connections -->
-        <mxCell id="e10" value="HTTPS" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="21" target="22" parent="20">
+        
+        <mxCell id="e10" value="HTTPS" style="edgeStyle=orthogonalEdgeStyle;strokeWidth=2;" edge="1" source="21" target="22" parent="20">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="e11" value="/api" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="21" target="23a" parent="20">
+        <mxCell id="e11" value="/api" style="edgeStyle=orthogonalEdgeStyle;strokeWidth=2;" edge="1" source="21" target="23a" parent="20">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="e12" value="encrypted" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="23a" target="24a" parent="20">
+        <mxCell id="e12" value="encrypted" style="edgeStyle=orthogonalEdgeStyle;strokeWidth=2;" edge="1" source="23a" target="24a" parent="20">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="e13" value="OIDC (planned)" style="edgeStyle=orthogonalEdgeStyle;dashed=1;" edge="1" source="23a" target="25" parent="20">
+        <mxCell id="e13" value="OIDC (planned)" style="edgeStyle=orthogonalEdgeStyle;dashed=1;strokeWidth=2;" edge="1" source="23a" target="25" parent="20">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
       </root>
