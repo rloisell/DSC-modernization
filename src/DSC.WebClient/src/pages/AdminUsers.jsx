@@ -61,6 +61,7 @@ export default function AdminUsers() {
     password: '',
     role: ''
   });
+  const [statusFilter, setStatusFilter] = useState('active');
   const navigate = useNavigate();
   const [subTab, setSubTab] = useState('current');
 
@@ -244,6 +245,8 @@ export default function AdminUsers() {
   }
 
   async function handleDeactivateUser(user) {
+    const displayName = user.firstName ? `${user.firstName} ${user.lastName || ''}`.trim() : user.username;
+    if (!window.confirm(`Deactivate ${displayName}? They will no longer be able to log in.`)) return;
     setMessage('');
     setError(null);
     try {
@@ -442,7 +445,25 @@ export default function AdminUsers() {
       <section className="section stack">
         <Heading level={2}>Current Users</Heading>
         {loading ? <Text elementType="p">Loading...</Text> : null}
-        {users.length > 0 ? (
+        <div style={{ maxWidth: '220px', marginBottom: '0.75rem' }}>
+          <Select
+            label="Filter by Status"
+            items={[
+              { id: '', label: 'All Users' },
+              { id: 'active', label: 'Active Only' },
+              { id: 'inactive', label: 'Inactive Only' },
+            ]}
+            selectedKey={statusFilter}
+            onSelectionChange={key => setStatusFilter(key != null ? String(key) : '')}
+          />
+        </div>
+        {(() => {
+          const filteredUsers = statusFilter === ''
+            ? users
+            : statusFilter === 'active'
+              ? users.filter(u => u.isActive)
+              : users.filter(u => !u.isActive);
+          return filteredUsers.length > 0 ? (
           <table className="bcds-table">
             <thead>
               <tr>
@@ -456,7 +477,7 @@ export default function AdminUsers() {
               </tr>
             </thead>
             <tbody>
-              {users.map(user => {
+              {filteredUsers.map(user => {
                 const role = roles.find(r => r.id === user.roleId);
                 const fullName = `${user.firstName || ''} ${user.lastName || ''}`.trim() || '—';
                 
@@ -492,8 +513,9 @@ export default function AdminUsers() {
             </tbody>
           </table>
         ) : !loading ? (
-          <Text elementType="p" className="muted">No users found.</Text>
-        ) : null}
+          <Text elementType="p" className="muted">No users found{statusFilter ? ' matching filter' : ''}.</Text>
+        ) : null;
+        })()} 
       </section>
       )}
       {error ? <InlineAlert variant="danger" title="Error" description={error} /> : null}
