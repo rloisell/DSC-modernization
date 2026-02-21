@@ -15,6 +15,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { getWorkItems, createWorkItemWithLegacy, getDetailedWorkItems } from '../api/WorkItemService';
 import { getProjects } from '../api/ProjectService';
 import { getActivityCodes, getNetworkNumbers, getBudgets, getProjectOptions } from '../api/CatalogService';
+import { getUserFromStorage } from '../api/AuthConfig';
 
 export default function Activity() {
   const { user } = useAuth();
@@ -156,11 +157,13 @@ export default function Activity() {
       
       for (const projectId of uniqueProjectIds) {
         try {
+          const _u = getUserFromStorage();
           const response = await fetch(`/api/items/project/${projectId}/remaining-hours`, {
             credentials: 'include',
             headers: {
               'Content-Type': 'application/json',
-              'Accept': 'application/json'
+              'Accept': 'application/json',
+              ...(_u?.id ? { 'X-User-Id': _u.id } : {})
             }
           });
           if (!response.ok) {
@@ -205,11 +208,13 @@ export default function Activity() {
       setSelectedProjectData(project || null);
       
       // Fetch cumulative remaining hours for this user on this project
+      const _authUser = getUserFromStorage();
       fetch(`/api/items/project/${projectId}/remaining-hours`, {
         credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
-          'Accept': 'application/json'
+          'Accept': 'application/json',
+          ...(_authUser?.id ? { 'X-User-Id': _authUser.id } : {})
         }
       })
         .then(async res => {

@@ -11,6 +11,7 @@ import {
   TextField
 } from '@bcgov/design-system-react-components';
 import { AdminCatalogService } from '../api/AdminCatalogService';
+import SubTabs from '../components/SubTabs';
 
 export default function AdminExpense() {
   const [message, setMessage] = useState('');
@@ -25,6 +26,7 @@ export default function AdminExpense() {
   const [editingCategoryId, setEditingCategoryId] = useState('');
   const [editingBudgetId, setEditingBudgetId] = useState('');
   const [editingOptionId, setEditingOptionId] = useState('');
+  const [subTab, setSubTab] = useState('budgets');
   const navigate = useNavigate();
 
   const statusItems = [
@@ -255,6 +257,7 @@ export default function AdminExpense() {
 
   function handleEditCategory(category) {
     setEditingCategoryId(category.id);
+    setSubTab('categories');
     setCategoryForm({
       budgetId: category.budgetId || '',
       name: category.name,
@@ -264,6 +267,7 @@ export default function AdminExpense() {
 
   function handleEditBudget(budget) {
     setEditingBudgetId(budget.id);
+    setSubTab('budgets');
     setBudgetForm({
       description: budget.description,
       status: budget.isActive ? 'active' : 'inactive'
@@ -272,6 +276,7 @@ export default function AdminExpense() {
 
   function handleEditOption(option) {
     setEditingOptionId(option.id);
+    setSubTab('options');
     setOptionForm({
       categoryId: option.expenseCategoryId || '',
       name: option.name,
@@ -286,6 +291,16 @@ export default function AdminExpense() {
         <Text elementType="p">Legacy servlet: AdminExpense. This page will manage budgets (CAPEX/OPEX) and expense categories.</Text>
 
       </section>
+      <SubTabs
+        tabs={[
+          { id: 'budgets', label: 'Budgets' },
+          { id: 'categories', label: 'Expense Categories' },
+          { id: 'options', label: 'Expense Options' },
+        ]}
+        activeTab={subTab}
+        onTabChange={setSubTab}
+      />
+      {subTab === 'budgets' && (<>
       <section className="section stack">
         <Heading level={2}>{editingBudgetId ? 'Edit Budget' : 'Add Budget'}</Heading>
         <Form onSubmit={handleBudgetSubmit} className="form-grid">
@@ -312,6 +327,7 @@ export default function AdminExpense() {
                 onPress={() => {
                   setEditingBudgetId('');
                   setBudgetForm({ description: '', status: 'active' });
+                  setSubTab('budgets');
                 }}
               >
                 Cancel
@@ -351,6 +367,8 @@ export default function AdminExpense() {
           </tbody>
         </table>
       </section>
+      </>)}
+      {subTab === 'categories' && (<>
       <section className="section stack">
         <Heading level={2}>{editingCategoryId ? 'Edit Expense Category' : 'Add Expense Category'}</Heading>
         <Form onSubmit={handleCategorySubmit} className="form-grid">
@@ -385,6 +403,7 @@ export default function AdminExpense() {
                 onPress={() => {
                   setEditingCategoryId('');
                   setCategoryForm({ budgetId: '', name: '', status: 'active' });
+                  setSubTab('categories');
                 }}
               >
                 Cancel
@@ -426,6 +445,8 @@ export default function AdminExpense() {
           </tbody>
         </table>
       </section>
+      </>)}
+      {subTab === 'options' && (<>
       <section className="section stack">
         <Heading level={2}>{editingOptionId ? 'Edit Expense Option' : 'Add Expense Option'}</Heading>
         <Form onSubmit={handleOptionSubmit} className="form-grid">
@@ -460,6 +481,7 @@ export default function AdminExpense() {
                 onPress={() => {
                   setEditingOptionId('');
                   setOptionForm({ categoryId: '', name: '', status: 'active' });
+                  setSubTab('options');
                 }}
               >
                 Cancel
@@ -501,6 +523,7 @@ export default function AdminExpense() {
           </tbody>
         </table>
       </section>
+      </>)}
       {loading ? <Text elementType="p">Loading...</Text> : null}
       {error ? <InlineAlert variant="danger" title="Error" description={error} /> : null}
       {message ? <InlineAlert variant="success" title="Success" description={message} /> : null}

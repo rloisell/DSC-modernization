@@ -11,6 +11,7 @@ import {
   TextField
 } from '@bcgov/design-system-react-components';
 import { AdminCatalogService } from '../api/AdminCatalogService';
+import SubTabs from '../components/SubTabs';
 
 export default function AdminPositions() {
   const [message, setMessage] = useState('');
@@ -19,6 +20,7 @@ export default function AdminPositions() {
   const [error, setError] = useState(null);
   const [form, setForm] = useState({ title: '', description: '', status: 'active' });
   const [editingId, setEditingId] = useState('');
+  const [subTab, setSubTab] = useState('list');
   const navigate = useNavigate();
 
   const statusItems = [
@@ -66,6 +68,7 @@ export default function AdminPositions() {
 
   function handleEdit(position) {
     setEditingId(position.id);
+    setSubTab('form');
     setForm({
       title: position.title,
       description: position.description || '',
@@ -113,6 +116,15 @@ export default function AdminPositions() {
         <Text elementType="p">Legacy servlet: AdminPositions. This page will manage position records.</Text>
 
       </section>
+      <SubTabs
+        tabs={[
+          { id: 'list', label: 'Positions' },
+          { id: 'form', label: 'Add / Edit' },
+        ]}
+        activeTab={subTab}
+        onTabChange={setSubTab}
+      />
+      {subTab === 'form' && (
       <section className="section stack">
         <Heading level={2}>{editingId ? 'Edit Position' : 'Add Position'}</Heading>
         <Form onSubmit={handleSubmit} className="form-grid">
@@ -144,6 +156,7 @@ export default function AdminPositions() {
                 onPress={() => {
                   setEditingId('');
                   setForm({ title: '', description: '', status: 'active' });
+                  setSubTab('list');
                 }}
               >
                 Cancel
@@ -152,6 +165,8 @@ export default function AdminPositions() {
           </ButtonGroup>
         </Form>
       </section>
+      )}
+      {subTab === 'list' && (
       <section className="section stack">
         <Heading level={2}>Existing Positions</Heading>
         <table className="bcds-table">
@@ -184,8 +199,7 @@ export default function AdminPositions() {
             ))}
           </tbody>
         </table>
-      </section>
-      {loading ? <Text elementType="p">Loading...</Text> : null}
+      </section>      )}      {loading ? <Text elementType="p">Loading...</Text> : null}
       {error ? <InlineAlert variant="danger" title="Error" description={error} /> : null}
       {message ? <InlineAlert variant="success" title="Success" description={message} /> : null}
     </div>

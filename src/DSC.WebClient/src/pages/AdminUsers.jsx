@@ -18,6 +18,7 @@ import {
   deleteAdminUser
 } from '../api/AdminUserService';
 import { AdminCatalogService } from '../api/AdminCatalogService';
+import SubTabs from '../components/SubTabs';
 
 export default function AdminUsers() {
   const [message, setMessage] = useState('');
@@ -59,6 +60,7 @@ export default function AdminUsers() {
     role: ''
   });
   const navigate = useNavigate();
+  const [subTab, setSubTab] = useState('current');
 
   const userItems = users.map(user => {
     const name = `${user.firstName ?? ''} ${user.lastName ?? ''}`.trim();
@@ -148,6 +150,7 @@ export default function AdminUsers() {
       position: selected.positionId ?? '',
       department: selected.departmentId ?? ''
     }));
+    setSubTab('edit');
   }
 
   async function handleAddUser(e) {
@@ -245,6 +248,16 @@ export default function AdminUsers() {
         <Text elementType="p">Legacy servlet: AdminUsers. This page will manage user accounts, roles, and assignments.</Text>
 
       </section>
+      <SubTabs
+        tabs={[
+          { id: 'current', label: 'Current Users' },
+          { id: 'add', label: 'Add User' },
+          { id: 'edit', label: 'Edit User' },
+        ]}
+        activeTab={subTab}
+        onTabChange={setSubTab}
+      />
+      {subTab === 'add' && (
       <section className="section stack">
         <Heading level={2}>Add New User</Heading>
         <Form onSubmit={handleAddUser} className="form-grid">
@@ -309,6 +322,8 @@ export default function AdminUsers() {
           </ButtonGroup>
         </Form>
       </section>
+      )}
+      {subTab === 'edit' && (
       <section className="section stack">
         <Heading level={2}>Edit User</Heading>
         <Text elementType="p">Select a user from the dropdown below or click a user in the table.</Text>
@@ -393,6 +408,8 @@ export default function AdminUsers() {
           </ButtonGroup>
         </Form>
       </section>
+      )}
+      {subTab === 'current' && (
       <section className="section stack">
         <Heading level={2}>Current Users</Heading>
         <Text elementType="p">Click a user to edit their information.</Text>
@@ -452,6 +469,7 @@ export default function AdminUsers() {
           <Text elementType="p" className="muted">No users found.</Text>
         ) : null}
       </section>
+      )}
       {error ? <InlineAlert variant="danger" title="Error" description={error} /> : null}
       {message ? <InlineAlert variant="success" title="Success" description={message} /> : null}
     </div>

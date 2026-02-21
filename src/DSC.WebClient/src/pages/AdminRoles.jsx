@@ -11,6 +11,7 @@ import {
   TextField
 } from '@bcgov/design-system-react-components';
 import { AdminCatalogService } from '../api/AdminCatalogService';
+import SubTabs from '../components/SubTabs';
 
 export default function AdminRoles() {
   const [message, setMessage] = useState('');
@@ -19,6 +20,7 @@ export default function AdminRoles() {
   const [error, setError] = useState(null);
   const [form, setForm] = useState({ name: '', description: '', status: 'active' });
   const [editingId, setEditingId] = useState('');
+  const [subTab, setSubTab] = useState('list');
   const navigate = useNavigate();
 
   const statusItems = [
@@ -72,6 +74,7 @@ export default function AdminRoles() {
 
   function handleEdit(role) {
     setEditingId(role.id);
+    setSubTab('form');
     setForm({
       name: role.name,
       description: role.description || '',
@@ -99,6 +102,7 @@ export default function AdminRoles() {
   function handleCancel() {
     setEditingId('');
     setForm({ name: '', description: '', status: 'active' });
+    setSubTab('list');
   }
 
   return (
@@ -108,6 +112,15 @@ export default function AdminRoles() {
         <Text elementType="p">Manage system roles for user assignments.</Text>
 
       </section>
+      <SubTabs
+        tabs={[
+          { id: 'list', label: 'Roles' },
+          { id: 'form', label: 'Add / Edit' },
+        ]}
+        activeTab={subTab}
+        onTabChange={setSubTab}
+      />
+      {subTab === 'form' && (
       <section className="section stack">
         <Heading level={2}>{editingId ? 'Edit Role' : 'Create New Role'}</Heading>
         <Form onSubmit={handleSubmit} className="form-grid">
@@ -141,6 +154,8 @@ export default function AdminRoles() {
           </ButtonGroup>
         </Form>
       </section>
+      )}
+      {subTab === 'list' && (
       <section className="section stack">
         <Heading level={2}>Available Roles</Heading>
         {loading ? <Text elementType="p">Loading...</Text> : null}
@@ -177,8 +192,7 @@ export default function AdminRoles() {
             ))}
           </tbody>
         </table>
-      </section>
-      {error ? <InlineAlert variant="danger" title="Error" description={error} /> : null}
+      </section>      )}      {error ? <InlineAlert variant="danger" title="Error" description={error} /> : null}
       {message ? <InlineAlert variant="success" title="Success" description={message} /> : null}
     </div>
   );

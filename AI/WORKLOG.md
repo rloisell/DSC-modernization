@@ -1,3 +1,43 @@
+## 2026-02-20 — Session 5 (Part 2): Admin Sub-Tabs & Remaining Hours Auth Fix (COMPLETED ✓)
+
+**Objective**: Add sub-section tabs within each admin page; fix "Project Estimated Hours / Current Cumulative Remaining" fields showing no data.
+
+### Issues Identified & Fixed
+
+**Issue 1: Project Estimated Hours / Remaining Hours Not Loading**
+- **Root Cause**: `Activity.jsx` used native `fetch()` (not axios) for the two `/api/items/project/${projectId}/remaining-hours` calls. Native fetch bypasses the global axios interceptor added in Session 5 Part 1, so no `X-User-Id` header was sent → API returned 401/empty.
+- **Fix**: Imported `getUserFromStorage` from `AuthConfig.js` and manually added `X-User-Id` header to both fetch calls in `Activity.jsx`.
+
+**Issue 2: Admin Pages Have No Sub-Section Navigation**
+- **Root Cause**: Each admin page rendered all sections (list + form) stacked vertically — busy and hard to navigate.
+- **Fix**: Created a reusable `SubTabs` component and applied it to all 7 admin pages:
+  - **AdminRoles** / **AdminPositions** / **AdminDepartments**: 2 tabs — `{entity list}` + `Add / Edit`
+  - **AdminUsers**: 3 tabs — `Current Users` · `Add User` · `Edit User`; clicking a row in Current Users switches to Edit tab with form pre-populated
+  - **AdminProjects**: 4 tabs — `Projects` · `Add / Edit` · `Assign Options` · `Assignments`
+  - **AdminExpense**: 3 tabs — `Budgets` · `Expense Categories` · `Expense Options` (each wraps form + table for that entity)
+  - **AdminActivityOptions**: 2 tabs — `Activity Codes` · `Network Numbers` (each wraps form + table)
+  - Tab switching is also wired to Edit/Cancel actions so the UI snaps to the relevant tab automatically
+
+### Files Changed
+
+**Frontend**:
+- `src/DSC.WebClient/src/components/SubTabs.jsx` — **NEW**: Reusable secondary tab bar component (lighter styling, `#003366` active indicator)
+- `src/DSC.WebClient/src/pages/Activity.jsx` — Added X-User-Id header to both native `fetch()` remaining-hours calls
+- `src/DSC.WebClient/src/pages/AdminRoles.jsx` — SubTabs + 2-tab section wrapping
+- `src/DSC.WebClient/src/pages/AdminPositions.jsx` — SubTabs + 2-tab section wrapping
+- `src/DSC.WebClient/src/pages/AdminDepartments.jsx` — SubTabs + 2-tab section wrapping
+- `src/DSC.WebClient/src/pages/AdminUsers.jsx` — SubTabs + 3-tab section wrapping; handleSelectUser sets 'edit' tab
+- `src/DSC.WebClient/src/pages/AdminProjects.jsx` — SubTabs + 4-tab section wrapping
+- `src/DSC.WebClient/src/pages/AdminExpense.jsx` — SubTabs + 3-tab section wrapping with React Fragments
+- `src/DSC.WebClient/src/pages/AdminActivityOptions.jsx` — SubTabs + 2-tab section wrapping with React Fragments
+
+### Architecture Notes
+- `SubTabs` renders as a `role="tablist"` row below the page heading, styled lighter than the top-level admin tabs
+- Cancel buttons in edit forms call `setSubTab('list'|'projects'|etc.)` to return the user to the appropriate list tab
+- The Fragment `<>...</>` pattern in AdminExpense and AdminActivityOptions allows a single tab button to control two sibling sections (form + table) without an extra DOM wrapper
+
+---
+
 ## 2026-02-20 — Session 5: UX Improvements & Admin Auth Fix (COMPLETED ✓)
 
 **Objective**: Fix 401 admin errors, improve activity code/network selection UX, convert admin to tab-based layout.

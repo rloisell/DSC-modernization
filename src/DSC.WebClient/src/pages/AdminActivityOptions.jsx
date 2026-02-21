@@ -11,6 +11,7 @@ import {
   TextField
 } from '@bcgov/design-system-react-components';
 import { AdminCatalogService } from '../api/AdminCatalogService';
+import SubTabs from '../components/SubTabs';
 
 export default function AdminActivityOptions() {
   const [message, setMessage] = useState('');
@@ -22,6 +23,7 @@ export default function AdminActivityOptions() {
   const [networkForm, setNetworkForm] = useState({ number: '', description: '' });
   const [editingCodeId, setEditingCodeId] = useState('');
   const [editingNetworkId, setEditingNetworkId] = useState('');
+  const [subTab, setSubTab] = useState('codes');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -167,11 +169,13 @@ export default function AdminActivityOptions() {
 
   function handleEditCode(code) {
     setEditingCodeId(code.id);
+    setSubTab('codes');
     setCodeForm({ code: code.code, description: code.description || '' });
   }
 
   function handleEditNetwork(network) {
     setEditingNetworkId(network.id);
+    setSubTab('networks');
     setNetworkForm({ number: String(network.number), description: network.description || '' });
   }
 
@@ -184,6 +188,15 @@ export default function AdminActivityOptions() {
         </Text>
 
       </section>
+      <SubTabs
+        tabs={[
+          { id: 'codes', label: 'Activity Codes' },
+          { id: 'networks', label: 'Network Numbers' },
+        ]}
+        activeTab={subTab}
+        onTabChange={setSubTab}
+      />
+      {subTab === 'codes' && (<>
       <section className="section stack">
         <Heading level={2}>{editingCodeId ? 'Edit Activity Code' : 'Add Activity Code'}</Heading>
         <Form onSubmit={handleCodeSubmit} className="form-grid">
@@ -209,6 +222,7 @@ export default function AdminActivityOptions() {
                 onPress={() => {
                   setEditingCodeId('');
                   setCodeForm({ code: '', description: '' });
+                  setSubTab('codes');
                 }}
               >
                 Cancel
@@ -248,6 +262,8 @@ export default function AdminActivityOptions() {
           </tbody>
         </table>
       </section>
+      </>)}
+      {subTab === 'networks' && (<>
       <section className="section stack">
         <Heading level={2}>{editingNetworkId ? 'Edit Network Number' : 'Add Network Number'}</Heading>
         <Form onSubmit={handleNetworkSubmit} className="form-grid">
@@ -273,6 +289,7 @@ export default function AdminActivityOptions() {
                 onPress={() => {
                   setEditingNetworkId('');
                   setNetworkForm({ number: '', description: '' });
+                  setSubTab('networks');
                 }}
               >
                 Cancel
@@ -312,6 +329,7 @@ export default function AdminActivityOptions() {
           </tbody>
         </table>
       </section>
+      </>)}
       {loading ? <Text elementType="p">Loading...</Text> : null}
       {error ? <InlineAlert variant="danger" title="Error" description={error} /> : null}
       {message ? <InlineAlert variant="success" title="Success" description={message} /> : null}

@@ -13,6 +13,7 @@ import {
   TextField
 } from '@bcgov/design-system-react-components';
 import { AdminCatalogService } from '../api/AdminCatalogService';
+import SubTabs from '../components/SubTabs';
 
 export default function AdminProjects() {
   const [message, setMessage] = useState('');
@@ -25,6 +26,7 @@ export default function AdminProjects() {
   const [form, setForm] = useState({ projectNo: '', name: '', description: '', estimatedHours: '' });
   const [assignForm, setAssignForm] = useState({ projectId: '', activityCodeId: '', networkNumberId: '' });
   const [editingId, setEditingId] = useState('');
+  const [subTab, setSubTab] = useState('projects');
   const navigate = useNavigate();
 
   const projectItems = projects.map(project => ({
@@ -104,6 +106,7 @@ export default function AdminProjects() {
 
   function handleEdit(project) {
     setEditingId(project.id);
+    setSubTab('form');
     setForm({
       projectNo: project.projectNo || '',
       name: project.name,
@@ -194,6 +197,17 @@ export default function AdminProjects() {
         <Text elementType="p">Legacy servlet: AdminProjects. This page will manage project metadata and assignments.</Text>
 
       </section>
+      <SubTabs
+        tabs={[
+          { id: 'projects', label: 'Projects' },
+          { id: 'form', label: 'Add / Edit' },
+          { id: 'assign', label: 'Assign Options' },
+          { id: 'assignments', label: 'Assignments' },
+        ]}
+        activeTab={subTab}
+        onTabChange={setSubTab}
+      />
+      {subTab === 'form' && (
       <section className="section stack">
         <Heading level={2}>{editingId ? 'Edit Project' : 'Add Project'}</Heading>
         <Form onSubmit={handleSubmit} className="form-grid">
@@ -229,6 +243,7 @@ export default function AdminProjects() {
                 onPress={() => {
                   setEditingId('');
                   setForm({ projectNo: '', name: '', description: '', estimatedHours: '' });
+                  setSubTab('projects');
                 }}
               >
                 Cancel
@@ -237,6 +252,8 @@ export default function AdminProjects() {
           </ButtonGroup>
         </Form>
       </section>
+      )}
+      {subTab === 'projects' && (
       <section className="section stack">
         <Heading level={2}>Existing Projects</Heading>
         <table className="bcds-table">
@@ -273,6 +290,8 @@ export default function AdminProjects() {
           </tbody>
         </table>
       </section>
+      )}
+      {subTab === 'assign' && (
       <section className="section stack">
         <Heading level={2}>Assign Activity Codes / Network Numbers</Heading>
         <Form onSubmit={handleAssign} className="form-grid">
@@ -307,6 +326,8 @@ export default function AdminProjects() {
           </ButtonGroup>
         </Form>
       </section>
+      )}
+      {subTab === 'assignments' && (
       <section className="section stack">
         <Heading level={2}>Project Activity Options</Heading>
         <Text elementType="p">All assigned activity code and network number combinations for projects.</Text>
@@ -347,6 +368,7 @@ export default function AdminProjects() {
           </table>
         )}
       </section>
+      )}
       {loading ? <Text elementType="p">Loading...</Text> : null}
       {error ? <InlineAlert variant="danger" title="Error" description={error} /> : null}
       {message ? <InlineAlert variant="success" title="Success" description={message} /> : null}

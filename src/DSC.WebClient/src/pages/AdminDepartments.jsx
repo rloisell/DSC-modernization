@@ -12,6 +12,7 @@ import {
 } from '@bcgov/design-system-react-components';
 import { getAdminUsers } from '../api/AdminUserService';
 import { AdminCatalogService } from '../api/AdminCatalogService';
+import SubTabs from '../components/SubTabs';
 
 export default function AdminDepartments() {
   const [message, setMessage] = useState('');
@@ -21,6 +22,7 @@ export default function AdminDepartments() {
   const [error, setError] = useState(null);
   const [form, setForm] = useState({ name: '', manager: '', status: 'active' });
   const [editingId, setEditingId] = useState('');
+  const [subTab, setSubTab] = useState('list');
   const navigate = useNavigate();
 
   const statusItems = [
@@ -97,6 +99,7 @@ export default function AdminDepartments() {
 
   function handleEdit(dept) {
     setEditingId(dept.id);
+    setSubTab('form');
     // Try to find the user by name when editing
     let managerId = '';
     if (dept.managerName) {
@@ -153,6 +156,15 @@ export default function AdminDepartments() {
         <Text elementType="p">Legacy servlet: AdminDepartments. This page will manage department records.</Text>
 
       </section>
+      <SubTabs
+        tabs={[
+          { id: 'list', label: 'Departments' },
+          { id: 'form', label: 'Add / Edit' },
+        ]}
+        activeTab={subTab}
+        onTabChange={setSubTab}
+      />
+      {subTab === 'form' && (
       <section className="section stack">
         <Heading level={2}>{editingId ? 'Edit Department' : 'Add Department'}</Heading>
         <Form onSubmit={handleSubmit} className="form-grid">
@@ -189,6 +201,7 @@ export default function AdminDepartments() {
                   setForm({ name: '', manager: '', status: 'active' });
                   setMessage('');
                   setError(null);
+                  setSubTab('list');
                 }}
               >
                 Cancel
@@ -197,6 +210,8 @@ export default function AdminDepartments() {
           </ButtonGroup>
         </Form>
       </section>
+      )}
+      {subTab === 'list' && (
       <section className="section stack">
         <Heading level={2}>Existing Departments</Heading>
         <table className="bcds-table">
@@ -230,6 +245,7 @@ export default function AdminDepartments() {
           </tbody>
         </table>
       </section>
+      )}
       {loading ? <Text elementType="p">Loading...</Text> : null}
       {error ? <InlineAlert variant="danger" title="Error" description={error} /> : null}
       {message ? <InlineAlert variant="success" title="Success" description={message} /> : null}
