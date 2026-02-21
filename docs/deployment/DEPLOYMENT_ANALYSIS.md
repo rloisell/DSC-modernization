@@ -522,9 +522,78 @@ The following steps require a human operator and cannot be automated in this rep
 | 4 | Create Artifactory service account; create pull secret in namespace | CLI / Artifactory |
 | 5 | Add `ARTIFACTORY_USERNAME` + `ARTIFACTORY_PASSWORD` as GitHub Secrets | GitHub repo settings |
 | 6 | Add `GITOPS_TOKEN` (PAT with write to tenant-gitops-be808f) as GitHub Secret | GitHub repo settings |
-| 7 | Onboard to Vault; create secret paths `secret/be808f/dev/dsc-db` and `secret/be808f/dev/dsc-admin` | Vault console |
-| 8 | Pre-create `dsc-db-secret` and `dsc-admin-secret` in `be808f-dev` namespace | `oc create secret` |
-| 9 | Mirror MariaDB 10.11 image to Artifactory (`be808f-docker-local/mariadb:10.11`) | Artifactory |
-| 10 | Submit one of the following to platform team to register DSC Application CRDs with ArgoCD: push `applications/argocd/be808f-dsc-dev.yaml` to the ArgoCD bootstrap path, or request platform team to `oc apply` the file | ArgoCD admin |
-| 11 | Push to `develop` branch of DSC-modernization to trigger first image build; confirm images appear in Artifactory | GitHub Actions |
+| 7 | **Obtain `DATREE_TOKEN` from ISB; add as GitHub Secret in tenant-gitops-be808f** | ISB team + GitHub repo settings |
+| 8 | Onboard to Vault; create secret paths `secret/be808f/dev/dsc-db` and `secret/be808f/dev/dsc-admin` | Vault console |
+| 9 | Pre-create `dsc-db-secret` and `dsc-admin-secret` in `be808f-dev` namespace | `oc create secret` |
+| 10 | Mirror MariaDB 10.11 image to Artifactory (`be808f-docker-local/mariadb:10.11`) | Artifactory |
+| 11 | Submit one of the following to platform team to register DSC Application CRDs with ArgoCD: push `applications/argocd/be808f-dsc-dev.yaml` to the ArgoCD bootstrap path, or request platform team to `oc apply` the file | ArgoCD admin |
+| 12 | Push to `develop` branch of DSC-modernization to trigger first image build; confirm images appear in Artifactory | GitHub Actions |
+
+---
+
+## 14. ISB EA Document Review — Gap Analysis
+
+**Document reviewed:** *OPTION 2 – Using GitHub Actions + GitOps in Emerald (preferred)*  
+**Source:** BC Gov Emerald Enterprise Architecture guidance (ISB)  
+**Review date:** February 2026
+
+This section documents the findings from comparing the DSC deployment implementation
+against the ISB-preferred EA pattern for Emerald.
+
+### 14.1 Conformant Items
+
+The following aspects of the DSC implementation already align with the EA pattern:
+
+| EA Requirement | DSC Implementation | Status |
+|---|---|---|
+| Standalone ArgoCD Applications per environment | `applications/argocd/be808f-dsc-{dev,test,prod}.yaml` — three separate CRDs | ✅ Conforms |
+| GitOps folder structure | `charts/`, `deploy/`, `applications/argocd/` in tenant-gitops-be808f | ✅ Conforms |
+| Artifactory image registry | `artifacts.developer.gov.bc.ca/be808f-docker-local/<image>:<tag>` | ✅ Conforms |
+| Artifactory pull secret in namespace | `imagePullSecrets: [name: artifactory-pull-secret]` in Helm chart | ✅ Conforms |
+| Vault for secret injection | `secret.yaml` shape-only; real values from Vault at runtime | ✅ Conforms |
+| NetworkPolicies | deny-all + 5 explicit allow rules in `networkpolicies.yaml` | ✅ Conforms |
+| DataClass label | `DataClass: "Low"` on all workloads across all environments | ✅ Conforms |
+| Manual sync for test/prod ArgoCD Applications | `automated: {}` omitted in test + prod Application CRDs | ✅ Conforms |
+| GitHub Actions CI/CD pipeline | `build-and-push.yml` builds, pushes images, updates gitops | ✅ Conforms |
+
+### 14.2 Gaps Identified and Remediated
+
+Three gaps were identified between the DSC implementation and the ISB EA Option 2 pattern.
+All three have been remediated in code as of February 2026.
+
+#### Gap 1 — Datree Security Policy Enforcer (CI)
+
+| Attribute | Detail |
+|---|---|
+| **EA Requirement** | All gitops repos must run Datree against Helm-rendered manifests in CI before code can merge to `main`. This enforces ISB security policies including `CUSTOM_WORKLOAD_INCORRECT_DATACLASS_LABELS`. |
+| **Previous State** | `tenant-gitops-be808f/.github/workflows/ci.yml` ran only `helm lint` and `helm template`. No Datree step. |
+| **Remediation** | Added `datreeio/action-datree@main` step to `ci.yml`. `.github/policies.yaml` already existed with the full ISB policy set (previously committed by ISB). `DATREE_TOKEN` must be obtained from ISB and stored as a GitHub Secret. |
+| **Files changed** | `tenant-gitops-be808f/.github/workflows/ci.yml` |
+
+#### Gap 2 — Production Deployment Must Be a PR (Not a Direct Commit)
+
+| Attribute | Detail |
+|---|---|
+| **EA Requirement** | Pushes to `main` (prod) in the gitops repo must originate from a reviewed PR, not a direct commit. The `ag-pssg-emerald` team should be available for review. ArgoCD syncs automatically on merge. |
+| **Previous State** | `build-and-push.yml` `update-gitops` job ran for `develop`, `test`, **and `main`**, all via direct commit. Production was being patched without a review gate. |
+| **Remediation** | `update-gitops` job restricted to `develop` and `test` only. New `create-prod-pr` job added: triggers on `main` push or `v*` semver tag; creates a branch `chore/dsc-prod-<tag>` in the gitops repo; opens a PR targeting `main` via `gh pr create`. Merge of that PR is the prod deployment trigger. |
+| **Files changed** | `.github/workflows/build-and-push.yml` |
+
+#### Gap 3 — Production Image Tags Must Use Semver (Not Git SHA)
+
+| Attribute | Detail |
+|---|---|
+| **EA Requirement** | Production deployments should use semver-tagged images (e.g., `v1.0.1`) for auditability and rollback clarity. Non-production environments may use short SHAs. |
+| **Previous State** | All environments used `git rev-parse --short HEAD` (short SHA) as the image tag unconditionally. |
+| **Remediation** | Image tag computation now branches on `github.ref_type`: `tag` → uses `github.ref_name` (e.g., `v1.0.1`); `branch` → uses short SHA. The prod PR job thus carries a meaningful version when triggered by a semver tag. |
+| **Files changed** | `.github/workflows/build-and-push.yml` |
+
+### 14.3 Recommended Follow-up
+
+| Item | Priority |
+|---|---|
+| Obtain `DATREE_TOKEN` from ISB; store as GitHub Secret in `bcgov-c/tenant-gitops-be808f` | **High** — Datree step will block CI until token is present |
+| Confirm `ag-pssg-emerald` GitHub team exists and has reviewer access to `bcgov-c/tenant-gitops-be808f` | **Medium** — Required to assign prod PRs to a reviewer |
+| Tag and release `v1.0.0` to validate the semver prod PR flow end-to-end | **Medium** — Confirms the full EA Option 2 path before go-live |
+| Enable branch protection on `main` in tenant-gitops-be808f to require PR approval | **Medium** — Enforces the prod gate at the repository level |
 

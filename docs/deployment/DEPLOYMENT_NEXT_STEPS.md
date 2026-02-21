@@ -50,11 +50,14 @@ They are grouped by who performs them.
 Three secrets must be added to `rloisell/DSC-modernization` → Settings → Secrets →
 Actions before the build pipeline can run.
 
-| Secret Name | Value | Purpose |
-|---|---|---|
-| `ARTIFACTORY_USERNAME` | Artifactory service account username | Log in to `artifacts.developer.gov.bc.ca` to push images |
-| `ARTIFACTORY_PASSWORD` | Artifactory service account password / API key | As above |
-| `GITOPS_TOKEN` | GitHub PAT with `repo` write scope on `bcgov-c/tenant-gitops-be808f` | `update-gitops` job patches image tags in `dsc-dev_values.yaml` |
+| Secret Name | Value | Purpose | Repo |
+|---|---|---|---|
+| `ARTIFACTORY_USERNAME` | Artifactory service account username | Log in to `artifacts.developer.gov.bc.ca` to push images | `DSC-modernization` |
+| `ARTIFACTORY_PASSWORD` | Artifactory service account password / API key | As above | `DSC-modernization` |
+| `GITOPS_TOKEN` | GitHub PAT with `repo` write scope on `bcgov-c/tenant-gitops-be808f` | `update-gitops` job patches image tags; `create-prod-pr` job opens prod PR | `DSC-modernization` |
+| `DATREE_TOKEN` | Token obtained from ISB (Emerald platform team) | Authenticates the Datree security policy check in `ci.yml` | **`tenant-gitops-be808f`** |
+
+> **`DATREE_TOKEN` note:** This token is managed by ISB — contact the Emerald platform team to obtain it. It must be set as a GitHub Actions Secret in `bcgov-c/tenant-gitops-be808f` (**not** in DSC-modernization). Without this token the Datree step in `ci.yml` will fail and PRs to the gitops repo will be blocked.
 
 **Confirm:** Does an Artifactory service account already exist for `be808f`? The
 co-tenant (`jag-network-tools`) already uses one — check if it can be shared or if
@@ -146,6 +149,13 @@ them the file from the gitops repo.
 Once applied, ArgoCD will immediately attempt to sync `charts/dsc-app` against
 `be808f-dev` using `deploy/dsc-dev_values.yaml`.
 
+> **Production deployment note (ISB EA Option 2 requirement):** Do not push directly to
+> `main` or force-push prod values to the gitops repo. The `create-prod-pr` job in
+> `build-and-push.yml` will automatically open a PR in `tenant-gitops-be808f` when
+> the `main` branch is pushed or a `v*` semver tag is created. A reviewer (ideally via
+> the `ag-pssg-emerald` GitHub team) must approve and merge that PR before ArgoCD
+> syncs to `be808f-prod`.
+
 ---
 
 ## 3. Fast Path — Ordered Checklist
@@ -153,7 +163,8 @@ Once applied, ArgoCD will immediately attempt to sync `charts/dsc-app` against
 If the namespace and Artifactory are already provisioned by the co-tenant, this is the
 minimal sequence:
 
-- [ ] **1.** Add `ARTIFACTORY_USERNAME`, `ARTIFACTORY_PASSWORD`, `GITOPS_TOKEN` to GitHub Secrets
+- [ ] **1a.** Add `ARTIFACTORY_USERNAME`, `ARTIFACTORY_PASSWORD`, `GITOPS_TOKEN` to GitHub Secrets in `DSC-modernization`
+- [ ] **1b.** Obtain `DATREE_TOKEN` from ISB; add to GitHub Secrets in `tenant-gitops-be808f`
 - [ ] **2.** Push `develop` branch → confirm `build-and-push.yml` green → confirm images appear in Artifactory
 - [ ] **3.** Confirm `dsc-dev_values.yaml` in gitops repo has been updated with a real image tag
 - [ ] **4.** `oc create secret docker-registry artifactory-pull-secret` in `be808f-dev`

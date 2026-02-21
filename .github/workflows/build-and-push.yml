@@ -4,34 +4,35 @@
 # Builds the DSC API and Frontend container images and pushes them to the
 # BC Gov Artifactory Docker registry (be808f-docker-local).
 #
-# After a successful push the workflow updates the corresponding image tags
-# in the tenant-gitops-be808f repository so that ArgoCD can pick up the
-# change and deploy without manual intervention.
-#
-# Pattern mirrors jag-network-tools / tenant-gitops-be808f conventions.
+# Per EA Option 2 (ISB preferred GitOps pattern for Emerald):
+#   develop branch → direct commit to dsc-dev_values.yaml   (ArgoCD auto-sync)
+#   test branch    → direct commit to dsc-test_values.yaml  (ArgoCD auto-sync)
+#   main branch / v* semver tag → opens a PR to the gitops repo targeting
+#     dsc-prod_values.yaml.  A maintainer must approve the PR before ArgoCD
+#     syncs to be808f-prod.  Semver tags use the version (e.g. v1.0.1) as the
+#     image tag; branches use the short commit SHA.
 #
 # Required GitHub Secrets (set in repo Settings → Secrets → Actions):
 #   ARTIFACTORY_USERNAME   BC Gov Artifactory service account username
 #   ARTIFACTORY_PASSWORD   BC Gov Artifactory service account password / token
-#   GITOPS_TOKEN           GitHub PAT with write access to tenant-gitops-be808f
+#   GITOPS_TOKEN           GitHub PAT with repo write access to tenant-gitops-be808f
 
 name: Build and Push
 
 on:
   push:
     branches:
-      - main       # → prod_values.yaml  (tag: main-<sha>)
-      - test       # → test_values.yaml  (tag: test-<sha>)
-      - develop    # → dev_values.yaml   (tag: dev-<sha>)
+      - main       # → prod PR in gitops repo
+      - test       # → direct commit to dsc-test_values.yaml
+      - develop    # → direct commit to dsc-dev_values.yaml
     tags:
-      - "v*"       # semver release tags
+      - "v*"       # semver release tags → prod PR with version as image tag
   pull_request:
     branches:
       - main
       - develop
 
-# Limit concurrent runs per branch so that rapid pushes don't queue up a
-# backlog of outdated builds.
+# Limit concurrent runs per ref so rapid pushes don't stack stale builds.
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -40,10 +41,10 @@ permissions:
   contents: read
 
 env:
-  REGISTRY:  artifacts.developer.gov.bc.ca
-  NAMESPACE: be808f-docker-local
-  API_IMAGE: dsc-api
-  WEB_IMAGE: dsc-frontend
+  REGISTRY:    artifacts.developer.gov.bc.ca
+  NAMESPACE:   be808f-docker-local
+  API_IMAGE:   dsc-api
+  WEB_IMAGE:   dsc-frontend
   GITOPS_REPO: bcgov-c/tenant-gitops-be808f
 
 jobs:
@@ -54,20 +55,25 @@ jobs:
     runs-on: ubuntu-latest
 
     outputs:
-      image_tag: ${{ steps.meta.outputs.short_sha }}
+      image_tag: ${{ steps.meta.outputs.image_tag }}
 
     steps:
       - name: Checkout source
         uses: actions/checkout@v4
 
-      # Short SHA used as the image tag — provides an unambiguous link back
-      # to the commit that produced the image.
+      # Image tag strategy (per ISB EA Option 2 guidance):
+      #   v* semver tag  → use the tag name as-is (e.g. v1.0.1)
+      #   branch push    → short SHA for per-commit traceability
       - name: Compute image tag
         id: meta
-        run: echo "short_sha=$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
+        run: |
+          if [[ "${{ github.ref_type }}" == "tag" ]]; then
+            echo "image_tag=${{ github.ref_name }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "image_tag=$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Log in to Artifactory
-        # Only authenticate when we intend to push (not on pull_request events)
         if: github.event_name != 'pull_request'
         uses: docker/login-action@v3
         with:
@@ -83,7 +89,7 @@ jobs:
           file:       containerization/Containerfile.api
           push:       ${{ github.event_name != 'pull_request' }}
           tags: |
-            ${{ env.REGISTRY }}/${{ env.NAMESPACE }}/${{ env.API_IMAGE }}:${{ steps.meta.outputs.short_sha }}
+            ${{ env.REGISTRY }}/${{ env.NAMESPACE }}/${{ env.API_IMAGE }}:${{ steps.meta.outputs.image_tag }}
             ${{ env.REGISTRY }}/${{ env.NAMESPACE }}/${{ env.API_IMAGE }}:${{ github.ref_name }}
 
       # ── Frontend image ─────────────────────────────────────────────────────
@@ -94,21 +100,20 @@ jobs:
           file:       containerization/Containerfile.frontend
           push:       ${{ github.event_name != 'pull_request' }}
           tags: |
-            ${{ env.REGISTRY }}/${{ env.NAMESPACE }}/${{ env.WEB_IMAGE }}:${{ steps.meta.outputs.short_sha }}
+            ${{ env.REGISTRY }}/${{ env.NAMESPACE }}/${{ env.WEB_IMAGE }}:${{ steps.meta.outputs.image_tag }}
             ${{ env.REGISTRY }}/${{ env.NAMESPACE }}/${{ env.WEB_IMAGE }}:${{ github.ref_name }}
 
-  # ── Update gitops values ───────────────────────────────────────────────────
-  # Keeps the GitOps repo in sync by writing the new image tags directly into
-  # the per-environment values files.  ArgoCD detects the commit, reconciles,
-  # and rolls out the new images with zero manual intervention.
+  # ── Update gitops (dev/test) ───────────────────────────────────────────────
+  # Direct commit to the gitops repo for develop and test branches.
+  # ArgoCD detects the change and auto-syncs to the matching namespace.
+  # Prod updates use the create-prod-pr job below instead.
   update-gitops:
-    name: Update GitOps Values
+    name: Update GitOps Values (dev/test)
     runs-on: ubuntu-latest
     needs: build
-    # Only update gitops for real branch pushes, not PRs or version tags
     if: >
       github.event_name == 'push' &&
-      contains(fromJson('["main","test","develop"]'), github.ref_name)
+      contains(fromJson('["test","develop"]'), github.ref_name)
 
     steps:
       - name: Checkout gitops repo
@@ -116,31 +121,24 @@ jobs:
         with:
           repository: ${{ env.GITOPS_REPO }}
           token:      ${{ secrets.GITOPS_TOKEN }}
-          ref:        main   # gitops repo uses a single main branch
+          ref:        main
 
       - name: Install yq
         uses: mikefarah/yq@v4
 
-      # Map the app repo branch to the correct gitops values file
       - name: Resolve target values file
         id: env
         run: |
           case "${{ github.ref_name }}" in
-            develop) VALUES_FILE="deploy/dsc-dev_values.yaml"   ;;
-            test)    VALUES_FILE="deploy/dsc-test_values.yaml"  ;;
-            main)    VALUES_FILE="deploy/dsc-prod_values.yaml"  ;;
+            develop) echo "values_file=deploy/dsc-dev_values.yaml"  >> "$GITHUB_OUTPUT" ;;
+            test)    echo "values_file=deploy/dsc-test_values.yaml" >> "$GITHUB_OUTPUT" ;;
           esac
-          echo "values_file=${VALUES_FILE}" >> "$GITHUB_OUTPUT"
 
       - name: Update API image tag
-        run: |
-          yq -i '.api.image.tag = "${{ needs.build.outputs.image_tag }}"' \
-            ${{ steps.env.outputs.values_file }}
+        run: yq -i '.api.image.tag = "${{ needs.build.outputs.image_tag }}"' ${{ steps.env.outputs.values_file }}
 
       - name: Update Frontend image tag
-        run: |
-          yq -i '.frontend.image.tag = "${{ needs.build.outputs.image_tag }}"' \
-            ${{ steps.env.outputs.values_file }}
+        run: yq -i '.frontend.image.tag = "${{ needs.build.outputs.image_tag }}"' ${{ steps.env.outputs.values_file }}
 
       - name: Commit and push updated values
         run: |
@@ -150,3 +148,72 @@ jobs:
           git diff --staged --quiet || \
             git commit -m "chore(dsc): bump image tags to ${{ needs.build.outputs.image_tag }} [${{ github.ref_name }}]"
           git push
+
+  # ── Create prod PR ─────────────────────────────────────────────────────────
+  # Per ISB EA Option 2: production deployments must go through a reviewed PR
+  # in the gitops repo — never a direct commit.  A maintainer approves the PR;
+  # on merge ArgoCD syncs be808f-prod automatically.
+  #
+  # Triggered by:
+  #   - push to main branch (main-<sha> image tag)
+  #   - push of a v* semver tag (e.g. v1.0.1 → image tag v1.0.1)
+  create-prod-pr:
+    name: Open Prod Deployment PR
+    runs-on: ubuntu-latest
+    needs: build
+    if: >
+      github.event_name == 'push' && (
+        github.ref_name == 'main' ||
+        startsWith(github.ref, 'refs/tags/v')
+      )
+
+    steps:
+      - name: Checkout gitops repo
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.GITOPS_REPO }}
+          token:      ${{ secrets.GITOPS_TOKEN }}
+          ref:        main
+
+      - name: Install yq
+        uses: mikefarah/yq@v4
+
+      - name: Create release branch
+        id: branch
+        run: |
+          BRANCH="chore/dsc-prod-${{ needs.build.outputs.image_tag }}"
+          git checkout -b "${BRANCH}"
+          echo "name=${BRANCH}" >> "$GITHUB_OUTPUT"
+
+      - name: Update prod image tags
+        run: |
+          yq -i '.api.image.tag      = "${{ needs.build.outputs.image_tag }}"' deploy/dsc-prod_values.yaml
+          yq -i '.frontend.image.tag = "${{ needs.build.outputs.image_tag }}"' deploy/dsc-prod_values.yaml
+
+      - name: Commit and push branch
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add deploy/dsc-prod_values.yaml
+          git commit -m "chore(dsc): bump prod image tags to ${{ needs.build.outputs.image_tag }}"
+          git push origin "${{ steps.branch.outputs.name }}"
+
+      - name: Open pull request
+        env:
+          GH_TOKEN: ${{ secrets.GITOPS_TOKEN }}
+        run: |
+          gh pr create \
+            --repo "${{ env.GITOPS_REPO }}" \
+            --base main \
+            --head "${{ steps.branch.outputs.name }}" \
+            --title "chore(dsc): promote to prod — ${{ needs.build.outputs.image_tag }}" \
+            --body "## DSC Production Deployment
+
+          **Image tag:** \`${{ needs.build.outputs.image_tag }}\`
+          **Source commit:** [\`${{ github.sha }}\`](https://github.com/${{ github.repository }}/commit/${{ github.sha }})
+          **Triggered by:** \`${{ github.ref_name }}\` on \`${{ github.repository }}\`
+
+          This PR updates \`deploy/dsc-prod_values.yaml\` with the new image tags.
+          ArgoCD will sync to \`be808f-prod\` automatically on merge.
+
+          > **Requires maintainer approval before merging.**"
