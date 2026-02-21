@@ -64,6 +64,16 @@ Every source file must open with a header block identifying both contributors:
 #
 ```
 
+**Markdown / Documentation (.md):**
+
+Place immediately below the `# Title` of the document:
+
+```markdown
+**Author**: Ryan Loiselle — Developer / Architect
+**AI tool**: GitHub Copilot — AI pair programmer / code generation
+**Updated**: <Month Year>
+```
+
 ---
 
 ## 2. Comment Style
@@ -147,6 +157,11 @@ count++;
 ### docs/local-development/README.md
 - Ports, services, credentials (dev only), LaunchAgent / Docker setup
 - Known issues and workarounds
+
+### docs/data-model/ *(when applicable)*
+Present for projects that migrate or evolve an existing data schema.
+- `README.md` — entity mapping table between old and new models, key structural differences, design rationale
+- Reference the ERD diagram files in `diagrams/data-model/` rather than duplicating them here
 
 ### docs/deployment/
 - `STANDARDS.md` — deployment checklist for BC Gov Emerald (GitOps pattern, Artifactory, Vault)

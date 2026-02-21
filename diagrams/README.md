@@ -245,8 +245,10 @@ See [docs/data-model/README.md](../docs/data-model/README.md) for full compare/c
 
 ### Activity Diagrams
 
+> PlantUML source only (no Draw.io equivalent). Pre-generated PNGs are in [`plantuml/png/`](plantuml/png/).
+
 #### 14. Activity — Time Entry Creation *(new)*
-**PlantUML:** [`plantuml/activity-time-entry.puml`](plantuml/activity-time-entry.puml)
+**PlantUML:** [`plantuml/activity-time-entry.puml`](plantuml/activity-time-entry.puml) | **PNG:** `plantuml/png/Activity — Time Entry Creation.png`
 
 Step-by-step workflow for a user creating a work item and recording hours against a project.
 - Project availability guard — no assigned projects blocks the form
@@ -258,7 +260,7 @@ Step-by-step workflow for a user creating a work item and recording hours agains
 ---
 
 #### 15. Activity — Admin User Management *(new)*
-**PlantUML:** [`plantuml/activity-admin-users.puml`](plantuml/activity-admin-users.puml)
+**PlantUML:** [`plantuml/activity-admin-users.puml`](plantuml/activity-admin-users.puml) | **PNG:** `plantuml/png/Activity — Admin User Management.png`
 
 Full admin workflow for managing user accounts (Create / Edit / Deactivate-Reactivate / Delete).
 - Create: unique-username check → User + UserAuth records created → 201
@@ -271,8 +273,10 @@ Full admin workflow for managing user accounts (Create / Edit / Deactivate-React
 
 ### State Diagrams
 
+> PlantUML source only (no Draw.io equivalent). Pre-generated PNGs are in [`plantuml/png/`](plantuml/png/).
+
 #### 16. State — WorkItem Lifecycle *(new)*
-**PlantUML:** [`plantuml/state-workitem.puml`](plantuml/state-workitem.puml)
+**PlantUML:** [`plantuml/state-workitem.puml`](plantuml/state-workitem.puml) | **PNG:** `plantuml/png/State — WorkItem Lifecycle.png`
 
 Lifecycle states for a `WorkItem` entity driven by user and admin actions.
 - **Active** (sub-states: Logged → TimeTracked): created, editable, hours logged against it
@@ -283,7 +287,7 @@ Lifecycle states for a `WorkItem` entity driven by user and admin actions.
 ---
 
 #### 17. State — User Lifecycle *(new)*
-**PlantUML:** [`plantuml/state-user.puml`](plantuml/state-user.puml)
+**PlantUML:** [`plantuml/state-user.puml`](plantuml/state-user.puml) | **PNG:** `plantuml/png/State — User Lifecycle.png`
 
 Lifecycle states for a `User` entity driven by the `IsActive` flag and admin actions.
 - **Active** (sub-states: Provisioned → Authenticated): admin creates account, user logs in successfully
@@ -295,8 +299,10 @@ Lifecycle states for a `User` entity driven by the `IsActive` flag and admin act
 
 ### Physical Schema
 
+> PlantUML source only (no Draw.io equivalent). Pre-generated PNG is in [`plantuml/png/`](plantuml/png/).
+
 #### 18. Physical Schema — dsc_dev *(new)*
-**PlantUML:** [`plantuml/erd-physical.puml`](plantuml/erd-physical.puml)
+**PlantUML:** [`plantuml/erd-physical.puml`](plantuml/erd-physical.puml) | **PNG:** `plantuml/png/Physical Schema — DSC Database (dsc_dev).png`
 
 DDL-level schema for the MariaDB `dsc_dev` database as managed by EF Core migrations.
 - **Core tables:** `Users`, `Projects`, `WorkItems`, `TimeEntries`, `ProjectAssignments`

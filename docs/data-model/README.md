@@ -1,5 +1,9 @@
 # Data Model Documentation
 
+**Author**: Ryan Loiselle — Developer / Architect
+**AI tool**: GitHub Copilot — AI pair programmer / code generation
+**Updated**: February 2026
+
 > DSC Modernization — Data Model: Java Legacy vs. .NET Current
 
 ## Contents

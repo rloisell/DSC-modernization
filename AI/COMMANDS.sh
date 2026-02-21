@@ -44,3 +44,22 @@ git add diagrams/plantuml/activity-time-entry.puml \
         AI/CHANGES.csv AI/COMMANDS.sh AI/WORKLOG.md
 git commit -m "docs: add activity, state, and physical schema diagrams — complete required diagram set"
 git push
+
+# 2026-02-21 — Docs consolidation, PlantUML PNG export, attribution sync
+# Export all 16 PlantUML diagrams to PNG
+plantuml -tpng -o "$(pwd)/diagrams/plantuml/png" diagrams/plantuml/*.puml
+
+# Commit DSC-modernization docs audit changes
+git -C /Users/rloisell/Documents/developer/DSC-modernization add diagrams/plantuml/png/ docs/deployment/STANDARDS.md docs/data-model/README.md docs/development-history.md docs/local-development/README.md CODING_STANDARDS.md .github/copilot-instructions.md diagrams/README.md AI/CHANGES.csv AI/COMMANDS.sh AI/WORKLOG.md
+git -C /Users/rloisell/Documents/developer/DSC-modernization commit -m "docs: export PlantUML PNGs, add STANDARDS.md, fix attribution, sync standards"
+git -C /Users/rloisell/Documents/developer/DSC-modernization push
+
+# Commit rl-project-template standards sync
+git -C /Users/rloisell/Documents/developer/rl-project-template add CODING_STANDARDS.md .github/copilot-instructions.md
+git -C /Users/rloisell/Documents/developer/rl-project-template commit -m "docs: add Markdown attribution format and docs/data-model section to CODING_STANDARDS"
+git -C /Users/rloisell/Documents/developer/rl-project-template push
+
+# Commit Java DSC README replacement
+git -C /Users/rloisell/Documents/developer/DSC-modernization/src/DSC.WebClient/external/DSC-java add README.md
+git -C /Users/rloisell/Documents/developer/DSC-modernization/src/DSC.WebClient/external/DSC-java commit -m "docs: replace placeholder README with proper legacy-status documentation"
+git -C /Users/rloisell/Documents/developer/DSC-modernization/src/DSC.WebClient/external/DSC-java push

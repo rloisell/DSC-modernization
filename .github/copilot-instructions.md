@@ -31,6 +31,14 @@ When creating a **new file**, always open with this header block:
 Use `#` block comments for Perl; `//` block or `/* */` for C-family languages.
 Omit student IDs, course names, and academic metadata — this is professional work.
 
+For **Markdown documentation files** (`.md`), place immediately below the `# Title`:
+
+```markdown
+**Author**: Ryan Loiselle — Developer / Architect
+**AI tool**: GitHub Copilot — AI pair programmer / code generation
+**Updated**: <Month Year>
+```
+
 ---
 
 ## Comment Conventions

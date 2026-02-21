@@ -3210,3 +3210,34 @@ defined in CODING_STANDARDS.md §7. All 10 required diagram types are now presen
 
 ### Commit
 - `docs: add activity, state, and physical schema diagrams — complete required diagram set`
+
+---
+
+## 2026-02-21 — Docs consolidation, diagram PNG export, attribution headers
+
+### Summary
+Audited docs/ vs diagrams/ structure. Confirmed no actual content duplication (docs/ = narrative; diagrams/ = source files + exports). Identified and resolved the following gaps:
+
+### Files Created
+- `docs/deployment/STANDARDS.md` — deployment standards and project status checklist for DSC on BC Gov Emerald OpenShift (was in template, missing from DSC)
+
+### Files Modified (DSC-modernization)
+- `diagrams/plantuml/png/` — exported all 16 .puml files to PNG (5 new + 11 refreshed) using `plantuml -tpng`
+- `docs/data-model/README.md` — added **Author**/**AI tool**/**Updated** attribution block
+- `docs/development-history.md` — added attribution block
+- `docs/local-development/README.md` — added attribution block
+- `CODING_STANDARDS.md` — §1: added Markdown docs attribution format; §3: added `docs/data-model/` entry
+- `.github/copilot-instructions.md` — added Markdown docs attribution format
+- `diagrams/README.md` — added section-level PNG-folder notes; added PNG links for diagrams 14–18
+
+### Files Modified (rl-project-template)
+- `CODING_STANDARDS.md` — §1: added Markdown docs attribution format; §3: added `docs/data-model/ *(when applicable)*` entry
+- `.github/copilot-instructions.md` — added Markdown docs attribution format (kept in sync with DSC)
+
+### Files Modified (rloisell/DSC — Java legacy repo)
+- `README.md` — replaced one-line placeholder with full README: description, status (legacy/superseded), tech stack, key entities, security notice, related repos
+
+### Commits
+- DSC-modernization: `docs: export PlantUML PNGs, add STANDARDS.md, fix attribution, sync standards`
+- rl-project-template: `docs: add Markdown attribution format and docs/data-model section to CODING_STANDARDS`
+- rloisell/DSC: `docs: replace placeholder README with proper legacy-status documentation`

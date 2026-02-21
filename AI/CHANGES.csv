@@ -6,26 +6,21 @@ README.md,added,project description
 AI/repo-create,completed,repo created and initial scaffold pushed to GitHub
 LICENSE,added,Apache-2.0 license added
 spec/SUBTREE_POLICY.md,added,policy for managing spec-kit as a subtree
-spec/spec-kit,added,imported via git subtree from https://github.com/github/spec-kit.git @ 9f3adc7
-diagrams/plantuml/activity-time-entry.puml,created,Activity diagram — time entry creation workflow (WorkItemService.CreateAsync)
-diagrams/plantuml/activity-admin-users.puml,created,Activity diagram — admin user management (create/edit/deactivate/delete)
-diagrams/plantuml/state-workitem.puml,created,State diagram — WorkItem lifecycle (Active/Frozen/Deleted)
-diagrams/plantuml/state-user.puml,created,State diagram — User lifecycle (Active/Inactive/OIDC future)
-diagrams/plantuml/erd-physical.puml,created,Physical schema — DDL-level MariaDB schema (core + catalog + auth tables)
-diagrams/README.md,modified,Updated Required Diagrams table (rows 6/7/9 now complete); added directory entries; added overview sections diagrams/README.md,modified,Updated Required Diagrams ta─diagrams/README.md,modified,Updated Required Diagrams table (rows 6/7/9 now complete); added directory entries; added overview sections diagrams/README.md,modified,Updated Required Diagrams ta─diagrams/RE— Missing diagrams (activity, state, physical schema)
-# Created 5 new PlantUML diagram files:
-#   diagrams/plantuml/activity-time-entry.puml
-#   diagrams/plantuml/activity-admin-users.puml
-#   diagrams/plantuml/state-workitem.puml
-#   diagrams/plantuml/state-user.puml
-#   diagrams/plantuml/erd-physical.puml
-# Updated diagrams/README.md — Required Diagrams table now 10/10 complete
-git add diagrams/plantuml/activity-time-entry.puml \
-        diagrams/plantuml/activity-admin-users.puml \
-        diagrams/plantuml/state-workitem.puml \
-        diagrams/plantuml/state-user.puml \
-        diagrams/plantuml/erd-physical.puml \
-        diagrams/README.md \
-        AI/CHANGES.csv \
-        AI/COMMANDS.sh \
-        AI/WORKLOG.md
+diagrams/plantuml/activity-time-entry.puml,created,Activity diagram - time entry creation
+diagrams/plantuml/activity-admin-users.puml,created,Activity diagram - admin user management
+diagrams/plantuml/state-workitem.puml,created,State diagram - WorkItem lifecycle
+diagrams/plantuml/state-user.puml,created,State diagram - User lifecycle
+diagrams/plantuml/erd-physical.puml,created,Physical schema - DDL-level MariaDB schema
+diagrams/README.md,modified,Updated Required Diagrams table; added directory entries
+diagrams/plantuml/png/activity-time-entry.png,created,PlantUML PNG export - activity time entry
+diagrams/plantuml/png/activity-admin-users.png,created,PlantUML PNG export - admin user management
+diagrams/plantuml/png/state-workitem.png,created,PlantUML PNG export - WorkItem state machine
+diagrams/plantuml/png/state-user.png,created,PlantUML PNG export - User state machine
+diagrams/plantuml/png/erd-physical.png,created,PlantUML PNG export - physical schema
+docs/deployment/STANDARDS.md,created,DSC-specific deployment checklist with project status table
+docs/data-model/README.md,modified,Added Markdown attribution block after title
+docs/development-history.md,modified,Added Markdown attribution block after title
+docs/local-development/README.md,modified,Added Markdown attribution block after title
+CODING_STANDARDS.md,modified,Added Markdown attribution format to section 1; docs/data-model to section 3
+.github/copilot-instructions.md,modified,Added Markdown docs attribution format block
+diagrams/README.md,modified,Added PNG links for entries 14-18 and section-level PNG-folder notes

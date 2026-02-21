@@ -1,6 +1,11 @@
 # Local Development Environment
 
-This guide documents how to run the DSC modernization stack locally, including dependencies, configuration, and persistent services that keep running when VS Code is closed.
+**Author**: Ryan Loiselle — Developer / Architect
+**AI tool**: GitHub Copilot — AI pair programmer / code generation
+**Updated**: February 2026
+
+This guide documents how to run the DSC modernization stack locally, including
+dependencies, configuration, and persistent services that keep running when VS Code is closed.
 
 ## What runs locally
 

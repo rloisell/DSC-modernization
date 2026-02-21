@@ -1,5 +1,9 @@
 # DSC Modernization — Development History
 
+**Author**: Ryan Loiselle — Developer / Architect
+**AI tool**: GitHub Copilot — AI pair programmer / code generation
+**Updated**: February 2026
+
 This document records the session-by-session development history for the DSC Modernization project.
 For the product overview and architecture, see the [root README](../README.md).
 For in-depth session logs, build decisions, and command history, see [AI/WORKLOG.md](../AI/WORKLOG.md).
