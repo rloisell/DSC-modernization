@@ -2,7 +2,7 @@
 
 ---
 
-## 🔴 Standards Compliance Gaps — Audit 2026-02-21
+## ✅ Standards Compliance Gaps — Audit 2026-02-21 (ALL RESOLVED 2026-02-21)
 
 Audit of DSC-modernization (app repo + gitops `tenant-gitops-be808f`) against the
 updated standards in `EmeraldDeploymentAnalysis.md` and `CODING_STANDARDS.md`.
@@ -135,21 +135,31 @@ exists this should be updated to a clean pointer.
 
 ### Compliance Summary
 
-| Gap | File | Severity | Action |
+| Gap | File | Severity | Status |
 |-----|------|----------|--------|
-| C1 — `dotnet.yml` wrong version/triggers/content | `.github/workflows/dotnet.yml` | High | Replace with `build-and-test.yml` |
-| C2 — No frontend test framework | `DSC.WebClient/package.json` | High | Add Vitest + write smoke tests |
-| C3 — No Trivy scan | `.github/workflows/build-and-push.yml` | Medium | Add 2× Trivy steps |
-| C4 — Datree doesn't cover `charts/dsc-app` | `tenant-gitops-be808f/.github/workflows/policy-enforcement.yaml` | High | Add dsc-app Datree block |
-| C5 — Stale TODO in gitops `ci.yml` | `tenant-gitops-be808f/.github/workflows/ci.yml` | Low | Update comment |
+| C1 — `dotnet.yml` wrong version/triggers/content | `.github/workflows/dotnet.yml` | High | ✅ Replaced with `build-and-test.yml` (`ca9d5be`) |
+| C2 — No frontend test framework | `DSC.WebClient/package.json` | High | ✅ Vitest + 9 tests (Home, Login, SubTabs) (`ca9d5be`) |
+| C3 — No Trivy scan | `.github/workflows/build-and-push.yml` | Medium | ✅ 2× Trivy steps added (`ca9d5be`) |
+| C4 — Datree doesn't cover `charts/dsc-app` | `tenant-gitops-be808f/.github/workflows/policy-enforcement.yaml` | High | ✅ dsc-app block added (`c621b2c`) |
+| C5 — Stale TODO in gitops `ci.yml` | `tenant-gitops-be808f/.github/workflows/ci.yml` | Low | ✅ Replaced with clean pointer (`c621b2c`) |
 
 ---
 
-## 🔵 Peer Repo DevOps Patterns — Summary (not yet in DSC)
+## ✅ Peer Repo DevOps Patterns — P2/P3/P7/P8 resolved 2026-02-21 (P4/P5/P6 pending)
 
 Patterns observed in `bcgov-c/JAG-JAM-CORNET`, `bcgov-c/JAG-LEA`, `bcgov-c/tenant-gitops-be808f`
-(existing workflows), and `bcgov/security-pipeline-templates`. These are **not yet in DSC**.
-Prioritised roughly: implement in a future hardening session.
+(existing workflows), and `bcgov/security-pipeline-templates`.
+
+| Pattern | Status |
+|---------|--------|
+| P1 — Trivy image scan | ✅ Done (see C3 — `ca9d5be`) |
+| P2 — GitHub Release notes on v* tag | ✅ Done — `publish-on-tag.yml` added (`ca9d5be`) |
+| P3 — CodeQL SAST | ✅ Done — `codeql.yml` added (`ca9d5be`) |
+| P4 — OWASP Dependency Check | ⬜ Pending — optional; Trivy covers similar ground for containers |
+| P5 — OWASP ZAP DAST | ⬜ Pending — requires deployed app URL |
+| P6 — Branch protection rules | ⬜ Pending — human step in GitHub repo Settings |
+| P7 — Dependabot | ✅ Done — `dependabot.yml` added (`ca9d5be`) |
+| P8 — GitHub Copilot Code Review | ✅ Done — `copilot-review.yml` added (`99faaa2`) |
 
 ### P1 — Trivy Image Scan (See Gap C3 above — immediate fix)
 
