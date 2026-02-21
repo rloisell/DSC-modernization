@@ -126,20 +126,20 @@ jobs:
         id: env
         run: |
           case "${{ github.ref_name }}" in
-            develop) VALUES_FILE="deploy/dev_values.yaml"   ;;
-            test)    VALUES_FILE="deploy/test_values.yaml"  ;;
-            main)    VALUES_FILE="deploy/prod_values.yaml"  ;;
+            develop) VALUES_FILE="deploy/dsc-dev_values.yaml"   ;;
+            test)    VALUES_FILE="deploy/dsc-test_values.yaml"  ;;
+            main)    VALUES_FILE="deploy/dsc-prod_values.yaml"  ;;
           esac
           echo "values_file=${VALUES_FILE}" >> "$GITHUB_OUTPUT"
 
       - name: Update API image tag
         run: |
-          yq -i '.dsc-app.api.image.tag = "${{ needs.build.outputs.image_tag }}"' \
+          yq -i '.api.image.tag = "${{ needs.build.outputs.image_tag }}"' \
             ${{ steps.env.outputs.values_file }}
 
       - name: Update Frontend image tag
         run: |
-          yq -i '.dsc-app.frontend.image.tag = "${{ needs.build.outputs.image_tag }}"' \
+          yq -i '.frontend.image.tag = "${{ needs.build.outputs.image_tag }}"' \
             ${{ steps.env.outputs.values_file }}
 
       - name: Commit and push updated values
