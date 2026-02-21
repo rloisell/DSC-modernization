@@ -1,0 +1,85 @@
+'
+' activity-time-entry.puml
+' Ryan Loiselle — Developer / Architect
+' GitHub Copilot — AI pair programmer / code generation
+' February 2026
+'
+' AI-assisted: activity diagram generated from WorkItemService.CreateAsync and
+' sequence-time-entry.puml; reviewed and directed by Ryan Loiselle.
+'
+
+@startuml Activity — Time Entry Creation
+!theme plain
+title Time Entry Creation Workflow\n(User creates a work item and records hours against a project)
+
+start
+
+:User navigates to **Activity** page\n(/activity);
+
+:System fetches projects assigned to user\n**GET /api/projects?userId=…**;
+
+if (User has assigned projects?) then (no)
+  #tomato:Display "No projects assigned"\nContact administrator;
+  stop
+else (yes)
+endif
+
+:User selects a **Project**\nfrom the dropdown;
+
+if (Activity type?) then (Expense)
+  :User selects **Budget / Expense Category**\nand **Expense Option**;
+else (Project / Time)
+  :User enters **Activity Code**\nand **Network Number**;
+endif
+
+:User completes the work item form:
+  - Title *(required)*
+  - Date *(required)*
+  - Actual Duration *(hours)*
+  - Director Code / Reason Code / CPC Code *(optional)*;
+
+:Client‑side form validation;
+
+if (Required fields present?) then (no)
+  #tomato:Show inline field validation errors;
+  stop
+else (yes)
+endif
+
+:**POST** /api/items
+Body: { projectId, budgetId, activityType,
+  title, date, actualDuration, activityCode,
+  networkNumber, directorCode, reasonCode, cpcCode,
+  estimatedHours };
+
+partition "API — WorkItemService.CreateAsync()" {
+  :Resolve callerId from X‑User‑Id header;
+
+  :Verify project exists in database\n**Projects.AnyAsync(id == projectId)**;
+
+  if (Project found?) then (no)
+    #tomato:Throw **BadRequestException**\n→ 400 ProblemDetails "Project not found";
+    :SPA shows error alert;
+    stop
+  else (yes)
+  endif
+
+  if (ActivityType == "Expense") then (yes)
+    :Validate ExpenseCategory and\nExpenseOption exist\n→ 400 if not found;
+  else (no)
+  endif
+
+  :Compute **RemainingHours**\n= EstimatedHours − ActualDuration;
+
+  :INSERT WorkItem into **WorkItems** table;
+}
+
+:**201 Created** — WorkItemDto returned;
+
+:TanStack Query cache invalidated\n(useWorkItems query key);
+
+:New work item appears in\nthe activity list;
+
+stop
+
+@enduml

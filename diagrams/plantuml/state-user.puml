@@ -1,0 +1,66 @@
+'
+' state-user.puml
+' Ryan Loiselle — Developer / Architect
+' GitHub Copilot — AI pair programmer / code generation
+' February 2026
+'
+' AI-assisted: state diagram derived from AuthService.AuthenticateAsync,
+' User.IsActive flag, and admin user CRUD patterns; reviewed and directed by Ryan Loiselle.
+'
+
+@startuml State — User Lifecycle
+!theme plain
+title User Lifecycle\n(state transitions driven by admin actions and future OIDC provisioning)
+
+hide empty description
+
+[*] --> Active : **POST** /api/admin/users\nAdmin creates account\n(IsActive = true by default)
+
+state Active {
+  [*] --> Provisioned : Account created;\npending first login
+  Provisioned --> Authenticated : User calls **POST** /api/auth/login\nAuthService.AuthenticateAsync() succeeds
+  Authenticated --> Authenticated : Subsequent logins succeed
+}
+
+note right of Active
+  **AuthService guard:**
+  Login checks both credentials
+  AND IsActive flag.
+  Inactive accounts → 401
+  "Account is deactivated".
+end note
+
+Active --> Inactive : **PATCH** /api/admin/users/{id}\n{ isActive: false }\nAdmin deactivates account
+
+state Inactive {
+  [*] --> Blocked : Login attempts return 401\n"Account is deactivated"\nWork items / reports preserved
+}
+
+note right of Inactive
+  Deactivation is **non-destructive**.
+  All work items, time entries, and
+  project assignments are retained
+  for historical reporting.
+end note
+
+Inactive --> Active : **PATCH** /api/admin/users/{id}\n{ isActive: true }\nAdmin reactivates account
+
+Active --> [*] : **DELETE** /api/admin/users/{id}\nUser record permanently removed
+
+Inactive --> [*] : **DELETE** /api/admin/users/{id}\nUser record permanently removed
+
+state "Future — OIDC Provisioned" as OIDC {
+  [*] --> LinkedIdentity : ExternalIdentity record created\n(Provider, Subject from Keycloak)
+  LinkedIdentity --> Authenticated2 : JWT validated by middleware
+}
+
+note bottom of OIDC
+  **Roadmap** (AI/securityNextSteps.md):
+  Replace X-User-Id header auth with
+  Keycloak OIDC. ExternalIdentity table
+  already present in schema.
+end note
+
+[*] --> OIDC : Future: OIDC just-in-time\nprovisioning via Keycloak
+
+@enduml

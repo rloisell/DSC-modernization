@@ -46,16 +46,21 @@ diagrams/
 │   │   ├── sequence-time-entry.png
 │   │   ├── service-layer.png
 │   │   └── use-cases.png
+│   ├── activity-admin-users.puml
+│   ├── activity-time-entry.puml
 │   ├── api-architecture.puml
 │   ├── component-diagram.puml
 │   ├── deployment.puml
 │   ├── domain-model.puml
+│   ├── erd-physical.puml
 │   ├── health-check-sequence.puml
 │   ├── sequence-admin-crud.puml
 │   ├── sequence-admin-seed.puml
 │   ├── sequence-reporting-dashboard.puml
 │   ├── sequence-time-entry.puml
 │   ├── service-layer.puml
+│   ├── state-user.puml
+│   ├── state-workitem.puml
 │   └── use-cases.puml
 └── data-model/                ← ERD source files + exported SVGs and PNGs
     ├── svg/
@@ -95,10 +100,10 @@ Diagrams marked _scales with features_ should have one instance per major use ca
 | 3 | Package / module organisation | Package | Structural | **Required** | ✅ `component-diagram` |
 | 4 | Use case overview | Use Case | Behavioural | **Required** | ✅ `use-cases` |
 | 5 | Key sequence flows | Sequence | Behavioural | One per major user-facing feature | ✅ 5 sequences |
-| 6 | Key workflows | Activity | Behavioural | One per complex multi-step workflow | ⬜ Not yet created |
-| 7 | Entity lifecycle | State | Behavioural | For entities with non-trivial state transitions | ⬜ Not yet created |
+| 6 | Key workflows | Activity | Behavioural | One per complex multi-step workflow | ✅ `activity-time-entry` · `activity-admin-users` |
+| 7 | Entity lifecycle | State | Behavioural | For entities with non-trivial state transitions | ✅ `state-workitem` · `state-user` |
 | 8 | Entity-Relationship Diagram (ERD) | ERD | Data | **Required** | ✅ `erd-current` |
-| 9 | Physical schema | Schema | Data | **Required** | ⬜ Not yet created |
+| 9 | Physical schema | Schema | Data | **Required** | ✅ `erd-physical` |
 | 10 | Deployment topology | Deployment | Infrastructure | **Required** | ✅ `deployment` |
 
 ---
@@ -235,6 +240,70 @@ See [docs/data-model/README.md](../docs/data-model/README.md) for full compare/c
 Database ERD of the original Java application's Hibernate ORM model.
 Entity groups: Person & Authentication, Organisation & Department, Project & Activity, Reference / Catalog, Calendar.
 See [docs/data-model/README.md](../docs/data-model/README.md) for full compare/contrast with current .NET model.
+
+---
+
+### Activity Diagrams
+
+#### 14. Activity — Time Entry Creation *(new)*
+**PlantUML:** [`plantuml/activity-time-entry.puml`](plantuml/activity-time-entry.puml)
+
+Step-by-step workflow for a user creating a work item and recording hours against a project.
+- Project availability guard — no assigned projects blocks the form
+- Activity-type branch: Expense (budget + category/option) vs. Project/Time (activity code + network number)
+- Client-side required-field validation before POST
+- API-side: project existence check in `WorkItemService.CreateAsync()` → 400 if not found
+- RemainingHours computed on save; 201 response returned; TanStack Query cache invalidated
+
+---
+
+#### 15. Activity — Admin User Management *(new)*
+**PlantUML:** [`plantuml/activity-admin-users.puml`](plantuml/activity-admin-users.puml)
+
+Full admin workflow for managing user accounts (Create / Edit / Deactivate-Reactivate / Delete).
+- Create: unique-username check → User + UserAuth records created → 201
+- Edit: partial-update PATCH → fields updated → 204
+- Deactivate: `IsActive = false` → `AuthService` returns 401 "Account is deactivated" on next login
+- Reactivate: `IsActive = true` → immediate access restored
+- Delete: confirmation guard → permanent removal of User record → 204
+
+---
+
+### State Diagrams
+
+#### 16. State — WorkItem Lifecycle *(new)*
+**PlantUML:** [`plantuml/state-workitem.puml`](plantuml/state-workitem.puml)
+
+Lifecycle states for a `WorkItem` entity driven by user and admin actions.
+- **Active** (sub-states: Logged → TimeTracked): created, editable, hours logged against it
+- **Frozen**: parent project deactivated (`Project.IsActive = false`); data preserved, read-only for new entries
+- **Deleted**: via `DELETE /api/items/{id}`; ownership enforced by `EnforceOwnershipAsync()`
+- Frozen → Active transition possible on project reactivation
+
+---
+
+#### 17. State — User Lifecycle *(new)*
+**PlantUML:** [`plantuml/state-user.puml`](plantuml/state-user.puml)
+
+Lifecycle states for a `User` entity driven by the `IsActive` flag and admin actions.
+- **Active** (sub-states: Provisioned → Authenticated): admin creates account, user logs in successfully
+- **Inactive**: `IsActive = false`; `AuthService.AuthenticateAsync()` throws 401 "Account is deactivated"
+- Active ↔ Inactive toggleable via admin PATCH; both states permit permanent deletion
+- Future state: **OIDC Provisioned** via `ExternalIdentity` table + Keycloak JWT (roadmap in `AI/securityNextSteps.md`)
+
+---
+
+### Physical Schema
+
+#### 18. Physical Schema — dsc_dev *(new)*
+**PlantUML:** [`plantuml/erd-physical.puml`](plantuml/erd-physical.puml)
+
+DDL-level schema for the MariaDB `dsc_dev` database as managed by EF Core migrations.
+- **Core tables:** `Users`, `Projects`, `WorkItems`, `TimeEntries`, `ProjectAssignments`
+- **Catalog tables:** `Budgets`, `Roles`, `Positions`, `Departments`, `ExpenseCategories`, `ExpenseOptions`
+- **Auth tables:** `UserAuth` (legacy, to be deprecated post-OIDC), `ExternalIdentities` (future Keycloak)
+- Column types follow MariaDB EF Core conventions: GUIDs as `CHAR(36)`, decimals as `DECIMAL(10,2)`, booleans as `TINYINT(1)`
+- Legacy fields (`start_time`, `end_time`, `legacy_activity_id`) annotated inline for migration context
 
 ---
 

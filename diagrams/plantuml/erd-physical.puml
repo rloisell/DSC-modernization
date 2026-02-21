@@ -1,0 +1,203 @@
+'
+' erd-physical.puml
+' Ryan Loiselle — Developer / Architect
+' GitHub Copilot — AI pair programmer / code generation
+' February 2026
+'
+' AI-assisted: physical schema derived from DSC.Data/Models entity classes and
+' ApplicationDbContext; reviewed and directed by Ryan Loiselle.
+' Column types inferred from C# types + MariaDB EF Core conventions.
+'
+
+@startuml Physical Schema — DSC Database (dsc_dev)
+!theme plain
+skinparam linetype ortho
+skinparam class {
+    BackgroundColor<<core>>    LightBlue
+    BackgroundColor<<catalog>> LightGreen
+    BackgroundColor<<auth>>    LightPink
+    BackgroundColor<<junction>> LightYellow
+    BorderColor #555555
+    FontSize 11
+}
+
+title Physical Schema — DSC Database (MariaDB)\nEF Core migrations; all IDs are CHAR(36) GUIDs
+
+' ── CORE TABLES ─────────────────────────────────────────────────────────────
+
+entity "Users" <<core>> {
+  * id : CHAR(36) <<PK>>
+  --
+  emp_id : INT NULL            /' legacy bridge '/
+  * username : VARCHAR(255)    <<UNIQUE>>
+  email : VARCHAR(255) NULL
+  first_name : VARCHAR(255) NULL
+  last_name : VARCHAR(255) NULL
+  * is_active : TINYINT(1)     DEFAULT 1
+  password_hash : VARCHAR(500) NULL  /' to be deprecated — OIDC '/
+  role_id : CHAR(36) NULL      <<FK → Roles>>
+  position_id : CHAR(36) NULL  <<FK → Positions>>
+  department_id : CHAR(36) NULL <<FK → Departments>>
+}
+
+entity "Projects" <<core>> {
+  * id : CHAR(36) <<PK>>
+  --
+  project_no : VARCHAR(50) NULL  /' legacy Java field '/
+  * name : VARCHAR(255)
+  description : TEXT NULL
+  * is_active : TINYINT(1)   DEFAULT 1
+  estimated_hours : DECIMAL(10,2) NULL
+}
+
+entity "WorkItems" <<core>> {
+  * id : CHAR(36) <<PK>>
+  --
+  project_id : CHAR(36) NULL    <<FK → Projects>>
+  user_id : CHAR(36) NULL       <<FK → Users>>
+  budget_id : CHAR(36) NULL     <<FK → Budgets>>
+  * activity_type : VARCHAR(50) DEFAULT 'Project'
+  legacy_activity_id : INT NULL  /' legacy Java Activity.id '/
+  date : DATETIME NULL
+  start_time : DATETIME NULL    /' legacy '/
+  end_time : DATETIME NULL      /' legacy '/
+  planned_duration : TIME NULL
+  actual_duration : INT NULL    /' hours as integer '/
+  * title : VARCHAR(500)
+  description : TEXT NULL
+  activity_code : VARCHAR(50) NULL
+  network_number : VARCHAR(20) NULL
+  director_code : VARCHAR(50) NULL
+  reason_code : VARCHAR(50) NULL
+  cpc_code : VARCHAR(50) NULL
+  estimated_hours : DECIMAL(10,2) NULL
+  remaining_hours : DECIMAL(10,2) NULL
+}
+
+entity "TimeEntries" <<core>> {
+  * id : CHAR(36) <<PK>>
+  --
+  * work_item_id : CHAR(36) <<FK → WorkItems>>
+  * user_id : CHAR(36)      <<FK → Users>>
+  * date : DATETIME
+  * hours : DECIMAL(8,2)
+  notes : TEXT NULL
+}
+
+entity "ProjectAssignments" <<junction>> {
+  * project_id : CHAR(36) <<PK, FK → Projects>>
+  * user_id : CHAR(36)    <<PK, FK → Users>>
+  --
+  * role : VARCHAR(50)  DEFAULT 'Contributor'
+  estimated_hours : DECIMAL(10,2) NULL
+}
+
+' ── CATALOG TABLES ──────────────────────────────────────────────────────────
+
+entity "Budgets" <<catalog>> {
+  * id : CHAR(36) <<PK>>
+  --
+  * description : VARCHAR(255)
+  * is_active : TINYINT(1) DEFAULT 1
+}
+
+entity "Roles" <<catalog>> {
+  * id : CHAR(36) <<PK>>
+  --
+  * name : VARCHAR(100)
+  description : VARCHAR(500) NULL
+  * is_active : TINYINT(1) DEFAULT 1
+}
+
+entity "Positions" <<catalog>> {
+  * id : CHAR(36) <<PK>>
+  --
+  * title : VARCHAR(255)
+  description : TEXT NULL
+  * is_active : TINYINT(1) DEFAULT 1
+}
+
+entity "Departments" <<catalog>> {
+  * id : CHAR(36) <<PK>>
+  --
+  * name : VARCHAR(255)
+  manager_name : VARCHAR(255) NULL
+  * is_active : TINYINT(1) DEFAULT 1
+}
+
+entity "ExpenseCategories" <<catalog>> {
+  * id : CHAR(36) <<PK>>
+  --
+  * name : VARCHAR(255)
+  description : TEXT NULL
+  * is_active : TINYINT(1) DEFAULT 1
+}
+
+entity "ExpenseOptions" <<catalog>> {
+  * id : CHAR(36) <<PK>>
+  --
+  * expense_category_id : CHAR(36) <<FK → ExpenseCategories>>
+  * name : VARCHAR(255)
+  * is_active : TINYINT(1) DEFAULT 1
+}
+
+' ── AUTH TABLES ──────────────────────────────────────────────────────────────
+
+entity "UserAuth" <<auth>> {
+  * user_name : VARCHAR(255) <<PK>>
+  --
+  * password : VARCHAR(500)  /' SHA-256 hash; will be deprecated '/
+  emp_id : INT NULL
+}
+
+entity "ExternalIdentities" <<auth>> {
+  * id : CHAR(36) <<PK>>
+  --
+  * user_id : CHAR(36) <<FK → Users>>
+  * provider : VARCHAR(50)   /' e.g. "keycloak" '/
+  * subject : VARCHAR(255)   /' OIDC sub claim '/
+}
+
+' ── RELATIONSHIPS ────────────────────────────────────────────────────────────
+
+Users              ||--o{ WorkItems          : "logs"
+Users              ||--o{ TimeEntries        : "records"
+Users              ||--o{ ProjectAssignments : "assigned via"
+Users              }o--o| Roles              : "has role"
+Users              }o--o| Positions          : "holds"
+Users              }o--o| Departments        : "belongs to"
+Users              ||--o| UserAuth           : "legacy auth"
+Users              ||--o{ ExternalIdentities : "OIDC identity"
+
+Projects           ||--o{ WorkItems          : "contains"
+Projects           ||--o{ ProjectAssignments : "assigns users"
+
+WorkItems          ||--o{ TimeEntries        : "tracked by"
+WorkItems          }o--o| Budgets            : "categorised"
+
+Budgets            ||--o{ ExpenseCategories  : "has"
+ExpenseCategories  ||--o{ ExpenseOptions     : "subdivides"
+
+note top of UserAuth
+  **Legacy bridge.** Maps old Java
+  employee credentials to new User.
+  Will be removed after Keycloak
+  OIDC roll-out.
+end note
+
+note bottom of ExternalIdentities
+  **Future.** Table already in schema
+  (ExternalIdentity.cs entity).
+  Populated when OIDC migration
+  is completed.
+end note
+
+note right of WorkItems
+  **Legacy fields:** start_time, end_time,
+  planned_duration, legacy_activity_id
+  preserved for data-migration fidelity.
+  See AI/securityNextSteps.md for
+  deprecation roadmap.
+end note
+
+@enduml

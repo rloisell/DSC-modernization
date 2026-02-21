@@ -1,0 +1,53 @@
+'
+' state-workitem.puml
+' Ryan Loiselle — Developer / Architect
+' GitHub Copilot — AI pair programmer / code generation
+' February 2026
+'
+' AI-assisted: state diagram derived from WorkItemService.cs CRUD lifecycle
+' and Project.IsActive soft-delete pattern; reviewed and directed by Ryan Loiselle.
+'
+
+@startuml State — WorkItem Lifecycle
+!theme plain
+title WorkItem Lifecycle\n(state transitions driven by user actions and project status)
+
+hide empty description
+
+[*] --> Active : **POST** /api/items\nUser submits work item form\nWorkItemService.CreateAsync()
+
+state Active {
+  [*] --> Logged : Item saved with\ntitle, date, duration, codes
+  Logged --> Logged : **PATCH** /api/items/{id}\nUser edits fields\nWorkItemService.UpdateAsync()
+  Logged --> TimeTracked : **POST** /api/time-entries\nHours logged against item
+  TimeTracked --> TimeTracked : Additional time entries added
+}
+
+note right of Active
+  **Ownership rule:**
+  Only the owning user, or a user
+  with Admin / Manager role, may
+  update or delete a work item.
+  Enforced by EnforceOwnershipAsync().
+end note
+
+Active --> Frozen : Parent **Project.IsActive** set to false\n(admin deactivates project)
+
+state Frozen {
+  [*] --> ReadOnly : Work item data preserved;\nnot available in active project list
+}
+
+note right of Frozen
+  No new work items can reference
+  an inactive project.
+  Existing items remain queryable
+  for reporting (GET /api/items).
+end note
+
+Active --> [*] : **DELETE** /api/items/{id}\nWorkItemService.DeleteAsync()\nRecord permanently removed
+
+Frozen --> [*] : **DELETE** /api/items/{id}\n(Admin / Manager only)
+
+Frozen --> Active : Parent **Project.IsActive** restored\n(admin reactivates project)
+
+@enduml

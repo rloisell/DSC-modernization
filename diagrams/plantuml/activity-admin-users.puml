@@ -1,0 +1,79 @@
+'
+' activity-admin-users.puml
+' Ryan Loiselle — Developer / Architect
+' GitHub Copilot — AI pair programmer / code generation
+' February 2026
+'
+' AI-assisted: activity diagram generated from AdminUsersController and
+' AuthService.AuthenticateAsync patterns; reviewed and directed by Ryan Loiselle.
+'
+
+@startuml Activity — Admin User Management
+!theme plain
+title Admin User Management Workflow\n(Administrator manages user accounts via /admin/users)
+
+start
+
+:Admin navigates to **Admin → Users**\n(/admin/users);
+
+:System loads all users\n**GET /api/admin/users**\n(X‑Admin‑Token required);
+
+:Display user table with:\nname · email · role · position · status;
+
+switch (Admin selects action?)
+
+case (Create User)
+  :Admin opens **Create User** form;
+  :Fill: username, email, first/last name,\nrole, position, department, empId;
+  :**POST** /api/admin/users;
+  :Validate username is unique\n**Users.AnyAsync(u.Username == username)**;
+  if (Username taken?) then (yes)
+    #tomato:**409 Conflict** — "Username already exists";
+    :Show error on form;
+    stop
+  else (no)
+  endif
+  :Create **User** record (IsActive = true);
+  :Create companion **UserAuth** record\n(legacy bridge, plain SHA‑256 password);
+  :**201 Created** — user appended to table;
+
+case (Edit User)
+  :Admin clicks **Edit** on a user row;
+  :Admin modifies: name, email,\nrole, position, or department;
+  :**PATCH** /api/admin/users/{id};
+  :Update User record in database;
+  :**204 No Content** — row refreshed in table;
+
+case (Deactivate / Reactivate)
+  :Admin toggles the user's **Active** status;
+  :**PATCH** /api/admin/users/{id}\n{ isActive: false | true };
+  if (Deactivating?) then (yes)
+    :Set **User.IsActive = false**;
+    note right
+      AuthService.AuthenticateAsync
+      now throws **UnauthorizedException**:
+      "Account is deactivated" → 401
+    end note
+  else (Reactivating)
+    :Set **User.IsActive = true**;
+    :User can log in immediately;
+  endif
+  :**204 No Content** — status badge updated in table;
+
+case (Delete User)
+  :Admin clicks **Delete** on a user row;
+  :Confirmation dialog shown;
+  if (Admin confirms?) then (no)
+    :Cancel — no change;
+    stop
+  else (yes)
+  endif
+  :**DELETE** /api/admin/users/{id};
+  :Remove **User** and **UserAuth** records;
+  :**204 No Content** — row removed from table;
+
+endswitch
+
+stop
+
+@enduml
