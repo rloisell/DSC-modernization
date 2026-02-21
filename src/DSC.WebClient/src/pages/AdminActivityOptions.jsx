@@ -181,9 +181,6 @@ export default function AdminActivityOptions() {
 
   return (
     <div className="page">
-      <section className="section stack" style={{ paddingBottom: '0.25rem' }}>
-        <Heading level={2}>Admin Activity Options</Heading>
-      </section>
       <SubTabs
         tabs={[
           { id: 'codes', label: 'Activity Codes' },

@@ -98,6 +98,7 @@ export default function AdminProjects() {
       setProjects(refreshed);
       setForm({ projectNo: '', name: '', description: '', estimatedHours: '' });
       setEditingId('');
+      setSubTab('projects');
       setMessage(editingId ? 'Project updated.' : 'Project created.');
     } catch (e) {
       setError(e.message);
@@ -106,7 +107,7 @@ export default function AdminProjects() {
 
   function handleEdit(project) {
     setEditingId(project.id);
-    setSubTab('form');
+    setSubTab('edit');
     setForm({
       projectNo: project.projectNo || '',
       name: project.name,
@@ -192,20 +193,18 @@ export default function AdminProjects() {
 
   return (
     <div className="page">
-      <section className="section stack" style={{ paddingBottom: '0.25rem' }}>
-        <Heading level={2}>Admin Projects</Heading>
-      </section>
       <SubTabs
         tabs={[
           { id: 'projects', label: 'Projects' },
-          { id: 'form', label: 'Add / Edit' },
+          { id: 'add', label: 'Add' },
+          ...(editingId ? [{ id: 'edit', label: 'Edit' }] : []),
           { id: 'assign', label: 'Assign Options' },
           { id: 'assignments', label: 'Assignments' },
         ]}
         activeTab={subTab}
-        onTabChange={setSubTab}
+        onTabChange={(tab) => { if (tab === 'add') setEditingId(''); setSubTab(tab); }}
       />
-      {subTab === 'form' && (
+      {(subTab === 'add' || subTab === 'edit') && (
       <section className="section stack">
         <Heading level={2}>{editingId ? 'Edit Project' : 'Add Project'}</Heading>
         <Form onSubmit={handleSubmit} className="form-grid">

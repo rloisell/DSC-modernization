@@ -60,6 +60,7 @@ export default function AdminPositions() {
       setPositions(refreshed);
       setForm({ title: '', description: '', status: 'active' });
       setEditingId('');
+      setSubTab('list');
       setMessage(editingId ? 'Position updated.' : 'Position created.');
     } catch (e) {
       setError(e.message);
@@ -68,7 +69,7 @@ export default function AdminPositions() {
 
   function handleEdit(position) {
     setEditingId(position.id);
-    setSubTab('form');
+    setSubTab('edit');
     setForm({
       title: position.title,
       description: position.description || '',
@@ -111,18 +112,16 @@ export default function AdminPositions() {
 
   return (
     <div className="page">
-      <section className="section stack" style={{ paddingBottom: '0.25rem' }}>
-        <Heading level={2}>Admin Positions</Heading>
-      </section>
       <SubTabs
         tabs={[
           { id: 'list', label: 'Positions' },
-          { id: 'form', label: 'Add / Edit' },
+          { id: 'add', label: 'Add' },
+          ...(editingId ? [{ id: 'edit', label: 'Edit' }] : []),
         ]}
         activeTab={subTab}
-        onTabChange={setSubTab}
+        onTabChange={(tab) => { if (tab === 'add') setEditingId(''); setSubTab(tab); }}
       />
-      {subTab === 'form' && (
+      {(subTab === 'add' || subTab === 'edit') && (
       <section className="section stack">
         <Heading level={2}>{editingId ? 'Edit Position' : 'Add Position'}</Heading>
         <Form onSubmit={handleSubmit} className="form-grid">

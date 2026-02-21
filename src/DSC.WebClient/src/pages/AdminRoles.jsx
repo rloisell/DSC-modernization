@@ -66,6 +66,7 @@ export default function AdminRoles() {
       setRoles(refreshed);
       setForm({ name: '', description: '', status: 'active' });
       setEditingId('');
+      setSubTab('list');
       setMessage(editingId ? 'Role updated.' : 'Role created.');
     } catch (e) {
       setError(e.message);
@@ -74,7 +75,7 @@ export default function AdminRoles() {
 
   function handleEdit(role) {
     setEditingId(role.id);
-    setSubTab('form');
+    setSubTab('edit');
     setForm({
       name: role.name,
       description: role.description || '',
@@ -107,18 +108,16 @@ export default function AdminRoles() {
 
   return (
     <div className="page">
-      <section className="section stack" style={{ paddingBottom: '0.25rem' }}>
-        <Heading level={2}>Admin Roles</Heading>
-      </section>
       <SubTabs
         tabs={[
           { id: 'list', label: 'Roles' },
-          { id: 'form', label: 'Add / Edit' },
+          { id: 'add', label: 'Add' },
+          ...(editingId ? [{ id: 'edit', label: 'Edit' }] : []),
         ]}
         activeTab={subTab}
-        onTabChange={setSubTab}
+        onTabChange={(tab) => { if (tab === 'add') setEditingId(''); setSubTab(tab); }}
       />
-      {subTab === 'form' && (
+      {(subTab === 'add' || subTab === 'edit') && (
       <section className="section stack">
         <Heading level={2}>{editingId ? 'Edit Role' : 'Create New Role'}</Heading>
         <Form onSubmit={handleSubmit} className="form-grid">

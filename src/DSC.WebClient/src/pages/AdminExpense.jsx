@@ -286,9 +286,6 @@ export default function AdminExpense() {
 
   return (
     <div className="page">
-      <section className="section stack" style={{ paddingBottom: '0.25rem' }}>
-        <Heading level={2}>Admin Expense</Heading>
-      </section>
       <SubTabs
         tabs={[
           { id: 'budgets', label: 'Budgets' },

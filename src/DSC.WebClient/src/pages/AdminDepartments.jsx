@@ -91,6 +91,7 @@ export default function AdminDepartments() {
       setDepartments(refreshed);
       setForm({ name: '', manager: '', status: 'active' });
       setEditingId('');
+      setSubTab('list');
       setMessage(editingId ? 'Department updated.' : 'Department created.');
     } catch (e) {
       setError(e.message);
@@ -99,7 +100,7 @@ export default function AdminDepartments() {
 
   function handleEdit(dept) {
     setEditingId(dept.id);
-    setSubTab('form');
+    setSubTab('edit');
     // Try to find the user by name when editing
     let managerId = '';
     if (dept.managerName) {
@@ -151,18 +152,16 @@ export default function AdminDepartments() {
 
   return (
     <div className="page">
-      <section className="section stack" style={{ paddingBottom: '0.25rem' }}>
-        <Heading level={2}>Admin Departments</Heading>
-      </section>
       <SubTabs
         tabs={[
           { id: 'list', label: 'Departments' },
-          { id: 'form', label: 'Add / Edit' },
+          { id: 'add', label: 'Add' },
+          ...(editingId ? [{ id: 'edit', label: 'Edit' }] : []),
         ]}
         activeTab={subTab}
-        onTabChange={setSubTab}
+        onTabChange={(tab) => { if (tab === 'add') setEditingId(''); setSubTab(tab); }}
       />
-      {subTab === 'form' && (
+      {(subTab === 'add' || subTab === 'edit') && (
       <section className="section stack">
         <Heading level={2}>{editingId ? 'Edit Department' : 'Add Department'}</Heading>
         <Form onSubmit={handleSubmit} className="form-grid">

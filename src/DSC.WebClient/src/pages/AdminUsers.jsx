@@ -243,17 +243,14 @@ export default function AdminUsers() {
 
   return (
     <div className="page">
-      <section className="section stack" style={{ paddingBottom: '0.25rem' }}>
-        <Heading level={2}>Admin Users</Heading>
-      </section>
       <SubTabs
         tabs={[
           { id: 'current', label: 'Current Users' },
           { id: 'add', label: 'Add User' },
-          { id: 'edit', label: 'Edit User' },
+          ...(selectedUserId ? [{ id: 'edit', label: 'Edit User' }] : []),
         ]}
         activeTab={subTab}
-        onTabChange={setSubTab}
+        onTabChange={(tab) => { if (tab !== 'edit') setSelectedUserId(''); setSubTab(tab); }}
       />
       {subTab === 'add' && (
       <section className="section stack">
