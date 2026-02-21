@@ -12,7 +12,7 @@ import { getReportSummary, exportToCSV } from '../api/ReportService';
 import { getProjects } from '../api/ProjectService';
 
 const PERIOD_ITEMS = [
-  { id: '', label: 'All Time' },
+  { id: '__all_time__', label: 'All Time' },
   { id: 'month', label: 'This Month' },
   { id: 'quarter', label: 'This Quarter' },
   { id: 'year', label: 'This Year' },
@@ -55,7 +55,7 @@ export default function Reports() {
   const [error, setError] = useState(null);
 
   const projectItems = [
-    { id: '', label: 'All Projects' },
+    { id: '__all__', label: 'All Projects' },
     ...projects.map(p => ({ id: p.id, label: p.projectNo ? `${p.projectNo} — ${p.name}` : p.name }))
   ];
 
@@ -72,13 +72,15 @@ export default function Reports() {
     setLoading(true);
     setError(null);
     try {
-      const dates = period === 'custom'
+      const dates = (period === 'custom')
         ? { from: customFrom || undefined, to: customTo || undefined }
-        : getPeriodDates(period);
+        : (period === '__all_time__' || !period)
+          ? { from: undefined, to: undefined }
+          : getPeriodDates(period);
       const data = await getReportSummary({
         from: dates.from || undefined,
         to: dates.to || undefined,
-        projectId: filterProjectId || undefined,
+        projectId: (filterProjectId && filterProjectId !== '__all__') ? filterProjectId : undefined,
       });
       setReport(data);
     } catch (e) {
@@ -105,15 +107,15 @@ export default function Reports() {
               label="Time Period"
               items={PERIOD_ITEMS}
               selectedKey={period}
-              onSelectionChange={key => setPeriod(key ? String(key) : '')}
+              onSelectionChange={key => setPeriod(key ? String(key) : 'month')}
             />
           </div>
           <div style={{ minWidth: '220px' }}>
             <Select
               label="Project"
               items={projectItems}
-              selectedKey={filterProjectId || ''}
-              onSelectionChange={key => setFilterProjectId(key ? String(key) : '')}
+            selectedKey={filterProjectId || '__all__'}
+            onSelectionChange={key => setFilterProjectId(key && key !== '__all__' ? String(key) : '')}
             />
           </div>
           {period === 'custom' && (
