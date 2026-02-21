@@ -83,6 +83,23 @@ namespace DSC.Api.DTOs
         public decimal? RemainingHours { get; set; }
     }
 
+    public class WorkItemUpdateRequest
+    {
+        public string? Title { get; set; }
+        public string? Description { get; set; }
+        public DateTime? Date { get; set; }
+        public DateTime? StartTime { get; set; }
+        public DateTime? EndTime { get; set; }
+        public int? PlannedDuration { get; set; }
+        public int? ActualDuration { get; set; }
+        public string? ActivityCode { get; set; }
+        public int? NetworkNumber { get; set; }
+        public string? DirectorCode { get; set; }
+        public string? ReasonCode { get; set; }
+        public string? CpcCode { get; set; }
+        public decimal? EstimatedHours { get; set; }
+    }
+
     /// <summary>
     /// Data transfer object for project remaining hours calculation.
     /// Represents cumulative remaining hours for a user on a specific project,

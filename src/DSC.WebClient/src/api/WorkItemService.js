@@ -25,6 +25,14 @@ export async function createWorkItem(item) {
   return res.data;
 }
 
+export async function updateWorkItem(id, payload) {
+  await axios.put(`${API_URL}/${id}`, payload, getAuthConfig());
+}
+
+export async function deleteWorkItem(id) {
+  await axios.delete(`${API_URL}/${id}`, getAuthConfig());
+}
+
 // Convenience helper to create a work item including legacy Java fields.
 export async function createWorkItemWithLegacy({
   title,

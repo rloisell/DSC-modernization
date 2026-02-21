@@ -12,7 +12,7 @@ import {
   TextField
 } from '@bcgov/design-system-react-components';
 import { useAuth } from '../contexts/AuthContext';
-import { getWorkItems, createWorkItemWithLegacy, getDetailedWorkItems } from '../api/WorkItemService';
+import { getWorkItems, createWorkItemWithLegacy, getDetailedWorkItems, updateWorkItem, deleteWorkItem } from '../api/WorkItemService';
 import { getProjects } from '../api/ProjectService';
 import { getActivityCodes, getNetworkNumbers, getBudgets, getProjectOptions } from '../api/CatalogService';
 import { getUserFromStorage } from '../api/AuthConfig';
@@ -47,6 +47,10 @@ export default function Activity() {
   const [creating, setCreating] = useState(false);
   const [selectedProjectData, setSelectedProjectData] = useState(null);
   const [projectSummaries, setProjectSummaries] = useState({});
+  const [editingItem, setEditingItem] = useState(null);
+  const [editForm, setEditForm] = useState({});
+  const [saving, setSaving] = useState(false);
+  const [successMsg, setSuccessMsg] = useState('');
 
   const timePeriodItems = [
     { id: 'day', label: 'Today' },
@@ -278,10 +282,84 @@ export default function Activity() {
     }
   }, [projectId, activityMode, projects]);
 
+  function handleEditClick(item) {
+    setEditingItem(item);
+    setEditForm({
+      title: item.title || '',
+      description: item.description || '',
+      date: item.date ? new Date(item.date).toISOString().split('T')[0] : '',
+      startTime: item.startTime ? new Date(item.startTime).toTimeString().slice(0,5) : '',
+      endTime: item.endTime ? new Date(item.endTime).toTimeString().slice(0,5) : '',
+      plannedDuration: item.plannedDuration ? String(item.plannedDuration) : '',
+      actualDuration: item.actualDuration != null ? String(item.actualDuration) : '',
+      activityCode: item.activityCode || '',
+      networkNumber: item.networkNumber != null ? String(item.networkNumber) : '',
+      estimatedHours: item.estimatedHours != null ? String(item.estimatedHours) : '',
+    });
+    setTimeout(() => document.getElementById('edit-work-item-form')?.scrollIntoView({ behavior: 'smooth' }), 100);
+  }
+
+  function handleEditCancel() {
+    setEditingItem(null);
+    setEditForm({});
+  }
+
+  async function handleEditSave(e) {
+    e.preventDefault();
+    setSaving(true);
+    setError(null);
+    try {
+      await updateWorkItem(editingItem.id, {
+        title: editForm.title || undefined,
+        description: editForm.description || undefined,
+        date: editForm.date || undefined,
+        startTime: editForm.startTime || undefined,
+        endTime: editForm.endTime || undefined,
+        plannedDuration: editForm.plannedDuration ? Number(editForm.plannedDuration) : undefined,
+        actualDuration: editForm.actualDuration ? Number(editForm.actualDuration) : undefined,
+        activityCode: editForm.activityCode || undefined,
+        networkNumber: editForm.networkNumber ? Number(editForm.networkNumber) : undefined,
+        estimatedHours: editForm.estimatedHours ? Number(editForm.estimatedHours) : undefined,
+      });
+      setEditingItem(null);
+      setEditForm({});
+      setSuccessMsg('Work item updated.');
+      const [updated, detailed] = await Promise.all([
+        getWorkItems(user?.Id),
+        getDetailedWorkItems(timePeriod, user?.Id)
+      ]);
+      setItems(updated);
+      setDetailedItems(detailed);
+    } catch (e) {
+      setError(getErrorMessage(e));
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function handleDeleteItem(item) {
+    if (!window.confirm(`Delete "${item.title}"? This cannot be undone.`)) return;
+    setError(null);
+    try {
+      await deleteWorkItem(item.id);
+      setSuccessMsg('Work item deleted.');
+      const [updated, detailed] = await Promise.all([
+        getWorkItems(user?.Id),
+        getDetailedWorkItems(timePeriod, user?.Id)
+      ]);
+      setItems(updated);
+      setDetailedItems(detailed);
+      if (editingItem?.id === item.id) handleEditCancel();
+    } catch (e) {
+      setError(getErrorMessage(e));
+    }
+  }
+
   async function handleCreate(e) {
     e.preventDefault();
     setCreating(true);
     setError(null);
+    setSuccessMsg('');
     try {
       const payload = {
         title,
@@ -330,6 +408,7 @@ export default function Activity() {
         <Text elementType="p">Track your work activities and view planned vs actual hours across projects.</Text>
         
         {error ? <InlineAlert variant="danger" title="Error" description={error} /> : null}
+      {successMsg ? <InlineAlert variant="success" title="Success" description={successMsg} /> : null}
 
         {/* Time Period Filter */}
         <div style={{ maxWidth: '300px' }}>
@@ -395,35 +474,57 @@ export default function Activity() {
                 <th>Budget</th>
                 <th>Title</th>
                 <th>Activity Code</th>
-                <th>Network</th>
                 <th>Date</th>
-                <th>Est. Hours</th>
                 <th>Actual Hours</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
-              {detailedItems.map(item => {
-                return (
-                  <tr key={item.id}>
-                    <td>
-                      <strong>
-                        {item.projectNo ? `${item.projectNo} — ${item.projectName}` : item.projectName}
-                      </strong>
-                    </td>
-                    <td>{item.budgetDescription || '—'}</td>
-                    <td>{item.title}</td>
-                    <td>{item.activityCode || '—'}</td>
-                    <td>{item.networkNumber || '—'}</td>
-                    <td>{item.date ? new Date(item.date).toLocaleDateString() : '—'}</td>
-                    <td>{item.estimatedHours != null ? `${item.estimatedHours} hrs` : '—'}</td>
-                    <td>{item.actualDuration != null ? `${item.actualDuration} hrs` : '—'}</td>
-                  </tr>
-                );
-              })}
+              {detailedItems.map(item => (
+                <tr key={item.id} style={{ backgroundColor: editingItem?.id === item.id ? '#f0f9ff' : undefined }}>
+                  <td><strong>{item.projectNo ? `${item.projectNo} — ${item.projectName}` : (item.projectName || '—')}</strong></td>
+                  <td>{item.budgetDescription || '—'}</td>
+                  <td>{item.title}</td>
+                  <td>{item.activityCode || '—'}</td>
+                  <td>{item.date ? new Date(item.date).toLocaleDateString() : '—'}</td>
+                  <td>{item.actualDuration != null ? `${item.actualDuration} hrs` : '—'}</td>
+                  <td style={{ whiteSpace: 'nowrap' }}>
+                    <ButtonGroup ariaLabel="Activity actions">
+                      <Button size="small" variant="secondary" onPress={() => handleEditClick(item)}>Edit</Button>
+                      <Button size="small" variant="tertiary" onPress={() => handleDeleteItem(item)}>Delete</Button>
+                    </ButtonGroup>
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
         )}
       </section>
+
+      {editingItem && (
+      <section className="section stack" id="edit-work-item-form">
+        <Heading level={2}>Edit Work Item</Heading>
+        <Text elementType="p">Editing: <strong>{editingItem.title}</strong></Text>
+        <Form onSubmit={handleEditSave} className="form-grid">
+          <TextField label="Title" value={editForm.title} onChange={v => setEditForm(f => ({...f, title: v}))} isRequired />
+          <div className="form-columns">
+            <TextField label="Date" type="date" value={editForm.date} onChange={v => setEditForm(f => ({...f, date: v}))} />
+            <TextField label="Start Time" type="time" value={editForm.startTime} onChange={v => setEditForm(f => ({...f, startTime: v}))} />
+            <TextField label="End Time" type="time" value={editForm.endTime} onChange={v => setEditForm(f => ({...f, endTime: v}))} />
+          </div>
+          <div className="form-columns">
+            <NumberField label="Planned Duration (hours)" value={editForm.plannedDuration ? Number(editForm.plannedDuration) : undefined} onChange={v => setEditForm(f => ({...f, plannedDuration: v == null ? '' : String(v)}))} />
+            <NumberField label="Actual Duration (hours)" value={editForm.actualDuration ? Number(editForm.actualDuration) : undefined} onChange={v => setEditForm(f => ({...f, actualDuration: v == null ? '' : String(v)}))} />
+          </div>
+          <TextArea label="Description" value={editForm.description} onChange={v => setEditForm(f => ({...f, description: v}))} />
+          <ButtonGroup alignment="start" ariaLabel="Edit work item actions">
+            <Button type="submit" variant="primary" isDisabled={saving}>Save Changes</Button>
+            <Button type="button" variant="tertiary" onPress={handleEditCancel}>Cancel</Button>
+            <Button type="button" variant="tertiary" onPress={() => handleDeleteItem(editingItem)}>Delete This Item</Button>
+          </ButtonGroup>
+        </Form>
+      </section>
+      )}
 
       <section className="section stack">
         <Heading level={2}>Add Work Item</Heading>

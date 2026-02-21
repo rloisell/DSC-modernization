@@ -296,6 +296,71 @@ namespace DSC.Api.Controllers
             return CreatedAtAction(nameof(Get), new { id = workItem.Id }, responseDto);
         }
 
+        [HttpPut("{id}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        public async Task<IActionResult> Update(Guid id, [FromBody] WorkItemUpdateRequest request)
+        {
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+            var item = await _db.WorkItems.FirstOrDefaultAsync(w => w.Id == id);
+            if (item == null) return NotFound();
+
+            // Users can only update their own items (admins/managers may update any)
+            if (!string.IsNullOrEmpty(userId) && item.UserId != null && item.UserId != Guid.Parse(userId))
+            {
+                var requestingUser = await _db.Users.AsNoTracking()
+                    .Include(u => u.Role)
+                    .FirstOrDefaultAsync(u => u.Id == Guid.Parse(userId));
+                if (requestingUser?.Role?.Name != "Admin" && requestingUser?.Role?.Name != "Manager")
+                    return Forbid();
+            }
+
+            if (request.Title != null) item.Title = request.Title;
+            if (request.Description != null) item.Description = request.Description;
+            if (request.Date.HasValue) item.Date = request.Date;
+            if (request.StartTime.HasValue) item.StartTime = request.StartTime;
+            if (request.EndTime.HasValue) item.EndTime = request.EndTime;
+            if (request.PlannedDuration.HasValue) item.PlannedDuration = TimeSpan.FromHours(request.PlannedDuration.Value);
+            if (request.ActualDuration.HasValue) item.ActualDuration = request.ActualDuration;
+            if (request.ActivityCode != null) item.ActivityCode = request.ActivityCode;
+            if (request.NetworkNumber.HasValue) item.NetworkNumber = request.NetworkNumber.ToString();
+            if (request.DirectorCode != null) item.DirectorCode = request.DirectorCode;
+            if (request.ReasonCode != null) item.ReasonCode = request.ReasonCode;
+            if (request.CpcCode != null) item.CpcCode = request.CpcCode;
+            if (request.EstimatedHours.HasValue) item.EstimatedHours = request.EstimatedHours;
+
+            await _db.SaveChangesAsync();
+            return NoContent();
+        }
+
+        [HttpDelete("{id}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        public async Task<IActionResult> Delete(Guid id)
+        {
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+            var item = await _db.WorkItems.FirstOrDefaultAsync(w => w.Id == id);
+            if (item == null) return NotFound();
+
+            // Users can only delete their own items
+            if (!string.IsNullOrEmpty(userId) && item.UserId != null && item.UserId != Guid.Parse(userId))
+            {
+                var requestingUser = await _db.Users.AsNoTracking()
+                    .Include(u => u.Role)
+                    .FirstOrDefaultAsync(u => u.Id == Guid.Parse(userId));
+                if (requestingUser?.Role?.Name != "Admin" && requestingUser?.Role?.Name != "Manager")
+                    return Forbid();
+            }
+
+            _db.WorkItems.Remove(item);
+            await _db.SaveChangesAsync();
+            return NoContent();
+        }
+
         /// <summary>
         /// Get cumulative remaining hours for the current user on a specific project.
         /// This accounts for ALL work items the user has on the project.
