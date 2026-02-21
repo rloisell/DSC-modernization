@@ -243,10 +243,8 @@ export default function AdminUsers() {
 
   return (
     <div className="page">
-      <section className="section stack">
-        <Heading level={1}>Admin Users</Heading>
-        <Text elementType="p">Legacy servlet: AdminUsers. This page will manage user accounts, roles, and assignments.</Text>
-
+      <section className="section stack" style={{ paddingBottom: '0.25rem' }}>
+        <Heading level={2}>Admin Users</Heading>
       </section>
       <SubTabs
         tabs={[

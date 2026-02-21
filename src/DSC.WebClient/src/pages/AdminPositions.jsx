@@ -111,10 +111,8 @@ export default function AdminPositions() {
 
   return (
     <div className="page">
-      <section className="section stack">
-        <Heading level={1}>Admin Positions</Heading>
-        <Text elementType="p">Legacy servlet: AdminPositions. This page will manage position records.</Text>
-
+      <section className="section stack" style={{ paddingBottom: '0.25rem' }}>
+        <Heading level={2}>Admin Positions</Heading>
       </section>
       <SubTabs
         tabs={[

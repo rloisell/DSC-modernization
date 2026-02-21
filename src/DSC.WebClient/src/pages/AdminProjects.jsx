@@ -192,10 +192,8 @@ export default function AdminProjects() {
 
   return (
     <div className="page">
-      <section className="section stack">
-        <Heading level={1}>Admin Projects</Heading>
-        <Text elementType="p">Legacy servlet: AdminProjects. This page will manage project metadata and assignments.</Text>
-
+      <section className="section stack" style={{ paddingBottom: '0.25rem' }}>
+        <Heading level={2}>Admin Projects</Heading>
       </section>
       <SubTabs
         tabs={[

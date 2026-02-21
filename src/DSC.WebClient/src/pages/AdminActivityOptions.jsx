@@ -181,12 +181,8 @@ export default function AdminActivityOptions() {
 
   return (
     <div className="page">
-      <section className="section stack">
-        <Heading level={1}>Admin Activity Options</Heading>
-        <Text elementType="p">
-          Legacy servlet: AdminActivityOptions. This page will manage activity codes and network numbers.
-        </Text>
-
+      <section className="section stack" style={{ paddingBottom: '0.25rem' }}>
+        <Heading level={2}>Admin Activity Options</Heading>
       </section>
       <SubTabs
         tabs={[

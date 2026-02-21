@@ -286,10 +286,8 @@ export default function AdminExpense() {
 
   return (
     <div className="page">
-      <section className="section stack">
-        <Heading level={1}>Admin Expense</Heading>
-        <Text elementType="p">Legacy servlet: AdminExpense. This page will manage budgets (CAPEX/OPEX) and expense categories.</Text>
-
+      <section className="section stack" style={{ paddingBottom: '0.25rem' }}>
+        <Heading level={2}>Admin Expense</Heading>
       </section>
       <SubTabs
         tabs={[

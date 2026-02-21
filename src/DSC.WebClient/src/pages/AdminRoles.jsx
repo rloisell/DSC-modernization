@@ -107,10 +107,8 @@ export default function AdminRoles() {
 
   return (
     <div className="page">
-      <section className="section stack">
-        <Heading level={1}>Admin Roles</Heading>
-        <Text elementType="p">Manage system roles for user assignments.</Text>
-
+      <section className="section stack" style={{ paddingBottom: '0.25rem' }}>
+        <Heading level={2}>Admin Roles</Heading>
       </section>
       <SubTabs
         tabs={[

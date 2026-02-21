@@ -151,10 +151,8 @@ export default function AdminDepartments() {
 
   return (
     <div className="page">
-      <section className="section stack">
-        <Heading level={1}>Admin Departments</Heading>
-        <Text elementType="p">Legacy servlet: AdminDepartments. This page will manage department records.</Text>
-
+      <section className="section stack" style={{ paddingBottom: '0.25rem' }}>
+        <Heading level={2}>Admin Departments</Heading>
       </section>
       <SubTabs
         tabs={[
