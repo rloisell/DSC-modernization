@@ -8,6 +8,7 @@ import AdminProjects from './AdminProjects';
 import AdminExpense from './AdminExpense';
 import AdminActivityOptions from './AdminActivityOptions';
 import AdminProjectAssignments from './AdminProjectAssignments';
+import AdminReferenceData from './AdminReferenceData';
 
 const TABS = [
   { id: 'users',            label: 'Users' },
@@ -18,6 +19,7 @@ const TABS = [
   { id: 'assignments',      label: 'Assignments' },
   { id: 'expense',          label: 'Expense' },
   { id: 'activity-options', label: 'Activity Options' },
+  { id: 'reference-data',   label: 'Reference Data' },
 ];
 
 const TAB_COMPONENTS = {
@@ -29,6 +31,7 @@ const TAB_COMPONENTS = {
   'assignments':      AdminProjectAssignments,
   'expense':          AdminExpense,
   'activity-options': AdminActivityOptions,
+  'reference-data':   AdminReferenceData,
 };
 
 export default function Administrator() {
