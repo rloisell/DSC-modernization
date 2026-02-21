@@ -1,4 +1,92 @@
+## Session: Modernization Backlog Sprint (P1–P9 — all priorities shipped)
+
+**Objective**: Deliver all 9 outstanding backlog priorities from `AI/nextSteps.md` in a single session.
+
+---
+
+### P1 — User: Edit & Delete Own Work Items (`d46f97f`)
+- Added `WorkItemUpdateRequest` DTO to `WorkItemDto.cs`
+- Added `PUT /api/items/{id}` and `DELETE /api/items/{id}` to `ItemsController.cs`
+  - Both endpoints scope to the authenticated user; Admin/Manager/Director bypass for corrections
+- Added `updateWorkItem(id, payload)` and `deleteWorkItem(id)` to `WorkItemService.js`
+- Updated `Activity.jsx`: Actions column, inline edit form with scroll-into-view, success message, delete handler
+
+---
+
+### P2 — Admin: Project Assignments UI (`eed1def`)
+- Created `ProjectAssignmentAdminService.js` wrapping all 5 assignment endpoints
+- Created `AdminProjectAssignments.jsx`: project-filter list, Add form (project/user/role/hours), conditional Edit subtab, Remove button
+- Updated `Administrator.jsx`: added "Assignments" tab
+
+---
+
+### P3 — Reporting Dashboard (`2862998`)
+- Created `ReportsController.cs` (`GET /api/reports/summary?from=&to=&projectId=&userId=`)
+  - Privileged roles (Admin/Manager/Director) see all data + user summaries; others see own data only
+  - Returns: total hours, total items, project summaries (with `isOverBudget`), activity code summaries, user summaries
+- Created `ReportService.js` with `getReportSummary()` and `exportToCSV()`
+- Created `Reports.jsx` with period selector (Month/Quarter/Year/Custom/All), project filter, four summary sections, CSV export
+- Updated `App.jsx`: added `Reports` lazy import, `/reports` `ProtectedRoute`, and "Reports" `NavButton` (visible to all authenticated users)
+
+---
+
+### P4 — User Deactivation UX Polish (`1789957`)
+- `AdminUsers.jsx`: `window.confirm()` dialog before deactivation (with user display name)
+- `AdminUsers.jsx`: Active/Inactive/All filter dropdown (default: Active) above Current Users table
+- Note: UserAuth sync not needed — `AuthController.Login` already blocks login when `User.IsActive = false`; `UserAuth` has no status field
+
+---
+
+### P5 — Catalog Reference Data Admin (`876d9b0`)
+- Created `AdminReferenceData.jsx`: single config-driven page covering 9 reference data types
+  - Activity Codes, Network Numbers, Budgets, Director Codes, CPC Codes, Reason Codes, Unions, Activity Categories, Calendar Categories
+  - Type selector dropdown + list/add/edit pattern; handles Guid/string/int primary keys; optional `isActive` status
+- Updated `Administrator.jsx`: added "Reference Data" tab
+
+---
+
+### P6 — User-facing Self-Service Reporting
+- No additional work needed: `Reports.jsx` (P3) already scopes non-privileged users to own data via `isPrivilegedView` flag
+
+---
+
+### P7 — Unit / Integration Tests (`108c5bb`)
+- Created `tests/DSC.Tests/ModernizationFeatureTests.cs` — 16 new tests (36 total, all passing)
+  - Auth: inactive user blocked, active user login OK, wrong password blocked
+  - Model: `User.IsActive` defaults to true, deactivation persists
+  - Work items: `UserId` filter correctness, ownership exclusion, delete removes record
+  - Reports: total hours aggregation, project-scoped aggregation, overbudget flag calculation
+  - Catalog: `ActivityCode` CRUD, `Budget` deactivation
+
+---
+
+### P8 — Security Hardening Scaffold (`392a6b1`)
+- `Program.cs`: Added CORS policy (`DevCors` = localhost:5173/5175; `ProdCors` = `AllowedOrigins` config)
+- `Program.cs`: Added security response headers middleware (all responses):
+  - `X-Content-Type-Options: nosniff`
+  - `X-Frame-Options: DENY`
+  - `X-XSS-Protection: 1; mode=block`
+  - `Referrer-Policy: strict-origin-when-cross-origin`
+  - `Permissions-Policy: camera=(), microphone=(), geolocation=()`
+  - `Content-Security-Policy: default-src 'none'; frame-ancestors 'none'`
+- `AI/securityNextSteps.md`: Updated with completion status table, OIDC/Keycloak migration path, remaining high-priority items (password hashing, HTTPS in prod)
+
+---
+
+### P9 — Documentation (this entry)
+- `AI/WORKLOG.md`: this session log
+- `AI/nextSteps.md`: backlog marked complete, future work section added
+- API service restarted after each backend commit: `launchctl kickstart -k gui/501/com.dsc.api`
+
+### Build / Test Summary
+- Backend builds: 0 errors, 6 pre-existing nullable warnings
+- Tests: 36 passing, 0 failing, 0 skipped
+- Commits: d46f97f · eed1def · 2862998 · 1789957 · 876d9b0 · 108c5bb · 392a6b1 · (P9 commit)
+
+---
+
 ## 2026-02-20 — Session 5 (Part 2): Admin Sub-Tabs & Remaining Hours Auth Fix (COMPLETED ✓)
+
 
 **Objective**: Add sub-section tabs within each admin page; fix "Project Estimated Hours / Current Cumulative Remaining" fields showing no data.
 
