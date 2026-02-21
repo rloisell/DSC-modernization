@@ -1,3 +1,43 @@
+## Architecture Recommendations 1–5 — Structural Refactor (`78a7041`)
+
+**Objective**: Implement the first 5 architecture recommendations from `AI/nextSteps.md` to improve correctness, testability, and observability before production deployment.
+
+### Rec 1 — EF Core Migrations (HIGH)
+- `Program.cs`: replaced `db.Database.EnsureCreated()` with `db.Database.Migrate()`
+- Startup now applies pending migrations incrementally; no data loss risk on schema changes
+
+### Rec 2 — Service Layer (HIGH)
+- Created `src/DSC.Api/Services/`: `IWorkItemService` + `WorkItemService`, `IReportService` + `ReportService`, `IProjectService` + `ProjectService`, `IAuthService` + `AuthService`
+- Created `src/DSC.Api/Infrastructure/DomainExceptions.cs`: `NotFoundException` (404), `ForbiddenException` (403), `BadRequestException` (400), `UnauthorizedException` (401)
+- Created `src/DSC.Api/DTOs/ReportDtos.cs` and `DTOs/AuthDtos.cs` (moved from inline controller definitions)
+- All 4 controllers reduced to thin HTTP delegates (~20–55 lines each, zero business logic)
+- `DSC.Api.csproj` updated: added `<Compile Include="Infrastructure/*.cs" />` and `<Compile Include="Services/*.cs" />`
+- Tests updated: `ActivityPageTests` constructs `new ItemsController(new WorkItemService(context))`; `ModernizationFeatureTests` tests `AuthService` directly
+- **36/36 tests passing**
+
+### Rec 3 — Global Exception Handler / ProblemDetails (HIGH)
+- Created `src/DSC.Api/Infrastructure/GlobalExceptionHandler.cs`: `IExceptionHandler` implementation maps domain exceptions to RFC 7807 `ProblemDetails` responses
+- `Program.cs`: `AddExceptionHandler<GlobalExceptionHandler>()`, `AddProblemDetails()`, `app.UseExceptionHandler()` added before routing
+
+### Rec 4 — TanStack Query v5 (MEDIUM)
+- `npm install @tanstack/react-query@5.90.21`
+- `src/DSC.WebClient/src/main.jsx`: wrapped app in `QueryClientProvider` (`retry: 1`, `refetchOnWindowFocus: false`)
+- Created `src/hooks/useProjects.js`, `useWorkItems.js`, `useReport.js`
+- `Reports.jsx`: removed `loadReport` + two `useEffect`s + manual state — replaced with `useReport()` + `useProjects()` hooks
+- `Project.jsx`: replaced `useEffect` project loader with `useProjects()` hook
+- **Frontend Vite build: 0 errors**
+
+### Rec 5 — Health Check Endpoints (MEDIUM)
+- Created `src/DSC.Api/Infrastructure/DatabaseHealthCheck.cs`: `IHealthCheck` using EF Core `db.Database.CanConnectAsync()` (no extra NuGet packages)
+- `Program.cs`: `.AddHealthChecks().AddCheck<DatabaseHealthCheck>("database")`, `app.MapHealthChecks("/health/live")`, `app.MapHealthChecks("/health/ready")`
+
+### Build / Test Summary
+- Backend: `dotnet build` — 0 errors, 6 pre-existing nullable warnings
+- Tests: `dotnet test` — 36 passing, 0 failing
+- Frontend: `npm run build` — clean build in ~1s
+
+---
+
 ## 2026-02-20 — Bug Fix: Reports 400 Error on Project Filter Clear (`9522624`)
 
 **Objective**: Fix a 400 error thrown when resetting the Project filter on the Reports page back to "All Projects".

@@ -55,7 +55,7 @@ These are structural improvements that should be addressed before or during prod
 
 ---
 
-### 1. Replace `EnsureCreated()` with EF Core Migrations ⚠️ HIGH
+### ✅ 1. Replace `EnsureCreated()` with EF Core Migrations ⚠️ HIGH — DONE (`78a7041`)
 
 **Current state**: `Program.cs` calls `db.Database.EnsureCreated()` at startup, which creates tables from the model but never applies incremental changes.  
 **Risk**: Any schema change (new column, renamed FK) will silently not apply to an existing database. Data loss / runtime crashes in production.  
@@ -68,7 +68,7 @@ Remove `EnsureCreated()` and replace with `db.Database.Migrate()` on startup.
 
 ---
 
-### 2. Introduce a Service Layer between Controllers and DbContext ⚠️ HIGH
+### ✅ 2. Introduce a Service Layer between Controllers and DbContext ⚠️ HIGH — DONE (`78a7041`)
 
 **Current state**: Controllers (`ReportsController`, `ItemsController`, etc.) query `ApplicationDbContext` directly — business logic, LINQ queries, and authorization checks are all mixed into controller actions.  
 **Risk**: Difficult to test (requires full HTTP/EF stack), violates single-responsibility, and makes future OAuth/Keycloak migration harder (auth logic is tangled with query logic).  
@@ -76,7 +76,7 @@ Remove `EnsureCreated()` and replace with `db.Database.Migrate()` on startup.
 
 ---
 
-### 3. Add a Global Exception Handler / ProblemDetails Middleware ⚠️ HIGH
+### ✅ 3. Add a Global Exception Handler / ProblemDetails Middleware ⚠️ HIGH — DONE (`78a7041`)
 
 **Current state**: No `app.UseExceptionHandler()` or `IProblemDetailsService`. Unhandled exceptions return ASP.NET's default 500 HTML or JSON depending on environment.  
 **Fix** (one line in `Program.cs`):
@@ -89,7 +89,7 @@ Also configure `AddProblemDetails()` in services for a consistent RFC 7807 error
 
 ---
 
-### 4. Frontend: Replace raw `useState`/`useEffect` Data Fetching with TanStack Query ⚡ MEDIUM
+### ✅ 4. Frontend: Replace raw `useState`/`useEffect` Data Fetching with TanStack Query ⚡ MEDIUM — DONE (`78a7041`)
 
 **Current state**: Every page component manually manages `loading`, `error`, and `data` state, calls the API in `useEffect`, and handles re-fetch manually. There is no caching, deduplication, or background revalidation.  
 **Recommended library**: `@tanstack/react-query` v5 (TanStack Query).  
@@ -103,7 +103,7 @@ Also configure `AddProblemDetails()` in services for a consistent RFC 7807 error
 
 ---
 
-### 5. Add Health Check Endpoints ⚡ MEDIUM
+### ✅ 5. Add Health Check Endpoints ⚡ MEDIUM — DONE (`78a7041`)
 
 Required for OpenShift liveness/readiness probes and container orchestration.  
 ```csharp
