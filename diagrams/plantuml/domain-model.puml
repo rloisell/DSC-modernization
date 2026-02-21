@@ -1,0 +1,256 @@
+@startuml DSC Domain Model
+!theme plain
+skinparam linetype ortho
+skinparam class {
+    BackgroundColor<<Legacy>>  LightYellow
+    BackgroundColor<<Core>>    LightBlue
+    BackgroundColor<<Catalog>> LightGreen
+    BackgroundColor<<Auth>>    LightPink
+}
+
+package "Core Domain" {
+    class User <<Core>> {
+        + Id : Guid
+        + EmpId : int?              <<legacy bridge>>
+        + Username : string
+        + Email : string
+        + FirstName : string?
+        + LastName : string?
+        + PasswordHash : string?
+        + IsActive : bool
+        + PositionId : Guid? {FK}
+        + DepartmentId : Guid? {FK}
+        + RoleId : Guid? {FK}
+        --
+        + TimeEntries : ICollection<TimeEntry>
+        + ProjectAssignments : ICollection<ProjectAssignment>
+        + Position : Position?
+        + Department : Department?
+        + Role : Role?
+    }
+
+    class UserAuth <<Legacy>> {
+        + UserName : string {PK}
+        + Password : string
+        + EmpId : int?
+        --
+        + User : User?
+    }
+
+    class ExternalIdentity <<Core>> {
+        + Id : Guid
+        + UserId : Guid {FK}
+        + Provider : string
+        + Subject : string
+        --
+        + User : User
+    }
+
+    class Project <<Core>> {
+        + Id : Guid
+        + ProjectNo : string?   <<legacy>>
+        + Name : string
+        + Description : string?
+        + IsActive : bool
+        + EstimatedHours : decimal?
+        --
+        + WorkItems : ICollection<WorkItem>
+        + Assignments : ICollection<ProjectAssignment>
+        + ActivityOptions : ICollection<ProjectActivityOption>
+    }
+
+    class WorkItem <<Core>> {
+        + Id : Guid
+        + UserId : Guid {FK}
+        + ProjectId : Guid {FK}
+        + Title : string
+        + Description : string?
+        + Date : DateOnly?
+        + StartTime : TimeSpan?       <<legacy>>
+        + EndTime : TimeSpan?         <<legacy>>
+        + PlannedDuration : decimal?  <<legacy>>
+        + ActualDuration : decimal?   <<legacy>>
+        + LegacyActivityId : int?     <<legacy>>
+        + ActivityCode : string?
+        + NetworkNumber : string?
+        + ExpenseCategoryId : Guid? {FK}
+        + ExpenseOptionId : Guid? {FK}
+        --
+        + Project : Project
+        + User : User
+        + TimeEntries : ICollection<TimeEntry>
+    }
+
+    class TimeEntry <<Core>> {
+        + Id : Guid
+        + WorkItemId : Guid {FK}
+        + UserId : Guid {FK}
+        + Hours : decimal
+        + EntryDate : DateTime
+        + Notes : string?
+        --
+        + WorkItem : WorkItem
+        + User : User
+    }
+
+    class ProjectAssignment <<Core>> {
+        + ProjectId : Guid {FK, PK}
+        + UserId : Guid {FK, PK}
+        + AssignedDate : DateTime
+        + Role : string?
+        --
+        + Project : Project
+        + User : User
+    }
+}
+
+package "Catalog Domain" {
+    class Position <<Catalog>> {
+        + Id : Guid
+        + Title : string
+        + Description : string?
+        + IsActive : bool
+    }
+
+    class Department <<Catalog>> {
+        + Id : Guid
+        + Name : string
+        + ManagerName : string?
+        + IsActive : bool
+    }
+
+    class Role <<Catalog>> {
+        + Id : Guid
+        + Name : string
+        + Description : string?
+        + IsActive : bool
+    }
+
+    class ExpenseCategory <<Catalog>> {
+        + Id : Guid
+        + Name : string
+        + Description : string?
+        + IsActive : bool
+        --
+        + Options : ICollection<ExpenseOption>
+    }
+
+    class ExpenseOption <<Catalog>> {
+        + Id : Guid
+        + ExpenseCategoryId : Guid {FK}
+        + Name : string
+        + IsActive : bool
+        --
+        + Category : ExpenseCategory
+    }
+
+    class ActivityCode <<Catalog>> {
+        + Id : Guid
+        + Code : string
+        + Description : string?
+        + IsActive : bool
+    }
+
+    class NetworkNumber <<Catalog>> {
+        + Id : Guid
+        + Number : string
+        + Description : string?
+        + IsActive : bool
+    }
+
+    class ProjectActivityOption <<Catalog>> {
+        + ProjectId : Guid {FK, PK}
+        + ActivityCodeId : Guid {FK, PK}
+        + NetworkNumberId : Guid {FK, PK}
+        --
+        + Project : Project
+        + ActivityCode : ActivityCode
+        + NetworkNumber : NetworkNumber
+    }
+
+    class Budget <<Catalog>> {
+        + Id : Guid
+        + Code : string
+        + Description : string?
+        + IsActive : bool
+    }
+
+    class CpcCode <<Catalog>> {
+        + Id : Guid
+        + Code : string
+        + Description : string?
+        + IsActive : bool
+    }
+
+    class DirectorCode <<Catalog>> {
+        + Id : Guid
+        + Code : string
+        + Name : string?
+        + IsActive : bool
+    }
+
+    class ReasonCode <<Catalog>> {
+        + Id : Guid
+        + Code : string
+        + Description : string?
+        + IsActive : bool
+    }
+
+    class Union <<Catalog>> {
+        + Id : Guid
+        + Name : string
+        + Description : string?
+        + IsActive : bool
+    }
+
+    class CalendarCategory <<Catalog>> {
+        + Id : Guid
+        + Name : string
+        + IsActive : bool
+    }
+}
+
+' ─── Relationships ─────────────────────────────────────────────────────────────
+User         "1"  --> "*"  TimeEntry          : records
+User         "1"  --> "*"  ProjectAssignment   : assigned to
+User         "1"  --> "*"  WorkItem            : logs
+User         "1"  <--> "0..1" UserAuth         : legacy auth bridge
+User         "1"  <-- "0..1" ExternalIdentity  : OIDC identity
+User         "*"  --> "0..1" Position          : holds
+User         "*"  --> "0..1" Department        : belongs to
+User         "*"  --> "0..1" Role              : has role
+
+Project      "1"  --> "*"  WorkItem            : contains
+Project      "1"  --> "*"  ProjectAssignment   : assigned users
+Project      "1"  --> "*"  ProjectActivityOption : options
+
+WorkItem     "1"  --> "*"  TimeEntry           : tracked by
+WorkItem     "*"  --> "1"  Project             : belongs to
+WorkItem     "*"  --> "0..1" ExpenseCategory   : categorised
+WorkItem     "*"  --> "0..1" ExpenseOption     : option
+
+ExpenseCategory "1" --> "*" ExpenseOption      : has options
+
+ProjectActivityOption "*" --> "1" Project
+ProjectActivityOption "*" --> "1" ActivityCode
+ProjectActivityOption "*" --> "1" NetworkNumber
+
+note right of UserAuth
+  Legacy table bridging old Java app
+  to new User model.
+  Will be deprecated after JWT/OIDC migration.
+end note
+
+note right of WorkItem
+  Legacy time fields (StartTime/EndTime) preserve
+  data fidelity during incremental migration
+  from the Java application.
+end note
+
+note top of "Catalog Domain"
+  All catalog entities managed via
+  Admin* controllers (CRUD).
+  Most support IsActive soft-delete.
+end note
+
+@enduml

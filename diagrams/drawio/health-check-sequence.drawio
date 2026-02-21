@@ -1,0 +1,160 @@
+<mxfile host="app.diagrams.net" modified="2026-02-20T00:00:00.000Z" agent="GitHub Copilot" version="24.5.2">
+  <diagram id="seq-health-check" name="Sequence - Health Check Dashboard">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1654" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- Title -->
+        <mxCell id="t1" value="Health Check Dashboard — Frontend to Database Flow" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontStyle=1;fontSize=16;" vertex="1" parent="1">
+          <mxGeometry x="100" y="10" width="700" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- ═══ PARTICIPANTS ═══ -->
+        <mxCell id="p1" value="User&#xa;(browser)" style="shape=mxgraph.sequence.actor2;html=1;whiteSpace=wrap;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="40" y="60" width="60" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="p2" value="Health.jsx&#xa;(React component)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="180" y="70" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="p3" value="useHealthCheck&#xa;(TanStack Query)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="370" y="70" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="p4" value="GET /health/details&#xa;(ASP.NET Core)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="560" y="70" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="p5" value="HealthCheckService&#xa;(.NET HealthChecks)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="750" y="70" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="p6" value="DatabaseHealthCheck&#xa;(custom IHealthCheck)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="940" y="70" width="130" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="p7" value="MariaDB" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=12;fillColor=#f5f5f5;strokeColor=#666666;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="1140" y="60" width="90" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- ═══ SECTION: INITIAL PAGE LOAD ═══ -->
+        <mxCell id="sec1" value="Navigate to /health (public route, no auth)" style="text;html=1;strokeColor=#6c8ebf;fillColor=#dae8fc;align=center;fontStyle=1;fontSize=11;rounded=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="140" width="300" height="25" as="geometry" />
+        </mxCell>
+
+        <mxCell id="m1" value="Navigate to /health" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;endFill=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint as="sourcePoint" x="70" y="185"/><mxPoint as="targetPoint" x="240" y="185"/></mxGeometry>
+        </mxCell>
+
+        <mxCell id="m2" value="Mount Health.jsx&#xa;(React.lazy import)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;endFill=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint as="sourcePoint" x="240" y="215"/><mxPoint as="targetPoint" x="430" y="215"/></mxGeometry>
+        </mxCell>
+
+        <mxCell id="n1" value="TanStack Query fires initial fetch&#xa;staleTime: 0, refetchInterval: 30 000ms" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fffacd;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="370" y="235" width="240" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- ═══ SECTION: HEALTH CHECK REQUEST ═══ -->
+        <mxCell id="sec2" value="Fetch Health Details (every 30 s)" style="text;html=1;strokeColor=#82b366;fillColor=#d5e8d4;align=center;fontStyle=1;fontSize=11;rounded=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="295" width="240" height="25" as="geometry" />
+        </mxCell>
+
+        <mxCell id="m3" value="GET /api/health/details" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;endFill=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint as="sourcePoint" x="430" y="340"/><mxPoint as="targetPoint" x="620" y="340"/></mxGeometry>
+        </mxCell>
+
+        <mxCell id="m4" value="RunAsync(CancellationToken)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;endFill=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint as="sourcePoint" x="620" y="370"/><mxPoint as="targetPoint" x="810" y="370"/></mxGeometry>
+        </mxCell>
+
+        <mxCell id="m5" value="CheckHealthAsync(ctx)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;endFill=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint as="sourcePoint" x="810" y="400"/><mxPoint as="targetPoint" x="1005" y="400"/></mxGeometry>
+        </mxCell>
+
+        <mxCell id="m6" value="IServiceScopeFactory.CreateScope()&#xa;→ ApplicationDbContext" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;endFill=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint as="sourcePoint" x="1005" y="430"/><mxPoint as="targetPoint" x="1185" y="430"/></mxGeometry>
+        </mxCell>
+
+        <mxCell id="m7" value="SELECT 1 (CanConnectAsync)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;endFill=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint as="sourcePoint" x="1185" y="455"/><mxPoint as="targetPoint" x="1185" y="455"/><Array as="points"><mxPoint x="1185" y="455"/><mxPoint x="1220" y="455"/></Array></mxGeometry>
+        </mxCell>
+
+        <!-- ALT: Healthy path -->
+        <mxCell id="sec3" value="ALT: Database reachable (Healthy)" style="text;html=1;strokeColor=#82b366;fillColor=#d5e8d4;align=center;fontStyle=1;fontSize=10;rounded=1;" vertex="1" parent="1">
+          <mxGeometry x="750" y="485" width="240" height="20" as="geometry" />
+        </mxCell>
+
+        <mxCell id="m8" value="true (connected)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;endFill=1;dashed=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint as="sourcePoint" x="1185" y="515"/><mxPoint as="targetPoint" x="1005" y="515"/></mxGeometry>
+        </mxCell>
+
+        <mxCell id="m9" value="HealthCheckResult.Healthy(&#xa;'Database is reachable')" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;endFill=1;dashed=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint as="sourcePoint" x="1005" y="545"/><mxPoint as="targetPoint" x="810" y="545"/></mxGeometry>
+        </mxCell>
+
+        <mxCell id="m10" value="HealthReport { Status: Healthy,&#xa;TotalDuration: Xms, Entries: [...] }" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;endFill=1;dashed=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint as="sourcePoint" x="810" y="575"/><mxPoint as="targetPoint" x="620" y="575"/></mxGeometry>
+        </mxCell>
+
+        <mxCell id="m11" value="200 OK&#xa;{ status: 'Healthy', totalDuration: 4.2, checks: [{ name: 'database', status: 'Healthy', durationMs: 3.1 }] }" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;endFill=1;dashed=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint as="sourcePoint" x="620" y="610"/><mxPoint as="targetPoint" x="430" y="610"/></mxGeometry>
+        </mxCell>
+
+        <!-- UI Render OK -->
+        <mxCell id="ui1" value="Render: Green 'Healthy' badge&#xa;Check table: database | Healthy | 3.1ms&#xa;Last checked: HH:MM:SS" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="180" y="635" width="240" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="m12" value="Render healthy status" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;endFill=1;dashed=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint as="sourcePoint" x="430" y="660"/><mxPoint as="targetPoint" x="240" y="660"/></mxGeometry>
+        </mxCell>
+        <mxCell id="m13" value="Displays dashboard" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;endFill=1;dashed=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint as="sourcePoint" x="240" y="680"/><mxPoint as="targetPoint" x="70" y="680"/></mxGeometry>
+        </mxCell>
+
+        <!-- ALT: Unhealthy path -->
+        <mxCell id="sec4" value="ALT: Database unreachable (Unhealthy)" style="text;html=1;strokeColor=#b85450;fillColor=#f8cecc;align=center;fontStyle=1;fontSize=10;rounded=1;" vertex="1" parent="1">
+          <mxGeometry x="750" y="715" width="250" height="20" as="geometry" />
+        </mxCell>
+
+        <mxCell id="m14" value="Exception / timeout" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;endFill=1;dashed=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint as="sourcePoint" x="1185" y="750"/><mxPoint as="targetPoint" x="1005" y="750"/></mxGeometry>
+        </mxCell>
+
+        <mxCell id="m15" value="HealthCheckResult.Unhealthy(ex.Message)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;endFill=1;dashed=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint as="sourcePoint" x="1005" y="780"/><mxPoint as="targetPoint" x="810" y="780"/></mxGeometry>
+        </mxCell>
+
+        <mxCell id="m16" value="503 Service Unavailable&#xa;{ status: 'Unhealthy', ... }" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;endFill=1;dashed=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint as="sourcePoint" x="620" y="810"/><mxPoint as="targetPoint" x="430" y="810"/></mxGeometry>
+        </mxCell>
+
+        <!-- UI Render unhealthy -->
+        <mxCell id="ui2" value="Render: Red 'Unhealthy' InlineAlert&#xa;Check table: database | Unhealthy | error msg&#xa;Action: Check connection / retry" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="180" y="830" width="260" height="55" as="geometry" />
+        </mxCell>
+
+        <mxCell id="m17" value="Render error state" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;endFill=1;dashed=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint as="sourcePoint" x="430" y="855"/><mxPoint as="targetPoint" x="240" y="855"/></mxGeometry>
+        </mxCell>
+
+        <!-- Auto-refresh note -->
+        <mxCell id="n2" value="Auto-refresh repeats every 30 000 ms via TanStack Query refetchInterval&#xa;User can also click Refresh button to trigger manual refetch" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff0c8;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="40" y="910" width="500" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- Legend -->
+        <mxCell id="leg" value="Legend" style="text;html=1;fontStyle=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="1100" y="680" width="80" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="leg1" value="Solid arrow = request" style="rounded=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="1090" y="710" width="150" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="leg2" value="Dashed arrow = response" style="rounded=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=10;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="1090" y="745" width="150" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="leg3" value="Green alt = happy path" style="rounded=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="1090" y="780" width="150" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="leg4" value="Red alt = error path" style="rounded=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="1090" y="815" width="150" height="25" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

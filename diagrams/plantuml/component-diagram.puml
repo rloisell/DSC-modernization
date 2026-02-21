@@ -1,0 +1,203 @@
+@startuml DSC Component Diagram
+!theme plain
+
+package "Frontend (React SPA — Vite 5)" {
+    package "Pages" {
+        [Home]
+        [Login]
+        [Activity]
+        [Project]
+        [Reports]
+        [Administrator]
+        [AdminUsers]
+        [AdminRoles]
+        [AdminPositions]
+        [AdminDepartments]
+        [AdminProjects]
+        [AdminProjectAssignments]
+        [AdminExpense]
+        [AdminActivityOptions]
+        [AdminReferenceData]
+        [Health]
+    }
+
+    package "TanStack Query Hooks" <<NEW>> {
+        [useProjects]
+        [useWorkItems]
+        [useReport]
+        [useHealthCheck]
+    }
+
+    package "API Services (Axios)" {
+        [ProjectService.js]
+        [WorkItemService.js]
+        [AdminUserService.js]
+        [AdminCatalogService.js]
+        [AuthService.js]
+    }
+
+    package "Contexts" {
+        [AuthContext]
+    }
+
+    package "Components" {
+        [ProtectedRoute]
+        [AdminRoute]
+    }
+
+    package "UI Framework" {
+        [B.C. Design System]
+        [Header / Footer]
+        [Button / TextField / Select]
+        [InlineAlert / TableBody]
+    }
+
+    [Pages] ..> [TanStack Query Hooks] : data fetching
+    [Pages] ..> [API Services (Axios)] : mutations / legacy
+    [Pages] ..> [UI Framework] : renders
+    [Pages] ..> [Contexts] : reads auth state
+    [Pages] ..> [Components] : route guards
+    [TanStack Query Hooks] ..> [API Services (Axios)] : wraps
+}
+
+package "Backend API (.NET 10)" {
+
+    package "Public Controllers" {
+        [AuthController]
+        [CatalogController]
+    }
+
+    package "User Controllers (Authenticated)" {
+        [ProjectsController]
+        [ItemsController]
+        [ReportsController]
+    }
+
+    package "Admin Controllers" {
+        [AdminUsersController]
+        [AdminProjectsController]
+        [AdminDepartmentsController]
+        [AdminPositionsController]
+        [AdminRolesController]
+        [AdminExpenseCategoriesController]
+        [AdminExpenseOptionsController]
+        [AdminActivityCodesController]
+        [AdminNetworkNumbersController]
+        [AdminBudgetsController]
+        [AdminCpcCodesController]
+        [AdminCalendarCategoriesController]
+        [AdminDirectorCodesController]
+        [AdminReasonCodesController]
+        [AdminUnionsController]
+        [AdminProjectAssignmentsController]
+        [AdminSeedController]
+    }
+
+    package "Service Layer" <<NEW>> {
+        [IWorkItemService]
+        [IReportService]
+        [IProjectService]
+        [IAuthService]
+        [WorkItemService]
+        [ReportService]
+        [ProjectService]
+        [AuthService]
+
+        [IWorkItemService] <|.. [WorkItemService]
+        [IReportService]   <|.. [ReportService]
+        [IProjectService]  <|.. [ProjectService]
+        [IAuthService]     <|.. [AuthService]
+    }
+
+    package "Infrastructure" <<NEW>> {
+        [GlobalExceptionHandler] <<IExceptionHandler>>
+        [DatabaseHealthCheck] <<IHealthCheck>>
+        [DomainExceptions]
+    }
+
+    package "Security" {
+        [UserIdAuthenticationHandler]
+        [AdminTokenAuthenticationHandler]
+        [AuthorizationPolicies]
+        [RateLimitingPolicy]
+    }
+
+    package "DTOs" {
+        [WorkItemDto]
+        [ProjectDto]
+        [ReportDtos]
+        [AuthDtos]
+        [AdminUserDto]
+        [AdminCatalogDtos]
+    }
+
+    package "Seeding" {
+        [TestDataSeeder]
+    }
+
+    [ItemsController]    ..> [IWorkItemService] : delegates
+    [ProjectsController] ..> [IProjectService]  : delegates
+    [ReportsController]  ..> [IReportService]   : delegates
+    [AuthController]     ..> [IAuthService]     : delegates
+
+    [User Controllers (Authenticated)] ..> [Security] : Auth + RateLimit
+    [Admin Controllers]                ..> [Security] : AdminToken required
+    [AdminSeedController]              ..> [TestDataSeeder] : uses
+    [GlobalExceptionHandler]           ..> [DomainExceptions] : handles
+    [WorkItemService]                  ..> [DomainExceptions] : throws
+}
+
+package "Data Layer (EF Core 9)" {
+    package "Entities" {
+        [User]
+        [UserAuth]
+        [Project]
+        [WorkItem]
+        [TimeEntry]
+        [ProjectAssignment]
+        [Position]
+        [Department]
+        [Role]
+        [ExpenseCategory / Option]
+        [ActivityCode]
+        [NetworkNumber]
+        [ProjectActivityOption]
+    }
+
+    [Migrations] <<16 applied via Migrate()>>
+}
+
+database "MariaDB 10.11" {
+    [dsc_dev]
+}
+
+' Frontend → Backend
+[ProjectService.js] -down-> [ProjectsController]     : GET /api/projects
+[WorkItemService.js] -down-> [ItemsController]        : GET/POST/PUT/DELETE /api/items
+[AuthService.js]    -down-> [AuthController]          : POST /api/auth/login
+[AdminUserService.js] -down-> [AdminUsersController]  : HTTP CRUD
+[AdminCatalogService.js] -down-> [Admin Controllers]  : HTTP CRUD
+[useHealthCheck]    -down-> [DatabaseHealthCheck]     : GET /health/details
+
+' Backend → Data
+[WorkItemService]   -down-> [Migrations] : via ApplicationDbContext
+[ReportService]     -down-> [Migrations] : via ApplicationDbContext
+[ProjectService]    -down-> [Migrations] : via ApplicationDbContext
+[AuthService]       -down-> [Migrations] : via ApplicationDbContext
+[Admin Controllers] -down-> [Migrations] : direct via ApplicationDbContext
+[Migrations]        -down-> [dsc_dev]    : Pomelo.MySQL
+
+note bottom of [B.C. Design System]
+  @bcgov/design-system-react-components
+  @bcgov/design-tokens
+  @bcgov/bc-sans
+end note
+
+note right of "Service Layer"
+  NEW: Introduced in modernisation sprint.
+  All business logic, ownership checks,
+  and domain rule enforcement moved here.
+  Controllers are thin HTTP delegates only.
+end note
+
+@enduml

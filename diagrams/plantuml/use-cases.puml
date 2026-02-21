@@ -1,0 +1,167 @@
+@startuml DSC Use Cases
+!theme plain
+left to right direction
+
+actor "End User" as User
+actor "Administrator" as Admin
+actor "OpenShift Probe" as Probe
+actor "System" as System
+
+rectangle "DSC Time & Expense Tracking System" {
+
+    package "Authentication" {
+        usecase "Login (Local Account)" as UC_LOGIN
+        usecase "Login (OIDC — Future)" as UC_OIDC
+        usecase "Logout" as UC_LOGOUT
+        usecase "View Session" as UC_SESSION
+    }
+
+    package "Time Tracking" {
+        usecase "View Own Work Items" as UC_VIEW_ITEMS
+        usecase "Create Work Item" as UC_CREATE_ITEM
+        usecase "Edit Own Work Item" as UC_EDIT_ITEM
+        usecase "Delete Own Work Item" as UC_DELETE_ITEM
+        usecase "Record Time Entry" as UC_TIME_ENTRY
+    }
+
+    package "Projects" {
+        usecase "View Assigned Projects" as UC_VIEW_PROJECTS
+        usecase "View Project Details" as UC_PROJECT_DETAIL
+        usecase "View Catalog Options" as UC_CATALOG
+    }
+
+    package "Reporting" {
+        usecase "View Report Dashboard" as UC_REPORT
+        usecase "Filter by Date Range" as UC_FILTER_DATE
+        usecase "Filter by Project" as UC_FILTER_PROJECT
+        usecase "View All Users Report" as UC_REPORT_ALL
+    }
+
+    package "System Health" {
+        usecase "View Health Dashboard" as UC_HEALTH_UI
+        usecase "Liveness Probe" as UC_HEALTH_LIVE
+        usecase "Readiness Probe" as UC_HEALTH_READY
+        usecase "Health Detail (JSON)" as UC_HEALTH_DETAIL
+    }
+
+    package "User Administration" {
+        usecase "List Users" as UC_LIST_USERS
+        usecase "Create User" as UC_CREATE_USER
+        usecase "Edit User" as UC_EDIT_USER
+        usecase "Deactivate User" as UC_DEACTIVATE_USER
+        usecase "Assign Position / Department / Role" as UC_ASSIGN_ORG
+    }
+
+    package "Catalog Administration" {
+        usecase "Manage Positions" as UC_POS
+        usecase "Manage Departments" as UC_DEPT
+        usecase "Manage Roles" as UC_ROLES
+        usecase "Manage Projects" as UC_ADMIN_PROJ
+        usecase "Manage Project Assignments" as UC_PROJ_ASSIGN
+        usecase "Manage Expense Categories & Options" as UC_EXPENSE
+        usecase "Manage Activity Codes" as UC_ACTIVITY
+        usecase "Manage Network Numbers" as UC_NETWORK
+        usecase "Manage Project Activity Options" as UC_PAO
+        usecase "Manage Reference Data (Budget / CPC / Director / Union / Reason / Calendar)" as UC_REF_DATA
+    }
+
+    package "Data Management" {
+        usecase "Seed Test Data" as UC_SEED
+        usecase "Import Legacy Data" as UC_IMPORT
+    }
+}
+
+' ─── User Relationships ────────────────────────────────────────────────────────
+User --> UC_LOGIN
+User --> UC_LOGOUT
+User --> UC_SESSION
+
+User --> UC_VIEW_ITEMS
+User --> UC_CREATE_ITEM
+User --> UC_EDIT_ITEM
+User --> UC_DELETE_ITEM
+User --> UC_TIME_ENTRY
+
+User --> UC_VIEW_PROJECTS
+User --> UC_PROJECT_DETAIL
+User --> UC_CATALOG
+
+User --> UC_REPORT
+User --> UC_FILTER_DATE
+User --> UC_FILTER_PROJECT
+User --> UC_HEALTH_UI
+
+' ─── Admin Relationships ───────────────────────────────────────────────────────
+Admin --> UC_LIST_USERS
+Admin --> UC_CREATE_USER
+Admin --> UC_EDIT_USER
+Admin --> UC_DEACTIVATE_USER
+Admin --> UC_ASSIGN_ORG
+
+Admin --> UC_POS
+Admin --> UC_DEPT
+Admin --> UC_ROLES
+Admin --> UC_ADMIN_PROJ
+Admin --> UC_PROJ_ASSIGN
+Admin --> UC_EXPENSE
+Admin --> UC_ACTIVITY
+Admin --> UC_NETWORK
+Admin --> UC_PAO
+Admin --> UC_REF_DATA
+
+Admin --> UC_SEED
+Admin --> UC_IMPORT
+Admin --> UC_REPORT_ALL
+Admin --> UC_HEALTH_UI
+
+' ─── Probe Relationships ───────────────────────────────────────────────────────
+Probe --> UC_HEALTH_LIVE
+Probe --> UC_HEALTH_READY
+
+' ─── System Relationships ──────────────────────────────────────────────────────
+System --> UC_OIDC : planned
+
+' ─── Include/Extend Dependencies ──────────────────────────────────────────────
+UC_CREATE_ITEM  ..> UC_VIEW_PROJECTS  : <<include>>
+UC_EDIT_ITEM    ..> UC_VIEW_ITEMS     : <<include>>
+UC_DELETE_ITEM  ..> UC_VIEW_ITEMS     : <<include>>
+UC_TIME_ENTRY   ..> UC_CREATE_ITEM    : <<include>>
+
+UC_REPORT       ..> UC_FILTER_DATE    : <<extend>>
+UC_REPORT       ..> UC_FILTER_PROJECT : <<extend>>
+UC_REPORT_ALL   ..> UC_REPORT         : <<extend>>
+
+UC_CREATE_USER  ..> UC_ASSIGN_ORG     : <<extend>>
+UC_EXPENSE      ..> UC_EXPENSE        : option <<include>>
+UC_PAO          ..> UC_ADMIN_PROJ     : <<include>>
+UC_PAO          ..> UC_ACTIVITY       : <<include>>
+UC_PAO          ..> UC_NETWORK        : <<include>>
+
+UC_HEALTH_DETAIL ..> UC_HEALTH_READY  : <<include>>
+UC_HEALTH_UI    ..> UC_HEALTH_DETAIL  : <<include>>
+
+note right of UC_OIDC
+  Planned migration to
+  Keycloak / BC Gov OIDC.
+  Replaces X-User-Id header scheme.
+end note
+
+note right of UC_EDIT_ITEM
+  Users may only edit/delete
+  their own items.
+  Admin/Manager can edit any item.
+end note
+
+note bottom of UC_REPORT_ALL
+  Manager / Admin can view
+  cross-user reports.
+  Regular users see own data only.
+end note
+
+note bottom of Admin
+  Requires X-Admin-Token header
+  (Admin:RequireToken=false in Dev only)
+  Rate limited: 60 req/min per IP
+end note
+
+@enduml

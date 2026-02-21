@@ -1,0 +1,165 @@
+<mxfile host="app.diagrams.net" modified="2026-02-20T00:00:00.000Z" agent="GitHub Copilot" version="24.5.2">
+  <diagram id="seq-time-entry" name="Sequence - Time Entry (Service Layer)">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1654" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- Title -->
+        <mxCell id="t1" value="Time Entry Creation — Updated with Service Layer" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontStyle=1;fontSize=16;" vertex="1" parent="1">
+          <mxGeometry x="100" y="10" width="600" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- ═══ PARTICIPANTS (lifeline headers) ═══ -->
+        <mxCell id="p1" value="User" style="shape=mxgraph.sequence.actor2;html=1;pointerEvents=1;whiteSpace=wrap;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="40" y="60" width="60" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="p2" value="React SPA&#xa;(Activity.jsx)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="180" y="70" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="p3" value="TanStack Query&#xa;useWorkItems" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="360" y="70" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="p4" value="ItemsController" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="540" y="70" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="p5" value="IWorkItemService&#xa;(WorkItemService.cs)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="720" y="70" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="p6" value="ApplicationDbContext" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="900" y="70" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="p7" value="MariaDB" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=12;fillColor=#f5f5f5;strokeColor=#666666;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="1080" y="60" width="100" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- Lifelines -->
+        <mxCell id="l1" style="endArrow=none;dashed=1;endFill=0;strokeColor=#999999;" edge="1" source="p1" target="p1" parent="1">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="70" y="1100"/></Array></mxGeometry>
+        </mxCell>
+
+        <!-- ═══ SECTION: LOAD PAGE ═══ -->
+        <mxCell id="sec1" value="Load Page" style="text;html=1;strokeColor=#6c8ebf;fillColor=#dae8fc;align=center;fontStyle=1;fontSize=11;rounded=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="140" width="120" height="25" as="geometry" />
+        </mxCell>
+
+        <!-- 1: Navigate -->
+        <mxCell id="m1" value="Navigate to /activity" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;endFill=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint as="sourcePoint" x="70" y="180"/><mxPoint as="targetPoint" x="240" y="180"/></mxGeometry>
+        </mxCell>
+
+        <!-- 2: useWorkItems hook fires -->
+        <mxCell id="m2" value="useWorkItems(userId)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;endFill=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint as="sourcePoint" x="240" y="210"/><mxPoint as="targetPoint" x="420" y="210"/></mxGeometry>
+        </mxCell>
+
+        <!-- 3: GET /api/items -->
+        <mxCell id="m3" value="GET /api/items?userId=..." style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;endFill=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint as="sourcePoint" x="420" y="240"/><mxPoint as="targetPoint" x="600" y="240"/></mxGeometry>
+        </mxCell>
+
+        <!-- 4: Controller → Service -->
+        <mxCell id="m4" value="GetAllAsync(callerId)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;endFill=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint as="sourcePoint" x="600" y="270"/><mxPoint as="targetPoint" x="780" y="270"/></mxGeometry>
+        </mxCell>
+
+        <!-- 5: Service → DbContext -->
+        <mxCell id="m5" value="WorkItems.Where(userId).ToArrayAsync()" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;endFill=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint as="sourcePoint" x="780" y="300"/><mxPoint as="targetPoint" x="960" y="300"/></mxGeometry>
+        </mxCell>
+
+        <!-- 6: DbContext → DB -->
+        <mxCell id="m6" value="SELECT * FROM WorkItems WHERE UserId=?" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;endFill=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint as="sourcePoint" x="960" y="330"/><mxPoint as="targetPoint" x="1130" y="330"/></mxGeometry>
+        </mxCell>
+
+        <!-- 7: DB returns -->
+        <mxCell id="m7" value="WorkItem[]" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;endFill=1;dashed=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint as="sourcePoint" x="1130" y="360"/><mxPoint as="targetPoint" x="960" y="360"/></mxGeometry>
+        </mxCell>
+
+        <!-- 8: Service MapToDto + return -->
+        <mxCell id="m8" value="MapToDto(items) → WorkItemDto[]" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;endFill=1;dashed=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint as="sourcePoint" x="780" y="390"/><mxPoint as="targetPoint" x="600" y="390"/></mxGeometry>
+        </mxCell>
+
+        <!-- 9: Controller returns 200 -->
+        <mxCell id="m9" value="200 OK WorkItemDto[]" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;endFill=1;dashed=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint as="sourcePoint" x="600" y="420"/><mxPoint as="targetPoint" x="420" y="420"/></mxGeometry>
+        </mxCell>
+
+        <!-- 10: Hook returns data -->
+        <mxCell id="m10" value="{ data: workItems }" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;endFill=1;dashed=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint as="sourcePoint" x="420" y="450"/><mxPoint as="targetPoint" x="240" y="450"/></mxGeometry>
+        </mxCell>
+
+        <!-- ═══ SECTION: CREATE WORK ITEM ═══ -->
+        <mxCell id="sec2" value="Create Work Item" style="text;html=1;strokeColor=#82b366;fillColor=#d5e8d4;align=center;fontStyle=1;fontSize=11;rounded=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="490" width="140" height="25" as="geometry" />
+        </mxCell>
+
+        <!-- 11: User fills form -->
+        <mxCell id="m11" value="Fill form and submit" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;endFill=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint as="sourcePoint" x="70" y="530"/><mxPoint as="targetPoint" x="240" y="530"/></mxGeometry>
+        </mxCell>
+
+        <!-- 12: Hook mutation -->
+        <mxCell id="m12" value="useCreateWorkItem().mutate(payload)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;endFill=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint as="sourcePoint" x="240" y="560"/><mxPoint as="targetPoint" x="420" y="560"/></mxGeometry>
+        </mxCell>
+
+        <!-- 13: POST /api/items -->
+        <mxCell id="m13" value="POST /api/items { title, projectId, ... }" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;endFill=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint as="sourcePoint" x="420" y="590"/><mxPoint as="targetPoint" x="600" y="590"/></mxGeometry>
+        </mxCell>
+
+        <!-- 14: Controller → Service -->
+        <mxCell id="m14" value="CreateAsync(callerId, request)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;endFill=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint as="sourcePoint" x="600" y="620"/><mxPoint as="targetPoint" x="780" y="620"/></mxGeometry>
+        </mxCell>
+
+        <!-- 15: Validate project -->
+        <mxCell id="m15" value="Projects.AnyAsync(id == req.ProjectId)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;endFill=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint as="sourcePoint" x="780" y="650"/><mxPoint as="targetPoint" x="960" y="650"/></mxGeometry>
+        </mxCell>
+        <mxCell id="m15b" value="SELECT COUNT(*) FROM Projects WHERE Id=?" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;endFill=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint as="sourcePoint" x="960" y="670"/><mxPoint as="targetPoint" x="1130" y="670"/></mxGeometry>
+        </mxCell>
+        <mxCell id="m15c" value="count &gt; 0" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;endFill=1;dashed=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint as="sourcePoint" x="1130" y="690"/><mxPoint as="targetPoint" x="780" y="690"/></mxGeometry>
+        </mxCell>
+
+        <!-- ALT: bad project -->
+        <mxCell id="alt1" value="[Project not found]&#xa;throw BadRequestException&#xa;→ GlobalExceptionHandler → 400 ProblemDetails" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="780" y="710" width="320" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- 16: Insert -->
+        <mxCell id="m16" value="WorkItems.AddAsync(item) + SaveChangesAsync()" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;endFill=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint as="sourcePoint" x="780" y="780"/><mxPoint as="targetPoint" x="960" y="780"/></mxGeometry>
+        </mxCell>
+        <mxCell id="m16b" value="INSERT INTO WorkItems..." style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;endFill=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint as="sourcePoint" x="960" y="800"/><mxPoint as="targetPoint" x="1130" y="800"/></mxGeometry>
+        </mxCell>
+        <mxCell id="m16c" value="success" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;endFill=1;dashed=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint as="sourcePoint" x="1130" y="825"/><mxPoint as="targetPoint" x="780" y="825"/></mxGeometry>
+        </mxCell>
+
+        <!-- 17: Controller returns 201 -->
+        <mxCell id="m17" value="201 Created WorkItemDto" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;endFill=1;dashed=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint as="sourcePoint" x="600" y="860"/><mxPoint as="targetPoint" x="420" y="860"/></mxGeometry>
+        </mxCell>
+
+        <!-- 18: Hook invalidates cache -->
+        <mxCell id="m18" value="invalidate ['workItems', userId]" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="360" y="875" width="200" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- 19: SPA updates -->
+        <mxCell id="m19" value="Updated list + success message" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;endFill=1;dashed=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint as="sourcePoint" x="240" y="920"/><mxPoint as="targetPoint" x="70" y="920"/></mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

@@ -1,0 +1,169 @@
+@startuml DSC API Architecture
+!theme plain
+skinparam componentStyle rectangle
+
+package "Client (Browser)" {
+    component "React SPA" as WebClient
+    note right of WebClient
+      Vite Dev Server (port 5173)
+      B.C. Design System Components
+      TanStack Query v5  +  Axios
+    end note
+
+    package "TanStack Query Hooks" {
+        [useProjects]
+        [useWorkItems]
+        [useReport]
+        [useHealthCheck]
+    }
+}
+
+package "API Layer (ASP.NET Core .NET 10 — port 5005)" {
+
+    package "Middleware Pipeline" {
+        [GlobalExceptionHandler] <<first — IExceptionHandler>>
+        [CORS]
+        [Routing]
+        [RateLimiter] <<60 req/min admin>>
+        [SecurityHeaders] <<CSP / X-Frame>>
+        [Authentication] <<UserId + AdminToken>>
+        [Authorization]
+    }
+
+    package "Controllers" {
+        [AuthController] <<Public>>
+        [CatalogController] <<Authenticated>>
+        [ProjectsController] <<Authenticated>>
+        [ItemsController] <<Authenticated>>
+        [ReportsController] <<Authenticated>>
+        [AdminUsersController] <<Admin>>
+        [AdminProjectsController] <<Admin>>
+        [AdminDepartmentsController] <<Admin>>
+        [AdminPositionsController] <<Admin>>
+        [AdminRolesController] <<Admin>>
+        [AdminExpense Controllers] <<Admin>>
+        [AdminActivityControllers] <<Admin>>
+        [AdminProjectAssignmentsController] <<Admin>>
+        [AdminSeedController] <<Admin>>
+    }
+
+    package "Service Layer" <<NEW>> {
+        [IWorkItemService / WorkItemService]
+        [IReportService / ReportService]
+        [IProjectService / ProjectService]
+        [IAuthService / AuthService]
+    }
+
+    package "Infrastructure" <<NEW>> {
+        [GlobalExceptionHandlerImpl] as GEH <<IExceptionHandler>>
+        [DatabaseHealthCheck] <<IHealthCheck>>
+        [DomainExceptions] <<NotFoundException etc.>>
+    }
+
+    package "Security" {
+        [UserIdAuthenticationHandler]
+        [AdminTokenAuthenticationHandler]
+    }
+
+    package "DTOs" {
+        [WorkItemDto]
+        [ProjectDto]
+        [ReportDtos]
+        [AuthDtos]
+        [AdminUserDto]
+        [AdminCatalogDtos]
+    }
+}
+
+package "Data Layer (EF Core 9 + Pomelo)" {
+    component "ApplicationDbContext" as DbCtx
+    component "Migrations (16 applied)" as Migrations
+
+    package "Domain Entities" {
+        [User / UserAuth]
+        [Project / WorkItem / TimeEntry]
+        [ProjectAssignment]
+        [Position / Department / Role]
+        [ExpenseCategory / ExpenseOption]
+        [ActivityCode / NetworkNumber]
+        [ProjectActivityOption]
+    }
+}
+
+database "MariaDB 10.11" {
+    [dsc_dev]
+}
+
+' ─── Request Flow ────────────────────────────────────────────────────────────
+WebClient -down-> [GlobalExceptionHandler] : HTTP / REST
+
+[GlobalExceptionHandler] -down-> [CORS]
+[CORS] -down-> [Routing]
+[Routing] -down-> [RateLimiter]
+[RateLimiter] -down-> [SecurityHeaders]
+[SecurityHeaders] -down-> [Authentication]
+[Authentication] -down-> [Authorization]
+
+[Authorization] -down-> [AuthController]
+[Authorization] -down-> [ProjectsController]
+[Authorization] -down-> [ItemsController]
+[Authorization] -down-> [ReportsController]
+[Authorization] -down-> [AdminUsersController]
+[Authorization] -down-> [AdminSeedController]
+
+' ─── Controllers → Services ──────────────────────────────────────────────────
+[ItemsController]    ..> [IWorkItemService / WorkItemService] : delegates
+[ProjectsController] ..> [IProjectService / ProjectService]  : delegates
+[ReportsController]  ..> [IReportService / ReportService]    : delegates
+[AuthController]     ..> [IAuthService / AuthService]        : delegates
+
+' ─── Services → Data ─────────────────────────────────────────────────────────
+[IWorkItemService / WorkItemService] -down-> DbCtx
+[IReportService / ReportService]     -down-> DbCtx
+[IProjectService / ProjectService]   -down-> DbCtx
+[IAuthService / AuthService]         -down-> DbCtx
+[AdminUsersController]               -down-> DbCtx : direct CRUD
+[AdminSeedController]                -down-> DbCtx : seeds
+
+' ─── Infrastructure Wiring ────────────────────────────────────────────────────
+[Authentication]   ..> [UserIdAuthenticationHandler]
+[Authentication]   ..> [AdminTokenAuthenticationHandler]
+GEH                ..> [DomainExceptions] : maps to RFC 7807 ProblemDetails
+[IWorkItemService / WorkItemService] ..> [DomainExceptions] : throws
+[DatabaseHealthCheck] --> DbCtx : CanConnectAsync()
+
+' ─── Data Layer ───────────────────────────────────────────────────────────────
+DbCtx  -down-> [dsc_dev] : Pomelo.MySQL
+DbCtx  ..> [Migrations] : applies on startup (Migrate())
+Migrations ..> [User / UserAuth]
+Migrations ..> [Project / WorkItem / TimeEntry]
+
+' ─── Health Endpoints ─────────────────────────────────────────────────────────
+[Routing] ..> [DatabaseHealthCheck] : /health/live\n/health/ready\n/health/details
+
+note top of "Service Layer"
+  NEW in this modernisation sprint.
+  Controllers are thin HTTP delegates.
+  All business logic lives here.
+  Domain exceptions replace ActionResult errors.
+end note
+
+note right of "Infrastructure"
+  GlobalExceptionHandler catches
+  domain exceptions and maps them
+  to RFC 7807 ProblemDetails JSON:
+  NotFoundException     → 404
+  ForbiddenException    → 403
+  BadRequestException   → 400
+  UnauthorizedException → 401
+  all others            → 500
+end note
+
+note right of "Middleware Pipeline"
+  Rate Limiting: 60 req/min per IP for admin endpoints
+  Auth Schemes: UserId (header X-User-Id) + AdminToken (X-Admin-Token)
+  Dev bypass: Admin:RequireToken=false
+  Security headers enforced on all responses
+end note
+
+@enduml

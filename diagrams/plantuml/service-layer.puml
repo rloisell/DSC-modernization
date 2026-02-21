@@ -1,0 +1,184 @@
+@startuml DSC Service Layer Architecture
+!theme plain
+skinparam linetype ortho
+
+title DSC Service Layer — Introduced in Modernisation Sprint
+
+package "HTTP Layer (Controllers)" {
+    class AuthController {
+        - _svc : IAuthService
+        + Login(req) : IActionResult
+        + GetByEmpId(empId) : IActionResult
+    }
+
+    class ItemsController {
+        - _svc : IWorkItemService
+        + CallerId : Guid
+        + GetAll() : IActionResult
+        + GetDetailed() : IActionResult
+        + Create(req) : IActionResult
+        + Patch(id, req) : IActionResult
+        + Delete(id) : IActionResult
+    }
+
+    class ProjectsController {
+        - _svc : IProjectService
+        + GetAll() : IActionResult
+    }
+
+    class ReportsController {
+        - _svc : IReportService
+        + GetSummary(...) : IActionResult
+    }
+}
+
+package "Service Interfaces + Implementations" {
+
+    interface IAuthService {
+        + AuthenticateAsync(username, password) : Task<LoginResponse>
+        + GetByEmpIdAsync(empId) : Task<LoginResponse?>
+    }
+
+    interface IWorkItemService {
+        + GetAllAsync(userId) : Task<WorkItemDto[]>
+        + GetDetailedAsync(from, to, userId) : Task<WorkItemDto[]>
+        + CreateAsync(userId, req) : Task<WorkItemDto>
+        + PatchAsync(id, userId, req) : Task<WorkItemDto>
+        + DeleteAsync(id, userId) : Task
+    }
+
+    interface IProjectService {
+        + GetAllAsync(userId, isAdmin) : Task<ProjectDto[]>
+    }
+
+    interface IReportService {
+        + GetSummaryAsync(from, to, projectId, userId, requesterId) : Task<ReportSummaryDto>
+    }
+
+    class AuthService {
+        - _db : ApplicationDbContext
+        + AuthenticateAsync(username, password) : Task<LoginResponse>
+        + GetByEmpIdAsync(empId) : Task<LoginResponse?>
+    }
+
+    class WorkItemService {
+        - _db : ApplicationDbContext
+        - IsExpenseBudget(projectId) : bool
+        - CalculateRemainingHours(...) : decimal
+        - EnforceOwnershipAsync(id, userId) : Task<WorkItem>
+        - MapToDto(item) : WorkItemDto
+        + GetAllAsync(userId) : Task<WorkItemDto[]>
+        + GetDetailedAsync(from, to, userId) : Task<WorkItemDto[]>
+        + CreateAsync(userId, req) : Task<WorkItemDto>
+        + PatchAsync(id, userId, req) : Task<WorkItemDto>
+        + DeleteAsync(id, userId) : Task
+    }
+
+    class ProjectService {
+        - _db : ApplicationDbContext
+        + GetAllAsync(userId, isAdmin) : Task<ProjectDto[]>
+    }
+
+    class ReportService {
+        - _db : ApplicationDbContext
+        + GetSummaryAsync(from, to, projectId, userId, requesterId) : Task<ReportSummaryDto>
+    }
+
+    IAuthService     <|.. AuthService
+    IWorkItemService <|.. WorkItemService
+    IProjectService  <|.. ProjectService
+    IReportService   <|.. ReportService
+}
+
+package "Infrastructure" {
+    class GlobalExceptionHandler <<IExceptionHandler>> {
+        + TryHandleAsync(context, ex, ct) : ValueTask<bool>
+        --
+        NotFoundException     → 404
+        ForbiddenException    → 403
+        BadRequestException   → 400
+        UnauthorizedException → 401
+        Exception             → 500 (logged)
+    }
+
+    class DatabaseHealthCheck <<IHealthCheck>> {
+        - _scopeFactory : IServiceScopeFactory
+        + CheckHealthAsync(ctx, ct) : Task<HealthCheckResult>
+        --
+        db.Database.CanConnectAsync()
+    }
+
+    abstract class DomainException {
+        + Message : string
+    }
+
+    class NotFoundException {
+        + NotFoundException(message)
+    }
+    class ForbiddenException {
+        + ForbiddenException(message)
+    }
+    class BadRequestException {
+        + BadRequestException(message)
+    }
+    class UnauthorizedException {
+        + UnauthorizedException(message)
+    }
+
+    DomainException <|-- NotFoundException
+    DomainException <|-- ForbiddenException
+    DomainException <|-- BadRequestException
+    DomainException <|-- UnauthorizedException
+}
+
+package "Data Layer" {
+    class ApplicationDbContext {
+        + Users : DbSet<User>
+        + Projects : DbSet<Project>
+        + WorkItems : DbSet<WorkItem>
+        + TimeEntries : DbSet<TimeEntry>
+        + ProjectAssignments : DbSet<ProjectAssignment>
+        + Positions : DbSet<Position>
+        + Departments : DbSet<Department>
+        + ...
+    }
+}
+
+' Controller → Service wiring
+AuthController     --> IAuthService
+ItemsController    --> IWorkItemService
+ProjectsController --> IProjectService
+ReportsController  --> IReportService
+
+' Service → DbContext
+AuthService        --> ApplicationDbContext : scoped
+WorkItemService    --> ApplicationDbContext : scoped
+ProjectService     --> ApplicationDbContext : scoped
+ReportService      --> ApplicationDbContext : scoped
+
+' Domain exceptions thrown by services, caught by handler
+WorkItemService    ..> NotFoundException     : throws
+WorkItemService    ..> ForbiddenException    : throws
+WorkItemService    ..> BadRequestException   : throws
+AuthService        ..> UnauthorizedException : throws
+GlobalExceptionHandler ..> DomainException  : handles → ProblemDetails
+
+' Health
+DatabaseHealthCheck --> ApplicationDbContext : probes
+
+note right of "Service Interfaces + Implementations"
+  All services are registered as Scoped:
+    builder.Services.AddScoped<IWorkItemService, WorkItemService>()
+    builder.Services.AddScoped<IReportService,   ReportService>()
+    builder.Services.AddScoped<IProjectService,  ProjectService>()
+    builder.Services.AddScoped<IAuthService,     AuthService>()
+end note
+
+note right of GlobalExceptionHandler
+  Registered as:
+    builder.Services.AddExceptionHandler<GlobalExceptionHandler>()
+    builder.Services.AddProblemDetails()
+    app.UseExceptionHandler()   ← FIRST in pipeline
+end note
+
+@enduml

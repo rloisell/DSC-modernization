@@ -1,0 +1,136 @@
+<mxfile host="app.diagrams.net" modified="2026-02-20T00:00:00.000Z" agent="GitHub Copilot" version="24.5.2">
+  <diagram id="domain-model" name="Domain Model">
+    <mxGraphModel dx="1422" dy="762" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1654" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- ═══ CORE DOMAIN ═══ -->
+        <mxCell id="10" value="Core Domain" style="swimlane;startSize=30;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="30" y="30" width="1100" height="500" as="geometry" />
+        </mxCell>
+
+        <!-- User -->
+        <mxCell id="11" value="User" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;" vertex="1" parent="10">
+          <mxGeometry x="20" y="50" width="200" height="180" as="geometry" />
+        </mxCell>
+        <mxCell id="11a" value="+ Id: Guid&#xa;+ EmpId: int? «legacy»&#xa;+ Username: string&#xa;+ Email: string&#xa;+ FirstName: string?&#xa;+ LastName: string?&#xa;+ IsActive: bool&#xa;+ PositionId: Guid? {FK}&#xa;+ DepartmentId: Guid? {FK}&#xa;+ RoleId: Guid? {FK}" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;fontSize=10;" vertex="1" parent="10">
+          <mxGeometry x="20" y="80" width="200" height="145" as="geometry" />
+        </mxCell>
+
+        <!-- UserAuth -->
+        <mxCell id="12" value="UserAuth «Legacy»" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontStyle=1;" vertex="1" parent="10">
+          <mxGeometry x="240" y="50" width="200" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="12a" value="+ UserName: string {PK}&#xa;+ Password: string&#xa;+ EmpId: int?" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;fontSize=10;" vertex="1" parent="10">
+          <mxGeometry x="240" y="80" width="200" height="65" as="geometry" />
+        </mxCell>
+
+        <!-- ExternalIdentity -->
+        <mxCell id="13" value="ExternalIdentity" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;" vertex="1" parent="10">
+          <mxGeometry x="240" y="180" width="200" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="13a" value="+ Id: Guid&#xa;+ UserId: Guid {FK}&#xa;+ Provider: string&#xa;+ Subject: string" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;fontSize=10;" vertex="1" parent="10">
+          <mxGeometry x="240" y="210" width="200" height="65" as="geometry" />
+        </mxCell>
+
+        <!-- Project -->
+        <mxCell id="14" value="Project" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;" vertex="1" parent="10">
+          <mxGeometry x="460" y="50" width="200" height="140" as="geometry" />
+        </mxCell>
+        <mxCell id="14a" value="+ Id: Guid&#xa;+ ProjectNo: string? «legacy»&#xa;+ Name: string&#xa;+ Description: string?&#xa;+ IsActive: bool&#xa;+ EstimatedHours: decimal?" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;fontSize=10;" vertex="1" parent="10">
+          <mxGeometry x="460" y="80" width="200" height="105" as="geometry" />
+        </mxCell>
+
+        <!-- WorkItem -->
+        <mxCell id="15" value="WorkItem" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;" vertex="1" parent="10">
+          <mxGeometry x="460" y="220" width="200" height="200" as="geometry" />
+        </mxCell>
+        <mxCell id="15a" value="+ Id: Guid&#xa;+ UserId: Guid {FK}&#xa;+ ProjectId: Guid {FK}&#xa;+ Title: string&#xa;+ Date: DateOnly?&#xa;+ StartTime: TimeSpan? «leg»&#xa;+ EndTime: TimeSpan? «leg»&#xa;+ ActualDuration: decimal?&#xa;+ ActivityCode: string?&#xa;+ NetworkNumber: string?&#xa;+ ExpenseCategoryId: Guid?" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;fontSize=10;" vertex="1" parent="10">
+          <mxGeometry x="460" y="250" width="200" height="165" as="geometry" />
+        </mxCell>
+
+        <!-- TimeEntry -->
+        <mxCell id="16" value="TimeEntry" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;" vertex="1" parent="10">
+          <mxGeometry x="680" y="50" width="200" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="16a" value="+ Id: Guid&#xa;+ WorkItemId: Guid {FK}&#xa;+ UserId: Guid {FK}&#xa;+ Hours: decimal&#xa;+ EntryDate: DateTime&#xa;+ Notes: string?" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;fontSize=10;" vertex="1" parent="10">
+          <mxGeometry x="680" y="80" width="200" height="85" as="geometry" />
+        </mxCell>
+
+        <!-- ProjectAssignment -->
+        <mxCell id="17" value="ProjectAssignment" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;" vertex="1" parent="10">
+          <mxGeometry x="680" y="200" width="200" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="17a" value="+ ProjectId: Guid {FK,PK}&#xa;+ UserId: Guid {FK,PK}&#xa;+ AssignedDate: DateTime&#xa;+ Role: string?" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;fontSize=10;" vertex="1" parent="10">
+          <mxGeometry x="680" y="230" width="200" height="75" as="geometry" />
+        </mxCell>
+
+        <!-- ═══ CATALOG DOMAIN ═══ -->
+        <mxCell id="20" value="Catalog Domain" style="swimlane;startSize=30;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="30" y="570" width="1300" height="300" as="geometry" />
+        </mxCell>
+
+        <mxCell id="21" value="Position&#xa;─────────&#xa;+ Id: Guid&#xa;+ Title: string&#xa;+ IsActive: bool" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="20">
+          <mxGeometry x="10" y="50" width="140" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="22" value="Department&#xa;─────────&#xa;+ Id: Guid&#xa;+ Name: string&#xa;+ ManagerName: string?&#xa;+ IsActive: bool" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="20">
+          <mxGeometry x="160" y="50" width="140" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="23" value="Role&#xa;─────────&#xa;+ Id: Guid&#xa;+ Name: string&#xa;+ IsActive: bool" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="20">
+          <mxGeometry x="310" y="50" width="140" height="85" as="geometry" />
+        </mxCell>
+        <mxCell id="24" value="ExpenseCategory&#xa;─────────&#xa;+ Id: Guid&#xa;+ Name: string&#xa;+ IsActive: bool&#xa;→ Options: ICollection" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="20">
+          <mxGeometry x="460" y="50" width="150" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="25" value="ExpenseOption&#xa;─────────&#xa;+ Id: Guid&#xa;+ ExpenseCategoryId {FK}&#xa;+ Name: string&#xa;+ IsActive: bool" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="20">
+          <mxGeometry x="620" y="50" width="150" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="26" value="ActivityCode&#xa;─────────&#xa;+ Id: Guid&#xa;+ Code: string&#xa;+ Description: string?&#xa;+ IsActive: bool" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="20">
+          <mxGeometry x="780" y="50" width="150" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="27" value="NetworkNumber&#xa;─────────&#xa;+ Id: Guid&#xa;+ Number: string&#xa;+ Description: string?&#xa;+ IsActive: bool" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="20">
+          <mxGeometry x="940" y="50" width="150" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="28" value="ProjectActivityOption&#xa;─────────&#xa;+ ProjectId {FK,PK}&#xa;+ ActivityCodeId {FK,PK}&#xa;+ NetworkNumberId {FK,PK}" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="20">
+          <mxGeometry x="1100" y="50" width="170" height="90" as="geometry" />
+        </mxCell>
+
+        <!-- More catalog -->
+        <mxCell id="29" value="Budget / CpcCode / DirectorCode&#xa;ReasonCode / Union / CalendarCategory&#xa;(all: Id, Code/Name, IsActive)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="20">
+          <mxGeometry x="10" y="180" width="400" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- ═══ RELATIONSHIPS ═══ -->
+        <mxCell id="r1" value="1" style="edgeStyle=orthogonalEdgeStyle;endArrow=open;startArrow=none;" edge="1" source="11" target="12" parent="10">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="r2" value="1..*" style="edgeStyle=orthogonalEdgeStyle;endArrow=open;" edge="1" source="11" target="16" parent="10">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="r3" value="1..*" style="edgeStyle=orthogonalEdgeStyle;endArrow=open;" edge="1" source="11" target="17" parent="10">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="r4" value="1..*" style="edgeStyle=orthogonalEdgeStyle;endArrow=open;" edge="1" source="14" target="15" parent="10">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="r5" value="1..*" style="edgeStyle=orthogonalEdgeStyle;endArrow=open;" edge="1" source="15" target="16" parent="10">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="r6" value="" style="edgeStyle=orthogonalEdgeStyle;endArrow=open;" edge="1" source="13" target="11" parent="10">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="r10" value="1" style="edgeStyle=orthogonalEdgeStyle;endArrow=open;" edge="1" source="24" target="25" parent="20">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="r11" value="" style="edgeStyle=orthogonalEdgeStyle;endArrow=open;" edge="1" source="28" target="26" parent="20">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="r12" value="" style="edgeStyle=orthogonalEdgeStyle;endArrow=open;" edge="1" source="28" target="27" parent="20">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

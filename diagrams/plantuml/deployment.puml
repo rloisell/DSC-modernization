@@ -1,0 +1,122 @@
+@startuml DSC Deployment Architecture
+!theme plain
+
+node "Developer Workstation (macOS)" {
+
+    node "Frontend (localhost:5173)" {
+        component "Vite Dev Server" as Vite
+        component "React 18 SPA" as React
+        component "TanStack Query Cache" as QueryCache
+        Vite --> React
+        React --> QueryCache
+    }
+
+    node "Backend API (localhost:5005)" {
+        component "Kestrel / ASP.NET Core .NET 10" as API
+        component "Middleware Pipeline" as MW {
+            component "GlobalExceptionHandler (first)"
+            component "CORS, Rate Limiter, Security Headers"
+            component "Authentication (UserId + AdminToken)"
+        }
+        component "Service Layer" as SL {
+            component "WorkItemService"
+            component "ReportService"
+            component "ProjectService"
+            component "AuthService"
+        }
+        component "EF Core 9 + Pomelo" as EF
+        API --> MW
+        MW --> SL
+        SL --> EF
+    }
+
+    node "Database (localhost:3306)" {
+        database "MariaDB 10.11" as DB {
+            [dsc_dev]
+        }
+        EF --> dsc_dev : connection pool
+    }
+}
+
+node "Production Environment (Future — BC Gov Pathfinder / OpenShift)" {
+
+    node "Web Tier" {
+        component "NGINX / Route (OpenShift)" as Proxy
+        component "Static Assets (React Build)" as StaticAssets
+    }
+
+    node "Application Tier (Pod)" {
+        component "ASP.NET Core Kestrel" as ProdAPI
+        component "Service Layer" as ProdSL
+        component "EF Core 9" as ProdEF
+        ProdAPI --> ProdSL
+        ProdSL --> ProdEF
+    }
+
+    node "Database Tier" {
+        database "MariaDB / MySQL" as ProdDB {
+            [dsc_production]
+        }
+    }
+
+    node "Identity Provider" {
+        component "Keycloak / OIDC" as Keycloak
+    }
+
+    node "Observability" {
+        component "OpenShift Health Probes" as Probes
+        note right of Probes
+          Liveness:  GET /health/live
+          Readiness: GET /health/ready
+          Details:   GET /health/details
+        end note
+    }
+}
+
+cloud "Developer Browser" as DevBrowser
+cloud "Production Browser" as ProdBrowser
+
+DevBrowser --> Vite : http://localhost:5173
+Vite ..> API : proxy /api → 5005
+
+ProdBrowser --> Proxy : HTTPS
+Proxy --> StaticAssets
+Proxy --> ProdAPI : /api
+
+ProdEF --> dsc_production : Pomelo.MySQL (encrypted)
+ProdAPI ..> Keycloak : future OIDC (JWT)
+Probes ..> ProdAPI : /health/live, /health/ready
+
+note right of API
+  DEV:
+  - EF Core Migrate() on startup (not EnsureCreated)
+  - Admin:RequireToken=false (bypass)
+  - Local MariaDB (no TLS)
+  - Swagger UI enabled
+  - CORS allows localhost:5173
+end note
+
+note right of ProdAPI
+  PRODUCTION:
+  - Migrate() on startup (pending migrations applied)
+  - Admin:RequireToken=true (enforced)
+  - Encrypted DB connection string via secrets
+  - Swagger disabled
+  - HTTPS enforced + HSTS
+  - OIDC/Keycloak (planned)
+  - Security headers policy active
+end note
+
+note bottom of DB
+  Local dev:
+  User: dsc_local / Pass: dsc_password
+  (env vars only — not in source)
+end note
+
+note bottom of ProdDB
+  Production:
+  Managed secrets (OpenShift Secrets / Vault)
+  No default credentials in source
+end note
+
+@enduml

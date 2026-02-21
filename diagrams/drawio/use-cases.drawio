@@ -1,0 +1,197 @@
+<mxfile host="app.diagrams.net" modified="2026-02-20T00:00:00.000Z" agent="GitHub Copilot" version="24.5.2">
+  <diagram id="use-cases" name="Use Cases">
+    <mxGraphModel dx="1422" dy="762" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1654" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- ═══ ACTORS ═══ -->
+        <!-- End User -->
+        <mxCell id="a1" value="End User" style="shape=mxgraph.archimate3.actor;html=1;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="50" y="150" width="60" height="80" as="geometry" />
+        </mxCell>
+        <!-- Admin -->
+        <mxCell id="a2" value="Administrator" style="shape=mxgraph.archimate3.actor;html=1;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="50" y="550" width="60" height="80" as="geometry" />
+        </mxCell>
+        <!-- OpenShift Probe -->
+        <mxCell id="a3" value="OpenShift Probe" style="shape=mxgraph.archimate3.actor;html=1;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="50" y="900" width="60" height="80" as="geometry" />
+        </mxCell>
+        <!-- System -->
+        <mxCell id="a4" value="System" style="shape=mxgraph.archimate3.actor;html=1;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="1560" y="150" width="60" height="80" as="geometry" />
+        </mxCell>
+
+        <!-- ═══ SYSTEM BOUNDARY ═══ -->
+        <mxCell id="sys" value="DSC Time &amp; Expense Tracking System" style="swimlane;startSize=30;fillColor=#f5f5f5;strokeColor=#666666;fontStyle=1;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="160" y="30" width="1350" height="1000" as="geometry" />
+        </mxCell>
+
+        <!-- Authentication group -->
+        <mxCell id="g1" value="Authentication" style="swimlane;startSize=25;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="sys">
+          <mxGeometry x="10" y="50" width="310" height="160" as="geometry" />
+        </mxCell>
+        <mxCell id="uc1" value="Login (Local Account)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="g1">
+          <mxGeometry x="10" y="35" width="130" height="45" as="geometry" />
+        </mxCell>
+        <mxCell id="uc2" value="Login (OIDC — Future)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=10;dashed=1;" vertex="1" parent="g1">
+          <mxGeometry x="160" y="35" width="130" height="45" as="geometry" />
+        </mxCell>
+        <mxCell id="uc3" value="Logout / View Session" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="g1">
+          <mxGeometry x="10" y="95" width="280" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- Time Tracking group -->
+        <mxCell id="g2" value="Time Tracking" style="swimlane;startSize=25;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" vertex="1" parent="sys">
+          <mxGeometry x="10" y="230" width="310" height="220" as="geometry" />
+        </mxCell>
+        <mxCell id="uc4" value="View Own Work Items" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="g2">
+          <mxGeometry x="10" y="35" width="280" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="uc5" value="Create Work Item" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="g2">
+          <mxGeometry x="10" y="80" width="280" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="uc6" value="Edit Own Work Item" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="g2">
+          <mxGeometry x="10" y="125" width="280" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="uc7" value="Delete Own Work Item" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="g2">
+          <mxGeometry x="10" y="170" width="280" height="35" as="geometry" />
+        </mxCell>
+
+        <!-- Projects group -->
+        <mxCell id="g3" value="Projects" style="swimlane;startSize=25;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" vertex="1" parent="sys">
+          <mxGeometry x="340" y="50" width="290" height="170" as="geometry" />
+        </mxCell>
+        <mxCell id="uc8" value="View Assigned Projects" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="g3">
+          <mxGeometry x="10" y="35" width="270" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="uc9" value="View Project Details" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="g3">
+          <mxGeometry x="10" y="80" width="270" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="uc10" value="View Catalog (Activity / Network)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="g3">
+          <mxGeometry x="10" y="125" width="270" height="35" as="geometry" />
+        </mxCell>
+
+        <!-- Reporting group -->
+        <mxCell id="g4" value="Reporting" style="swimlane;startSize=25;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=11;" vertex="1" parent="sys">
+          <mxGeometry x="340" y="240" width="290" height="200" as="geometry" />
+        </mxCell>
+        <mxCell id="uc11" value="View Report Dashboard" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=10;" vertex="1" parent="g4">
+          <mxGeometry x="10" y="35" width="270" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="uc12" value="Filter by Date Range" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=10;" vertex="1" parent="g4">
+          <mxGeometry x="10" y="80" width="270" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="uc13" value="Filter by Project" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=10;" vertex="1" parent="g4">
+          <mxGeometry x="10" y="125" width="270" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="uc14" value="View All Users Report (Admin/Mgr)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=10;" vertex="1" parent="g4">
+          <mxGeometry x="10" y="160" width="270" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- Health group -->
+        <mxCell id="g5" value="System Health" style="swimlane;startSize=25;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;" vertex="1" parent="sys">
+          <mxGeometry x="340" y="460" width="290" height="180" as="geometry" />
+        </mxCell>
+        <mxCell id="uc15" value="View Health Dashboard (/health)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" vertex="1" parent="g5">
+          <mxGeometry x="10" y="35" width="270" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="uc16" value="Liveness Probe (/health/live)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" vertex="1" parent="g5">
+          <mxGeometry x="10" y="80" width="270" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="uc17" value="Readiness Probe (/health/ready)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" vertex="1" parent="g5">
+          <mxGeometry x="10" y="125" width="270" height="35" as="geometry" />
+        </mxCell>
+
+        <!-- User Admin group -->
+        <mxCell id="g6" value="User Administration" style="swimlane;startSize=25;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" vertex="1" parent="sys">
+          <mxGeometry x="660" y="50" width="290" height="200" as="geometry" />
+        </mxCell>
+        <mxCell id="uc18" value="List Users" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="g6">
+          <mxGeometry x="10" y="35" width="270" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="uc19" value="Create / Edit User" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="g6">
+          <mxGeometry x="10" y="75" width="270" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="uc20" value="Deactivate User" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="g6">
+          <mxGeometry x="10" y="115" width="270" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="uc21" value="Assign Position / Dept / Role" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="g6">
+          <mxGeometry x="10" y="155" width="270" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- Catalog Admin group -->
+        <mxCell id="g7" value="Catalog Administration" style="swimlane;startSize=25;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" vertex="1" parent="sys">
+          <mxGeometry x="660" y="270" width="290" height="380" as="geometry" />
+        </mxCell>
+        <mxCell id="uc22" value="Manage Projects + Assignments" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="g7">
+          <mxGeometry x="10" y="35" width="270" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="uc23" value="Manage Positions / Departments / Roles" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="g7">
+          <mxGeometry x="10" y="80" width="270" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="uc24" value="Manage Expense Categories &amp; Options" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="g7">
+          <mxGeometry x="10" y="125" width="270" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="uc25" value="Manage Activity Codes + Network Numbers" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="g7">
+          <mxGeometry x="10" y="170" width="270" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="uc26" value="Manage Project Activity Options" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="g7">
+          <mxGeometry x="10" y="215" width="270" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="uc27" value="Manage Reference Data&#xa;(Budget/CPC/Director/Union/Reason/Calendar)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="g7">
+          <mxGeometry x="10" y="260" width="270" height="45" as="geometry" />
+        </mxCell>
+        <mxCell id="uc28" value="Seed Test Data" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="g7">
+          <mxGeometry x="10" y="320" width="270" height="35" as="geometry" />
+        </mxCell>
+
+        <!-- ═══ ASSOCIATIONS ═══ -->
+        <!-- User → use cases -->
+        <mxCell id="e1" style="edgeStyle=none;" edge="1" source="a1" target="uc1" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" style="edgeStyle=none;" edge="1" source="a1" target="uc4" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" style="edgeStyle=none;" edge="1" source="a1" target="uc5" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e4" style="edgeStyle=none;" edge="1" source="a1" target="uc11" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e5" style="edgeStyle=none;" edge="1" source="a1" target="uc15" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Admin → use cases -->
+        <mxCell id="e10" style="edgeStyle=none;" edge="1" source="a2" target="uc18" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e11" style="edgeStyle=none;" edge="1" source="a2" target="uc22" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e12" style="edgeStyle=none;" edge="1" source="a2" target="uc14" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e13" style="edgeStyle=none;" edge="1" source="a2" target="uc28" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Probe → health -->
+        <mxCell id="e20" style="edgeStyle=none;" edge="1" source="a3" target="uc16" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e21" style="edgeStyle=none;" edge="1" source="a3" target="uc17" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- System → OIDC -->
+        <mxCell id="e30" style="edgeStyle=none;" edge="1" source="a4" target="uc2" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

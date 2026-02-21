@@ -1,0 +1,139 @@
+@startuml Time Entry Creation — Updated with Service Layer
+!theme plain
+autonumber
+
+actor "User" as User
+participant "React SPA\n(Activity.jsx)" as SPA
+participant "TanStack Query\nuseWorkItems hook" as Hook
+participant "WorkItemService.js\n(Axios)" as FESvc
+participant "ItemsController" as Controller
+participant "IWorkItemService\n(WorkItemService.cs)" as BESvc
+participant "ApplicationDbContext" as DbContext
+database "MariaDB" as DB
+
+== Load Page ==
+
+User -> SPA : Navigate to /activity
+activate SPA
+
+SPA -> Hook : useWorkItems(userId)
+activate Hook
+Hook -> FESvc : getWorkItems(userId)
+activate FESvc
+FESvc -> Controller : GET /api/items?userId=...
+activate Controller
+Controller -> BESvc : GetAllAsync(callerId)
+activate BESvc
+BESvc -> DbContext : WorkItems\n.Where(userId).ToArrayAsync()
+activate DbContext
+DbContext -> DB : SELECT * FROM WorkItems\nWHERE UserId = ?
+DB --> DbContext : WorkItem[]
+DbContext --> BESvc : WorkItem[]
+deactivate DbContext
+BeSvc --> BeSvc : MapToDto(items)
+BESvc --> Controller : WorkItemDto[]
+deactivate BESvc
+Controller --> FESvc : 200 OK WorkItemDto[]
+deactivate Controller
+FeSvc --> Hook : response.data
+deactivate FESvc
+Hook --> SPA : { data: workItems }
+deactivate Hook
+
+SPA --> User : Show project selector\nand existing work items
+deactivate SPA
+
+== Create Work Item ==
+
+User -> SPA : Fill form and submit
+activate SPA
+
+SPA -> Hook : useCreateWorkItem().mutate(payload)
+activate Hook
+Hook -> FESvc : createWorkItem(payload)
+activate FeSvc
+FeSvc -> Controller : POST /api/items\n{ title, projectId, date, activityCode,\n  networkNumber, actualDuration, ... }
+activate Controller
+
+Controller -> BeSvc : CreateAsync(callerId, request)
+activate BESvc
+
+BESvc -> DbContext : Projects.AnyAsync(id == request.ProjectId)
+activate DbContext
+DbContext -> DB : SELECT COUNT(*) FROM Projects WHERE Id = ?
+DB --> DbContext : count
+DbContext --> BESvc : true/false
+deactivate DbContext
+
+alt Project not found
+    BESvc -[#red]-> BESvc : throw BadRequestException("Project not found")
+    note right: GlobalExceptionHandler catches this\n→ 400 ProblemDetails JSON
+    BESvc --> Controller : (exception propagates)
+    Controller --> FeSvc : 400 ProblemDetails
+    FeSvc --> Hook : error
+    Hook --> SPA : { error }
+    SPA --> User : InlineAlert error message
+else Project found
+    BESvc -> BeSvc : new WorkItem { ... }
+    BeSvc -> DbContext : WorkItems.AddAsync(workItem)
+    BeSvc -> DbContext : SaveChangesAsync()
+    activate DbContext
+    DbContext -> DB : INSERT INTO WorkItems (...) VALUES (...)
+    DB --> DbContext : success
+    DbContext --> BESvc : 1 row saved
+    deactivate DbContext
+
+    BeSvc --> BeSvc : MapToDto(workItem)
+    BESvc --> Controller : WorkItemDto
+    deactivate BESvc
+    Controller --> FeSvc : 201 Created\nWorkItemDto
+    deactivate Controller
+    FeSvc --> Hook : workItemDto
+    deactivate FeSvc
+    Hook -> Hook : invalidate ['workItems', userId]
+    Hook --> SPA : onSuccess callback
+    deactivate Hook
+    SPA --> User : Updated list + success message
+    deactivate SPA
+end
+
+== Delete Work Item ==
+
+User -> SPA : Click Delete on own item
+activate SPA
+SPA -> Hook : useDeleteWorkItem().mutate(id)
+activate Hook
+Hook -> FeSvc : deleteWorkItem(id)
+activate FeSvc
+FeSvc -> Controller : DELETE /api/items/{id}
+activate Controller
+Controller -> BeSvc : DeleteAsync(id, callerId)
+activate BESvc
+
+BeSvc -> DbContext : WorkItems.FindAsync(id)
+DbContext -> DB : SELECT * FROM WorkItems WHERE Id = ?
+DB --> DbContext : item or null
+
+alt item not found
+    BeSvc -[#red]-> BeSvc : throw NotFoundException("Work item not found")
+else caller not owner AND not admin
+    BeSvc -[#red]-> BeSvc : throw ForbiddenException("Cannot delete another user's item")
+else authorised
+    BeSvc -> DbContext : WorkItems.Remove(item)
+    BeSvc -> DbContext : SaveChangesAsync()
+    DbContext -> DB : DELETE FROM WorkItems WHERE Id = ?
+    DB --> DbContext : success
+    BeSvc --> Controller : (void)
+    deactivate BeSvc
+    Controller --> FeSvc : 204 No Content
+    deactivate Controller
+    FeSvc --> Hook : success
+    deactivate FeSvc
+    Hook -> Hook : invalidate ['workItems', userId]
+    Hook --> SPA : onSuccess
+    deactivate Hook
+    SPA --> User : Item removed from list
+    deactivate SPA
+end
+
+@enduml

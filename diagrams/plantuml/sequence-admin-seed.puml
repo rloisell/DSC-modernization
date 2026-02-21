@@ -1,0 +1,117 @@
+@startuml Admin Seed Test Data Sequence
+!theme plain
+autonumber
+
+actor "Administrator" as Admin
+participant "Browser" as Browser
+participant "AdminToken\nAuthHandler" as Auth
+participant "AdminSeed\nController" as Controller
+participant "TestData\nSeeder" as Seeder
+participant "ApplicationDbContext" as DbContext
+participant "GlobalException\nHandler" as GEH
+database "MariaDB\n(dsc_dev)" as DB
+
+Admin -> Browser : POST /api/admin/seed/test-data
+activate Browser
+
+note over GEH : Wrapped around entire\npipeline — catches all\nunhandled exceptions
+
+Browser -> Auth : X-Admin-Token header\n(or bypass if Dev mode)
+activate Auth
+
+alt Admin:RequireToken=true
+    Auth -> Auth : Validate X-Admin-Token\nvs appsettings Admin:Token
+    alt Token invalid or missing
+        Auth --> Browser : 401 Unauthorized\nProblemDetails JSON
+        Browser --> Admin : Authentication failed
+    end
+else Admin:RequireToken=false
+    Auth -> Auth : Check ASPNETCORE_ENVIRONMENT
+    alt Not "Development"
+        Auth -[#red]-> GEH : ForbiddenException
+        GEH --> Browser : 403 ProblemDetails JSON\n"Bypass only allowed in Development"
+        Browser --> Admin : Environment check failed
+    else Development
+        Auth -> Auth : Bypass authentication
+    end
+end
+
+Auth --> Controller : 401/403 or pass-through
+deactivate Auth
+
+activate Controller
+
+note right of Controller
+  Rate limited: 60 req/min per IP
+  (AdminRateLimit policy)
+end note
+
+Controller -> Seeder : SeedAsync(cancellationToken)
+activate Seeder
+
+Seeder -> DbContext : BeginTransactionAsync()
+activate DbContext
+
+loop for each user seed (4 users)
+    Seeder -> DbContext : Users.FirstOrDefaultAsync(u => u.Username == seed.Username)
+    DbContext -> DB : SELECT * FROM Users WHERE Username = ?
+    DB --> DbContext : User? 
+    alt User not found
+        Seeder -> Seeder : new User with PasswordHasher
+        Seeder -> DbContext : Users.Add(user)
+    else User exists
+        Seeder -> Seeder : update missing fields only
+    end
+end
+
+loop for each UserAuth seed (3 entries)
+    Seeder -> DbContext : Set<UserAuth>().FirstOrDefaultAsync(UserName = ?)
+    DbContext -> DB : SELECT * FROM UserAuth WHERE UserName = ?
+    DB --> DbContext : UserAuth?
+    alt UserAuth not found
+        Seeder -> DbContext : Set<UserAuth>().Add(userAuth)
+    else exists and UpdatePassword=true
+        Seeder -> Seeder : re-hash password
+    end
+end
+
+Seeder -> DbContext : Projects.FirstOrDefaultAsync(p => p.ProjectNo == "P99999")
+DbContext -> DB : SELECT * FROM Projects WHERE ProjectNo = ?
+DB --> DbContext : Project?
+alt Project not found
+    Seeder -> DbContext : Projects.Add(testProject)
+end
+
+Seeder -> DbContext : Departments.FirstOrDefaultAsync(d => d.Name == "OSS Operations")
+DbContext -> DB : SELECT * FROM Departments WHERE Name = ?
+DB --> DbContext : Department?
+alt Department not found
+    Seeder -> DbContext : Departments.Add(dept)
+end
+
+Seeder -> DbContext : SaveChangesAsync(ct)
+DbContext -> DB : INSERT / UPDATE statements (batch)
+DB --> DbContext : success, rows affected
+
+Seeder -> DbContext : CommitAsync(ct)
+DbContext -> DB : COMMIT
+deactivate DbContext
+
+Seeder --> Controller : TestSeedResult\n{ usersCreated, userAuthCreated,\n  projectsCreated, departmentsCreated }
+deactivate Seeder
+
+Controller --> Browser : 200 OK\n{ usersCreated: 4, userAuthCreated: 3,\n  projectsCreated: 1, departmentsCreated: 1 }
+deactivate Controller
+
+Browser --> Admin : Seed completed\n4 users, 1 project, 1 department
+
+deactivate Browser
+
+note bottom
+  On any unhandled error, GlobalExceptionHandler
+  catches the exception and returns RFC 7807
+  ProblemDetails JSON rather than the raw ASP.NET
+  HTML error page.
+end note
+
+@enduml

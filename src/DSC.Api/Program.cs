@@ -5,9 +5,11 @@ using DSC.Api.Seeding;
 using DSC.Api.Services;
 using DSC.Data;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -136,6 +138,41 @@ app.MapControllers();
 // Health check endpoints — consumed by OpenShift liveness / readiness probes
 app.MapHealthChecks("/health/live");
 app.MapHealthChecks("/health/ready");
+
+// Detailed JSON health report — consumed by the frontend Health dashboard.
+// Mapped at both /health/details (direct) and /api/health/details (Vite proxy path).
+var healthDetailsOptions = new HealthCheckOptions
+{
+    ResponseWriter = async (context, report) =>
+    {
+        context.Response.ContentType = "application/json";
+        var result = new
+        {
+            status = report.Status.ToString(),
+            totalDuration = report.TotalDuration.TotalMilliseconds,
+            checks = report.Entries.Select(e => new
+            {
+                name = e.Key,
+                status = e.Value.Status.ToString(),
+                description = e.Value.Description,
+                durationMs = e.Value.Duration.TotalMilliseconds,
+                exception = e.Value.Exception?.Message
+            })
+        };
+        await context.Response.WriteAsJsonAsync(result);
+    },
+    // Return 200 even when unhealthy so the frontend can display details
+    // (probes at /health/live and /health/ready still return the correct status codes)
+    ResultStatusCodes =
+    {
+        [HealthStatus.Healthy]   = 200,
+        [HealthStatus.Degraded]  = 200,
+        [HealthStatus.Unhealthy] = 200
+    }
+};
+
+app.MapHealthChecks("/health/details",     healthDetailsOptions);
+app.MapHealthChecks("/api/health/details", healthDetailsOptions);
 
 app.Run();
 
