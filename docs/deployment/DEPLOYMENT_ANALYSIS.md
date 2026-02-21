@@ -7,10 +7,18 @@ This document captures the pre-deployment analysis for deploying the DSC Moderni
 application to the **BC Gov Private Cloud PaaS — Emerald Hosting Tier**. The goal is
 to understand what is needed before writing any pipeline code.
 
+> **See also:** [`EmeraldDeploymentAnalysis.md`](EmeraldDeploymentAnalysis.md) — the
+> consolidated, up-to-date deployment reference including implementation decisions,
+> CI/CD gap analysis, corrected Datree pattern, full secrets inventory, and pending
+> work checklist. That document supersedes the gap entries in **§14** of this document
+> where there are conflicts.
+
 **Reference repositories studied:**
 
 - `bcgov-c/jag-network-tools` — app repo pattern (similar .NET + React/Vite stack)
 - `bcgov-c/tenant-gitops-be808f` — GitOps pattern for Emerald (ArgoCD + Helm)
+- `bcgov-c/JAG-JAM-CORNET` — CI/CD pipeline pattern (Trivy, unit tests)
+- `bcgov-c/JAG-LEA` — CI/CD pipeline pattern (confirms CORNET patterns)
 
 ---
 
@@ -522,7 +530,7 @@ The following steps require a human operator and cannot be automated in this rep
 | 4 | Create Artifactory service account; create pull secret in namespace | CLI / Artifactory |
 | 5 | Add `ARTIFACTORY_USERNAME` + `ARTIFACTORY_PASSWORD` as GitHub Secrets | GitHub repo settings |
 | 6 | Add `GITOPS_TOKEN` (PAT with write to tenant-gitops-be808f) as GitHub Secret | GitHub repo settings |
-| 7 | **Obtain `DATREE_TOKEN` from ISB; add as GitHub Secret in tenant-gitops-be808f** | ISB team + GitHub repo settings |
+| 7 | ~~**Obtain `DATREE_TOKEN` from ISB**~~ — **Not required.** The correct Datree implementation uses the Helm plugin in offline mode (`helm datree config set offline local`), which does not need a `DATREE_TOKEN`. Implement via a separate `policy-enforcement.yaml` workflow (see §14.2 Gap 1 update and `EmeraldDeploymentAnalysis.md` §7.2 for exact content). | Developer |
 | 8 | Onboard to Vault; create secret paths `secret/be808f/dev/dsc-db` and `secret/be808f/dev/dsc-admin` | Vault console |
 | 9 | Pre-create `dsc-db-secret` and `dsc-admin-secret` in `be808f-dev` namespace | `oc create secret` |
 | 10 | Mirror MariaDB 10.11 image to Artifactory (`be808f-docker-local/mariadb:10.11`) | Artifactory |
@@ -566,9 +574,11 @@ All three have been remediated in code as of February 2026.
 | Attribute | Detail |
 |---|---|
 | **EA Requirement** | All gitops repos must run Datree against Helm-rendered manifests in CI before code can merge to `main`. This enforces ISB security policies including `CUSTOM_WORKLOAD_INCORRECT_DATACLASS_LABELS`. |
-| **Previous State** | `tenant-gitops-be808f/.github/workflows/ci.yml` ran only `helm lint` and `helm template`. No Datree step. |
-| **Remediation** | Added `datreeio/action-datree@main` step to `ci.yml`. `.github/policies.yaml` already existed with the full ISB policy set (previously committed by ISB). `DATREE_TOKEN` must be obtained from ISB and stored as a GitHub Secret. |
-| **Files changed** | `tenant-gitops-be808f/.github/workflows/ci.yml` |
+| **Previous State** | `ci.yml` ran only `helm lint` and `helm template`. No Datree step. |
+| **First Attempt (Incorrect)** | Added `datreeio/action-datree@main` step to `ci.yml` with `DATREE_TOKEN`. **This was wrong.** Study of all active ISB `tenant-gitops-*` repos (`e648d1`, `a56f0d`, `cc9b4e`, `ca61f6`, `dead5e`, `a239c6`) confirmed that **none** use the GitHub Action. All implement Datree as a separate `policy-enforcement.yaml` workflow using the Helm plugin in offline mode — no `DATREE_TOKEN` required. |
+| **Current State** | The incorrect `datreeio/action-datree@main` step has been **commented out** in `ci.yml` with an explanatory note. `.github/policies.yaml` already exists with the full ISB policy set (committed by ISB). |
+| **Correct Remediation** | Create `.github/workflows/policy-enforcement.yaml` using the Helm plugin offline pattern: `helm plugin install https://github.com/datreeio/helm-datree` → `helm datree config set offline local` → `helm datree test --ignore-missing-schemas --policy-config ../policies.yaml`. **Status: TO BE IMPLEMENTED.** See `EmeraldDeploymentAnalysis.md` §7.2 for the exact file content. |
+| **Files changed** | `tenant-gitops-be808f/.github/workflows/ci.yml` (step commented out); `policy-enforcement.yaml` pending creation |
 
 #### Gap 2 — Production Deployment Must Be a PR (Not a Direct Commit)
 
@@ -588,12 +598,36 @@ All three have been remediated in code as of February 2026.
 | **Remediation** | Image tag computation now branches on `github.ref_type`: `tag` → uses `github.ref_name` (e.g., `v1.0.1`); `branch` → uses short SHA. The prod PR job thus carries a meaningful version when triggered by a semver tag. |
 | **Files changed** | `.github/workflows/build-and-push.yml` |
 
-### 14.3 Recommended Follow-up
+### 14.3 — CI/CD Gap Analysis — Peer Repo Comparison
+
+Beyond the ISB EA document, a survey of peer ISB application repositories
+(`bcgov-c/JAG-JAM-CORNET`, `bcgov-c/JAG-LEA`) identified two additional CI/CD
+practices present in those stacks that are currently absent from DSC.
+
+#### Gap 4 — Trivy Image Vulnerability Scan
+
+| Attribute | Detail |
+|---|---|
+| **Source** | `JAG-JAM-CORNET` `build-push-backend.yaml`; `JAG-LEA` `build-push-backend.yaml` |
+| **Pattern** | `aquasecurity/trivy-action@master` runs after image push; scans for `HIGH,CRITICAL` CVEs; `ignore-unfixed: true`; informational (does not fail the pipeline) |
+| **DSC status** | **Not yet implemented.** Recommended addition to `build-and-push.yml` after image push for both `dsc-api` and `dsc-frontend`. |
+
+#### Gap 5 — Automated Unit Test Run in CI
+
+| Attribute | Detail |
+|---|---|
+| **Source** | `JAG-JAM-CORNET` `build-test-apps.yaml`; `JAG-LEA` `build-test-apps.yaml` |
+| **Pattern** | Separate `build-test-apps.yaml` workflow on PR/push to `develop`; `dotnet restore` → `dotnet build` → `dotnet test`; `npm install` → `npm run build` → `npm test` |
+| **DSC status** | **Not yet implemented.** DSC has 36 xUnit tests covering Services, Auth, Reports, and Catalog CRUD. These run locally but are not gated in CI. A `build-and-test.yml` workflow should be created. |
+
+### 14.4 Recommended Follow-up
 
 | Item | Priority |
 |---|---|
-| Obtain `DATREE_TOKEN` from ISB; store as GitHub Secret in `bcgov-c/tenant-gitops-be808f` | **High** — Datree step will block CI until token is present |
+| Create `policy-enforcement.yaml` in `tenant-gitops-be808f/.github/workflows/` (Helm plugin offline Datree) | **High** — Required for ISB EA compliance |
+| Add Trivy scan to `build-and-push.yml` (both images, after push) | **Medium** — Present in all peer repos |
+| Create `build-and-test.yml` (`dotnet test` + Vite build gated in CI) | **Medium** — Present in all peer repos |
 | Confirm `ag-pssg-emerald` GitHub team exists and has reviewer access to `bcgov-c/tenant-gitops-be808f` | **Medium** — Required to assign prod PRs to a reviewer |
 | Tag and release `v1.0.0` to validate the semver prod PR flow end-to-end | **Medium** — Confirms the full EA Option 2 path before go-live |
-| Enable branch protection on `main` in tenant-gitops-be808f to require PR approval | **Medium** — Enforces the prod gate at the repository level |
+| Enable branch protection on `main` in `tenant-gitops-be808f` requiring PR approval | **Medium** — Enforces the prod gate at the repository level |
 
