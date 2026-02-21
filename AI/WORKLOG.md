@@ -3187,3 +3187,26 @@ This will start the Vite dev server for the client. After installing dependencie
 **Frontend**
 - AdminUserService.js: Added deactivateAdminUser, activateAdminUser.
 - AdminUsers.jsx: Current Users table has explicit Edit + Deactivate/Activate buttons and Status column. Edit tab has Deactivate/Activate toggle.
+
+---
+
+## 2026-02-21 — Missing Diagrams (Activity, State, Physical Schema)
+
+### Summary
+Created the five remaining PlantUML diagrams to complete the Required Diagram set
+defined in CODING_STANDARDS.md §7. All 10 required diagram types are now present.
+
+### Files Created
+- `diagrams/plantuml/activity-time-entry.puml` — Activity diagram: work item creation workflow (WorkItemService.CreateAsync)
+- `diagrams/plantuml/activity-admin-users.puml` — Activity diagram: admin user management (create/edit/deactivate/delete)
+- `diagrams/plantuml/state-workitem.puml` — State diagram: WorkItem lifecycle (Active/Frozen/Deleted + EnforceOwnership)
+- `diagrams/plantuml/state-user.puml` — State diagram: User lifecycle (IsActive flag + future OIDC provisioning)
+- `diagrams/plantuml/erd-physical.puml` — Physical schema: DDL-level MariaDB schema (core + catalog + auth tables)
+
+### Files Modified
+- `diagrams/README.md` — Required Diagrams table rows 6/7/9 marked ✅; directory structure updated; Diagram Overview entries 14–18 added
+- `AI/CHANGES.csv` — 6 new entries appended
+- `AI/COMMANDS.sh` — session commands appended
+
+### Commit
+- `docs: add activity, state, and physical schema diagrams — complete required diagram set`
