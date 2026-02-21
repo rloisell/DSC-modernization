@@ -1,0 +1,92 @@
+@startuml Reporting Dashboard Sequence
+!theme plain
+autonumber
+
+actor "User / Admin" as Actor
+participant "Browser\n(Reports.jsx)" as Browser
+participant "ReportsController" as Controller
+participant "ReportService" as Service
+participant "ApplicationDbContext" as DbContext
+participant "GlobalException\nHandler" as GEH
+database "MariaDB\n(dsc_dev)" as DB
+
+Actor -> Browser : Navigate to /reports\n(or admin-reports)
+
+== Page Load (project filter list) ==
+
+Browser -> Controller : GET /api/projects\n(X-User-Id header)
+activate Controller
+Controller -> Service : GetSummaryAsync via IProjectService
+Service -> DbContext : Projects.Where(IsActive)\n.OrderBy(Name)
+DbContext -> DB : SELECT * FROM Projects WHERE IsActive = 1
+DB --> DbContext : Project[]
+DbContext --> Service : Project[]
+Service --> Controller : ProjectDto[]
+Controller --> Browser : 200 OK — ProjectDto[]
+deactivate Controller
+
+Browser -> Browser : Populate Project filter\ndropdown (+ "All Projects" sentinel)
+
+== Report Generation ==
+
+Actor -> Browser : Select date range + optional project\nClick "Generate Report"
+
+Browser -> Controller : GET /api/reports/summary\n?from=YYYY-MM-DD&to=YYYY-MM-DD\n&projectId={UUID|omit}\n(X-User-Id header)
+activate Controller
+
+note right of Controller
+  Rate limited: 30 req/min per IP
+  Auth middleware validates X-User-Id
+  (non-admin users only see own data;
+   admin sees all users)
+end note
+
+Controller -> Service : GetSummaryAsync(from, to, projectId?, userId, requesterId)
+activate Service
+
+Service -> DbContext : WorkItems\n  .Include(wi => wi.Project)\n  .Include(wi => wi.User)\n  .Include(wi => wi.TimeEntries)\n  .Where(filters)
+activate DbContext
+
+DbContext -> DB : SELECT wi.*, p.*, u.*, te.*\nFROM WorkItems wi\nJOIN Projects p ON wi.ProjectId = p.Id\nJOIN Users u ON wi.UserId = u.Id\nLEFT JOIN TimeEntries te ON te.WorkItemId = wi.Id\nWHERE wi.Date BETWEEN @from AND @to\n  [AND wi.ProjectId = @projectId]\n  [AND wi.UserId = @userId]
+DB --> DbContext : WorkItem + TimeEntry rows
+deactivate DbContext
+
+Service -> Service : Aggregate by project:\n  totalHours = SUM(te.Hours)\n  itemCount = COUNT(wi.Id)
+Service -> Service : Aggregate by user:\n  totalHours, itemCount per user
+Service -> Service : Aggregate by activityCode:\n  hours per code
+Service -> Service : Build ReportSummaryDto:\n  { summary, byProject[], byUser[], byActivityCode[] }
+
+Service --> Controller : ReportSummaryDto
+deactivate Service
+
+Controller --> Browser : 200 OK — ReportSummaryDto
+deactivate Controller
+
+Browser -> Browser : Render dashboard:\n  • Summary cards (total hours, items, projects)\n  • Project breakdown table\n  • User breakdown table (admin only)\n  • Activity code breakdown
+
+Actor -> Actor : Reads report data
+
+== Error Cases ==
+
+alt Invalid date range (to < from)
+    Controller --> Browser : 400 ProblemDetails\n"Date range invalid"
+else projectId not a valid GUID
+    note over Controller : ASP.NET model binding\nrejects malformed value
+    Controller --> Browser : 400 ProblemDetails\n"The value 'x' is not valid."
+    note right of Browser
+      Frontend strips blank / sentinel
+      values before sending request —\n      avoids '0'-key bug on filter clear
+    end note
+else Non-admin requesting another user's data
+    Service ..> GEH : ForbiddenException
+    GEH --> Browser : 403 ProblemDetails
+end
+
+note bottom
+  Regular users see only their own WorkItems (userId filter applied).
+  Admin / Manager role sees all users when no userId filter is passed.
+  Aggregation happens in-process after a single wide JOIN query — no
+  N+1 queries.
+end note
+
+@enduml

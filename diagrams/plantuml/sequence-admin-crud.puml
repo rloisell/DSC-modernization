@@ -1,0 +1,142 @@
+@startuml Admin Project Assignments CRUD Sequence
+!theme plain
+autonumber
+
+actor "Administrator" as Admin
+participant "Browser\n(AdminProjectAssignments.jsx)" as Browser
+participant "AdminToken\nAuthHandler" as Auth
+participant "AdminProjectAssignments\nController" as Controller
+participant "ApplicationDbContext" as DbContext
+participant "GlobalException\nHandler" as GEH
+database "MariaDB\n(dsc_dev)" as DB
+
+== Page Load (Read All) ==
+
+Admin -> Browser : Navigate to /admin/project-assignments
+
+Browser -> Auth : GET /api/admin/project-assignments\nX-Admin-Token header
+activate Auth
+Auth -> Auth : Validate token / dev bypass
+Auth --> Controller : pass-through
+deactivate Auth
+
+activate Controller
+
+note right of Controller
+  Rate limited: 60 req/min per IP
+  (AdminRateLimit policy)
+end note
+
+Controller -> DbContext : ProjectAssignments\n  .Include(pa => pa.Project)\n  .Include(pa => pa.User)\n    .ThenInclude(u => u.Position)\n  .ToListAsync()
+activate DbContext
+DbContext -> DB : SELECT pa.*, p.*, u.*, pos.*\nFROM ProjectAssignments pa\nJOIN Projects p ON pa.ProjectId = p.Id\nJOIN Users u ON pa.UserId = u.Id\nLEFT JOIN Positions pos ON u.PositionId = pos.Id
+DB --> DbContext : rows
+deactivate DbContext
+
+Controller -> Controller : Map to ProjectAssignmentDto[]\n(includes UserPosition = u.Position.Title)
+Controller --> Browser : 200 OK — ProjectAssignmentDto[]
+deactivate Controller
+
+Browser -> Browser : Populate filter dropdowns:\n  • Project (from assignments)\n  • User (unique, from assignments)\n  • Position (unique, from assignments)
+Browser -> Browser : Render assignments table:\n  Project | User | Position | Role | Est. Hours
+
+== Filtering (Client-Side) ==
+
+Admin -> Browser : Select Project / User / Position filter
+Browser -> Browser : Apply combinedFilter useMemo:\n  assignments.filter(a =>\n    (!filterProjectId || a.projectId == filterProjectId)\n    && (!filterUserId || a.userId == filterUserId)\n    && (!filterPosition || a.userPosition == filterPosition)\n  )
+Browser -> Browser : Re-render filtered rows\n(no API call needed)
+
+== Create (Assign User to Project) ==
+
+Admin -> Browser : Click "Add Assignment"\nFill form: project, user, role, est. hours
+
+Browser -> Auth : POST /api/admin/project-assignments\nX-Admin-Token\nBody: { projectId, userId, role, estimatedHours }
+activate Auth
+Auth --> Controller : pass-through
+deactivate Auth
+
+activate Controller
+Controller -> DbContext : Check for duplicate:\nProjectAssignments.FindAsync(projectId, userId)
+activate DbContext
+DbContext -> DB : SELECT 1 FROM ProjectAssignments\nWHERE ProjectId = ? AND UserId = ?
+DB --> DbContext : null (not found)
+deactivate DbContext
+
+Controller -> DbContext : ProjectAssignments.Add(new ProjectAssignment { ... })
+activate DbContext
+Controller -> DbContext : SaveChangesAsync()
+DbContext -> DB : INSERT INTO ProjectAssignments (...)
+DB --> DbContext : 1 row affected
+deactivate DbContext
+
+Controller --> Browser : 201 Created — ProjectAssignmentDto\n(UserPosition = null for new records)
+deactivate Controller
+
+Browser -> Browser : Append new row to assignments state\nFilters automatically include new entry
+
+alt Duplicate assignment
+    Controller --> Browser : 409 Conflict\nProblemDetails "Assignment already exists"
+end
+
+== Edit Assignment ==
+
+Admin -> Browser : Click Edit button on assignment row\nFill form: role, estimatedHours
+
+Browser -> Auth : PUT /api/admin/project-assignments/{projectId}/{userId}\nX-Admin-Token\nBody: { role, estimatedHours }
+activate Auth
+Auth --> Controller : pass-through
+deactivate Auth
+
+activate Controller
+Controller -> DbContext : ProjectAssignments.FindAsync(projectId, userId)
+activate DbContext
+DbContext -> DB : SELECT * FROM ProjectAssignments\nWHERE ProjectId = ? AND UserId = ?
+DB --> DbContext : ProjectAssignment
+deactivate DbContext
+
+Controller -> DbContext : Update role + estimatedHours\nSaveChangesAsync()
+activate DbContext
+DbContext -> DB : UPDATE ProjectAssignments\nSET Role = ?, EstimatedHours = ?\nWHERE ProjectId = ? AND UserId = ?
+DB --> DbContext : 1 row affected
+deactivate DbContext
+
+Controller --> Browser : 200 OK — ProjectAssignmentDto
+deactivate Controller
+
+Browser -> Browser : Update row in assignments state
+
+alt Assignment not found
+    Controller ..> GEH : NotFoundException
+    GEH --> Browser : 404 ProblemDetails
+end
+
+== Remove Assignment ==
+
+Admin -> Browser : Click Remove button on assignment row\nConfirm dialog
+
+Browser -> Auth : DELETE /api/admin/project-assignments/{projectId}/{userId}\nX-Admin-Token
+activate Auth
+Auth --> Controller : pass-through
+deactivate Auth
+
+activate Controller
+Controller -> DbContext : ProjectAssignments.FindAsync(projectId, userId)
+DbContext -> DB : SELECT …
+DB --> DbContext : ProjectAssignment
+Controller -> DbContext : ProjectAssignments.Remove(pa)\nSaveChangesAsync()
+DbContext -> DB : DELETE FROM ProjectAssignments\nWHERE ProjectId = ? AND UserId = ?
+DB --> DbContext : 1 row affected
+Controller --> Browser : 204 No Content
+deactivate Controller
+
+Browser -> Browser : Remove row from assignments state
+Browser --> Admin : Assignment removed
+
+note bottom
+  All admin endpoints share the same AdminToken authentication handler.
+  In Development (ASPNETCORE_ENVIRONMENT=Development), the token check
+  can be bypassed for local testing by setting Admin:RequireToken=false.
+  In production this must ALWAYS be true.
+end note
+
+@enduml

@@ -1,3 +1,31 @@
+## 2026-02-20 — SVG Diagram Exports + Missing Diagram Coverage
+
+**Objective**: Export all Draw.io files to SVG for GitHub rendering; identify and fill diagram gaps for features implemented since the original diagram set.
+
+### SVG Export
+- Used draw.io CLI (`--export --format svg --embed-diagram --border 10`) to generate GitHub-renderable SVGs
+- All 10 existing `diagrams/drawio/*.drawio` → `diagrams/drawio/svg/*.svg` (11 total including new diagrams)
+- Both `diagrams/data-model/*.drawio` → `diagrams/data-model/svg/*.svg`
+- `--embed-diagram` flag creates SVGs that contain the Draw.io source XML — both renderable on GitHub and re-editable in Draw.io
+
+### New Diagrams — Gap Coverage
+Three diagram gaps identified vs. implemented features:
+
+1. **`sequence-admin-seed.drawio`** — Draw.io equivalent was missing for the pre-existing `sequence-admin-seed.puml`
+   - Covers: AdminToken auth handler (with dev bypass), loop over users/UserAuth, upsert project/dept, SaveChanges, 200 response
+2. **`sequence-reporting-dashboard.puml` + `.drawio`** — No diagram existed for the Reporting Dashboard feature
+   - Covers: page load (project dropdown), report generation (date + project filter), ReportService single-query aggregation, all error cases (400/403)
+3. **`sequence-admin-crud.puml` + `.drawio`** — No diagram existed for the Admin Project Assignments CRUD operations
+   - Covers: Read All (ThenInclude Position), Client-Side Filtering (useMemo, no API calls), Create (409 on duplicate), Edit (404 on missing), Remove (204)
+
+### Documentation
+- `diagrams/README.md` fully rewritten: directory structure map, all 13 diagrams documented with source + SVG links, SVG regeneration scripts, editing instructions
+
+### Build / Test
+- No backend or frontend code changes — documentation and diagram files only
+
+---
+
 ## 2026-02-20 — Project Assignments Fix, Button Consistency, ERD Diagrams (pending commit)
 
 **Objective**: Fix the "Role" column in Admin Project Assignments (should be "Position"), add User/Position filters, standardise button variants across all admin pages, and generate ERD diagrams + compare-contrast document for both data models.

@@ -1,116 +1,259 @@
-# DSC Modernization Diagram Documentation
+# DSC Modernization — Diagram Documentation
 
-This directory contains Draw.io (diagrams.net) diagrams documenting the architecture, domain model, and workflows of the DSC (Daily Status & Charges) modernization project.
+This directory contains all architecture, data model, and workflow diagrams for the DSC (Daily Status & Charges) modernization project.
+
+---
+
+## Directory Structure
+
+```
+diagrams/
+├── README.md                  ← this file
+├── drawio/                    ← editable Draw.io source files (.drawio)
+│   ├── svg/                   ← exported SVG files — render natively on GitHub
+│   │   ├── api-architecture.svg
+│   │   ├── component-diagram.svg
+│   │   ├── deployment.svg
+│   │   ├── domain-model.svg
+│   │   ├── health-check-sequence.svg
+│   │   ├── sequence-admin-crud.svg
+│   │   ├── sequence-admin-seed.svg
+│   │   ├── sequence-reporting-dashboard.svg
+│   │   ├── sequence-time-entry.svg
+│   │   ├── service-layer.svg
+│   │   └── use-cases.svg
+│   ├── api-architecture.drawio
+│   ├── component-diagram.drawio
+│   ├── deployment.drawio
+│   ├── domain-model.drawio
+│   ├── health-check-sequence.drawio
+│   ├── sequence-admin-crud.drawio
+│   ├── sequence-admin-seed.drawio
+│   ├── sequence-reporting-dashboard.drawio
+│   ├── sequence-time-entry.drawio
+│   ├── service-layer.drawio
+│   └── use-cases.drawio
+├── plantuml/                  ← PlantUML source files (.puml)
+│   ├── api-architecture.puml
+│   ├── component-diagram.puml
+│   ├── deployment.puml
+│   ├── domain-model.puml
+│   ├── health-check-sequence.puml
+│   ├── sequence-admin-crud.puml
+│   ├── sequence-admin-seed.puml
+│   ├── sequence-reporting-dashboard.puml
+│   ├── sequence-time-entry.puml
+│   ├── service-layer.puml
+│   └── use-cases.puml
+└── data-model/                ← ERD source files + exported SVGs
+    ├── svg/
+    │   ├── erd-current.svg
+    │   └── erd-java-legacy.svg
+    ├── erd-current.drawio
+    ├── erd-current.puml
+    ├── erd-java-legacy.drawio
+    └── erd-java-legacy.puml
+```
+
+---
 
 ## Diagram Overview
 
-### 1. Domain Model (diagrams/drawio/domain-model.drawio.svg)
-**Purpose:** Domain entity overview and key relationships.
+### Architecture Diagrams
 
-**Key Features:**
-- Core domain entities (User, Project, WorkItem, TimeEntry, ProjectAssignment)
-- Legacy compatibility entities (UserAuth, ExternalIdentity)
-- Catalog domain (Position, Department, ExpenseCategory, ActivityCode, NetworkNumber)
-- Relationship highlights
+#### 1. Domain Model
+**Source:** [`drawio/domain-model.drawio`](drawio/domain-model.drawio) | **SVG:** [`drawio/svg/domain-model.svg`](drawio/svg/domain-model.svg) | **PlantUML:** [`plantuml/domain-model.puml`](plantuml/domain-model.puml)
 
-### 2. ERD (diagrams/drawio/erd.drawio.svg)
-**Purpose:** Database-focused ERD with primary keys and foreign keys.
-
-**Key Features:**
-- Core tables and join tables
-- Key relationships between User, WorkItem, TimeEntry, ProjectAssignment
-- Catalog tables and activity options
-
-### 3. API Architecture (diagrams/drawio/api-architecture.drawio.svg)
-**Purpose:** Component view of the API layers, middleware, controllers, and data flow.
-
-**Key Features:**
-- API middleware pipeline (CORS, Rate Limiting, Authentication, Authorization)
-- Controller separation (public vs admin)
-- DTO patterns and seeding services
-
-### 4. Use Cases (diagrams/drawio/use-cases.drawio.svg)
-**Purpose:** Actor-based use case diagram showing what users and administrators can do.
-
-**Key Features:**
-- End-user workflows (time tracking, project viewing)
-- Admin workflows (user management, catalog administration, data seeding)
-- Planned features (OIDC login)
-
-### 5. Deployment Architecture (diagrams/drawio/deployment.drawio.svg)
-**Purpose:** Deployment view showing development and production environments.
-
-**Key Features:**
-- Development setup (Vite, Kestrel, MariaDB on localhost)
-- Production tier separation (web, app, database)
-- Planned OIDC integration (Keycloak)
-
-### 6. Sequence Diagrams
-
-#### Admin Seed Test Data (diagrams/drawio/sequence-admin-seed.drawio.svg)
-**Purpose:** Shows the flow for seeding legacy test data via the admin endpoint.
-
-#### Time Entry Creation (diagrams/drawio/sequence-time-entry.drawio.svg)
-**Purpose:** Shows the flow for creating a work item with legacy activity fields.
-
-### 7. Component Diagram (diagrams/drawio/component-diagram.drawio.svg)
-**Purpose:** Logical component view showing all major packages and dependencies.
-
-**Key Features:**
-- Frontend components (pages, services, UI components)
-- Backend controllers, security, data services
-- Data layer entities and migrations
+Entity overview and key relationships for the current (.NET) model.
+- Core entities: User, Project, WorkItem, TimeEntry, ProjectAssignment
+- Catalog entities: Position, Department, Role, ExpenseCategory, ExpenseOption, ActivityCode, NetworkNumber, Budget, CpcCode, DirectorCode, ReasonCode, CalendarCategory
+- Auth entities: ExternalIdentity, UserAuth (legacy bridge)
 
 ---
 
-## Using These Diagrams with Spec-Kitty
+#### 2. API Architecture
+**Source:** [`drawio/api-architecture.drawio`](drawio/api-architecture.drawio) | **SVG:** [`drawio/svg/api-architecture.svg`](drawio/svg/api-architecture.svg) | **PlantUML:** [`plantuml/api-architecture.puml`](plantuml/api-architecture.puml)
 
-### 1. Feature Specification Workflow
-
-When creating a new Spec-Kitty feature (e.g., `spec-kitty specify`):
-
-1. **Identify actors and use cases** from `use-cases.drawio.svg`
-2. **Map domain entities** from `domain-model.drawio.svg` and `erd.drawio.svg`
-3. **Define API contracts** using `api-architecture.drawio.svg` and `component-diagram.drawio.svg`
-4. **Specify acceptance criteria** using sequence diagrams as templates
-5. **Deployment considerations** from `deployment.drawio.svg`
+Component view of the API layers, middleware pipeline, controllers, and data flow.
+- Middleware pipeline: CORS → Rate Limiting → Authentication → Authorization → Routing
+- Public controllers vs. admin controllers (token-gated)
+- DTO patterns, global exception handler, seeding services
 
 ---
 
-## Editing Diagrams (Draw.io)
+#### 3. Service Layer Architecture
+**Source:** [`drawio/service-layer.drawio`](drawio/service-layer.drawio) | **SVG:** [`drawio/svg/service-layer.svg`](drawio/svg/service-layer.svg) | **PlantUML:** [`plantuml/service-layer.puml`](plantuml/service-layer.puml)
 
-These diagrams are stored as editable Draw.io SVGs.
+Detailed class-level view of the service layer introduced in the modernization sprint.
+- Service interfaces & implementations: `IWorkItemService`, `IReportService`, `IProjectService`, `IAuthService`
+- Infrastructure: `GlobalExceptionHandler`, `DatabaseHealthCheck`, `DomainException` hierarchy
+- Controller → Service → DbContext wiring
+
+---
+
+#### 4. Component Diagram
+**Source:** [`drawio/component-diagram.drawio`](drawio/component-diagram.drawio) | **SVG:** [`drawio/svg/component-diagram.svg`](drawio/svg/component-diagram.svg) | **PlantUML:** [`plantuml/component-diagram.puml`](plantuml/component-diagram.puml)
+
+Logical component view of all major packages and dependencies.
+- Frontend components: pages, services, hooks, UI components
+- Backend: controllers, security, data services
+- Data layer: EF Core entities and migrations
+
+---
+
+#### 5. Deployment Architecture
+**Source:** [`drawio/deployment.drawio`](drawio/deployment.drawio) | **SVG:** [`drawio/svg/deployment.svg`](drawio/svg/deployment.svg) | **PlantUML:** [`plantuml/deployment.puml`](plantuml/deployment.puml)
+
+Development and production deployment topology.
+- Development: Vite dev server + Kestrel API + MariaDB on localhost
+- Production: reverse proxy + app server + managed DB tier
+- Planned: Keycloak / BC Gov OIDC integration
+
+---
+
+#### 6. Use Cases
+**Source:** [`drawio/use-cases.drawio`](drawio/use-cases.drawio) | **SVG:** [`drawio/svg/use-cases.svg`](drawio/svg/use-cases.svg) | **PlantUML:** [`plantuml/use-cases.puml`](plantuml/use-cases.puml)
+
+Actor-based use case diagram.
+- End-user: time tracking (create/edit/delete own work items), project viewing, reporting dashboard
+- Administrator: user management, catalog administration, project assignments, reporting, data seeding
+- OpenShift Probe: liveness/readiness health checks
+
+---
+
+### Sequence Diagrams
+
+#### 7. Time Entry Creation
+**Source:** [`drawio/sequence-time-entry.drawio`](drawio/sequence-time-entry.drawio) | **SVG:** [`drawio/svg/sequence-time-entry.svg`](drawio/svg/sequence-time-entry.svg) | **PlantUML:** [`plantuml/sequence-time-entry.puml`](plantuml/sequence-time-entry.puml)
+
+End-to-end flow for a user creating a work item with legacy activity fields.
+Covers auth validation, WorkItemService, EF Core insert, response mapping.
+
+---
+
+#### 8. Admin Seed Test Data
+**Source:** [`drawio/sequence-admin-seed.drawio`](drawio/sequence-admin-seed.drawio) | **SVG:** [`drawio/svg/sequence-admin-seed.svg`](drawio/svg/sequence-admin-seed.svg) | **PlantUML:** [`plantuml/sequence-admin-seed.puml`](plantuml/sequence-admin-seed.puml)
+
+Flow for seeding legacy test data via `POST /api/admin/seed/test-data`.
+Covers admin token auth (with dev bypass), TestDataSeeder, transactional upsert of users, UserAuth, project, and department.
+
+---
+
+#### 9. Health Check Monitoring
+**Source:** [`drawio/health-check-sequence.drawio`](drawio/health-check-sequence.drawio) | **SVG:** [`drawio/svg/health-check-sequence.svg`](drawio/svg/health-check-sequence.svg) | **PlantUML:** [`plantuml/health-check-sequence.puml`](plantuml/health-check-sequence.puml)
+
+Flow for liveness (`/health/live`) and readiness (`/health/ready`) probe endpoints.
+Covers DatabaseHealthCheck using `db.Database.CanConnectAsync()`, browser health dashboard polling.
+
+---
+
+#### 10. Reporting Dashboard *(new)*
+**Source:** [`drawio/sequence-reporting-dashboard.drawio`](drawio/sequence-reporting-dashboard.drawio) | **SVG:** [`drawio/svg/sequence-reporting-dashboard.svg`](drawio/svg/sequence-reporting-dashboard.svg) | **PlantUML:** [`plantuml/sequence-reporting-dashboard.puml`](plantuml/sequence-reporting-dashboard.puml)
+
+Full flow for generating a time/expense summary report.
+- Page load: project list loaded for filter dropdown
+- Report generation: `GET /api/reports/summary?from=...&to=...[&projectId=UUID]`
+- ReportService: single wide JOIN query on WorkItems + TimeEntries, in-process aggregation (no N+1)
+- Output: summary cards, project breakdown, user breakdown (admin), activity code breakdown
+- Error cases: invalid date range (400), malformed GUID (400), cross-user access by non-admin (403)
+
+---
+
+#### 11. Admin Project Assignments CRUD *(new)*
+**Source:** [`drawio/sequence-admin-crud.drawio`](drawio/sequence-admin-crud.drawio) | **SVG:** [`drawio/svg/sequence-admin-crud.svg`](drawio/svg/sequence-admin-crud.svg) | **PlantUML:** [`plantuml/sequence-admin-crud.puml`](plantuml/sequence-admin-crud.puml)
+
+Full CRUD flow for the Admin Project Assignments page.
+- Page load: `GetAll` with `ThenInclude(u => u.Position)` for UserPosition column
+- Client-side filtering: Project / User / Position dropdowns via `useMemo` (no extra API calls)
+- Create: duplicate check → INSERT → 201 Created (or 409 if duplicate)
+- Edit: SELECT → UPDATE → 200 OK (or 404 if not found)
+- Remove: DELETE → 204 No Content
+- All endpoints protected by AdminToken auth handler + rate limiting
+
+---
+
+### Data Model ERDs
+
+#### 12. ERD — Current (.NET / EF Core 9) *(new)*
+**Source:** [`data-model/erd-current.drawio`](data-model/erd-current.drawio) | **SVG:** [`data-model/svg/erd-current.svg`](data-model/svg/erd-current.svg) | **PlantUML:** [`data-model/erd-current.puml`](data-model/erd-current.puml)
+
+Database ERD of the current .NET / EF Core 9 / MariaDB schema.
+Entity groups: Identity & Auth, Organisation, Projects, Work Tracking, Expense & Catalog, Calendar.
+See [docs/data-model/README.md](../docs/data-model/README.md) for full compare/contrast with Java legacy.
+
+---
+
+#### 13. ERD — Java Legacy (Hibernate ORM) *(new)*
+**Source:** [`data-model/erd-java-legacy.drawio`](data-model/erd-java-legacy.drawio) | **SVG:** [`data-model/svg/erd-java-legacy.svg`](data-model/svg/erd-java-legacy.svg) | **PlantUML:** [`data-model/erd-java-legacy.puml`](data-model/erd-java-legacy.puml)
+
+Database ERD of the original Java application's Hibernate ORM model.
+Entity groups: Person & Authentication, Organisation & Department, Project & Activity, Reference / Catalog, Calendar.
+See [docs/data-model/README.md](../docs/data-model/README.md) for full compare/contrast with current .NET model.
+
+---
+
+## Editing Diagrams
 
 ### Option 1: Draw.io Desktop App
-- Open the `.drawio.svg` files directly in the Draw.io app.
+Open any `.drawio` file directly in the Draw.io desktop application (installed at `/Applications/draw.io.app`).
 
 ### Option 2: diagrams.net (Web)
-- Visit https://app.diagrams.net
-- Drag and drop the `.drawio.svg` files into the editor.
+Visit [https://app.diagrams.net](https://app.diagrams.net) and drag/drop any `.drawio` file.
 
 ### Option 3: VS Code Extension
-- Install a Draw.io extension (e.g., `hediet.vscode-drawio`) and open the SVGs.
+Install the [`hediet.vscode-drawio`](https://marketplace.visualstudio.com/items?itemName=hediet.vscode-drawio) extension.
+
+### Viewing on GitHub
+The rendered SVG files in `drawio/svg/` and `data-model/svg/` display natively in GitHub's file browser and can be embedded in Markdown:
+
+```markdown
+![Domain Model](diagrams/drawio/svg/domain-model.svg)
+```
+
+---
+
+## Regenerating SVG Exports
+
+After editing a `.drawio` source file, regenerate its SVG export:
+
+```bash
+# Single file
+/Applications/draw.io.app/Contents/MacOS/draw.io \
+  --export --format svg --embed-diagram --border 10 \
+  --output diagrams/drawio/svg/my-diagram.svg \
+  diagrams/drawio/my-diagram.drawio
+
+# All drawio/ sources at once
+DRAW="/Applications/draw.io.app/Contents/MacOS/draw.io"
+for f in diagrams/drawio/*.drawio; do
+  name=$(basename "$f" .drawio)
+  "$DRAW" --export --format svg --embed-diagram --border 10 \
+    --output "diagrams/drawio/svg/$name.svg" "$f"
+done
+
+# data-model/ sources
+for f in diagrams/data-model/*.drawio; do
+  name=$(basename "$f" .drawio)
+  "$DRAW" --export --format svg --embed-diagram --border 10 \
+    --output "diagrams/data-model/svg/$name.svg" "$f"
+done
+```
 
 ---
 
 ## Diagram Maintenance
 
 **When to update:**
-- New entities added to `src/DSC.Data/Models/`
-- New controllers added to `src/DSC.Api/Controllers/`
+- New entities added to `src/DSC.Api/` models
+- New controllers or endpoints added
 - New security policies or middleware
-- New use cases or user stories
+- New use cases / user stories
 - New deployment tiers or infrastructure
 
 **Validation:**
-- Cross-reference diagram relationships with actual EF Core navigation properties
-- Verify sequence diagrams match actual controller logic
+- Cross-reference diagram relationships with actual EF Core navigation properties in models
+- Verify sequence diagrams match controller/service logic
 
 ---
 
-## Questions or Additions?
-
-If you need additional diagrams (e.g., state machine for WorkItem lifecycle, detailed ERD updates), create a request and follow the Spec-Kitty workflow to specify the new documentation artifact.
-
-**Generated:** 2026-02-19
-**Maintainer:** AI-assisted documentation for DSC-modernization project
+**Generated:** 2026-02-20 | **Maintainer:** AI-assisted documentation for DSC-modernization project

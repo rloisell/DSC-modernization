@@ -2,6 +2,18 @@
 
 ---
 
+## ✅ SVG Diagram Exports + Gap Coverage (2026-02-20)
+
+| Item | Status | Detail |
+|------|--------|--------|
+| Export all drawio → SVG for GitHub rendering | ✅ Done | draw.io CLI `--embed-diagram`; 11 SVGs in `drawio/svg/`, 2 in `data-model/svg/` |
+| `sequence-admin-seed.drawio` (was missing Draw.io version) | ✅ Done | Draw.io equivalent of pre-existing puml now created and exported |
+| `sequence-reporting-dashboard` in both formats | ✅ Done | `.puml` + `.drawio` + `.svg` all created |
+| `sequence-admin-crud` in both formats | ✅ Done | `.puml` + `.drawio` + `.svg` all created; covers Read All, Client-Side Filter, Create, Edit, Remove |
+| `diagrams/README.md` rewritten | ✅ Done | Full directory map, 13 diagrams documented with source + SVG links, SVG re-generation scripts |
+
+---
+
 ## ✅ Project Assignments Fix + Button Consistency + ERD Diagrams (pending commit — 2026-02-20)
 
 | Item | Status | Detail |
