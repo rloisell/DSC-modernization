@@ -40,14 +40,42 @@ first deployment to dev.
 
 ### Pending Code Changes (Not Yet Committed)
 
-The following items are identified but not yet implemented. They should be completed
-before promoting to test or prod:
+The following items are identified but not yet implemented. Complete before promoting to test or prod.
+Full detail for each item is in `AI/nextSteps.md` under the "Standards Compliance Gaps" section.
 
-| Artefact | Location | Status |
-|---|---|---|
-| Datree policy enforcement workflow | `tenant-gitops-be808f/.github/workflows/policy-enforcement.yaml` | ❌ not yet created — see §7.2 of `EmeraldDeploymentAnalysis.md` |
-| Trivy image vulnerability scan | `.github/workflows/build-and-push.yml` (step after image push) | ❌ not yet added |
-| Build and unit test workflow | `.github/workflows/build-and-test.yml` | ❌ not yet created |
+| # | Artefact | Location | Severity |
+|---|---|---|---|
+| C1 | Replace `dotnet.yml` with proper `build-and-test.yml` | `.github/workflows/` | High |
+| C2 | Add Vitest frontend test framework + smoke tests | `src/DSC.WebClient/` | High |
+| C3 | Add Trivy image scan (API + frontend) | `.github/workflows/build-and-push.yml` | Medium |
+| C4 | Add DSC app chart to Datree policy-enforcement workflow | `tenant-gitops-be808f/.github/workflows/policy-enforcement.yaml` | High |
+| C5 | Clean up stale Datree TODO comment in gitops `ci.yml` | `tenant-gitops-be808f/.github/workflows/ci.yml` | Low |
+
+#### C1 Fix — `build-and-test.yml`
+Delete `.github/workflows/dotnet.yml` and create `.github/workflows/build-and-test.yml`:
+- Target .NET 10 (not 8.0)
+- Triggers: push to `develop`, PR to `main`/`develop`
+- Jobs: `dotnet test` + `npm run build` (+ `npm test` once C2 is done)
+
+#### C2 Fix — Frontend tests
+```bash
+cd src/DSC.WebClient
+npm install --save-dev vitest @testing-library/react @testing-library/jest-dom jsdom
+```
+Add `"test": "vitest run"` to `package.json` scripts.
+Add `test: { environment: 'jsdom', globals: true }` to `vite.config.js`.
+
+#### C3 Fix — Trivy in `build-and-push.yml`
+Add two `aquasecurity/trivy-action@master` steps after image push (one for `dsc-api`, one for
+`dsc-frontend`). Informational only — does not fail the pipeline.
+
+#### C4 Fix — Datree for `charts/dsc-app`
+In `tenant-gitops-be808f/.github/workflows/policy-enforcement.yaml`, add a second
+`Policy Enforcement — DSC App` step (after the existing `charts/gitops` step) that runs
+`helm datree test` against `charts/dsc-app` with the appropriate env values.
+
+#### C5 Fix — Gitops `ci.yml` comment
+Replace the large stale Datree comment block with a 3-line pointer to `policy-enforcement.yaml`.
 
 ---
 

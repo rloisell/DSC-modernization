@@ -2,7 +2,268 @@
 
 ---
 
-## ✅ SVG Diagram Exports + Gap Coverage (2026-02-20)
+## 🔴 Standards Compliance Gaps — Audit 2026-02-21
+
+Audit of DSC-modernization (app repo + gitops `tenant-gitops-be808f`) against the
+updated standards in `EmeraldDeploymentAnalysis.md` and `CODING_STANDARDS.md`.
+
+### C1 — Replace `dotnet.yml` with proper `build-and-test.yml` ⚠️ HIGH
+
+**File:** `.github/workflows/dotnet.yml`
+**Problems:**
+- Targets `.NET 8.0` — project runs on .NET 10
+- Only triggers on push to `main`/`master` — should include `develop` branch and PRs to `develop`
+- Wraps `dotnet test` in `if [ -d "tests" ]` guard — stale pattern, tests always exist
+- Does not run frontend build or tests
+- Filename doesn't match template standard (`build-and-test.yml`)
+
+**Fix:** Delete `dotnet.yml` and create `.github/workflows/build-and-test.yml` per the standard
+skeleton in `EmeraldDeploymentAnalysis.md` §8.2. Triggers on push to `develop` and PRs to
+`main`/`develop`. Runs `dotnet test` + frontend build. Frontend tests require Gap C2 resolved first.
+
+---
+
+### C2 — Frontend has no test framework ⚠️ HIGH
+
+**File:** `src/DSC.WebClient/package.json`
+**Problem:** No `test` script, no Vitest/Jest, no React Testing Library installed. The standard
+`build-and-test.yml` requires `npm test` to succeed. CI will fail without a test runner.
+
+**Fix:** Install Vitest + React Testing Library. Add `"test": "vitest run"` script to `package.json`.
+Write at minimum one smoke test per page component. This is also a gap in the unit test P7 work
+(unit tests exist only in `DSC.Tests` on the API side).
+
+```bash
+cd src/DSC.WebClient
+npm install --save-dev vitest @testing-library/react @testing-library/jest-dom \
+  @testing-library/user-event jsdom
+```
+
+Add to `package.json` scripts: `"test": "vitest run"`.
+Add to `vite.config.js`: `test: { environment: 'jsdom', globals: true }`.
+
+---
+
+### C3 — No Trivy image vulnerability scan ⚠️ MEDIUM
+
+**File:** `.github/workflows/build-and-push.yml`
+**Problem:** No `aquasecurity/trivy-action@master` step after image push for either
+`dsc-api` or `dsc-frontend` images. Standard §8.1 requires this.
+
+**Fix:** Add two Trivy scan steps at the end of the `build` job (after both images are pushed):
+
+```yaml
+- name: Trivy scan — API image
+  if: github.event_name != 'pull_request'
+  uses: aquasecurity/trivy-action@master
+  with:
+    scan-type: image
+    image-ref: artifacts.developer.gov.bc.ca/be808f-docker-local/dsc-api:${{ steps.meta.outputs.image_tag }}
+    format: 'table'
+    ignore-unfixed: true
+    limit-severities-for-sarif: true
+    severity: HIGH,CRITICAL
+
+- name: Trivy scan — Frontend image
+  if: github.event_name != 'pull_request'
+  uses: aquasecurity/trivy-action@master
+  with:
+    scan-type: image
+    image-ref: artifacts.developer.gov.bc.ca/be808f-docker-local/dsc-frontend:${{ steps.meta.outputs.image_tag }}
+    format: 'table'
+    ignore-unfixed: true
+    limit-severities-for-sarif: true
+    severity: HIGH,CRITICAL
+```
+
+Note: Trivy needs to pull from Artifactory so must run after the `docker/login-action` step.
+Informational mode only (does not fail the pipeline).
+
+---
+
+### C4 — Gitops `policy-enforcement.yaml` does NOT cover `charts/dsc-app` ⚠️ HIGH
+
+**File:** `tenant-gitops-be808f/.github/workflows/policy-enforcement.yaml`
+**Problem:** The existing `policy-enforcement.yaml` runs Datree against `charts/gitops` (the
+umbrella chart for the shared `jag-network-tools`/`telnet` services). It does **not** run Datree
+against `charts/dsc-app`. The DataClass labels, privileged container checks, and other ISB
+policies on DSC pods are **not being validated**.
+
+**Fix:** Add a second `Policy Enforcement — DSC App` block to `policy-enforcement.yaml`.
+Note the working directory difference: the existing block uses a relative `charts/gitops` path
+from the repo root (no `env.policy-directory` trick), so the DSC block follows the same pattern:
+
+```yaml
+      - name: Policy Enforcement — DSC App
+        run: |
+          if [[ "$GITHUB_REF" == "refs/heads/main" ]] || [[ "$GITHUB_REF" == refs/tags/* ]]; then
+            helm datree test --ignore-missing-schemas --policy-config .github/policies.yaml \
+              --include-tests charts/dsc-app -- \
+              --namespace be808f-prod --values deploy/dsc-prod_values.yaml dsc-prod
+          elif [[ "$GITHUB_REF" == "refs/heads/test" ]]; then
+            helm datree test --ignore-missing-schemas --policy-config .github/policies.yaml \
+              --include-tests charts/dsc-app -- \
+              --namespace be808f-test --values deploy/dsc-test_values.yaml dsc-test
+          else
+            helm datree test --ignore-missing-schemas --policy-config .github/policies.yaml \
+              --include-tests charts/dsc-app -- \
+              --namespace be808f-dev --values deploy/dsc-dev_values.yaml dsc-dev
+          fi
+```
+
+Important: the existing workflow already installs + configures the Helm Datree plugin
+(offline mode) in the first `Policy Enforcement` step. The DSC block runs in the same job
+and can reuse the installed plugin — no need to reinstall.
+
+---
+
+### C5 — Gitops `ci.yml` Datree comment is stale ⚠️ LOW
+
+**File:** `tenant-gitops-be808f/.github/workflows/ci.yml`
+**Problem:** The Datree section comment still says "TO BE CONFIRMED WITH ISB" and has the old
+wrong `datreeio/action-datree@main` approach commented out. Now that `policy-enforcement.yaml`
+exists this should be updated to a clean pointer.
+
+**Fix:** Replace the entire commented Datree block with a brief note (3 lines):
+```yaml
+      # Datree security policy check is handled by the standalone
+      # .github/workflows/policy-enforcement.yaml workflow.
+      # No DATREE_TOKEN is required (Helm plugin offline mode).
+```
+
+---
+
+### Compliance Summary
+
+| Gap | File | Severity | Action |
+|-----|------|----------|--------|
+| C1 — `dotnet.yml` wrong version/triggers/content | `.github/workflows/dotnet.yml` | High | Replace with `build-and-test.yml` |
+| C2 — No frontend test framework | `DSC.WebClient/package.json` | High | Add Vitest + write smoke tests |
+| C3 — No Trivy scan | `.github/workflows/build-and-push.yml` | Medium | Add 2× Trivy steps |
+| C4 — Datree doesn't cover `charts/dsc-app` | `tenant-gitops-be808f/.github/workflows/policy-enforcement.yaml` | High | Add dsc-app Datree block |
+| C5 — Stale TODO in gitops `ci.yml` | `tenant-gitops-be808f/.github/workflows/ci.yml` | Low | Update comment |
+
+---
+
+## 🔵 Peer Repo DevOps Patterns — Summary (not yet in DSC)
+
+Patterns observed in `bcgov-c/JAG-JAM-CORNET`, `bcgov-c/JAG-LEA`, `bcgov-c/tenant-gitops-be808f`
+(existing workflows), and `bcgov/security-pipeline-templates`. These are **not yet in DSC**.
+Prioritised roughly: implement in a future hardening session.
+
+### P1 — Trivy Image Scan (See Gap C3 above — immediate fix)
+
+### P2 — GitHub Release Notes on `v*` Tag (Recommended — LOW effort)
+
+`tenant-gitops-be808f` already has `publish-on-tag.yml` using `softprops/action-gh-release@v2`
+with `generate_release_notes: true`. App repo doesn't. Add to `DSC-modernization`:
+
+```yaml
+# .github/workflows/publish-on-tag.yml
+on:
+  push:
+    tags: ['v*']
+permissions:
+  contents: write
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+```
+
+### P3 — CodeQL Static Application Security Testing (SAST) (Recommended — LOW effort)
+
+GitHub's built-in SAST for C# + JavaScript. Runs on push/PR to `main`/`develop`:
+
+```yaml
+# .github/workflows/codeql.yml
+on:
+  push: { branches: [main, develop] }
+  pull_request: { branches: [main, develop] }
+  schedule: [{ cron: '0 6 * * 1' }]  # weekly Monday 06:00 UTC
+
+jobs:
+  analyze:
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+    strategy:
+      matrix:
+        language: [csharp, javascript]
+    uses: github/codeql-action/init@v3, autobuild@v3, analyze@v3
+```
+
+Requires GitHub Advanced Security (GHAS) — available in `bcgov-c` private org.
+Results appear in GitHub Security → Code scanning tab.
+
+### P4 — OWASP Dependency Check (MEDIUM effort)
+
+Scans NuGet + npm packages against the NVD CVE database. More thorough than Trivy for
+supply-chain vulnerabilities. Available via `dependency-check/Dependency-Check_Action@main`.
+`bcgov/security-pipeline-templates` provides a ready-to-use action:
+
+```yaml
+- name: OWASP Dependency Check
+  uses: dependency-check/Dependency-Check_Action@main
+  with:
+    project: 'DSC-modernization'
+    path: '.'
+    format: 'HTML'
+    out: 'reports'
+```
+
+Note: First run takes 10–15 min to download the NVD database. Subsequent runs use a cached DB.
+
+### P5 — OWASP ZAP Dynamic Application Security Testing  (MEDIUM effort — requires running app)
+
+ZAP (Zed Attack Proxy) scans a **running application** for OWASP Top 10 vulnerabilities
+(SQL injection, XSS, etc.). `bcgov/security-pipeline-templates` provides a ZAP baseline action.
+Requires the app to be deployed (run against `be808f-dev` URL once deployed):
+
+```yaml
+- name: ZAP Baseline Scan
+  uses: zaproxy/action-baseline@v0.12.0
+  with:
+    target: 'https://dsc-api-be808f-dev.apps.emerald.devops.gov.bc.ca'
+    rules_file_name: '.zap/rules.tsv'
+    cmd_options: '-I'           # informational — don't fail pipeline
+```
+
+Best run as a nightly scheduled job after dev deployment, not on every PR.
+
+### P6 — Branch Protection Rules (Human step — no code required)
+
+Not a workflow, but required by ISB EA Option 2:
+- `rloisell/DSC-modernization`: Enable branch protection on `main` — require PR review before merge
+- `bcgov-c/tenant-gitops-be808f`: Enable branch protection on `main` — require PR review before merge
+
+These are configured in GitHub repo Settings → Branches.
+
+### P7 — Dependabot / Renovate for Automated Dependency Updates (LOW effort)
+
+Add `.github/dependabot.yml` to get automated PRs when NuGet or npm deps have security updates:
+
+```yaml
+version: 2
+updates:
+  - package-ecosystem: nuget
+    directory: /src/DSC.Api
+    schedule: { interval: weekly }
+  - package-ecosystem: npm
+    directory: /src/DSC.WebClient
+    schedule: { interval: weekly }
+```
+
+---
+
+
 
 | Item | Status | Detail |
 |------|--------|--------|
