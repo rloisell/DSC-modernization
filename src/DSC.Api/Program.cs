@@ -9,6 +9,22 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// ─── CORS ────────────────────────────────────────────────────────────────────
+// In production, replace the wildcard with explicit allowed origins.
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("DevCors", policy =>
+        policy.WithOrigins("http://localhost:5173", "http://localhost:5175", "https://localhost:5001")
+              .AllowAnyMethod()
+              .AllowAnyHeader());
+    options.AddPolicy("ProdCors", policy =>
+        policy.WithOrigins(
+            builder.Configuration.GetSection("AllowedOrigins").Get<string[]>()
+                ?? Array.Empty<string>())
+              .AllowAnyMethod()
+              .AllowAnyHeader());
+});
+
 // Add services to the container.
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -75,7 +91,22 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseRouting();
+app.UseCors(app.Environment.IsDevelopment() ? "DevCors" : "ProdCors");
 app.UseRateLimiter();
+
+// Security headers — defence-in-depth for all responses
+app.Use(async (context, next) =>
+{
+    context.Response.Headers["X-Content-Type-Options"] = "nosniff";
+    context.Response.Headers["X-Frame-Options"] = "DENY";
+    context.Response.Headers["X-XSS-Protection"] = "1; mode=block";
+    context.Response.Headers["Referrer-Policy"] = "strict-origin-when-cross-origin";
+    context.Response.Headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()";
+    // API-only CSP: no HTML served, so restrict everything
+    context.Response.Headers["Content-Security-Policy"] = "default-src 'none'; frame-ancestors 'none'";
+    await next();
+});
+
 app.UseAuthentication();
 app.UseAuthorization();
 
