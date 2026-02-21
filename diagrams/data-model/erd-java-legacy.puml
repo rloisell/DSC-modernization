@@ -1,0 +1,211 @@
+@startuml erd-java-legacy
+' DSC Java Application — Legacy Entity Relationship Diagram
+' Derived from Hibernate ORM entities in src/DSC.WebClient/external/DSC-java
+' Generated: 2026-02-20
+' Notation: Crow's foot (IE)
+
+skinparam monochrome false
+skinparam shadowing false
+skinparam linetype ortho
+skinparam classAttributeIconSize 0
+
+' ─── PEOPLE ──────────────────────────────────────────────────────────────────
+entity "User" as user {
+  * **empId** : INT <<PK>>
+  --
+  firstName : VARCHAR
+  lastName : VARCHAR
+  email : VARCHAR
+  ncsDate : DATE
+  roleID : INT
+  ' Note: roleID is a raw int, not a FK to a Roles table
+}
+
+entity "User_Auth" as userauth {
+  * **userName** : VARCHAR <<PK>>
+  --
+  password : VARCHAR
+  empId : INT <<FK>>
+}
+
+entity "User_User" as useruser {
+  * **empId** : INT <<PK, FK>>
+  * **empId2** : INT <<PK, FK>>
+  * **startDate** : DATE <<PK>>
+  --
+  endDate : DATE NULL
+}
+
+' ─── DEPARTMENT ──────────────────────────────────────────────────────────────
+entity "Department" as dept {
+  * **deptID** : INT <<PK>>
+  --
+  deptName : VARCHAR
+  managerEmpId : INT <<FK>>
+}
+
+entity "Department_User" as deptuser {
+  * **empId** : INT <<PK, FK>>
+  * **deptID** : INT <<PK, FK>>
+  * **startDate** : DATE <<PK>>
+  --
+  endDate : DATE NULL
+}
+
+' ─── POSITION ────────────────────────────────────────────────────────────────
+entity "Position" as pos {
+  * **positionID** : INT <<PK>>
+  --
+  latCode : INT
+  description : VARCHAR
+  status : VARCHAR
+  unionId : INT <<FK>>
+}
+
+entity "Union" as union {
+  * **unionId** : INT <<PK>>
+  --
+  unionName : VARCHAR
+}
+
+entity "User_Position" as userpos {
+  * **empId** : INT <<PK, FK>>
+  * **positionID** : INT <<PK, FK>>
+  * **startDate** : DATE <<PK>>
+  --
+  endDate : DATE NULL
+}
+
+' ─── PROJECT ─────────────────────────────────────────────────────────────────
+entity "Project" as project {
+  * **projectNo** : VARCHAR <<PK>>
+  --
+  description : VARCHAR
+}
+
+entity "Project_Activity" as projact {
+  * **activityID** : INT <<PK, FK>>
+  --
+  projectNo : VARCHAR <<FK>>
+  networkNumber : INT <<FK>>
+  activityCode : INT <<FK>>
+}
+
+' ─── ACTIVITY (core work record) ─────────────────────────────────────────────
+entity "Activity" as act {
+  * **activityID** : INT <<PK>>
+  --
+  date : DATE <<FK>>
+  description : VARCHAR
+  startTime : TIMESTAMP
+  endTime : TIMESTAMP
+  plannedDuration : TIME
+  actualDuration : INT
+  empId : INT <<FK>>
+  budgetId : INT <<FK>>
+  categoryID : INT <<FK>>
+}
+
+entity "Expense_Activity" as expact {
+  * **activityID** : INT <<PK, FK>>
+  --
+  directorCode : VARCHAR <<FK>>
+  reasonCode : VARCHAR <<FK>>
+  cpcCode : VARCHAR <<FK>>
+}
+
+' ─── REFERENCE / CATALOG ─────────────────────────────────────────────────────
+entity "Activity_Codes" as actcode {
+  * **activityCode** : INT <<PK>>
+  --
+  description : VARCHAR
+}
+
+entity "Network_Numbers" as netnum {
+  * **networkNumber** : INT <<PK>>
+  --
+  description : VARCHAR
+}
+
+entity "Budget" as budget {
+  * **budgetId** : INT <<PK>>
+  --
+  budgetDescription : VARCHAR
+}
+
+entity "Category" as category {
+  * **categoryID** : INT <<PK>>
+  --
+  categoryName : VARCHAR
+}
+
+entity "CPC_Code" as cpc {
+  * **cpcCode** : VARCHAR <<PK>>
+  --
+  description : VARCHAR
+}
+
+entity "Director_Code" as dircode {
+  * **directorCode** : VARCHAR <<PK>>
+  --
+  description : VARCHAR
+}
+
+entity "Reason_Code" as rcode {
+  * **reasonCode** : VARCHAR <<PK>>
+  --
+  description : VARCHAR
+}
+
+' ─── CALENDAR ────────────────────────────────────────────────────────────────
+entity "Calendar" as cal {
+  * **date** : DATE <<PK>>
+  --
+  calendarCategory : INT <<FK>>
+}
+
+entity "Calendar_Category" as calcat {
+  * **calendarCategory** : INT <<PK>>
+  --
+  calendarCatName : VARCHAR
+  description : VARCHAR
+}
+
+entity "Department_Category" as deptcat {
+  ' Junction: which categories a dept uses
+  * **deptID** : INT <<PK, FK>>
+  * **categoryID** : INT <<PK, FK>>
+}
+
+' ─── RELATIONSHIPS ────────────────────────────────────────────────────────────
+userauth }o--|| user     : "authenticates"
+user ||--o{ useruser     : "managed by"
+user ||--o{ deptuser     : "member of"
+user ||--o{ userpos      : "holds position"
+user ||--o{ act          : "performs"
+
+dept |o--o{ deptuser     : "has members"
+dept ||--o{ deptcat      : "uses categories"
+
+pos ||--o{ userpos       : "assigned to"
+pos }o--|| union         : "covered by"
+
+project ||--o{ projact   : "uses activities"
+
+act }o--|| cal           : "on date"
+act }o--|| budget        : "funded by"
+act }o--|| category      : "classified as"
+act ||--o| projact       : "links project"
+act ||--o| expact        : "has expense"
+
+projact }o--|| netnum    : "uses network"
+projact }o--|| actcode   : "uses code"
+
+expact }o--|| dircode    : "director code"
+expact }o--|| rcode      : "reason code"
+expact }o--|| cpc        : "cpc code"
+
+cal }o--|| calcat        : "category"
+category ||--o{ deptcat : "used by"
+
+@enduml

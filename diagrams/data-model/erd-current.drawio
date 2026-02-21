@@ -1,0 +1,267 @@
+<mxfile host="app.diagrams.net" modified="2026-02-20T00:00:00.000Z" agent="GitHub Copilot" version="24.5.2">
+  <diagram id="erd-current" name="ERD — Current (.NET / EF Core)">
+    <mxGraphModel dx="1400" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1900" pageHeight="1400" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- TITLE -->
+        <mxCell id="title" value="DSC Modernization — Current Data Model ERD (.NET / EF Core 9 / MariaDB)" style="text;html=1;fontStyle=1;fontSize=15;strokeColor=none;fillColor=none;align=center;" vertex="1" parent="1">
+          <mxGeometry x="200" y="10" width="1400" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- ═══ IDENTITY & AUTH GROUP ═══ -->
+        <mxCell id="g1" value="Identity &amp; Auth" style="swimlane;fontStyle=1;fillColor=#dae8fc;strokeColor=#6c8ebf;startSize=25;" vertex="1" parent="1">
+          <mxGeometry x="30" y="60" width="620" height="340" as="geometry" />
+        </mxCell>
+
+        <!-- Users -->
+        <mxCell id="users" value="&lt;b&gt;Users&lt;/b&gt;" style="swimlane;startSize=22;fillColor=#fff;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="g1">
+          <mxGeometry x="10" y="35" width="220" height="290" as="geometry" />
+        </mxCell>
+        <mxCell id="u1" value="🔑 Id : UUID PK" style="text;html=1;fontSize=10;align=left;" vertex="1" parent="users"><mxGeometry x="8" y="22" width="200" height="16" as="geometry" /></mxCell>
+        <mxCell id="u2" value="EmpId : INT NULL" style="text;html=1;fontSize=10;align=left;" vertex="1" parent="users"><mxGeometry x="8" y="38" width="200" height="16" as="geometry" /></mxCell>
+        <mxCell id="u3" value="Username : VARCHAR NN" style="text;html=1;fontSize=10;align=left;" vertex="1" parent="users"><mxGeometry x="8" y="54" width="200" height="16" as="geometry" /></mxCell>
+        <mxCell id="u4" value="Email : VARCHAR NN" style="text;html=1;fontSize=10;align=left;" vertex="1" parent="users"><mxGeometry x="8" y="70" width="200" height="16" as="geometry" /></mxCell>
+        <mxCell id="u5" value="FirstName : VARCHAR" style="text;html=1;fontSize=10;align=left;" vertex="1" parent="users"><mxGeometry x="8" y="86" width="200" height="16" as="geometry" /></mxCell>
+        <mxCell id="u6" value="LastName : VARCHAR" style="text;html=1;fontSize=10;align=left;" vertex="1" parent="users"><mxGeometry x="8" y="102" width="200" height="16" as="geometry" /></mxCell>
+        <mxCell id="u7" value="IsActive : BOOL" style="text;html=1;fontSize=10;align=left;" vertex="1" parent="users"><mxGeometry x="8" y="118" width="200" height="16" as="geometry" /></mxCell>
+        <mxCell id="u8" value="PasswordHash : VARCHAR" style="text;html=1;fontSize=10;align=left;" vertex="1" parent="users"><mxGeometry x="8" y="134" width="200" height="16" as="geometry" /></mxCell>
+        <mxCell id="u9" value="🔗 RoleId : UUID FK" style="text;html=1;fontSize=10;align=left;fontColor=#6c8ebf;" vertex="1" parent="users"><mxGeometry x="8" y="150" width="200" height="16" as="geometry" /></mxCell>
+        <mxCell id="u10" value="🔗 PositionId : UUID FK" style="text;html=1;fontSize=10;align=left;fontColor=#6c8ebf;" vertex="1" parent="users"><mxGeometry x="8" y="166" width="200" height="16" as="geometry" /></mxCell>
+        <mxCell id="u11" value="🔗 DepartmentId : UUID FK" style="text;html=1;fontSize=10;align=left;fontColor=#6c8ebf;" vertex="1" parent="users"><mxGeometry x="8" y="182" width="200" height="16" as="geometry" /></mxCell>
+
+        <!-- Roles -->
+        <mxCell id="roles" value="&lt;b&gt;Roles&lt;/b&gt;" style="swimlane;startSize=22;fillColor=#fff;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="g1">
+          <mxGeometry x="250" y="35" width="170" height="130" as="geometry" />
+        </mxCell>
+        <mxCell id="r1" value="🔑 Id : UUID PK" style="text;html=1;fontSize=10;align=left;" vertex="1" parent="roles"><mxGeometry x="8" y="22" width="155" height="16" as="geometry" /></mxCell>
+        <mxCell id="r2" value="Name : VARCHAR NN" style="text;html=1;fontSize=10;align=left;" vertex="1" parent="roles"><mxGeometry x="8" y="38" width="155" height="16" as="geometry" /></mxCell>
+        <mxCell id="r3" value="Description : VARCHAR" style="text;html=1;fontSize=10;align=left;" vertex="1" parent="roles"><mxGeometry x="8" y="54" width="155" height="16" as="geometry" /></mxCell>
+        <mxCell id="r4" value="IsActive : BOOL" style="text;html=1;fontSize=10;align=left;" vertex="1" parent="roles"><mxGeometry x="8" y="70" width="155" height="16" as="geometry" /></mxCell>
+        <mxCell id="r5" value="CreatedAt / ModifiedAt" style="text;html=1;fontSize=10;align=left;" vertex="1" parent="roles"><mxGeometry x="8" y="86" width="155" height="16" as="geometry" /></mxCell>
+
+        <!-- ExternalIdentities -->
+        <mxCell id="extid" value="&lt;b&gt;ExternalIdentities&lt;/b&gt;" style="swimlane;startSize=22;fillColor=#fff;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="g1">
+          <mxGeometry x="250" y="185" width="170" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="ei1" value="🔑 Id : UUID PK" style="text;html=1;fontSize=10;align=left;" vertex="1" parent="extid"><mxGeometry x="8" y="22" width="150" height="16" as="geometry" /></mxCell>
+        <mxCell id="ei2" value="Provider : VARCHAR NN" style="text;html=1;fontSize=10;align=left;" vertex="1" parent="extid"><mxGeometry x="8" y="38" width="150" height="16" as="geometry" /></mxCell>
+        <mxCell id="ei3" value="Subject : VARCHAR NN" style="text;html=1;fontSize=10;align=left;" vertex="1" parent="extid"><mxGeometry x="8" y="54" width="150" height="16" as="geometry" /></mxCell>
+        <mxCell id="ei4" value="🔗 UserId : UUID FK" style="text;html=1;fontSize=10;align=left;fontColor=#6c8ebf;" vertex="1" parent="extid"><mxGeometry x="8" y="70" width="150" height="16" as="geometry" /></mxCell>
+
+        <!-- UserAuth (legacy) -->
+        <mxCell id="uauth" value="&lt;b&gt;UserAuth&lt;/b&gt; (legacy)" style="swimlane;startSize=22;fillColor=#f5f5f5;strokeColor=#999;fontSize=11;" vertex="1" parent="g1">
+          <mxGeometry x="440" y="35" width="160" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="ua1" value="🔑 UserName : VARCHAR PK" style="text;html=1;fontSize=10;align=left;" vertex="1" parent="uauth"><mxGeometry x="8" y="22" width="145" height="16" as="geometry" /></mxCell>
+        <mxCell id="ua2" value="Password : VARCHAR" style="text;html=1;fontSize=10;align=left;" vertex="1" parent="uauth"><mxGeometry x="8" y="38" width="145" height="16" as="geometry" /></mxCell>
+        <mxCell id="ua3" value="EmpId : INT NULL" style="text;html=1;fontSize=10;align=left;" vertex="1" parent="uauth"><mxGeometry x="8" y="54" width="145" height="16" as="geometry" /></mxCell>
+
+        <!-- ═══ ORGANISATION GROUP ═══ -->
+        <mxCell id="g2" value="Organisation" style="swimlane;fontStyle=1;fillColor=#d5e8d4;strokeColor=#82b366;startSize=25;" vertex="1" parent="1">
+          <mxGeometry x="670" y="60" width="420" height="200" as="geometry" />
+        </mxCell>
+
+        <!-- Departments -->
+        <mxCell id="depts" value="&lt;b&gt;Departments&lt;/b&gt;" style="swimlane;startSize=22;fillColor=#fff;strokeColor=#82b366;fontSize=11;" vertex="1" parent="g2">
+          <mxGeometry x="10" y="35" width="180" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="d1" value="🔑 Id : UUID PK" style="text;html=1;fontSize=10;align=left;" vertex="1" parent="depts"><mxGeometry x="8" y="22" width="165" height="16" as="geometry" /></mxCell>
+        <mxCell id="d2" value="Name : VARCHAR NN" style="text;html=1;fontSize=10;align=left;" vertex="1" parent="depts"><mxGeometry x="8" y="38" width="165" height="16" as="geometry" /></mxCell>
+        <mxCell id="d3" value="ManagerName : VARCHAR" style="text;html=1;fontSize=10;align=left;" vertex="1" parent="depts"><mxGeometry x="8" y="54" width="165" height="16" as="geometry" /></mxCell>
+        <mxCell id="d4" value="IsActive : BOOL" style="text;html=1;fontSize=10;align=left;" vertex="1" parent="depts"><mxGeometry x="8" y="70" width="165" height="16" as="geometry" /></mxCell>
+
+        <!-- Positions -->
+        <mxCell id="posit" value="&lt;b&gt;Positions&lt;/b&gt;" style="swimlane;startSize=22;fillColor=#fff;strokeColor=#82b366;fontSize=11;" vertex="1" parent="g2">
+          <mxGeometry x="220" y="35" width="180" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="p1" value="🔑 Id : UUID PK" style="text;html=1;fontSize=10;align=left;" vertex="1" parent="posit"><mxGeometry x="8" y="22" width="165" height="16" as="geometry" /></mxCell>
+        <mxCell id="p2" value="Title : VARCHAR NN" style="text;html=1;fontSize=10;align=left;" vertex="1" parent="posit"><mxGeometry x="8" y="38" width="165" height="16" as="geometry" /></mxCell>
+        <mxCell id="p3" value="Description : VARCHAR" style="text;html=1;fontSize=10;align=left;" vertex="1" parent="posit"><mxGeometry x="8" y="54" width="165" height="16" as="geometry" /></mxCell>
+        <mxCell id="p4" value="IsActive : BOOL" style="text;html=1;fontSize=10;align=left;" vertex="1" parent="posit"><mxGeometry x="8" y="70" width="165" height="16" as="geometry" /></mxCell>
+
+        <!-- ═══ PROJECTS GROUP ═══ -->
+        <mxCell id="g3" value="Projects" style="swimlane;fontStyle=1;fillColor=#e1d5e7;strokeColor=#9673a6;startSize=25;" vertex="1" parent="1">
+          <mxGeometry x="30" y="430" width="620" height="330" as="geometry" />
+        </mxCell>
+
+        <!-- Projects -->
+        <mxCell id="proj" value="&lt;b&gt;Projects&lt;/b&gt;" style="swimlane;startSize=22;fillColor=#fff;strokeColor=#9673a6;fontSize=11;" vertex="1" parent="g3">
+          <mxGeometry x="10" y="35" width="200" height="130" as="geometry" />
+        </mxCell>
+        <mxCell id="pr1" value="🔑 Id : UUID PK" style="text;html=1;fontSize=10;align=left;" vertex="1" parent="proj"><mxGeometry x="8" y="22" width="185" height="16" as="geometry" /></mxCell>
+        <mxCell id="pr2" value="ProjectNo : VARCHAR" style="text;html=1;fontSize=10;align=left;" vertex="1" parent="proj"><mxGeometry x="8" y="38" width="185" height="16" as="geometry" /></mxCell>
+        <mxCell id="pr3" value="Name : VARCHAR NN" style="text;html=1;fontSize=10;align=left;" vertex="1" parent="proj"><mxGeometry x="8" y="54" width="185" height="16" as="geometry" /></mxCell>
+        <mxCell id="pr4" value="Description : TEXT" style="text;html=1;fontSize=10;align=left;" vertex="1" parent="proj"><mxGeometry x="8" y="70" width="185" height="16" as="geometry" /></mxCell>
+        <mxCell id="pr5" value="IsActive : BOOL" style="text;html=1;fontSize=10;align=left;" vertex="1" parent="proj"><mxGeometry x="8" y="86" width="185" height="16" as="geometry" /></mxCell>
+        <mxCell id="pr6" value="EstimatedHours : DECIMAL" style="text;html=1;fontSize=10;align=left;" vertex="1" parent="proj"><mxGeometry x="8" y="102" width="185" height="16" as="geometry" /></mxCell>
+
+        <!-- ProjectAssignments -->
+        <mxCell id="assign" value="&lt;b&gt;ProjectAssignments&lt;/b&gt;" style="swimlane;startSize=22;fillColor=#fff;strokeColor=#9673a6;fontSize=11;" vertex="1" parent="g3">
+          <mxGeometry x="230" y="35" width="185" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="pa1" value="🔑🔗 ProjectId : UUID PK,FK" style="text;html=1;fontSize=10;align=left;fontColor=#9673a6;" vertex="1" parent="assign"><mxGeometry x="8" y="22" width="168" height="16" as="geometry" /></mxCell>
+        <mxCell id="pa2" value="🔑🔗 UserId : UUID PK,FK" style="text;html=1;fontSize=10;align=left;fontColor=#9673a6;" vertex="1" parent="assign"><mxGeometry x="8" y="38" width="168" height="16" as="geometry" /></mxCell>
+        <mxCell id="pa3" value="Role : VARCHAR" style="text;html=1;fontSize=10;align=left;" vertex="1" parent="assign"><mxGeometry x="8" y="54" width="168" height="16" as="geometry" /></mxCell>
+        <mxCell id="pa4" value="EstimatedHours : DECIMAL" style="text;html=1;fontSize=10;align=left;" vertex="1" parent="assign"><mxGeometry x="8" y="70" width="168" height="16" as="geometry" /></mxCell>
+
+        <!-- ProjectActivityOptions -->
+        <mxCell id="pao" value="&lt;b&gt;ProjectActivityOptions&lt;/b&gt;" style="swimlane;startSize=22;fillColor=#fff;strokeColor=#9673a6;fontSize=11;" vertex="1" parent="g3">
+          <mxGeometry x="430" y="35" width="178" height="84" as="geometry" />
+        </mxCell>
+        <mxCell id="pao1" value="🔑🔗 ProjectId : UUID PK,FK" style="text;html=1;fontSize=10;align=left;fontColor=#9673a6;" vertex="1" parent="pao"><mxGeometry x="8" y="22" width="162" height="16" as="geometry" /></mxCell>
+        <mxCell id="pao2" value="🔑🔗 ActivityCodeId : UUID" style="text;html=1;fontSize=10;align=left;fontColor=#9673a6;" vertex="1" parent="pao"><mxGeometry x="8" y="38" width="162" height="16" as="geometry" /></mxCell>
+        <mxCell id="pao3" value="🔑🔗 NetworkNumberId : UUID" style="text;html=1;fontSize=10;align=left;fontColor=#9673a6;" vertex="1" parent="pao"><mxGeometry x="8" y="54" width="162" height="16" as="geometry" /></mxCell>
+
+        <!-- ═══ WORK TRACKING GROUP ═══ -->
+        <mxCell id="g4" value="Work Tracking" style="swimlane;fontStyle=1;fillColor=#fff2cc;strokeColor=#d6b656;startSize=25;" vertex="1" parent="1">
+          <mxGeometry x="670" y="290" width="580" height="480" as="geometry" />
+        </mxCell>
+
+        <!-- WorkItems -->
+        <mxCell id="wi" value="&lt;b&gt;WorkItems&lt;/b&gt;" style="swimlane;startSize=22;fillColor=#fff;strokeColor=#d6b656;fontSize=11;" vertex="1" parent="g4">
+          <mxGeometry x="10" y="35" width="220" height="420" as="geometry" />
+        </mxCell>
+        <mxCell id="wi1" value="🔑 Id : UUID PK" style="text;html=1;fontSize=10;align=left;" vertex="1" parent="wi"><mxGeometry x="8" y="22" width="200" height="16" as="geometry" /></mxCell>
+        <mxCell id="wi2" value="🔗 ProjectId : UUID FK" style="text;html=1;fontSize=10;align=left;fontColor=#d6b656;" vertex="1" parent="wi"><mxGeometry x="8" y="38" width="200" height="16" as="geometry" /></mxCell>
+        <mxCell id="wi3" value="🔗 UserId : UUID FK" style="text;html=1;fontSize=10;align=left;fontColor=#d6b656;" vertex="1" parent="wi"><mxGeometry x="8" y="54" width="200" height="16" as="geometry" /></mxCell>
+        <mxCell id="wi4" value="🔗 BudgetId : UUID FK" style="text;html=1;fontSize=10;align=left;fontColor=#d6b656;" vertex="1" parent="wi"><mxGeometry x="8" y="70" width="200" height="16" as="geometry" /></mxCell>
+        <mxCell id="wi5" value="ActivityType : VARCHAR" style="text;html=1;fontSize=10;align=left;" vertex="1" parent="wi"><mxGeometry x="8" y="86" width="200" height="16" as="geometry" /></mxCell>
+        <mxCell id="wi6" value="LegacyActivityId : INT" style="text;html=1;fontSize=10;align=left;" vertex="1" parent="wi"><mxGeometry x="8" y="102" width="200" height="16" as="geometry" /></mxCell>
+        <mxCell id="wi7" value="Title : VARCHAR NN" style="text;html=1;fontSize=10;align=left;" vertex="1" parent="wi"><mxGeometry x="8" y="118" width="200" height="16" as="geometry" /></mxCell>
+        <mxCell id="wi8" value="Description : TEXT" style="text;html=1;fontSize=10;align=left;" vertex="1" parent="wi"><mxGeometry x="8" y="134" width="200" height="16" as="geometry" /></mxCell>
+        <mxCell id="wi9" value="Date / StartTime / EndTime" style="text;html=1;fontSize=10;align=left;" vertex="1" parent="wi"><mxGeometry x="8" y="150" width="200" height="16" as="geometry" /></mxCell>
+        <mxCell id="wi10" value="PlannedDuration / ActualDuration" style="text;html=1;fontSize=10;align=left;" vertex="1" parent="wi"><mxGeometry x="8" y="166" width="200" height="16" as="geometry" /></mxCell>
+        <mxCell id="wi11" value="ActivityCode : VARCHAR" style="text;html=1;fontSize=10;align=left;" vertex="1" parent="wi"><mxGeometry x="8" y="182" width="200" height="16" as="geometry" /></mxCell>
+        <mxCell id="wi12" value="NetworkNumber : VARCHAR" style="text;html=1;fontSize=10;align=left;" vertex="1" parent="wi"><mxGeometry x="8" y="198" width="200" height="16" as="geometry" /></mxCell>
+        <mxCell id="wi13" value="DirectorCode : VARCHAR" style="text;html=1;fontSize=10;align=left;" vertex="1" parent="wi"><mxGeometry x="8" y="214" width="200" height="16" as="geometry" /></mxCell>
+        <mxCell id="wi14" value="ReasonCode : VARCHAR" style="text;html=1;fontSize=10;align=left;" vertex="1" parent="wi"><mxGeometry x="8" y="230" width="200" height="16" as="geometry" /></mxCell>
+        <mxCell id="wi15" value="CpcCode : VARCHAR" style="text;html=1;fontSize=10;align=left;" vertex="1" parent="wi"><mxGeometry x="8" y="246" width="200" height="16" as="geometry" /></mxCell>
+        <mxCell id="wi16" value="EstimatedHours / RemainingHours" style="text;html=1;fontSize=10;align=left;" vertex="1" parent="wi"><mxGeometry x="8" y="262" width="200" height="16" as="geometry" /></mxCell>
+
+        <!-- TimeEntries -->
+        <mxCell id="te" value="&lt;b&gt;TimeEntries&lt;/b&gt;" style="swimlane;startSize=22;fillColor=#fff;strokeColor=#d6b656;fontSize=11;" vertex="1" parent="g4">
+          <mxGeometry x="250" y="35" width="205" height="130" as="geometry" />
+        </mxCell>
+        <mxCell id="te1" value="🔑 Id : UUID PK" style="text;html=1;fontSize=10;align=left;" vertex="1" parent="te"><mxGeometry x="8" y="22" width="185" height="16" as="geometry" /></mxCell>
+        <mxCell id="te2" value="🔗 WorkItemId : UUID FK" style="text;html=1;fontSize=10;align=left;fontColor=#d6b656;" vertex="1" parent="te"><mxGeometry x="8" y="38" width="185" height="16" as="geometry" /></mxCell>
+        <mxCell id="te3" value="🔗 UserId : UUID FK" style="text;html=1;fontSize=10;align=left;fontColor=#d6b656;" vertex="1" parent="te"><mxGeometry x="8" y="54" width="185" height="16" as="geometry" /></mxCell>
+        <mxCell id="te4" value="Date : DATETIMEOFFSET" style="text;html=1;fontSize=10;align=left;" vertex="1" parent="te"><mxGeometry x="8" y="70" width="185" height="16" as="geometry" /></mxCell>
+        <mxCell id="te5" value="Hours : DECIMAL" style="text;html=1;fontSize=10;align=left;" vertex="1" parent="te"><mxGeometry x="8" y="86" width="185" height="16" as="geometry" /></mxCell>
+        <mxCell id="te6" value="Notes : VARCHAR" style="text;html=1;fontSize=10;align=left;" vertex="1" parent="te"><mxGeometry x="8" y="102" width="185" height="16" as="geometry" /></mxCell>
+
+        <!-- ═══ EXPENSE & CATALOG GROUP ═══ -->
+        <mxCell id="g5" value="Expense &amp; Catalog" style="swimlane;fontStyle=1;fillColor=#f8cecc;strokeColor=#b85450;startSize=25;" vertex="1" parent="1">
+          <mxGeometry x="30" y="790" width="820" height="220" as="geometry" />
+        </mxCell>
+
+        <!-- Budgets -->
+        <mxCell id="budg" value="&lt;b&gt;Budgets&lt;/b&gt;" style="swimlane;startSize=22;fillColor=#fff;strokeColor=#b85450;fontSize=11;" vertex="1" parent="g5">
+          <mxGeometry x="10" y="35" width="150" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="b1" value="🔑 Id : UUID PK" style="text;html=1;fontSize=10;align=left;" vertex="1" parent="budg"><mxGeometry x="8" y="22" width="135" height="16" as="geometry" /></mxCell>
+        <mxCell id="b2" value="Description : VARCHAR" style="text;html=1;fontSize=10;align=left;" vertex="1" parent="budg"><mxGeometry x="8" y="38" width="135" height="16" as="geometry" /></mxCell>
+        <mxCell id="b3" value="IsActive : BOOL" style="text;html=1;fontSize=10;align=left;" vertex="1" parent="budg"><mxGeometry x="8" y="54" width="135" height="16" as="geometry" /></mxCell>
+
+        <!-- ExpenseCategories -->
+        <mxCell id="ecat" value="&lt;b&gt;ExpenseCategories&lt;/b&gt;" style="swimlane;startSize=22;fillColor=#fff;strokeColor=#b85450;fontSize=11;" vertex="1" parent="g5">
+          <mxGeometry x="175" y="35" width="185" height="96" as="geometry" />
+        </mxCell>
+        <mxCell id="ec1" value="🔑 Id : UUID PK" style="text;html=1;fontSize=10;align=left;" vertex="1" parent="ecat"><mxGeometry x="8" y="22" width="170" height="16" as="geometry" /></mxCell>
+        <mxCell id="ec2" value="🔗 BudgetId : UUID FK" style="text;html=1;fontSize=10;align=left;fontColor=#b85450;" vertex="1" parent="ecat"><mxGeometry x="8" y="38" width="170" height="16" as="geometry" /></mxCell>
+        <mxCell id="ec3" value="Name : VARCHAR NN" style="text;html=1;fontSize=10;align=left;" vertex="1" parent="ecat"><mxGeometry x="8" y="54" width="170" height="16" as="geometry" /></mxCell>
+        <mxCell id="ec4" value="IsActive : BOOL" style="text;html=1;fontSize=10;align=left;" vertex="1" parent="ecat"><mxGeometry x="8" y="70" width="170" height="16" as="geometry" /></mxCell>
+
+        <!-- ExpenseOptions -->
+        <mxCell id="eopt" value="&lt;b&gt;ExpenseOptions&lt;/b&gt;" style="swimlane;startSize=22;fillColor=#fff;strokeColor=#b85450;fontSize=11;" vertex="1" parent="g5">
+          <mxGeometry x="375" y="35" width="190" height="96" as="geometry" />
+        </mxCell>
+        <mxCell id="eo1" value="🔑 Id : UUID PK" style="text;html=1;fontSize=10;align=left;" vertex="1" parent="eopt"><mxGeometry x="8" y="22" width="175" height="16" as="geometry" /></mxCell>
+        <mxCell id="eo2" value="🔗 ExpenseCategoryId FK" style="text;html=1;fontSize=10;align=left;fontColor=#b85450;" vertex="1" parent="eopt"><mxGeometry x="8" y="38" width="175" height="16" as="geometry" /></mxCell>
+        <mxCell id="eo3" value="Name : VARCHAR NN" style="text;html=1;fontSize=10;align=left;" vertex="1" parent="eopt"><mxGeometry x="8" y="54" width="175" height="16" as="geometry" /></mxCell>
+        <mxCell id="eo4" value="IsActive : BOOL" style="text;html=1;fontSize=10;align=left;" vertex="1" parent="eopt"><mxGeometry x="8" y="70" width="175" height="16" as="geometry" /></mxCell>
+
+        <!-- Code reference tables -->
+        <mxCell id="codes" value="CpcCodes / DirectorCodes / ReasonCodes / ActivityCodes / NetworkNumbers" style="rounded=1;fillColor=#fff;strokeColor=#b85450;fontSize=10;whiteSpace=wrap;" vertex="1" parent="g5">
+          <mxGeometry x="580" y="50" width="230" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="codenote" value="Each: Code/Id PK, Description, (IsActive)" style="text;html=1;fontSize=9;align=left;fontStyle=2;" vertex="1" parent="g5">
+          <mxGeometry x="580" y="118" width="230" height="16" as="geometry" />
+        </mxCell>
+
+        <!-- ═══ CALENDAR GROUP ═══ -->
+        <mxCell id="g6" value="Calendar" style="swimlane;fontStyle=1;fillColor=#f0f0f0;strokeColor=#666;startSize=25;" vertex="1" parent="1">
+          <mxGeometry x="870" y="60" width="360" height="200" as="geometry" />
+        </mxCell>
+
+        <mxCell id="calcat" value="&lt;b&gt;CalendarCategories&lt;/b&gt;" style="swimlane;startSize=22;fillColor=#fff;strokeColor=#666;fontSize=11;" vertex="1" parent="g6">
+          <mxGeometry x="10" y="35" width="165" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="cc1" value="🔑 Id : INT PK" style="text;html=1;fontSize=10;align=left;" vertex="1" parent="calcat"><mxGeometry x="8" y="22" width="150" height="16" as="geometry" /></mxCell>
+        <mxCell id="cc2" value="Name : VARCHAR NN" style="text;html=1;fontSize=10;align=left;" vertex="1" parent="calcat"><mxGeometry x="8" y="38" width="150" height="16" as="geometry" /></mxCell>
+        <mxCell id="cc3" value="Description : VARCHAR" style="text;html=1;fontSize=10;align=left;" vertex="1" parent="calcat"><mxGeometry x="8" y="54" width="150" height="16" as="geometry" /></mxCell>
+
+        <mxCell id="calent" value="&lt;b&gt;CalendarEntries&lt;/b&gt;" style="swimlane;startSize=22;fillColor=#fff;strokeColor=#666;fontSize=11;" vertex="1" parent="g6">
+          <mxGeometry x="190" y="35" width="160" height="64" as="geometry" />
+        </mxCell>
+        <mxCell id="ce1" value="🔑 Date : DATE PK" style="text;html=1;fontSize=10;align=left;" vertex="1" parent="calent"><mxGeometry x="8" y="22" width="145" height="16" as="geometry" /></mxCell>
+        <mxCell id="ce2" value="🔗 CalendarCategoryId FK" style="text;html=1;fontSize=10;align=left;fontColor=#666;" vertex="1" parent="calent"><mxGeometry x="8" y="38" width="145" height="16" as="geometry" /></mxCell>
+
+        <!-- ═══ RELATIONSHIPS (between groups) ═══ -->
+        <!-- Users → Roles -->
+        <mxCell id="rel1" style="edgeStyle=orthogonalEdgeStyle;endArrow=ERone;startArrow=ERmanyToOne;endFill=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="users" target="roles">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <!-- Users → Positions -->
+        <mxCell id="rel2" style="edgeStyle=orthogonalEdgeStyle;endArrow=ERone;startArrow=ERmanyToOne;endFill=1;" edge="1" parent="1" source="users" target="posit">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <!-- Users → Departments -->
+        <mxCell id="rel3" style="edgeStyle=orthogonalEdgeStyle;endArrow=ERone;startArrow=ERmanyToOne;endFill=1;" edge="1" parent="1" source="users" target="depts">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <!-- Users → ExternalIdentities -->
+        <mxCell id="rel4" style="edgeStyle=orthogonalEdgeStyle;endArrow=ERmany;startArrow=ERone;endFill=1;" edge="1" parent="1" source="users" target="extid">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <!-- Users → ProjectAssignments -->
+        <mxCell id="rel5" style="edgeStyle=orthogonalEdgeStyle;endArrow=ERmany;startArrow=ERone;endFill=1;" edge="1" parent="1" source="users" target="assign">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <!-- Projects → ProjectAssignments -->
+        <mxCell id="rel6" style="edgeStyle=orthogonalEdgeStyle;endArrow=ERmany;startArrow=ERone;endFill=1;" edge="1" parent="1" source="proj" target="assign">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <!-- Projects → ProjectActivityOptions -->
+        <mxCell id="rel7" style="edgeStyle=orthogonalEdgeStyle;endArrow=ERmany;startArrow=ERone;endFill=1;" edge="1" parent="1" source="proj" target="pao">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <!-- Projects → WorkItems -->
+        <mxCell id="rel8" style="edgeStyle=orthogonalEdgeStyle;endArrow=ERmany;startArrow=ERone;endFill=1;" edge="1" parent="1" source="proj" target="wi">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <!-- WorkItems → TimeEntries -->
+        <mxCell id="rel9" style="edgeStyle=orthogonalEdgeStyle;endArrow=ERmany;startArrow=ERone;endFill=1;" edge="1" parent="1" source="wi" target="te">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <!-- Budgets → ExpenseCategories -->
+        <mxCell id="rel10" style="edgeStyle=orthogonalEdgeStyle;endArrow=ERmany;startArrow=ERone;endFill=1;" edge="1" parent="1" source="budg" target="ecat">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <!-- ExpenseCategories → ExpenseOptions -->
+        <mxCell id="rel11" style="edgeStyle=orthogonalEdgeStyle;endArrow=ERmany;startArrow=ERone;endFill=1;" edge="1" parent="1" source="ecat" target="eopt">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <!-- CalendarCategories → CalendarEntries -->
+        <mxCell id="rel12" style="edgeStyle=orthogonalEdgeStyle;endArrow=ERmany;startArrow=ERone;endFill=1;" edge="1" parent="1" source="calcat" target="calent">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <!-- WorkItems → Budgets -->
+        <mxCell id="rel13" style="edgeStyle=orthogonalEdgeStyle;endArrow=ERone;startArrow=ERmanyToOne;endFill=1;dashed=1;" edge="1" parent="1" source="wi" target="budg">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

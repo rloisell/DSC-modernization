@@ -1,0 +1,273 @@
+@startuml erd-current
+' DSC Modernization — Current (.NET / EF Core) Entity Relationship Diagram
+' Generated: 2026-02-20
+' Notation: Crow's foot (IE)
+
+skinparam monochrome false
+skinparam shadowing false
+skinparam linetype ortho
+skinparam classAttributeIconSize 0
+
+' ─── IDENTITY & AUTH ─────────────────────────────────────────────────────────
+entity "Users" as users {
+  * **Id** : UUID <<PK>>
+  --
+  EmpId : INT NULL
+  Username : VARCHAR NOT NULL
+  Email : VARCHAR NOT NULL
+  FirstName : VARCHAR NULL
+  LastName : VARCHAR NULL
+  IsActive : BOOL
+  PasswordHash : VARCHAR NULL
+  RoleId : UUID NULL <<FK>>
+  PositionId : UUID NULL <<FK>>
+  DepartmentId : UUID NULL <<FK>>
+}
+
+entity "Roles" as roles {
+  * **Id** : UUID <<PK>>
+  --
+  Name : VARCHAR NOT NULL
+  Description : VARCHAR NULL
+  IsActive : BOOL
+  CreatedAt : DATETIME
+  ModifiedAt : DATETIME
+}
+
+entity "ExternalIdentities" as extid {
+  * **Id** : UUID <<PK>>
+  --
+  Provider : VARCHAR NOT NULL
+  Subject : VARCHAR NOT NULL
+  UserId : UUID <<FK>>
+}
+
+' Legacy auth tables (read-only bridge)
+entity "UserAuth" as userauth #LightGray {
+  * **UserName** : VARCHAR <<PK>>
+  --
+  Password : VARCHAR
+  EmpId : INT NULL
+}
+
+' ─── CATALOG: ORGANISATION ───────────────────────────────────────────────────
+entity "Departments" as dept {
+  * **Id** : UUID <<PK>>
+  --
+  Name : VARCHAR NOT NULL
+  ManagerName : VARCHAR NULL
+  IsActive : BOOL
+}
+
+entity "Positions" as pos {
+  * **Id** : UUID <<PK>>
+  --
+  Title : VARCHAR NOT NULL
+  Description : VARCHAR NULL
+  IsActive : BOOL
+}
+
+entity "Unions" as unions {
+  * **Id** : INT <<PK>>
+  --
+  Name : VARCHAR NULL
+}
+
+' ─── PROJECTS ────────────────────────────────────────────────────────────────
+entity "Projects" as project {
+  * **Id** : UUID <<PK>>
+  --
+  ProjectNo : VARCHAR NULL
+  Name : VARCHAR NOT NULL
+  Description : VARCHAR NULL
+  IsActive : BOOL
+  EstimatedHours : DECIMAL NULL
+}
+
+entity "ProjectAssignments" as assign {
+  * **ProjectId** : UUID <<PK, FK>>
+  * **UserId** : UUID <<PK, FK>>
+  --
+  Role : VARCHAR DEFAULT 'Contributor'
+  EstimatedHours : DECIMAL NULL
+}
+
+entity "ProjectActivityOptions" as pao {
+  * **ProjectId** : UUID <<PK, FK>>
+  * **ActivityCodeId** : UUID <<PK, FK>>
+  * **NetworkNumberId** : UUID <<PK, FK>>
+}
+
+' ─── WORK TRACKING ───────────────────────────────────────────────────────────
+entity "WorkItems" as wi {
+  * **Id** : UUID <<PK>>
+  --
+  ProjectId : UUID NULL <<FK>>
+  UserId : UUID NULL <<FK>>
+  BudgetId : UUID NULL <<FK>>
+  ActivityType : VARCHAR
+  LegacyActivityId : INT NULL
+  Title : VARCHAR NOT NULL
+  Description : TEXT NULL
+  Date : DATETIME NULL
+  StartTime : DATETIME NULL
+  EndTime : DATETIME NULL
+  PlannedDuration : TIME NULL
+  ActualDuration : INT NULL
+  ActivityCode : VARCHAR NULL
+  NetworkNumber : VARCHAR NULL
+  DirectorCode : VARCHAR NULL
+  ReasonCode : VARCHAR NULL
+  CpcCode : VARCHAR NULL
+  EstimatedHours : DECIMAL NULL
+  RemainingHours : DECIMAL NULL
+}
+
+entity "TimeEntries" as te {
+  * **Id** : UUID <<PK>>
+  --
+  WorkItemId : UUID <<FK>>
+  UserId : UUID <<FK>>
+  Date : DATETIMEOFFSET
+  Hours : DECIMAL
+  Notes : VARCHAR NULL
+}
+
+' ─── CATALOG: ACTIVITY & EXPENSE ─────────────────────────────────────────────
+entity "ActivityCodes" as actcode {
+  * **Id** : UUID <<PK>>
+  --
+  Code : VARCHAR NOT NULL
+  Description : VARCHAR NULL
+  IsActive : BOOL
+}
+
+entity "NetworkNumbers" as netnum {
+  * **Id** : UUID <<PK>>
+  --
+  Number : INT
+  Description : VARCHAR NULL
+  IsActive : BOOL
+}
+
+entity "Budgets" as budget {
+  * **Id** : UUID <<PK>>
+  --
+  Description : VARCHAR NOT NULL
+  IsActive : BOOL
+}
+
+entity "ExpenseCategories" as expcat {
+  * **Id** : UUID <<PK>>
+  --
+  BudgetId : UUID <<FK>>
+  Name : VARCHAR NOT NULL
+  IsActive : BOOL
+}
+
+entity "ExpenseOptions" as expopt {
+  * **Id** : UUID <<PK>>
+  --
+  ExpenseCategoryId : UUID <<FK>>
+  Name : VARCHAR NOT NULL
+  IsActive : BOOL
+}
+
+entity "CpcCodes" as cpc {
+  * **Code** : VARCHAR <<PK>>
+  --
+  Description : VARCHAR NULL
+}
+
+entity "DirectorCodes" as dircode {
+  * **Code** : VARCHAR <<PK>>
+  --
+  Description : VARCHAR NULL
+}
+
+entity "ReasonCodes" as rcode {
+  * **Code** : VARCHAR <<PK>>
+  --
+  Description : VARCHAR NULL
+}
+
+' ─── CALENDAR ────────────────────────────────────────────────────────────────
+entity "CalendarEntries" as cal {
+  * **Date** : DATE <<PK>>
+  --
+  CalendarCategoryId : INT <<FK>>
+}
+
+entity "CalendarCategories" as calcat {
+  * **Id** : INT <<PK>>
+  --
+  Name : VARCHAR NOT NULL
+  Description : VARCHAR NULL
+}
+
+' ─── LEGACY JUNCTION TABLES (bridge to old empId schema) ────────────────────
+entity "UserPositions" as userpos #LightGray {
+  * **UserEmpId** : INT <<PK, FK>>
+  * **PositionId** : INT <<PK, FK>>
+  --
+  StartDate : DATETIME
+  EndDate : DATETIME NULL
+}
+
+entity "DepartmentUsers" as deptuser #LightGray {
+  * **UserEmpId** : INT <<PK, FK>>
+  * **DepartmentId** : INT <<PK, FK>>
+  --
+  StartDate : DATETIME
+  EndDate : DATETIME NULL
+}
+
+entity "UserUsers" as useruser #LightGray {
+  * **UserEmpId** : INT <<PK, FK>>
+  * **UserEmpId2** : INT <<PK, FK>>
+  --
+  StartDate : DATETIME
+  EndDate : DATETIME NULL
+}
+
+entity "ProjectActivities" as projact #LightGray {
+  * **ActivityId** : INT <<PK>>
+  --
+  ProjectNo : VARCHAR
+  NetworkNumber : INT
+  ActivityCode : INT
+}
+
+entity "ExpenseActivities" as expact #LightGray {
+  * **ActivityId** : INT <<PK>>
+  --
+  DirectorCode : VARCHAR
+  ReasonCode : VARCHAR
+  CpcCode : VARCHAR
+}
+
+' ─── RELATIONSHIPS ────────────────────────────────────────────────────────────
+users }o--|| roles       : "has role"
+users }o--|| pos         : "has position"
+users }o--|| dept        : "belongs to dept"
+users ||--o{ extid       : "authenticated by"
+users ||--o{ assign      : "assigned to"
+users ||--o{ wi          : "creates"
+users ||--o{ te          : "logs"
+
+project ||--o{ assign    : "has members"
+project ||--o{ wi        : "contains"
+project ||--o{ pao       : "uses"
+
+pao }o--|| actcode       : "activity code"
+pao }o--|| netnum        : "network number"
+
+wi }o--|| budget         : "charged to"
+wi ||--o{ te             : "tracked by"
+
+budget ||--o{ expcat     : "contains"
+expcat ||--o{ expopt     : "has options"
+
+cal }o--|| calcat        : "category"
+
+@enduml

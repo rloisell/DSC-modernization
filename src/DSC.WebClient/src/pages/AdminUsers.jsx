@@ -500,9 +500,9 @@ export default function AdminUsers() {
                     </td>
                     <td>
                       <ButtonGroup ariaLabel="User actions">
-                        <Button size="small" variant="secondary" onPress={() => handleSelectUser(user.id)}>Edit</Button>
+                        <Button size="small" variant="tertiary" onPress={() => handleSelectUser(user.id)}>Edit</Button>
                         {user.isActive
-                          ? <Button size="small" variant="tertiary" onPress={() => handleDeactivateUser(user)}>Deactivate</Button>
+                          ? <Button size="small" variant="tertiary" danger onPress={() => handleDeactivateUser(user)}>Deactivate</Button>
                           : <Button size="small" variant="tertiary" onPress={() => handleActivateUser(user)}>Activate</Button>
                         }
                       </ButtonGroup>

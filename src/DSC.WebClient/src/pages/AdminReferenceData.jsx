@@ -376,9 +376,9 @@ export default function AdminReferenceData() {
                       )}
                       <td>
                         <ButtonGroup ariaLabel="Row actions">
-                          <Button size="small" variant="secondary" onPress={() => startEdit(item)}>Edit</Button>
+                          <Button size="small" variant="tertiary" onPress={() => startEdit(item)}>Edit</Button>
                           {config.service.delete && (
-                            <Button size="small" variant="tertiary" onPress={() => handleDelete(item)}>Delete</Button>
+                            <Button size="small" variant="secondary" danger onPress={() => handleDelete(item)}>Delete</Button>
                           )}
                         </ButtonGroup>
                       </td>

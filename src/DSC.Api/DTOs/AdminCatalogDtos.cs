@@ -329,7 +329,10 @@ namespace DSC.Api.DTOs
         public Guid UserId { get; set; }
         public string Username { get; set; } = string.Empty;
         public string UserFullName { get; set; } = string.Empty;
+        /// <summary>Project-level role (Contributor, Manager, etc.).</summary>
         public string Role { get; set; } = "Contributor";
+        /// <summary>The user's organisational Position title (from User.Position).</summary>
+        public string? UserPosition { get; set; }
         public decimal? EstimatedHours { get; set; }
     }
 

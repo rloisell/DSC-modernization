@@ -2,6 +2,19 @@
 
 ---
 
+## ✅ Project Assignments Fix + Button Consistency + ERD Diagrams (pending commit — 2026-02-20)
+
+| Item | Status | Detail |
+|------|--------|--------|
+| AdminProjectAssignments "Role" → "Position" column (label + data) | ✅ Done | DTO extended with `UserPosition`; `ThenInclude(u => u.Position)` in controller; frontend uses `a.userPosition` |
+| New User + Position filters on assignments page | ✅ Done | `filterUserId` / `filterPosition` state; derived filter lists via `useMemo`; 3 side-by-side dropdowns |
+| Button variant consistency across all admin pages | ✅ Done | Standardised: Edit=tertiary, Deactivate=tertiary+danger, Delete=secondary+danger |
+| ERD diagrams (current .NET model) | ✅ Done | `diagrams/data-model/erd-current.puml` + `.drawio` |
+| ERD diagrams (Java legacy model) | ✅ Done | `diagrams/data-model/erd-java-legacy.puml` + `.drawio` |
+| Compare/contrast documentation | ✅ Done | `docs/data-model/README.md` — table mapping, structural diffs, design philosophy |
+
+---
+
 ## ✅ Bug Fix: Reports 400 on Project Filter Clear (`9522624` — 2026-02-20)
 
 | Item | Status | Detail |

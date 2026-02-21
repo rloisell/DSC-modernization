@@ -44,7 +44,7 @@ namespace DSC.Api.Controllers
 
             var query = _db.ProjectAssignments
                 .Include(pa => pa.Project)
-                .Include(pa => pa.User)
+                .Include(pa => pa.User).ThenInclude(u => u.Position)
                 .AsQueryable();
 
             if (projectId.HasValue)
@@ -62,6 +62,7 @@ namespace DSC.Api.Controllers
                     Username = pa.User.Username,
                     UserFullName = $"{pa.User.FirstName} {pa.User.LastName}",
                     Role = pa.Role,
+                    UserPosition = pa.User.Position != null ? pa.User.Position.Title : null,
                     EstimatedHours = pa.EstimatedHours
                 })
                 .ToListAsync();
@@ -102,7 +103,7 @@ namespace DSC.Api.Controllers
             var assignments = await _db.ProjectAssignments
                 .Where(pa => pa.ProjectId == projectId)
                 .Include(pa => pa.Project)
-                .Include(pa => pa.User)
+                .Include(pa => pa.User).ThenInclude(u => u.Position)
                 .Select(pa => new ProjectAssignmentDto
                 {
                     ProjectId = pa.ProjectId,
@@ -112,6 +113,7 @@ namespace DSC.Api.Controllers
                     Username = pa.User.Username,
                     UserFullName = $"{pa.User.FirstName} {pa.User.LastName}",
                     Role = pa.Role,
+                    UserPosition = pa.User.Position != null ? pa.User.Position.Title : null,
                     EstimatedHours = pa.EstimatedHours
                 })
                 .ToListAsync();
@@ -186,6 +188,7 @@ namespace DSC.Api.Controllers
                 Username = assignedUser.Username,
                 UserFullName = $"{assignedUser.FirstName} {assignedUser.LastName}",
                 Role = assignment.Role,
+                UserPosition = null, // position not loaded in create path — client will refresh
                 EstimatedHours = assignment.EstimatedHours
             };
 

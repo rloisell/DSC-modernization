@@ -1,3 +1,50 @@
+## 2026-02-20 — Project Assignments Fix, Button Consistency, ERD Diagrams (pending commit)
+
+**Objective**: Fix the "Role" column in Admin Project Assignments (should be "Position"), add User/Position filters, standardise button variants across all admin pages, and generate ERD diagrams + compare-contrast document for both data models.
+
+### Bug Fix — ProjectAssignments "Position" Column
+- `src/DSC.Api/DTOs/AdminCatalogDtos.cs`: Added `UserPosition : string?` to `ProjectAssignmentDto` (keeps existing `Role` field for project-level role; new field exposes user's HR position title)
+- `src/DSC.Api/Controllers/AdminProjectAssignmentsController.cs`:
+  - `GetAll`: added `.ThenInclude(u => u.Position)`, mapped `UserPosition = pa.User.Position?.Title`
+  - `GetByProject`: same ThenInclude + mapping
+  - `Create`: `UserPosition = null` added to return DTO stub
+- `src/DSC.WebClient/src/pages/AdminProjectAssignments.jsx`:
+  - Table column header renamed "Role" → "Position"
+  - Cell data source changed `a.role` → `a.userPosition`
+
+### Feature — Additional Filters (User + Position) on Project Assignments
+- Added `filterUserId` and `filterPosition` state to `AdminProjectAssignments.jsx`
+- Derived `userFilterItems` and `positionFilterItems` via `useMemo` from already-loaded assignments data (no extra API calls)
+- Three side-by-side filter dropdowns: Project / User / Position
+
+### UI Fix — Button Variant Consistency
+Established standard button style across all admin pages:
+- **Edit** (reversible, non-destructive): `size="small" variant="tertiary"`
+- **Deactivate / Archive** (reversible, soft-destructive): `size="small" variant="tertiary" danger`
+- **Delete** (hard/permanent): `size="small" variant="secondary" danger`
+
+Files updated:
+- `AdminProjectAssignments.jsx`: Edit `secondary→tertiary`, Remove added `danger`
+- `AdminRoles.jsx`: Edit `link→tertiary`, Deactivate `link danger→tertiary danger`
+- `AdminUsers.jsx`: Edit `secondary→tertiary`, Deactivate added `danger`
+- `AdminReferenceData.jsx`: Edit `secondary→tertiary`, Delete `tertiary→secondary danger`
+
+### Docs — ERD Diagrams
+New directory: `diagrams/data-model/`
+- `erd-current.puml` — PlantUML ERD of the .NET / EF Core 9 data model
+- `erd-current.drawio` — Draw.io XML ERD of the .NET / EF Core 9 data model
+- `erd-java-legacy.puml` — PlantUML ERD of the original Java / Hibernate ORM model
+- `erd-java-legacy.drawio` — Draw.io XML ERD of the original Java / Hibernate ORM model
+
+New directory: `docs/data-model/`
+- `README.md` — Comprehensive compare/contrast document covering table mapping, structural differences, new/removed entities, bridge tables, data type evolution, and design philosophy shift
+
+### Build / Test Summary
+- Backend: `dotnet build` — 0 errors, 6 pre-existing nullable warnings
+- Frontend: `npm run build` — clean build in ~1s
+
+---
+
 ## Architecture Recommendations 1–5 — Structural Refactor (`78a7041`)
 
 **Objective**: Implement the first 5 architecture recommendations from `AI/nextSteps.md` to improve correctness, testability, and observability before production deployment.

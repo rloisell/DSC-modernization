@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   Button,
   ButtonGroup,
@@ -37,6 +37,8 @@ export default function AdminProjectAssignments() {
   const [users, setUsers] = useState([]);
 
   const [filterProjectId, setFilterProjectId] = useState('');
+  const [filterUserId, setFilterUserId] = useState('');
+  const [filterPosition, setFilterPosition] = useState('');
   const [addForm, setAddForm] = useState({ projectId: '', userId: '', role: 'Contributor', estimatedHours: '' });
   const [editingKey, setEditingKey] = useState(null); // "projectId:userId"
   const [editForm, setEditForm] = useState({ role: '', estimatedHours: '' });
@@ -46,18 +48,47 @@ export default function AdminProjectAssignments() {
     label: p.projectNo ? `${p.projectNo} — ${p.name}` : p.name,
   }));
 
-  const userItems = users
-    .filter(u => u.isActive !== false)
-    .map(u => ({
-      id: u.id,
-      label: `${u.firstName || ''} ${u.lastName || ''}`.trim() || u.username,
-    }));
+  const activeUsers = users.filter(u => u.isActive !== false);
 
-  const filterItems = [{ id: '', label: 'All Projects' }, ...projectItems];
+  const userItems = activeUsers.map(u => ({
+    id: u.id,
+    label: `${u.firstName || ''} ${u.lastName || ''}`.trim() || u.username,
+  }));
 
-  const filteredAssignments = filterProjectId
-    ? assignments.filter(a => a.projectId === filterProjectId)
-    : assignments;
+  const projectFilterItems = [{ id: '', label: 'All Projects' }, ...projectItems];
+
+  // Derive unique user options from the current assignments list for the user filter
+  const userFilterItems = useMemo(() => {
+    const seen = new Map();
+    assignments.forEach(a => {
+      if (!seen.has(a.userId)) {
+        seen.set(a.userId, a.userFullName || a.username);
+      }
+    });
+    return [
+      { id: '', label: 'All Users' },
+      ...Array.from(seen.entries()).map(([id, label]) => ({ id, label })),
+    ];
+  }, [assignments]);
+
+  // Derive unique positions from the assignments list for the position filter
+  const positionFilterItems = useMemo(() => {
+    const seen = new Set();
+    assignments.forEach(a => { if (a.userPosition) seen.add(a.userPosition); });
+    return [
+      { id: '', label: 'All Positions' },
+      ...Array.from(seen).sort().map(p => ({ id: p, label: p })),
+    ];
+  }, [assignments]);
+
+  const filteredAssignments = useMemo(() => {
+    return assignments.filter(a => {
+      if (filterProjectId && a.projectId !== filterProjectId) return false;
+      if (filterUserId && a.userId !== filterUserId) return false;
+      if (filterPosition && (a.userPosition ?? '') !== filterPosition) return false;
+      return true;
+    });
+  }, [assignments, filterProjectId, filterUserId, filterPosition]);
 
   useEffect(() => {
     const load = async () => {
@@ -164,13 +195,31 @@ export default function AdminProjectAssignments() {
       {subTab === 'assignments' && (
         <section className="section stack">
           <Heading level={2}>Project Assignments</Heading>
-          <div style={{ maxWidth: '400px' }}>
-            <Select
-              label="Filter by Project"
-              items={filterItems}
-              selectedKey={filterProjectId || ''}
-              onSelectionChange={key => setFilterProjectId(key ? String(key) : '')}
-            />
+          <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', maxWidth: '900px' }}>
+            <div style={{ flex: '1 1 220px' }}>
+              <Select
+                label="Filter by Project"
+                items={projectFilterItems}
+                selectedKey={filterProjectId || ''}
+                onSelectionChange={key => setFilterProjectId(key ? String(key) : '')}
+              />
+            </div>
+            <div style={{ flex: '1 1 220px' }}>
+              <Select
+                label="Filter by User"
+                items={userFilterItems}
+                selectedKey={filterUserId || ''}
+                onSelectionChange={key => setFilterUserId(key ? String(key) : '')}
+              />
+            </div>
+            <div style={{ flex: '1 1 200px' }}>
+              <Select
+                label="Filter by Position"
+                items={positionFilterItems}
+                selectedKey={filterPosition || ''}
+                onSelectionChange={key => setFilterPosition(key ? String(key) : '')}
+              />
+            </div>
           </div>
           {loading ? <Text elementType="p">Loading…</Text> : null}
           {!loading && filteredAssignments.length === 0 ? (
@@ -181,7 +230,7 @@ export default function AdminProjectAssignments() {
                 <tr>
                   <th>Project</th>
                   <th>User</th>
-                  <th>Role</th>
+                  <th>Position</th>
                   <th>Est. Hours</th>
                   <th>Actions</th>
                 </tr>
@@ -191,12 +240,12 @@ export default function AdminProjectAssignments() {
                   <tr key={`${a.projectId}:${a.userId}`}>
                     <td><strong>{a.projectNo}</strong> — {a.projectName}</td>
                     <td>{a.userFullName || a.username}</td>
-                    <td>{a.role || '—'}</td>
+                    <td>{a.userPosition || '—'}</td>
                     <td>{a.estimatedHours != null ? `${a.estimatedHours} hrs` : '—'}</td>
                     <td style={{ whiteSpace: 'nowrap' }}>
                       <ButtonGroup ariaLabel="Assignment actions">
-                        <Button size="small" variant="secondary" onPress={() => handleSelectEdit(a)}>Edit</Button>
-                        <Button size="small" variant="tertiary" onPress={() => handleDelete(a)}>Remove</Button>
+                        <Button size="small" variant="tertiary" onPress={() => handleSelectEdit(a)}>Edit</Button>
+                        <Button size="small" variant="tertiary" danger onPress={() => handleDelete(a)}>Remove</Button>
                       </ButtonGroup>
                     </td>
                   </tr>

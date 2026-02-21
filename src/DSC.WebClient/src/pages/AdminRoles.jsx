@@ -175,11 +175,11 @@ export default function AdminRoles() {
                 <td>{role.isActive ? 'Active' : 'Inactive'}</td>
                 <td>
                   <ButtonGroup alignment="start" ariaLabel="Role row actions">
-                    <Button variant="link" size="small" onPress={() => handleEdit(role)}>
+                    <Button variant="tertiary" size="small" onPress={() => handleEdit(role)}>
                       Edit
                     </Button>
                     {role.isActive && (
-                      <Button variant="link" size="small" danger onPress={() => handleDeactivate(role)}>
+                      <Button variant="tertiary" size="small" danger onPress={() => handleDeactivate(role)}>
                         Deactivate
                       </Button>
                     )}
