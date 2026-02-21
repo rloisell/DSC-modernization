@@ -1,0 +1,68 @@
+/* Containerfile.frontend, Ryan Loisell, GitHub Copilot, February 2026,
+   AI-assisted. Multistage build based on the jag-network-tools pattern.
+   Produces a non-root, port-8080 Nginx image that:
+     1. Serves the React/Vite SPA as static files.
+     2. Proxies /api/* to the dsc-api Kubernetes Service within the namespace.
+
+   All API calls in DSC.WebClient use relative paths (/api/...).  In
+   development the Vite dev-server proxy handles routing; in production the
+   Nginx reverse-proxy below replaces that role — no VITE_API_URL env var or
+   config.json injection is needed.
+
+   Build (from repo root):
+     podman build -f containerization/Containerfile.frontend \
+       --build-arg API_SERVICE_HOST=dsc-api \
+       --build-arg API_SERVICE_PORT=8080 \
+       -t dsc-frontend .
+*/
+
+# ── BUILD STAGE ──────────────────────────────────────────────────────────────
+FROM node:22-alpine AS build
+WORKDIR /app
+
+COPY src/DSC.WebClient/package*.json ./
+RUN npm ci
+
+COPY src/DSC.WebClient/ .
+
+# Build the Vite/React app — relative /api paths are kept as-is
+RUN npm run build
+
+# ── RUNTIME STAGE ────────────────────────────────────────────────────────────
+FROM nginx:alpine AS runtime
+
+# wget for the HEALTHCHECK instruction
+RUN apk add --no-cache wget
+
+# Non-root user — required by Kyverno policy on Emerald
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+
+# The nginx.conf is provided by a Helm ConfigMap at runtime;
+# this copy is the fallback for local/podman use.
+COPY containerization/nginx.conf /etc/nginx/templates/default.conf.template
+
+COPY --from=build /app/dist /usr/share/nginx/html
+
+RUN chown -R appuser:appgroup \
+      /usr/share/nginx/html \
+      /var/cache/nginx \
+      /var/log/nginx \
+      /etc/nginx/conf.d \
+      /etc/nginx/templates \
+    && touch /var/run/nginx.pid \
+    && chown appuser:appgroup /var/run/nginx.pid
+
+USER appuser
+
+EXPOSE 8080
+
+# API_SERVICE_HOST and API_SERVICE_PORT are substituted by nginx's envsubst
+# entrypoint at container start.  In OpenShift, these are set from the
+# Helm ConfigMap / values so the proxy target is environment-aware.
+ENV API_SERVICE_HOST=dsc-api
+ENV API_SERVICE_PORT=8080
+
+HEALTHCHECK --interval=30s --timeout=10s --start-period=20s --retries=3 \
+  CMD wget --no-verbose --tries=1 --spider http://localhost:8080/ || exit 1
+
+CMD ["nginx", "-g", "daemon off;"]

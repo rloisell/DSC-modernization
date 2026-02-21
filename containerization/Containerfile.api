@@ -1,0 +1,56 @@
+/* Containerfile.api, Ryan Loisell, GitHub Copilot, February 2026,
+   AI-assisted. Multistage build based on the jag-network-tools pattern.
+   Produces a non-root, port-8080 .NET 10 API image suitable for
+   BC Gov Emerald OpenShift (be808f-dev / be808f-test / be808f-prod).
+
+   Build:
+     podman build -f containerization/Containerfile.api -t dsc-api .
+
+   Required env vars at runtime (inject via OpenShift Secret / Helm):
+     ConnectionStrings__DefaultConnection  MariaDB connection string
+     Admin__Token                          Admin bearer token
+     ASPNETCORE_ENVIRONMENT                Production | Test
+*/
+
+# ── BUILD STAGE ──────────────────────────────────────────────────────────────
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
+WORKDIR /src
+
+# Restore dependencies first so Docker layer cache is reused on code-only changes
+COPY src/DSC.Api/DSC.Api.csproj ./src/DSC.Api/
+RUN dotnet restore src/DSC.Api/DSC.Api.csproj
+
+# Copy all source and publish a self-contained release
+COPY . .
+WORKDIR /src/src/DSC.Api
+RUN dotnet publish -c Release -o /app/publish
+
+# ── RUNTIME STAGE ────────────────────────────────────────────────────────────
+FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
+WORKDIR /app
+
+# Install curl for the HEALTHCHECK instruction below
+RUN apt-get update && apt-get install -y --no-install-recommends curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Non-root user — required by Kyverno policy on Emerald
+RUN groupadd -r appgroup && useradd -r -g appgroup appuser
+
+COPY --from=build /app/publish .
+
+# Ownership of the app directory for the non-root user
+RUN chown -R appuser:appgroup /app
+
+USER appuser
+
+EXPOSE 8080
+
+# Kestrel listens on 8080 (non-privileged port mandated by Emerald)
+ENV ASPNETCORE_URLS=http://+:8080
+ENV ASPNETCORE_ENVIRONMENT=Production
+
+# Liveness / readiness probes — matched to the endpoints in Program.cs
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+  CMD curl -f http://localhost:8080/health/live || exit 1
+
+ENTRYPOINT ["dotnet", "DSC.Api.dll"]

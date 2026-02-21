@@ -1,0 +1,512 @@
+# DSC Modernization — Deployment Analysis
+<!-- Author: Ryan Loiselle, Developer/Architect | GitHub Copilot | 2026 -->
+
+## Purpose
+
+This document captures the pre-deployment analysis for deploying the DSC Modernization
+application to the **BC Gov Private Cloud PaaS — Emerald Hosting Tier**. The goal is
+to understand what is needed before writing any pipeline code.
+
+**Reference repositories studied:**
+
+- `bcgov-c/jag-network-tools` — app repo pattern (similar .NET + React/Vite stack)
+- `bcgov-c/tenant-gitops-be808f` — GitOps pattern for Emerald (ArgoCD + Helm)
+
+---
+
+## 1. Target Platform — Emerald Tier
+
+**Cluster:** `console.apps.emerald.devops.gov.bc.ca`  
+**Route URL pattern:** `<app>-<namespace>.apps.emerald.devops.gov.bc.ca`
+
+| Attribute                   | Emerald Value                                              |
+|-----------------------------|-------------------------------------------------------------|
+| Maximum data sensitivity    | **Protected C** — storage and/or processing                |
+| Availability (single-node)  | 90% (30-day rolling)                                        |
+| Availability (multi-node)   | 99.5% (30-day rolling, max 4h outage per 30 days)           |
+| DR / HA options             | **None** (no cross-cluster DR unlike Gold)                  |
+| OpenShift upgrade model     | EUS — extended update support, even-numbered releases only  |
+| Supported operators         | Tekton, ArgoCD, CrunchyDB, Kyverno, HPA/VPA, IBM MQ        |
+| Scalability limit           | 175 CPU cores, 16 TB storage, 10G networking               |
+| Internet egress             | Restricted — **proxy only** for public internet access      |
+| API endpoint                | **SPANBC internal only** (not publicly reachable)           |
+| App routing                 | Public internet access **may** be granted per-application   |
+| Firewall interop            | Per-namespace egress subnet (usable in STMS-Classic rules)  |
+| VM-SDN access               | Available                                                   |
+
+### Key Emerald Differences vs Silver/Gold
+
+1. **No public API access** — the cluster API is only reachable inside SPANBC. This
+   means GitHub Actions runners cannot `oc login` or `kubectl apply` directly. The
+   deployment mechanism **must be ArgoCD** (GitOps pull model), not a push-based
+   pipeline.
+2. **Proxy-only internet** — pods can reach the internet only via an HTTP proxy.
+   This affects image pulls from public registries (Docker Hub, ghcr.io) at runtime.
+   All images must be mirrored to **Artifactory** first.
+3. **Protected C sensitivity** — stronger network policy requirements and mandatory
+   data classification labels on pods (`DataClass: "Medium"` or higher).
+4. **EUS upgrade cadence** — platform stays on stable even-point releases longer,
+   reducing forced upgrades but meaning you must target a supported OCP release.
+
+---
+
+## 2. Namespace Structure
+
+When a project is provisioned via the BC Gov Platform Product Registry, four namespaces
+are created automatically:
+
+| Namespace           | Purpose                                                   |
+|---------------------|-----------------------------------------------------------|
+| `<license>-tools`   | Build pipelines, image building/pushing, Artifactory auth |
+| `<license>-dev`     | Development environment                                   |
+| `<license>-test`    | Test / QA environment                                     |
+| `<license>-prod`    | Production environment                                    |
+
+The license plate is assigned by the Platform Registry (e.g., `be808f`).
+
+**DSC license plate is not yet assigned** — provisioning step must happen first.
+
+---
+
+## 3. CI/CD Architecture — The GitOps Pattern
+
+Based on `tenant-gitops-be808f`, the pattern for Emerald is:
+
+```
+┌─────────────────────────────────────────────────────────┐
+│  App Repo (DSC-modernization)                           │
+│                                                         │
+│  .github/workflows/                                     │
+│    build-and-push.yml  ──► Build images on push/tag     │
+│                             Push to Artifactory         │
+│                             Update image tag in GitOps  │
+│                                                         │
+│  containerization/                                      │
+│    Containerfile.api                                    │
+│    Containerfile.frontend                               │
+│    nginx.conf                                           │
+└───────────────────────────────┬─────────────────────────┘
+                                │ triggers update or PR
+                                ▼
+┌─────────────────────────────────────────────────────────┐
+│  GitOps Repo (dsc-gitops — new repo to create)          │
+│                                                         │
+│  charts/                                                │
+│    dsc/  (Helm chart: API + frontend + MariaDB)         │
+│      Chart.yaml                                         │
+│      templates/                                         │
+│        api-deployment.yaml                              │
+│        frontend-deployment.yaml                         │
+│        mariadb-statefulset.yaml  (or sub-chart)         │
+│        services.yaml                                    │
+│        routes.yaml                                      │
+│        networkpolicies.yaml                             │
+│        configmap.yaml                                   │
+│        secret.yaml  (template only — real values: Vault)│
+│      values.yaml  (defaults)                            │
+│                                                         │
+│  deploy/                                                │
+│    dev_values.yaml                                      │
+│    test_values.yaml                                     │
+│    prod_values.yaml                                     │
+│                                                         │
+│  applications/argocd/                                   │
+│    dsc-dev.yaml                                         │
+│    dsc-test.yaml                                        │
+│    dsc-prod.yaml                                        │
+│                                                         │
+│  .github/workflows/                                     │
+│    ci.yml  (helm lint + helm template all envs)         │
+└───────────────────────────────┬─────────────────────────┘
+                                │ ArgoCD watches (SSH/token)
+                                ▼
+┌─────────────────────────────────────────────────────────┐
+│  ArgoCD (running on Emerald cluster)                    │
+│                                                         │
+│  Watches gitops repo, auto-syncs to matching namespace  │
+│  selfHeal: true, prune: true                            │
+└─────────────────────────────────────────────────────────┘
+```
+
+### Why ArgoCD (not GitHub Actions direct push)
+
+Because the Emerald cluster API is **SPANBC-internal only**, GitHub Actions runners
+(which run on the public internet) cannot reach the API to run `oc apply` or
+`kubectl rollout`. Pull-based GitOps (ArgoCD) is the correct pattern:
+
+- ArgoCD runs **inside** the cluster
+- It watches the GitOps repo (SSH accessible from inside SPANBC)
+- On change, it applies the rendered Helm templates itself
+
+---
+
+## 4. Image Registry — Artifactory
+
+BC Gov provides **Artifactory** (`artifacts.developer.gov.bc.ca`) as the approved
+image registry. This replaces Docker Hub / GHCR for production images pulled by
+OpenShift.
+
+**Why this matters for Emerald:**
+- Pods on Emerald cannot pull from Docker Hub or GHCR directly (proxy restriction)
+- Artifactory is inside the network boundary
+- Artifactory has an Xray scan integration (security scanning of images)
+
+**Workflow:**
+1. GitHub Actions builds the image in the `tools` namespace context (or on public
+   runner using Artifactory credentials stored as GitHub Secrets)
+2. Image is pushed to Artifactory: `artifacts.developer.gov.bc.ca/<project>/<image>:<tag>`
+3. Helm values reference the Artifactory image URL
+4. ArgoCD deploys the pod, which pulls from Artifactory (internal, no proxy needed)
+
+**Required setup:**
+- Artifactory service account (`artifacts.developer.gov.bc.ca`)
+- GitHub Secret: `ARTIFACTORY_USERNAME` + `ARTIFACTORY_PASSWORD`
+- Artifactory project + repository provisioned via Product Registry
+
+---
+
+## 5. Secrets Management — Vault
+
+BC Gov provides **HashiCorp Vault** for secret management. For Emerald (Protected C),
+using Vault is the recommended (arguably required) approach.
+
+**Pattern:**
+- Secrets stored in Vault paths (e.g., `secret/<license>/dev/mariadb-password`)
+- Vault Agent Injector or External Secrets Operator fetches secrets at pod startup
+- Secrets are injected as files or env vars — never committed to GitOps repo
+- Helm chart contains only a template `Secret` object pointing to Vault path
+
+**DSC secrets that will need Vault entries:**
+- `MariaDB` root password + app user password
+- `ConnectionStrings__DefaultConnection` for the API
+- Admin token for `X-Admin-Token` header auth
+- Any future Keycloak / IDIR client credentials
+
+---
+
+## 6. DSC Stack Analysis for Containerization
+
+### 6.1 — API (`src/DSC.Api/`)
+
+| Factor                     | Current State                        | Container Needs                   |
+|----------------------------|--------------------------------------|-----------------------------------|
+| Framework                  | .NET 10                              | Base: `mcr.microsoft.com/dotnet/sdk:10.0` (build), `aspnet:10.0` (runtime) |
+| Port                       | `5005` (dev)                         | Must be `8080` in container (standard OpenShift convention) |
+| Database                   | MariaDB (localhost:3306)             | `ConnectionStrings__DefaultConnection` from Secret |
+| Auth                       | `X-User-Id` header / `X-Admin-Token` | Admin token from Secret; user ID passed from Keycloak-aware proxy or caller |
+| `ASPNETCORE_URLS`          | Not set (dev uses launchSettings)    | Set to `http://+:8080` in container |
+| Health check               | `GET /health` exists                 | Use as liveness/readiness probe   |
+| Non-root user              | Not configured                       | Must add `appuser` (OpenShift runs as random UID — use numeric UID or `nobody`) |
+| `appsettings.json`         | Has `localhost` MariaDB reference    | All connection strings → env vars from Secrets/ConfigMaps |
+
+**OpenShift non-root note:** OpenShift assigns a random UID from the namespace's SCC.
+The container user does not need to match exactly — but the **file system permissions**
+must allow that random UID to read the app. Setting `USER` is optional; the directory
+ownership should be set to group `0` (root group) with group-writable permissions, which
+is the standard OpenShift pattern.
+
+### 6.2 — Frontend (`src/DSC.WebClient/`)
+
+| Factor              | Current State               | Container Needs                                     |
+|---------------------|-----------------------------|-----------------------------------------------------|
+| Framework           | React + Vite                | Node build stage (`node:22-alpine`), then Nginx runtime |
+| `VITE_API_URL`      | `localhost:5005` hardcoded  | **Problem:** Vite bakes env vars at BUILD time       |
+| Output port         | Vite dev server 5173        | Nginx serving dist on port 8080                    |
+| SPA routing         | Vite handles in dev         | Nginx needs `try_files $uri /index.html`           |
+| Non-root            | Not configured              | Nginx config must not bind to port 80 or 443       |
+| Security headers    | None (dev only)             | Add in nginx.conf (see reference nginx.conf)       |
+
+**The VITE_API_URL build-time problem:** Because Vite embeds the API URL at build time,
+the same frontend container cannot be reused across dev/test/prod with different API URLs
+without one of these solutions:
+
+- **Option A (recommended):** Use a runtime config file served as `/config.json` from
+  Nginx, fetched by the app on startup. The API URL comes from `window.__env__` or a
+  config fetch — not from `import.meta.env`. This allows a single built image.
+- **Option B (simpler, less ideal):** Build a separate image per environment. Works but
+  wastes build time and storage.
+
+### 6.3 — Database (MariaDB)
+
+| Factor                | Current State                   | OpenShift Options                              |
+|-----------------------|---------------------------------|------------------------------------------------|
+| Engine                | MariaDB 10.x                    | Use Bitnami MariaDB Helm chart as sub-chart, or StatefulSet with PVC |
+| Storage               | Local dev file                  | PVC — `storageClassName: netapp-file-standard` |
+| Backup                | Not configured                  | `netapp-volume-backup` storage class or `backup-container` sidecar |
+| Connection            | `localhost:3306` (dev)          | In-cluster: `dsc-mariadb.{namespace}.svc.cluster.local:3306` |
+| Credentials           | appsettings.Development.json    | Vault → OpenShift Secret → injected as env vars|
+
+**Platform note:** BC Gov platform team guidelines push toward **PostgreSQL with CrunchyDB**
+as the preferred database operator (built-in HA, backup). Migrating from MariaDB to
+PostgreSQL would unlock CrunchyDB support and potentially simplify operations. This is a
+significant effort but worth flagging as a medium-term consideration.
+
+For the initial deployment, MariaDB in a StatefulSet is acceptable.
+
+---
+
+## 7. Required DataClass Labels
+
+On Emerald (Protected C), pods must carry data classification labels. Based on
+`dev_values.yaml` from the reference repo:
+
+```yaml
+podLabels:
+  DataClass: "Medium"   # or "High" / "Critical" depending on actual classification
+```
+
+And route annotations:
+```yaml
+route:
+  annotations:
+    aviinfrasetting.ako.vmware.com/name: "dataclass-medium"
+```
+
+**DSC data classification must be confirmed** with the Information Security team before
+choosing the `DataClass` value.
+
+---
+
+## 8. Network Policy Requirements
+
+Emerald enforces network policies by default — pods cannot communicate unless
+explicitly allowed. The GitOps repo must include `NetworkPolicy` objects:
+
+| Policy                        | Purpose                                          |
+|-------------------------------|--------------------------------------------------|
+| Frontend → API                | Allow port 8080 from frontend pods               |
+| API → MariaDB                 | Allow port 3306 from API pods                    |
+| OpenShift Router → Frontend   | Allow ingress from `ingress` namespace           |
+| OpenShift Router → API        | Allow ingress for direct API routes              |
+| API → Vault sidecar           | Allow Vault Agent Injector if used               |
+| API → external (via proxy)    | Allow egress on 443 if API calls external services|
+| Deny all else                 | Default deny — must be explicitly stated         |
+
+---
+
+## 9. What Needs to Be Built — Gap List
+
+### In the DSC App Repo (this repo)
+
+| Artifact                                        | Status   | Notes                                                  |
+|-------------------------------------------------|----------|--------------------------------------------------------|
+| `containerization/Containerfile.api`            | MISSING  | .NET 10 multistage build, port 8080, non-root          |
+| `containerization/Containerfile.frontend`       | MISSING  | Node + Nginx, port 8080, non-root                      |
+| `containerization/nginx.conf`                   | MISSING  | SPA routing + security headers                         |
+| `containerization/podman-compose.yml`           | MISSING  | Local dev container runtime                            |
+| `.github/workflows/build-and-push.yml`          | MISSING  | Build images, push to Artifactory on push/tag          |
+| Runtime config injection for VITE_API_URL       | MISSING  | `/config.json` served from Nginx (Option A) or build per env |
+| `GET /health` and `GET /health/ready` endpoints | Needs verification | Check if both exist in `src/DSC.Api/`         |
+
+### New GitOps Repo (`dsc-gitops` — to be created)
+
+| Artifact                                        | Notes                                                      |
+|-------------------------------------------------|------------------------------------------------------------|
+| `charts/dsc/` — Helm chart (API component)     | Deployment, Service, Route, ConfigMap, Secret template     |
+| `charts/dsc/` — Helm chart (Frontend component)| Deployment, Service, Route                                 |
+| `charts/dsc/` — Helm chart (MariaDB component) | StatefulSet or Bitnami sub-chart, PVC, Secret template     |
+| `charts/dsc/templates/networkpolicies.yaml`     | All required pod-to-pod and ingress policies               |
+| `deploy/dev_values.yaml`                        | Dev namespace values, Artifactory image tags, route hosts  |
+| `deploy/test_values.yaml`                       | Test environment overrides                                 |
+| `deploy/prod_values.yaml`                       | Production overrides (replica count, resource limits)      |
+| `applications/argocd/dsc-dev.yaml`              | ArgoCD Application CRD pointing to dev namespace           |
+| `applications/argocd/dsc-test.yaml`             | ArgoCD Application CRD for test                            |
+| `applications/argocd/dsc-prod.yaml`             | ArgoCD Application CRD for prod                            |
+| `.github/workflows/ci.yml`                      | `helm lint` all charts, `helm template` all envs           |
+
+### Platform Provisioning (Human Steps — Outside Codebase)
+
+| Step                                                    | Owner     |
+|---------------------------------------------------------|-----------|
+| Request namespace set via Platform Product Registry     | Product Owner / Admin |
+| Set up Artifactory project + Docker repository          | Platform request form |
+| Set up Artifactory service account                      | Platform request form |
+| Enable ArgoCD for the project                           | Platform request — or self-serve |
+| Onboard to Vault, create paths for DSC secrets          | Developer  |
+| Create `NetworkAttachmentDefinition` if VM-SDN needed   | Platform team |
+| Confirm `DataClass` with InfoSec                        | Product Owner |
+| Add team members to OpenShift project                   | Product Owner |
+
+---
+
+## 10. Proposed Pipeline Stages
+
+### Stage 1 — Build (GitHub Actions, runs on public runner)
+
+```
+1. Checkout code
+2. Log in to Artifactory (ARTIFACTORY_USERNAME / ARTIFACTORY_PASSWORD secrets)
+3. Build API image  →  artifacts.developer.gov.bc.ca/<project>/dsc-api:<git-sha>
+4. Build Frontend image  →  artifacts.developer.gov.bc.ca/<project>/dsc-frontend:<git-sha>
+5. Push both images to Artifactory
+6. (Optional) Trigger Xray scan
+7. On success: update image tags in GitOps repo (PR or direct commit to develop)
+```
+
+### Stage 2 — Deploy to Dev (ArgoCD, automatic)
+
+```
+1. ArgoCD detects change in gitops repo develop branch
+2. Renders Helm chart with dev_values.yaml
+3. Applies manifests to <license>-dev namespace
+4. Waits for pod readiness
+5. selfHeal: if pod drifts, ArgoCD corrects it
+```
+
+### Stage 3 — Promote to Test/Prod (Manual approval + GitOps PR)
+
+```
+1. Developer creates PR: update image tag in test_values.yaml or prod_values.yaml
+2. PR review + approval
+3. Merge → ArgoCD syncs test or prod namespace
+```
+
+---
+
+## 11. Recommended Build Order
+
+The recommended sequence for implementation (building nothing ahead of its dependencies):
+
+1. **Containerfiles + nginx.conf** — get the app building and running in containers locally
+2. **podman-compose.yml** — validate local multi-container setup (API + Frontend + MariaDB)
+3. **Runtime config injection** — solve the VITE_API_URL problem before building pipeline
+4. **Helm chart (GitOps repo)** — build the deployment manifests
+5. **Artifactory setup** — provision repo + service account (parallel with Helm work)
+6. **GitHub Actions build workflow** — wire up image build + push
+7. **Platform provisioning** — namespace, ArgoCD, Vault (requires human steps)
+8. **ArgoCD application CRDs** — register the app with ArgoCD
+9. **First deployment to dev** — verify end-to-end
+10. **Health checks + monitoring** — Sysdig onboarding, alert setup
+
+---
+
+## 12. Reference URLs
+
+| Resource                                | URL                                                                                      |
+|-----------------------------------------|------------------------------------------------------------------------------------------|
+| BC Gov Platform Technical Docs          | https://developer.gov.bc.ca/docs/default/component/platform-developer-docs               |
+| Hosting Tiers Table                     | https://developer.gov.bc.ca/docs/default/component/platform-developer-docs/docs/platform-architecture-reference/hosting-tiers-table/ |
+| CI/CD Pipeline Templates                | https://developer.gov.bc.ca/docs/default/component/platform-developer-docs/docs/automation-and-resiliency/cicd-pipeline-templates-for-private-cloud-teams/ |
+| ArgoCD Usage Guide                      | https://developer.gov.bc.ca/docs/default/component/platform-developer-docs/docs/automation-and-resiliency/argo-cd-usage/ |
+| Platform Product Registry               | https://digital.gov.bc.ca/technology/cloud/private/products-tools/registry/              |
+| Artifactory Setup                       | https://developer.gov.bc.ca/docs/default/component/platform-developer-docs/docs/build-deploy-and-maintain-apps/setup-artifactory-service-account/ |
+| Vault Getting Started                   | https://developer.gov.bc.ca/docs/default/component/platform-developer-docs/docs/secrets-management/vault-getting-started-guide/ |
+| Provision New OpenShift Project         | https://developer.gov.bc.ca/docs/default/component/platform-developer-docs/docs/openshift-projects-and-access/provision-new-openshift-project/ |
+| BC Gov Security Pipeline Templates     | https://github.com/bcgov/security-pipeline-templates                                     |
+| Reference App Repo (network tools)      | https://github.com/bcgov-c/jag-network-tools                                             |
+| Reference GitOps Repo                   | https://github.com/bcgov-c/tenant-gitops-be808f                                          |
+| OpenShift Network Policies              | https://developer.gov.bc.ca/docs/default/component/platform-developer-docs/docs/platform-architecture-reference/openshift-network-policies/ |
+| Database Backup Best Practices          | https://developer.gov.bc.ca/docs/default/component/platform-developer-docs/docs/database-and-api-management/database-backup-best-practices/ |
+
+---
+
+## 13. Implementation Summary — February 2026
+
+This section records what was actually built as the first deployment preparation sprint.
+The implementation decisions are documented here for traceability.
+
+### 13.1 Decision — Shared GitOps Repo (Not a New Repo)
+
+The pre-deployment analysis assumed DSC would get its own GitOps repo (`dsc-gitops`).
+After reviewing `tenant-gitops-be808f`, DSC is integrated as a **sub-chart of the
+existing umbrella chart**. This matches the pattern already established in the namespace
+and avoids platform team changes to provision an additional ArgoCD Application CRD.
+
+DSC is added as a conditionally-enabled sub-chart alongside `emerald-app`:
+
+```
+tenant-gitops-be808f/
+  charts/
+    gitops/             ← umbrella chart (ArgoCD watches this)
+      Chart.yaml        ← dsc-app added as dependency
+      values.yaml       ← dsc-app.enabled: false (default)
+    emerald-app/        ← existing service (untouched)
+    dsc-app/            ← NEW: DSC API + Frontend + MariaDB
+  deploy/
+    dev_values.yaml     ← dsc-app enabled, dev routes, 1Gi DB
+    test_values.yaml    ← dsc-app disabled (enable when ready)
+    prod_values.yaml    ← dsc-app disabled (enable when ready)
+```
+
+### 13.2 Decision — Nginx Proxy (No config.json Injection)
+
+All API calls in `DSC.WebClient` use **relative paths** (`/api/items`, `/api/reports`,
+etc.). Nginx is configured to proxy `/api/` requests to the `dsc-api` ClusterIP Service
+within the same namespace. This eliminates the need for:
+
+- `VITE_API_URL` environment variables baked at build time
+- `/config.json` runtime injection
+- A separate CORS configuration (requests appear same-origin to the browser)
+
+The nginx configuration is rendered by Helm into a ConfigMap mounted at
+`/etc/nginx/conf.d/default.conf` in the frontend pod. The API service hostname is
+injected at deploy time via the `{{ include "dsc-app.apiServiceName" . }}` helper.
+
+### 13.3 Files Created
+
+**DSC-modernization repo:**
+
+| File | Purpose |
+|------|---------|
+| `containerization/Containerfile.api` | .NET 10 multistage build — mirrors jag-network-tools pattern |
+| `containerization/Containerfile.frontend` | Node build → Nginx runtime with envsubst config support |
+| `containerization/nginx.conf` | SPA + `/api/` reverse proxy; envsubst template for local use |
+| `containerization/podman-compose.yml` | Full local dev stack (API + Frontend + MariaDB) |
+| `.github/workflows/build-and-push.yml` | Builds both images, pushes to Artifactory, updates gitops tags |
+
+**tenant-gitops-be808f repo (additions only — existing services untouched):**
+
+| File | Purpose |
+|------|---------|
+| `charts/dsc-app/Chart.yaml` | Helm chart descriptor |
+| `charts/dsc-app/values.yaml` | Default values (all envs) |
+| `charts/dsc-app/templates/_helpers.tpl` | Named templates (fullname, labels, selectors) |
+| `charts/dsc-app/templates/api-deployment.yaml` | DSC.Api Deployment |
+| `charts/dsc-app/templates/api-service.yaml` | ClusterIP Service for API |
+| `charts/dsc-app/templates/api-route.yaml` | OpenShift Route (TLS edge) |
+| `charts/dsc-app/templates/frontend-configmap.yaml` | Helm-rendered nginx.conf with API proxy target |
+| `charts/dsc-app/templates/frontend-deployment.yaml` | DSC.WebClient Deployment (ConfigMap-mounted nginx.conf) |
+| `charts/dsc-app/templates/frontend-service.yaml` | ClusterIP Service for Frontend |
+| `charts/dsc-app/templates/frontend-route.yaml` | OpenShift Route (TLS edge) |
+| `charts/dsc-app/templates/db-statefulset.yaml` | MariaDB 10.11 StatefulSet with PVC |
+| `charts/dsc-app/templates/db-service.yaml` | Headless Service for MariaDB |
+| `charts/dsc-app/templates/secret.yaml` | Shape-only Secrets (values from Vault) |
+| `charts/dsc-app/templates/networkpolicies.yaml` | Deny-all + 5 explicit allow rules |
+| `charts/dsc-app/templates/serviceaccount.yaml` | ServiceAccount (automount: false) |
+| `charts/dsc-app/templates/hpa.yaml` | HPA for API (enabled in prod only) |
+| `charts/gitops/Chart.yaml` | Added dsc-app dependency |
+| `charts/gitops/values.yaml` | Added dsc-app.enabled: false default |
+| `deploy/dev_values.yaml` | DSC dev config added (enabled: true) |
+| `deploy/test_values.yaml` | DSC test config added (enabled: false) |
+| `deploy/prod_values.yaml` | DSC prod config added (enabled: false) |
+| `.github/workflows/ci.yml` | Added dsc-app lint step + test template step |
+
+### 13.4 Health Check Endpoints
+
+`DSC.Api` already has the correct liveness/readiness endpoints (from `Program.cs`):
+
+| Probe | Path | Notes |
+|-------|------|-------|
+| Liveness | `GET /health/live` | Returns 200 when process is alive |
+| Readiness | `GET /health/ready` | Returns 200 when DB connection is healthy |
+
+The Helm chart uses these paths for `livenessProbe` and `readinessProbe`.
+
+### 13.5 Remaining Platform Provisioning Steps (Human Actions Required)
+
+The following steps require a human operator and cannot be automated in this repo:
+
+| Step | Action | Where |
+|------|--------|--------|
+| 1 | Register DSC in BC Gov Platform Product Registry | https://registry.developer.gov.bc.ca |
+| 2 | Receive license plate (currently `be808f` shared namespace is used) | Platform Registry |
+| 3 | Create Artifactory Docker repository (`be808f-docker-local`) | Artifactory console |
+| 4 | Create Artifactory service account; create pull secret in namespace | CLI / Artifactory |
+| 5 | Add `ARTIFACTORY_USERNAME` + `ARTIFACTORY_PASSWORD` as GitHub Secrets | GitHub repo settings |
+| 6 | Add `GITOPS_TOKEN` (PAT with write to tenant-gitops-be808f) as GitHub Secret | GitHub repo settings |
+| 7 | Onboard to Vault; create secret paths `secret/be808f/dev/dsc-db` and `secret/be808f/dev/dsc-admin` | Vault console |
+| 8 | Pre-create `dsc-db-secret` and `dsc-admin-secret` in `be808f-dev` namespace | `oc create secret` |
+| 9 | Confirm ArgoCD is watching `tenant-gitops-be808f` with access to the `charts/gitops` path | ArgoCD admin |
+| 10 | Confirm MariaDB base image is mirrored to Artifactory (`be808f-docker-local/mariadb:10.11`) | Artifactory |
+| 11 | Set `dsc-app.enabled: true` in `deploy/dev_values.yaml` and push to trigger first ArgoCD sync | GitOps PR |
+

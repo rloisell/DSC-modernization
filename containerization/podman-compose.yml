@@ -1,0 +1,127 @@
+# podman-compose.yml  —  DSC local development, Ryan Loisell, GitHub Copilot,
+# February 2026, AI-assisted.
+#
+# Spins up three services that mirror the Emerald production topology:
+#   db        — MariaDB 10.11
+#   dsc-api   — .NET 10 API (port 5005 → 8080)
+#   dsc-frontend — React/Nginx (port 5173 → 8080)
+#
+# Usage:
+#   podman-compose up --build     # first run
+#   podman-compose up             # subsequent runs
+#   podman-compose down -v        # tear down including volumes
+#
+# Environment variables expected in a .env file at the repo root:
+#   DB_ROOT_PASSWORD=<root_pass>
+#   DB_NAME=dsc_dev
+#   DB_USER=dsc_user
+#   DB_PASSWORD=<user_pass>
+#   ADMIN_TOKEN=<admin_token>
+
+version: "3.9"
+
+networks:
+  dsc-net:
+    driver: bridge
+
+volumes:
+  db-data:
+
+services:
+
+  # ── MariaDB ────────────────────────────────────────────────────────────────
+  db:
+    image: mariadb:10.11
+    restart: unless-stopped
+    networks: [dsc-net]
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root_local_pass}
+      MYSQL_DATABASE:      ${DB_NAME:-dsc_dev}
+      MYSQL_USER:          ${DB_USER:-dsc_user}
+      MYSQL_PASSWORD:      ${DB_PASSWORD:-dsc_local_pass}
+    volumes:
+      - db-data:/var/lib/mysql
+    ports:
+      - "3307:3306"   # exposed on 3307 to avoid conflicts with local MySQL
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+    security_opt:
+      - no-new-privileges:true
+    cap_drop: [ALL]
+    cap_add:  [CHOWN, SETUID, SETGID, DAC_OVERRIDE]
+
+  # ── .NET API ───────────────────────────────────────────────────────────────
+  dsc-api:
+    build:
+      context: .
+      dockerfile: containerization/Containerfile.api
+    restart: unless-stopped
+    networks: [dsc-net]
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "5005:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__DefaultConnection: >-
+        Server=db;Port=3306;Database=${DB_NAME:-dsc_dev};
+        Uid=${DB_USER:-dsc_user};Pwd=${DB_PASSWORD:-dsc_local_pass};SslMode=none;
+      Admin__Token:   ${ADMIN_TOKEN:-dev_admin_token}
+      Admin__RequireToken: "false"
+    healthcheck:
+      test:     ["CMD", "curl", "-f", "http://localhost:8080/health/live"]
+      interval: 30s
+      timeout:  10s
+      retries:  3
+      start_period: 40s
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+    security_opt:
+      - no-new-privileges:true
+    cap_drop: [ALL]
+    tmpfs:
+      - /tmp:mode=1777
+
+  # ── React/Nginx Frontend ───────────────────────────────────────────────────
+  dsc-frontend:
+    build:
+      context: .
+      dockerfile: containerization/Containerfile.frontend
+    restart: unless-stopped
+    networks: [dsc-net]
+    depends_on:
+      dsc-api:
+        condition: service_healthy
+    ports:
+      - "5173:8080"
+    environment:
+      # API_SERVICE_HOST matches the docker-compose service name above
+      API_SERVICE_HOST: dsc-api
+      API_SERVICE_PORT: "8080"
+    healthcheck:
+      test:     ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/"]
+      interval: 30s
+      timeout:  10s
+      retries:  3
+      start_period: 20s
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+    security_opt:
+      - no-new-privileges:true
+    cap_drop: [ALL]
+    tmpfs:
+      - /tmp:mode=1777
+      - /var/cache/nginx:mode=0755
