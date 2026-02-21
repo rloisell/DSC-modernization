@@ -72,6 +72,37 @@ diagrams/
 
 ---
 
+## Format Convention
+
+| Format | File extension | Purpose |
+|--------|----------------|---------|
+| Draw.io | `.drawio` | Primary editable source — open in [draw.io](https://app.diagrams.net) or VS Code Draw.io extension |
+| PlantUML | `.puml` | Text-based alternative — version-control friendly, renderable in GitHub |
+
+SVG exports (from Draw.io) use `background="#ffffff"` and `strokeWidth=2` on edges for consistent GitHub rendering.
+
+---
+
+## Required Diagrams
+
+Per `CODING_STANDARDS.md` §7, every project must produce the complete set below.
+Diagrams marked _scales with features_ should have one instance per major use case or lifecycle, not one globally.
+
+| # | Diagram | UML Type | Perspective | Requirement | Status |
+|---|---------|----------|-------------|-------------|--------|
+| 1 | System architecture | Component | Structural | **Required** | ✅ `api-architecture` |
+| 2 | Domain class model | Class | Structural | **Required** | ✅ `domain-model` |
+| 3 | Package / module organisation | Package | Structural | **Required** | ✅ `component-diagram` |
+| 4 | Use case overview | Use Case | Behavioural | **Required** | ✅ `use-cases` |
+| 5 | Key sequence flows | Sequence | Behavioural | One per major user-facing feature | ✅ 5 sequences |
+| 6 | Key workflows | Activity | Behavioural | One per complex multi-step workflow | ⬜ Not yet created |
+| 7 | Entity lifecycle | State | Behavioural | For entities with non-trivial state transitions | ⬜ Not yet created |
+| 8 | Entity-Relationship Diagram (ERD) | ERD | Data | **Required** | ✅ `erd-current` |
+| 9 | Physical schema | Schema | Data | **Required** | ⬜ Not yet created |
+| 10 | Deployment topology | Deployment | Infrastructure | **Required** | ✅ `deployment` |
+
+---
+
 ## Diagram Overview
 
 ### Architecture Diagrams
