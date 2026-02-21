@@ -261,6 +261,14 @@ updates:
     schedule: { interval: weekly }
 ```
 
+### P8 — GitHub Copilot Code Review (✅ IN USE — workflow configuration pending)
+
+GitHub Copilot Code Review is already adopted on this project. It analyzes PR diffs and posts inline review comments with suggested fixes.
+
+**Action required:** Create `.github/workflows/copilot-review.yml` in the DSC-modernization app repo to auto-request Copilot as a reviewer on every non-draft PR. See `EmeraldDeploymentAnalysis.md` §8.3 for the full workflow template.
+
+**Org setup check:** Confirm GitHub Copilot for Business or Enterprise is enabled on the org (Settings → Copilot → Code review). The auto-reviewer toggle can also be enabled in Settings → Code review → GitHub Copilot.
+
 ---
 
 

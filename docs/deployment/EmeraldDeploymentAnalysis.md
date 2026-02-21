@@ -394,6 +394,46 @@ jobs:
 
 ---
 
+### 8.3 — AI Code Review (GitHub Copilot Code Review)
+
+GitHub Copilot Code Review automatically analyzes PR diffs and posts inline review comments with suggested fixes. It is in active use on this project.
+
+**Requirements:** GitHub Copilot for Business or Enterprise must be enabled on the organization (Settings → Copilot → Code review).
+
+**Auto-request on every non-draft PR** — add `.github/workflows/copilot-review.yml` to the app repo:
+
+```yaml
+name: Request Copilot Code Review
+on:
+  pull_request:
+    types: [opened, ready_for_review, reopened]
+permissions:
+  pull-requests: write
+jobs:
+  request-review:
+    if: ${{ !github.event.pull_request.draft }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Request Copilot review
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.pulls.requestReviewers({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number,
+              reviewers: ['copilot']
+            });
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+```
+
+**What it checks:** Code correctness, potential bugs, security anti-patterns, naming consistency, and dead code. Results appear as inline review comments; Copilot may suggest specific code fixes that can be applied directly from the PR interface.
+
+> If `copilot-review.yml` is not yet added to the repo, Copilot can still be manually requested as a reviewer from the PR sidebar.
+
+---
+
 ## 9. Secrets Management
 
 ### 9.1 — GitHub Actions Secrets (App Repo)
