@@ -1,5 +1,71 @@
 # Remaining Work (2026-02-20)
 
+---
+
+## 📋 ACTIVE BACKLOG — Prioritized Outstanding Work (updated 2026-02-21)
+
+### 🔴 P1 — User: Edit & Delete Own Work Items
+**Status**: Not started
+- No PUT/DELETE endpoints in `ItemsController.cs` — users can't correct or remove submitted time entries
+- Needs: `PUT /api/items/{id}`, `DELETE /api/items/{id}` (scoped to the authenticated user's own entries)
+- Frontend: edit-in-place row or Edit tab on Activity.jsx, delete confirmation button
+
+### 🔴 P2 — Admin: Project Assignments UI
+**Status**: Not started (API exists: `AdminProjectAssignmentsController.cs`)
+- No `AdminProjectAssignments.jsx` page and no "Assignments" tab in `Administrator.jsx`
+- Needed to manage which users are on which projects (currently only possible via seed/SQL)
+- Needs: Select project → view assigned users → add/remove user with role + optional estimated hours override
+
+### 🟠 P3 — Reporting Dashboard
+**Status**: Not started
+- No `Reports.jsx` page, no `/api/reports/summary` endpoint
+- Summary view: hours by project, hours by activity code, trend over time, budget vs actual
+- Required by both regular users (own hours) and managers/admins (team-wide)
+- Suggested: start with a manager/admin reports page; add user self-service view after
+- Export to CSV needed for operational use
+
+### 🟠 P4 — Admin: User Deactivation UX Polish
+**Status**: Not started (deactivation itself was implemented in commit `2240f7b`)
+- **Confirmation dialog before deactivating** — currently fires immediately on button press
+- **Filter by status in Current Users table** — toggle All / Active / Inactive
+- **UserAuth table sync** — `UserAuth` row should also be flagged/removed when a user is deactivated so legacy auth path is also blocked
+- **Audit log** — record who deactivated whom and when (compliance requirement)
+
+### 🟡 P5 — Admin: Catalog Reference Data Management
+**Status**: Not started for most items
+Backend controllers exist but no frontend admin tabs for:
+- `AdminActivityCodesController` / `AdminNetworkNumbersController` — activity codes & network numbers (partially visible in Activity.jsx dropdowns but admin can't manage them via UI)
+- `AdminBudgetsController` — project budget management
+- `AdminExpenseCategoriesController` / `AdminExpenseOptionsController` — expense catalog
+- `AdminReasonCodesController`, `AdminCpcCodesController`, `AdminDirectorCodesController` — classification codes
+- `AdminUnionsController`, `AdminCalendarCategoriesController` — supporting reference data
+- Suggest adding an "Advanced" or "Reference Data" tab group in `Administrator.jsx` to house these
+
+### 🟡 P6 — Unit & Integration Tests
+**Status**: Not started
+- Backend: `UserIdAuthenticationHandler` parsing, role-scoped `ProjectsController`, deactivation auth enforcement
+- Backend: `ItemsController` scoped-by-user behavior
+- Frontend: `AuthConfig.getAuthConfig()`, `ProjectService`, `AdminUserService`
+- Existing test stub at `tests/DSC.Tests/`
+
+### 🔵 P7 — Security & Auth Hardening (Post-MVP)
+**Status**: Planning phase
+- JWT token-based auth to replace `X-User-Id` header scheme
+- Token refresh mechanism
+- OIDC / KeyCloak integration (per README goals)
+- CORS configuration review
+- XSS / SQL injection audit
+- Sync `UserAuth` table state with `Users.IsActive` on deactivation (also in P4)
+
+### 🔵 P8 — Documentation
+**Status**: Not started
+- Swagger/OpenAPI response types for all admin endpoints
+- Architecture diagram (auth flow, admin data model)
+- Local development guide update (launchd services, DB connection, seeding)
+- Deployment guide
+
+---
+
 ## ✅ COMPLETED: UX Improvements & Admin Auth Fix (2026-02-20 — Session 5)
 
 **Status**: COMPLETE ✅
