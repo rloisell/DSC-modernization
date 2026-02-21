@@ -1,3 +1,13 @@
+/*
+ * AuthDtos.cs
+ * Ryan Loiselle — Developer / Architect
+ * GitHub Copilot — AI pair programmer / code generation
+ * February 2026
+ *
+ * Data Transfer Objects for authentication: LoginRequest (credentials in) and LoginResponse (token out).
+ * AI-assisted: DTO scaffolding; reviewed and directed by Ryan Loiselle.
+ */
+
 namespace DSC.Api.DTOs;
 
 public class LoginRequest

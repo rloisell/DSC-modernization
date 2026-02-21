@@ -1,3 +1,14 @@
+/*
+ * WorkItemService.js
+ * Ryan Loiselle — Developer / Architect
+ * GitHub Copilot — AI pair programmer / code generation
+ * February 2026
+ *
+ * Axios wrappers for the work-item CRUD endpoints (/api/items).
+ * Auth header is injected via getAuthConfig() on every request.
+ * AI-assisted: axios CRUD wrapper scaffolding; reviewed and directed by Ryan Loiselle.
+ */
+
 import axios from 'axios';
 import { getAuthConfig } from './AuthConfig';
 

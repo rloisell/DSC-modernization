@@ -1,3 +1,14 @@
+/*
+ * AdminCatalogDtos.cs
+ * Ryan Loiselle — Developer / Architect
+ * GitHub Copilot — AI pair programmer / code generation
+ * February 2026
+ *
+ * Data Transfer Objects for catalog reference data (roles, activity codes, network numbers,
+ * budgets, positions, departments, unions, and related create/update request models).
+ * AI-assisted: DTO scaffolding; reviewed and directed by Ryan Loiselle.
+ */
+
 using System;
 
 namespace DSC.Api.DTOs

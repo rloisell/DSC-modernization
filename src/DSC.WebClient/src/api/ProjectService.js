@@ -1,3 +1,13 @@
+/*
+ * ProjectService.js
+ * Ryan Loiselle — Developer / Architect
+ * GitHub Copilot — AI pair programmer / code generation
+ * February 2026
+ *
+ * Axios wrapper for the user-facing projects endpoint (/api/projects).
+ * AI-assisted: axios GET wrapper; reviewed and directed by Ryan Loiselle.
+ */
+
 import axios from 'axios';
 import { getAuthConfig } from './AuthConfig';
 

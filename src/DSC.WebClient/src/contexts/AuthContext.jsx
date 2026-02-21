@@ -1,3 +1,14 @@
+/*
+ * AuthContext.jsx
+ * Ryan Loiselle — Developer / Architect
+ * GitHub Copilot — AI pair programmer / code generation
+ * February 2026
+ *
+ * React context providing authentication state (user, token) and login/logout operations
+ * to the component tree. Persists session to localStorage; exposed via useAuth() hook.
+ * AI-assisted: context + provider scaffolding, localStorage persistence pattern; reviewed and directed by Ryan Loiselle.
+ */
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
 const AuthContext = createContext(null);

@@ -1,3 +1,18 @@
+/*
+ * TestDataSeeder.cs
+ * Ryan Loiselle — Developer / Architect
+ * GitHub Copilot — AI pair programmer / code generation
+ * February 2026
+ *
+ * Transactional test-data seeder for development and integration-test environments.
+ * Idempotent: each entity type is seeded only when the expected record does not already exist.
+ * Covers users, projects, departments, roles, lookup tables (22 entity types), work items,
+ * project assignments, and time entries — all within a single database transaction.
+ * Returns a TestSeedResult record summarising the count of records created per entity type.
+ * AI-assisted: foreach-based idempotent seed pattern, EF Core transaction scope, record type for result;
+ * seed data values and business rules reviewed and directed by Ryan Loiselle.
+ */
+
 using System;
 using System.Threading;
 using System.Threading.Tasks;

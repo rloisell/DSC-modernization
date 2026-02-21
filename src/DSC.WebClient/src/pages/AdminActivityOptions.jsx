@@ -1,3 +1,15 @@
+/*
+ * AdminActivityOptions.jsx
+ * Ryan Loiselle — Developer / Architect
+ * GitHub Copilot — AI pair programmer / code generation
+ * February 2026
+ *
+ * Admin page for managing project-to-activity-option assignments.
+ * Controls which activity-code / network-number pairs are valid for a given project.
+ * AI-assisted: dual-select linking pattern, entity relationship management;
+ * reviewed and directed by Ryan Loiselle.
+ */
+
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {

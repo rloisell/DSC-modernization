@@ -1,3 +1,13 @@
+/*
+ * AdminUserService.js
+ * Ryan Loiselle — Developer / Architect
+ * GitHub Copilot — AI pair programmer / code generation
+ * February 2026
+ *
+ * Axios wrappers for the admin user CRUD endpoints (/api/admin/users).
+ * AI-assisted: axios CRUD wrapper scaffolding; reviewed and directed by Ryan Loiselle.
+ */
+
 import axios from 'axios';
 
 const API_URL = '/api/admin/users';

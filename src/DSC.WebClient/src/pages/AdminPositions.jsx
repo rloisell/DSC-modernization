@@ -1,3 +1,14 @@
+/*
+ * AdminPositions.jsx
+ * Ryan Loiselle — Developer / Architect
+ * GitHub Copilot — AI pair programmer / code generation
+ * February 2026
+ *
+ * Admin CRUD page for position reference data.
+ * Standard list / add / edit pattern using BC Gov design system form components.
+ * AI-assisted: CRUD page scaffolding, form state management; reviewed and directed by Ryan Loiselle.
+ */
+
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {

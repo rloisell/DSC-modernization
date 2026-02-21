@@ -1,3 +1,14 @@
+/*
+ * AdminDepartments.jsx
+ * Ryan Loiselle — Developer / Architect
+ * GitHub Copilot — AI pair programmer / code generation
+ * February 2026
+ *
+ * Admin department management page.
+ * Standard list / add / edit pattern for department reference data using BC Gov design system components.
+ * AI-assisted: CRUD page scaffolding, form state management; reviewed and directed by Ryan Loiselle.
+ */
+
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {

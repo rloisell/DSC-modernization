@@ -1,3 +1,14 @@
+/*
+ * Project.jsx
+ * Ryan Loiselle — Developer / Architect
+ * GitHub Copilot — AI pair programmer / code generation
+ * February 2026
+ *
+ * User-facing project detail page showing project metadata and assigned work items
+ * for the selected project. Reads project context from router state.
+ * AI-assisted: React Query integration, BC Gov design system components; reviewed and directed by Ryan Loiselle.
+ */
+
 import React, { useState } from 'react';
 import {
   Heading,

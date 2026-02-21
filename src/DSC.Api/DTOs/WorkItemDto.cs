@@ -1,3 +1,14 @@
+/*
+ * WorkItemDto.cs
+ * Ryan Loiselle — Developer / Architect
+ * GitHub Copilot — AI pair programmer / code generation
+ * February 2026
+ *
+ * Data Transfer Objects for work item read (WorkItemDto), create (WorkItemCreateRequest),
+ * and update (WorkItemUpdateRequest) operations.
+ * AI-assisted: DTO scaffolding; reviewed and directed by Ryan Loiselle.
+ */
+
 using System;
 
 namespace DSC.Api.DTOs

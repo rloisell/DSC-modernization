@@ -1,3 +1,14 @@
+/*
+ * DomainExceptions.cs
+ * Ryan Loiselle — Developer / Architect
+ * GitHub Copilot — AI pair programmer / code generation
+ * February 2026
+ *
+ * Custom exception types mapped to HTTP status codes by GlobalExceptionHandler.
+ * NotFoundException → 404, ForbiddenException → 403, BadRequestException → 400, UnauthorizedException → 401.
+ * AI-assisted: exception type scaffolding; reviewed and directed by Ryan Loiselle.
+ */
+
 namespace DSC.Api.Infrastructure;
 
 /// <summary>

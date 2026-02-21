@@ -1,3 +1,14 @@
+/*
+ * CatalogService.js
+ * Ryan Loiselle — Developer / Architect
+ * GitHub Copilot — AI pair programmer / code generation
+ * February 2026
+ *
+ * Axios wrappers for the public catalog read endpoints: activity codes, network numbers,
+ * budgets, director/reason/CPC codes, and the project-options join query.
+ * AI-assisted: axios GET wrapper scaffolding; reviewed and directed by Ryan Loiselle.
+ */
+
 import axios from 'axios';
 import { getAuthConfig } from './AuthConfig';
 

@@ -1,3 +1,14 @@
+/*
+ * ReportDtos.cs
+ * Ryan Loiselle — Developer / Architect
+ * GitHub Copilot — AI pair programmer / code generation
+ * February 2026
+ *
+ * Data Transfer Objects for the reporting endpoints: summary aggregation (ReportSummaryDto)
+ * and individual line-item shapes.
+ * AI-assisted: DTO scaffolding; reviewed and directed by Ryan Loiselle.
+ */
+
 namespace DSC.Api.DTOs;
 
 public class ReportSummaryDto

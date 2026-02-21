@@ -1,3 +1,15 @@
+/*
+ * AdminProjectAssignmentsController.cs
+ * Ryan Loiselle — Developer / Architect
+ * GitHub Copilot — AI pair programmer / code generation
+ * February 2026
+ *
+ * Admin controller for project-assignment CRUD. Each write endpoint validates the caller's
+ * role (Admin / Manager / Director) via claims before allowing assignment changes.
+ * Enforces duplicate-assignment prevention and existence checks for both project and user.
+ * AI-assisted: Claims-based role check pattern, EF Include chains, duplicate-guard query; reviewed and directed by Ryan Loiselle.
+ */
+
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using DSC.Data;

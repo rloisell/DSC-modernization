@@ -1,3 +1,15 @@
+/*
+ * AdminProjects.jsx
+ * Ryan Loiselle — Developer / Architect
+ * GitHub Copilot — AI pair programmer / code generation
+ * February 2026
+ *
+ * Admin project management page. CRUD for project records (name, project number,
+ * estimated hours, active status) with inline form and optimistic list updates.
+ * AI-assisted: CRUD page scaffolding, form state, list refresh pattern;
+ * reviewed and directed by Ryan Loiselle.
+ */
+
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {

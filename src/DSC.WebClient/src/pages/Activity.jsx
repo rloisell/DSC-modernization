@@ -1,3 +1,17 @@
+/*
+ * Activity.jsx
+ * Ryan Loiselle — Developer / Architect
+ * GitHub Copilot — AI pair programmer / code generation
+ * February 2026
+ *
+ * Time-entry (activity) page — the most complex user-facing component.
+ * Manages project and catalog selection, start/end time calculation, work-item CRUD,
+ * and inline edit. Integrates the project-options catalog to restrict
+ * activity-code / network-number combinations to only valid pairs for the chosen project.
+ * AI-assisted: multi-step form state, time calc helpers, catalog constraint filtering,
+ * inline edit/delete pattern; reviewed and directed by Ryan Loiselle.
+ */
+
 import React, { useEffect, useState } from 'react';
 import {
   Button,

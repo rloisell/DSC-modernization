@@ -1,3 +1,15 @@
+/*
+ * AdminCatalogService.js
+ * Ryan Loiselle — Developer / Architect
+ * GitHub Copilot — AI pair programmer / code generation
+ * February 2026
+ *
+ * Axios wrappers for admin catalog reference-data CRUD endpoints.
+ * Covers all lookup entity types (roles, activity codes, departments, etc.) using the same
+ * GET/POST/PUT/DELETE pattern per entity.
+ * AI-assisted: CRUD wrapper scaffolding; reviewed and directed by Ryan Loiselle.
+ */
+
 import axios from 'axios';
 
 export const AdminCatalogService = {

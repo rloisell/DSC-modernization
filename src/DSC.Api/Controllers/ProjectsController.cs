@@ -1,3 +1,14 @@
+/*
+ * ProjectsController.cs
+ * Ryan Loiselle — Developer / Architect
+ * GitHub Copilot — AI pair programmer / code generation
+ * February 2026
+ *
+ * Read-only user-facing controller that returns the project list for the authenticated user.
+ * Thin pass-through to IProjectService; authentication is validated by UserIdAuthenticationHandler.
+ * AI-assisted: controller scaffolding, auth claim extraction; reviewed and directed by Ryan Loiselle.
+ */
+
 using System.Collections.Generic;
 using System.Security.Claims;
 using DSC.Api.DTOs;

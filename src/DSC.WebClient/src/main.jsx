@@ -1,3 +1,14 @@
+/*
+ * main.jsx
+ * Ryan Loiselle — Developer / Architect
+ * GitHub Copilot — AI pair programmer / code generation
+ * February 2026
+ *
+ * Application entry point. Wraps the React app in AuthProvider and React Query,
+ * configures global axios defaults, and mounts to the #root DOM element.
+ * AI-assisted: React Query client config, axios default base URL; reviewed and directed by Ryan Loiselle.
+ */
+
 import React from 'react'
 import axios from 'axios'
 import { createRoot } from 'react-dom/client'

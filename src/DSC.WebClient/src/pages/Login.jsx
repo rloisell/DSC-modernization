@@ -1,3 +1,14 @@
+/*
+ * Login.jsx
+ * Ryan Loiselle — Developer / Architect
+ * GitHub Copilot — AI pair programmer / code generation
+ * February 2026
+ *
+ * Login form page. Submits credentials to AuthService, stores the returned token,
+ * and redirects to the originally requested path after a successful login.
+ * AI-assisted: form submission pattern, useNavigate + useLocation redirect; reviewed and directed by Ryan Loiselle.
+ */
+
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Button, Form, Heading, InlineAlert, Text, TextField } from '@bcgov/design-system-react-components';

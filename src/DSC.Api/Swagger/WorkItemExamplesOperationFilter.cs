@@ -1,3 +1,14 @@
+/*
+ * WorkItemExamplesOperationFilter.cs
+ * Ryan Loiselle — Developer / Architect
+ * GitHub Copilot — AI pair programmer / code generation
+ * February 2026
+ *
+ * Swagger/OpenAPI operation filter that injects realistic example request and response bodies
+ * for the work-item endpoints, improving Swagger UI usability during development.
+ * AI-assisted: OpenApiObject construction, Swashbuckle IOperationFilter pattern; reviewed and directed by Ryan Loiselle.
+ */
+
 using System;
 using System.Linq;
 using Microsoft.OpenApi.Any;

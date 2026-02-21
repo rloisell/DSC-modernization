@@ -1,3 +1,14 @@
+/*
+ * AdminUsersController.cs
+ * Ryan Loiselle — Developer / Architect
+ * GitHub Copilot — AI pair programmer / code generation
+ * February 2026
+ *
+ * Admin CRUD controller for user accounts including password hashing, soft-activation toggles, and role/department assignment.
+ * Requires AdminOnly policy; protected by a fixed-window rate limiter on admin endpoints.
+ * AI-assisted: controller scaffolding, IPasswordHasher usage, activate/deactivate REST pattern; reviewed and directed by Ryan Loiselle.
+ */
+
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -78,6 +89,8 @@ namespace DSC.Api.Controllers
             return Ok(dto);
         }
 
+        // Create: validates username uniqueness and conditionally hashes the password before persisting.
+        // Password hashing uses ASP.NET Core IPasswordHasher so the password is never stored in plain text.
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -116,6 +129,8 @@ namespace DSC.Api.Controllers
             return CreatedAtAction(nameof(Get), new { id = user.Id }, new { id = user.Id });
         }
 
+        // Update: all profile fields are replaced; password is only re-hashed when a non-empty value is supplied
+        // so that an update call without a password field does not clear the existing credential.
         [HttpPut("{id}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -141,6 +156,8 @@ namespace DSC.Api.Controllers
             return NoContent();
         }
 
+        // Deactivate/Activate: separate PATCH endpoints for soft-toggle rather than a boolean in PUT,
+        // making intent explicit at the HTTP level and avoiding accidental activation on a profile update.
         [HttpPatch("{id}/deactivate")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]

@@ -1,3 +1,14 @@
+/*
+ * AdminProjectsController.cs
+ * Ryan Loiselle — Developer / Architect
+ * GitHub Copilot — AI pair programmer / code generation
+ * February 2026
+ *
+ * Admin CRUD controller for project records. Requires AdminOnly policy and rate limiting.
+ * Thin controller — persistence is handled directly via EF Core; no service layer required.
+ * AI-assisted: CRUD scaffolding, EF Core query patterns, OpenAPI attributes; reviewed and directed by Ryan Loiselle.
+ */
+
 using System;
 using System.Linq;
 using System.Threading.Tasks;

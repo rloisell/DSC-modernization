@@ -1,3 +1,13 @@
+/*
+ * ReportService.js
+ * Ryan Loiselle — Developer / Architect
+ * GitHub Copilot — AI pair programmer / code generation
+ * February 2026
+ *
+ * Axios wrappers for the report summary endpoint with optional date range filtering.
+ * AI-assisted: axios GET wrapper with query params; reviewed and directed by Ryan Loiselle.
+ */
+
 import axios from 'axios';
 import { getAuthConfig } from './AuthConfig';
 

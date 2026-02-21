@@ -1,3 +1,15 @@
+/*
+ * App.jsx
+ * Ryan Loiselle — Developer / Architect
+ * GitHub Copilot — AI pair programmer / code generation
+ * February 2026
+ *
+ * Application root component. Defines all client-side routes using React Router,
+ * wraps the authenticated layout with AuthProvider, and guards protected routes
+ * with ProtectedRoute. Handles session expiry by redirecting to /login.
+ * AI-assisted: React Router v6 route tree structure, layout wrapper pattern; reviewed and directed by Ryan Loiselle.
+ */
+
 import React from 'react'
 import { Routes, Route, useNavigate } from 'react-router-dom'
 import {

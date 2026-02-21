@@ -1,3 +1,14 @@
+/*
+ * AdminSeedController.cs
+ * Ryan Loiselle — Developer / Architect
+ * GitHub Copilot — AI pair programmer / code generation
+ * February 2026
+ *
+ * Exposes a single admin-only endpoint to trigger test data seeding in non-production environments.
+ * Thin controller — all seeding logic is delegated to TestDataSeeder.
+ * AI-assisted: controller scaffolding, admin auth attribute; reviewed and directed by Ryan Loiselle.
+ */
+
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;

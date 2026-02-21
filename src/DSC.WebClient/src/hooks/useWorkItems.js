@@ -1,3 +1,14 @@
+/*
+ * useWorkItems.js
+ * Ryan Loiselle — Developer / Architect
+ * GitHub Copilot — AI pair programmer / code generation
+ * February 2026
+ *
+ * React Query hook providing work-item read, create, update, and delete mutations
+ * for the Activity page. Invalidates the work-items cache on every mutation.
+ * AI-assisted: useMutation + cache invalidation pattern; reviewed and directed by Ryan Loiselle.
+ */
+
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   getWorkItems,

@@ -1,3 +1,14 @@
+/*
+ * Administrator.jsx
+ * Ryan Loiselle — Developer / Architect
+ * GitHub Copilot — AI pair programmer / code generation
+ * February 2026
+ *
+ * Admin section root component. Renders a secondary tab bar and conditionally
+ * mounts the active admin sub-page based on the selected tab.
+ * AI-assisted: conditional rendering with tab state; reviewed and directed by Ryan Loiselle.
+ */
+
 import React, { useState } from 'react';
 import { Heading, Text } from '@bcgov/design-system-react-components';
 import AdminUsers from './AdminUsers';

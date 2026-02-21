@@ -1,3 +1,14 @@
+/*
+ * AdminUserDtos.cs
+ * Ryan Loiselle — Developer / Architect
+ * GitHub Copilot — AI pair programmer / code generation
+ * February 2026
+ *
+ * Data Transfer Objects for admin user management: read (AdminUserDto),
+ * create (AdminUserCreateRequest), and update (AdminUserUpdateRequest) shapes.
+ * AI-assisted: DTO scaffolding; reviewed and directed by Ryan Loiselle.
+ */
+
 using System;
 
 namespace DSC.Api.DTOs

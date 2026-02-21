@@ -1,3 +1,15 @@
+/*
+ * AdminExpense.jsx
+ * Ryan Loiselle — Developer / Architect
+ * GitHub Copilot — AI pair programmer / code generation
+ * February 2026
+ *
+ * Admin expense-management page. Manages expense categories and their child options
+ * in a nested list / add / edit UI, using BC Gov design system form components.
+ * AI-assisted: nested entity CRUD pattern, BC Gov design system integration;
+ * reviewed and directed by Ryan Loiselle.
+ */
+
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {

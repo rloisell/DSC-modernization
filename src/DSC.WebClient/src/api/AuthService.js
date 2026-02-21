@@ -1,3 +1,14 @@
+/*
+ * AuthService.js
+ * Ryan Loiselle — Developer / Architect
+ * GitHub Copilot — AI pair programmer / code generation
+ * February 2026
+ *
+ * Thin axios wrapper for the /api/auth/login endpoint.
+ * Returns a token and user object on success; throws on invalid credentials.
+ * AI-assisted: axios POST wrapper; reviewed and directed by Ryan Loiselle.
+ */
+
 import axios from 'axios';
 
 export const AuthService = {

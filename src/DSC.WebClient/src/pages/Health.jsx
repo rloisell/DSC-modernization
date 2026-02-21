@@ -1,3 +1,14 @@
+/*
+ * Health.jsx
+ * Ryan Loiselle — Developer / Architect
+ * GitHub Copilot — AI pair programmer / code generation
+ * February 2026
+ *
+ * Health-check dashboard page. Polls /api/health/details and renders a status card per check.
+ * Acts as the frontend counterpart to the /health/details endpoint consumed by OpenShift probes.
+ * AI-assisted: interval polling pattern, status-to-colour mapping, table layout; reviewed and directed by Ryan Loiselle.
+ */
+
 import React, { useEffect, useState } from 'react'
 import {
   Button,

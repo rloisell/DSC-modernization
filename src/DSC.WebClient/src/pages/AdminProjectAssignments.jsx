@@ -1,3 +1,16 @@
+/*
+ * AdminProjectAssignments.jsx
+ * Ryan Loiselle — Developer / Architect
+ * GitHub Copilot — AI pair programmer / code generation
+ * February 2026
+ *
+ * Admin project-assignment management page. Displays and manages which users are assigned
+ * to each project, with role and estimated-hours tracking.
+ * Filters assignments by project and loads the full user list to populate the add-assignment form.
+ * AI-assisted: project-filter select, assignment CRUD, useMemo filtering;
+ * reviewed and directed by Ryan Loiselle.
+ */
+
 import React, { useEffect, useMemo, useState } from 'react';
 import {
   Button,

@@ -1,3 +1,15 @@
+/*
+ * Reports.jsx
+ * Ryan Loiselle — Developer / Architect
+ * GitHub Copilot — AI pair programmer / code generation
+ * February 2026
+ *
+ * Time-entry report page. Fetches a paginated summary from /api/reports/summary
+ * with optional date range filters; aggregates work-item totals per project via useMemo.
+ * AI-assisted: date-range filter state, useMemo aggregation pattern, BC Gov design system components;
+ * reviewed and directed by Ryan Loiselle.
+ */
+
 import React, { useState, useMemo } from 'react';
 import {
   Button,

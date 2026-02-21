@@ -1,3 +1,14 @@
+/*
+ * AdminExpenseOptionsController.cs
+ * Ryan Loiselle — Developer / Architect
+ * GitHub Copilot — AI pair programmer / code generation
+ * February 2026
+ *
+ * Admin CRUD controller for expense-option reference data.
+ * Thin controller — persistence is handled directly via EF Core; no service layer required for simple lookup entities.
+ * AI-assisted: CRUD scaffolding, EF Core query patterns, OpenAPI attributes; reviewed and directed by Ryan Loiselle.
+ */
+
 using System;
 using System.Linq;
 using System.Threading.Tasks;

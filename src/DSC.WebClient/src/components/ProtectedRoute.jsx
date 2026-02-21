@@ -1,3 +1,14 @@
+/*
+ * ProtectedRoute.jsx
+ * Ryan Loiselle — Developer / Architect
+ * GitHub Copilot — AI pair programmer / code generation
+ * February 2026
+ *
+ * Route guard that redirects unauthenticated users to /login,
+ * preserving the originally requested location for post-login redirect.
+ * AI-assisted: Navigate + useLocation redirect pattern; reviewed and directed by Ryan Loiselle.
+ */
+
 import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';

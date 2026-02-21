@@ -1,3 +1,15 @@
+/*
+ * CatalogController.cs
+ * Ryan Loiselle — Developer / Architect
+ * GitHub Copilot — AI pair programmer / code generation
+ * February 2026
+ *
+ * Read-only catalog API that serves active reference data (activity codes, network numbers, budgets,
+ * director/reason/CPC codes) and the project-options join query used to populate time-entry dropdowns.
+ * Direct EF Core queries — no service layer; all endpoints are anonymous-accessible catalog reads.
+ * AI-assisted: LINQ projection patterns, GetProjectOptions join/group logic; reviewed and directed by Ryan Loiselle.
+ */
+
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -124,6 +136,10 @@ namespace DSC.Api.Controllers
             return Ok(codes);
         }
 
+        // GetProjectOptions: the most complex endpoint in this controller.
+        // Loads all ProjectActivityOption rows for the requested project (with ActivityCode + NetworkNumber includes),
+        // then groups in-memory to produce deduplicated activity-code and network-number lists alongside
+        // the full valid-pair array — used by the frontend to restrict dropdown combinations.
         [HttpGet("project-options/{projectId}")]
         [ProducesResponseType(typeof(ProjectActivityOptionsResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]

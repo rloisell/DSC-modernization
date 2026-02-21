@@ -1,3 +1,14 @@
+/*
+ * useReport.js
+ * Ryan Loiselle — Developer / Architect
+ * GitHub Copilot — AI pair programmer / code generation
+ * February 2026
+ *
+ * React Query hook that fetches a report summary from /api/reports/summary
+ * with optional date range parameters.
+ * AI-assisted: useQuery wrapper pattern; reviewed and directed by Ryan Loiselle.
+ */
+
 import { useQuery } from '@tanstack/react-query';
 import { getReportSummary } from '../api/ReportService';
 

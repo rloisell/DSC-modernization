@@ -1,3 +1,16 @@
+/*
+ * AdminUsers.jsx
+ * Ryan Loiselle — Developer / Architect
+ * GitHub Copilot — AI pair programmer / code generation
+ * February 2026
+ *
+ * Admin user management page. Full CRUD with activate/deactivate toggle endpoints,
+ * role/department/position assignment, and inline edit form.
+ * Loads catalog data (roles, positions, departments) in parallel to populate dropdowns.
+ * AI-assisted: parallel API load pattern, activate/deactivate UX, inline form state;
+ * reviewed and directed by Ryan Loiselle.
+ */
+
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {

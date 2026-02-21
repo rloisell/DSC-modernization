@@ -1,3 +1,14 @@
+/*
+ * DatabaseHealthCheck.cs
+ * Ryan Loiselle — Developer / Architect
+ * GitHub Copilot — AI pair programmer / code generation
+ * February 2026
+ *
+ * ASP.NET Core health check that verifies database connectivity using EF Core CanConnectAsync.
+ * Registered as the "database" check; consumed by /health/live and /health/ready probes.
+ * AI-assisted: IHealthCheck implementation pattern, scope factory usage; reviewed and directed by Ryan Loiselle.
+ */
+
 using DSC.Data;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 

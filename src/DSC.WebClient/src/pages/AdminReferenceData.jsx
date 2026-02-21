@@ -1,8 +1,15 @@
-/**
+/*
  * AdminReferenceData.jsx
- * Single page that provides CRUD access for all catalog reference data types.
- * Uses a config-driven approach so each type shares the same list/add/edit pattern.
+ * Ryan Loiselle — Developer / Architect
+ * GitHub Copilot — AI pair programmer / code generation
+ * February 2026
+ *
+ * Config-driven admin page providing CRUD for all catalog reference-data entity types.
+ * A shared entityConfig[] array drives the list / add / edit pattern for each entity,
+ * eliminating duplicated page components across the admin section.
+ * AI-assisted: config-driven component pattern, shared CRUD form; reviewed and directed by Ryan Loiselle.
  */
+
 import React, { useEffect, useState } from 'react';
 import {
   Button,

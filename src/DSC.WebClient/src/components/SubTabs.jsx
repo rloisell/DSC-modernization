@@ -1,12 +1,14 @@
-/**
+/*
+ * SubTabs.jsx
+ * Ryan Loiselle — Developer / Architect
+ * GitHub Copilot — AI pair programmer / code generation
+ * February 2026
+ *
  * Reusable secondary tab bar for admin sub-sections.
- * Usage:
- *   <SubTabs
- *     tabs={[{ id: 'list', label: 'Items' }, { id: 'form', label: 'Add / Edit' }]}
- *     activeTab={subTab}
- *     onTabChange={setSubTab}
- *   />
+ * Accepts a tabs config array ({ id, label }[]), the active tab ID, and an onTabChange callback.
+ * AI-assisted: ARIA tablist markup, active-tab styling pattern; reviewed and directed by Ryan Loiselle.
  */
+
 export default function SubTabs({ tabs, activeTab, onTabChange }) {
   return (
     <div

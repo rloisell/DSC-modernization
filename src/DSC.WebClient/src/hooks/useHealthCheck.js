@@ -1,3 +1,14 @@
+/*
+ * useHealthCheck.js
+ * Ryan Loiselle — Developer / Architect
+ * GitHub Copilot — AI pair programmer / code generation
+ * February 2026
+ *
+ * React Query hook that fetches /api/health/details and exposes health check status
+ * to the Health dashboard page. Refetches on a configurable interval.
+ * AI-assisted: useQuery wrapper pattern; reviewed and directed by Ryan Loiselle.
+ */
+
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 

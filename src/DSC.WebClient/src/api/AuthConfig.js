@@ -1,3 +1,14 @@
+/*
+ * AuthConfig.js
+ * Ryan Loiselle — Developer / Architect
+ * GitHub Copilot — AI pair programmer / code generation
+ * February 2026
+ *
+ * Utility helpers to read the current user session from localStorage
+ * and construct an axios Authorization header config object for authenticated requests.
+ * AI-assisted: localStorage session helper, axios config helper; reviewed and directed by Ryan Loiselle.
+ */
+
 // Utility to get axios config with authentication header
 export function getAuthConfig() {
   const user = getUserFromStorage();

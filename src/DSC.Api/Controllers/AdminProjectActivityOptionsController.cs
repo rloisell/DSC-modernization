@@ -1,3 +1,14 @@
+/*
+ * AdminProjectActivityOptionsController.cs
+ * Ryan Loiselle — Developer / Architect
+ * GitHub Copilot — AI pair programmer / code generation
+ * February 2026
+ *
+ * Admin CRUD controller for project-to-activity-option assignments.
+ * Manages valid activity-code / network-number combinations per project; enforces referential integrity on create.
+ * AI-assisted: CRUD scaffolding, EF Core include/query patterns, OpenAPI attributes; reviewed and directed by Ryan Loiselle.
+ */
+
 using System;
 using System.Linq;
 using System.Threading.Tasks;

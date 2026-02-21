@@ -1,3 +1,17 @@
+/*
+ * Program.cs
+ * Ryan Loiselle — Developer / Architect
+ * GitHub Copilot — AI pair programmer / code generation
+ * February 2026
+ *
+ * ASP.NET Core composition root — registers all services, middleware, and health-check endpoints.
+ * Sections: CORS policies, authentication schemes (UserId + AdminToken), rate limiter, domain services,
+ * health checks, EF Core auto-migration, HTTP pipeline (exception handler → routing → security headers
+ * → auth → controllers), and detailed health-check endpoints consumed by OpenShift probes + the frontend.
+ * AI-assisted: middleware ordering, rate-limiter configuration, security-header middleware, health-check
+ * JSON response writer; reviewed and directed by Ryan Loiselle.
+ */
+
 using System.Threading.RateLimiting;
 using DSC.Api.Infrastructure;
 using DSC.Api.Security;
