@@ -1,3 +1,15 @@
+/*
+ * ItemsController.cs
+ * Ryan Loiselle — Developer / Architect
+ * GitHub Copilot — AI pair programmer / code generation
+ * February 2026
+ *
+ * REST endpoints for work item CRUD operations and project hour tracking.
+ * Thin controller — all business logic delegated to IWorkItemService.
+ * AI-assisted: controller scaffolding generated with GitHub Copilot;
+ * reviewed and directed by Ryan Loiselle.
+ */
+
 using System.Security.Claims;
 using DSC.Api.DTOs;
 using DSC.Api.Services;
@@ -10,6 +22,7 @@ namespace DSC.Api.Controllers
     [Route("api/[controller]")]
     public class ItemsController(IWorkItemService svc) : ControllerBase
     {
+        // extracts the authenticated user's GUID from the ClaimsPrincipal set by UserIdAuthenticationHandler
         private Guid? CallerId => Guid.TryParse(
             User.FindFirst(ClaimTypes.NameIdentifier)?.Value, out var id) ? id : null;
 

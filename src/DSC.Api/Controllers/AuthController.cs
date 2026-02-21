@@ -1,3 +1,15 @@
+/*
+ * AuthController.cs
+ * Ryan Loiselle — Developer / Architect
+ * GitHub Copilot — AI pair programmer / code generation
+ * February 2026
+ *
+ * REST endpoints for login and user lookup by employee ID.
+ * Thin controller — credential validation delegated to IAuthService.
+ * AI-assisted: controller scaffolding generated with GitHub Copilot;
+ * reviewed and directed by Ryan Loiselle.
+ */
+
 using DSC.Api.DTOs;
 using DSC.Api.Services;
 using Microsoft.AspNetCore.Http;

@@ -1,3 +1,13 @@
+/*
+ * ReportService.cs
+ * Ryan Loiselle — Developer / Architect
+ * GitHub Copilot — AI pair programmer / code generation
+ * February 2026
+ *
+ * AI-assisted: aggregation groupings and privileged-view scoping
+ * generated with GitHub Copilot; reviewed and directed by Ryan Loiselle.
+ */
+
 using DSC.Api.DTOs;
 using DSC.Data;
 using Microsoft.EntityFrameworkCore;
@@ -6,6 +16,8 @@ namespace DSC.Api.Services;
 
 public class ReportService(ApplicationDbContext db) : IReportService
 {
+    // aggregates work items into project, activity code, and user summaries
+    // non-privileged users see only their own data; Admin/Manager/Director see all users
     public async Task<ReportSummaryDto> GetSummaryAsync(
         DateTime? from,
         DateTime? to,
@@ -113,4 +125,4 @@ public class ReportService(ApplicationDbContext db) : IReportService
             IsPrivilegedView  = isPrivileged
         };
     }
-}
+} // end ReportService

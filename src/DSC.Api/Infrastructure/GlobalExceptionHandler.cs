@@ -1,3 +1,15 @@
+/*
+ * GlobalExceptionHandler.cs
+ * Ryan Loiselle — Developer / Architect
+ * GitHub Copilot — AI pair programmer / code generation
+ * February 2026
+ *
+ * Maps domain exceptions to RFC 7807 ProblemDetails HTTP responses.
+ * Registered via AddExceptionHandler<GlobalExceptionHandler>() in Program.cs.
+ * AI-assisted: exception-to-status mapping generated with GitHub Copilot;
+ * reviewed and directed by Ryan Loiselle.
+ */
+
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 

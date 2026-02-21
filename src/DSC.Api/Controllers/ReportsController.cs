@@ -1,3 +1,16 @@
+/*
+ * ReportsController.cs
+ * Ryan Loiselle — Developer / Architect
+ * GitHub Copilot — AI pair programmer / code generation
+ * February 2026
+ *
+ * REST endpoints for reporting dashboard aggregations.
+ * Privileged users (Admin/Manager/Director) see cross-user summaries;
+ * regular users see only their own data.
+ * AI-assisted: controller scaffolding generated with GitHub Copilot;
+ * reviewed and directed by Ryan Loiselle.
+ */
+
 using System.Security.Claims;
 using DSC.Api.DTOs;
 using DSC.Api.Services;

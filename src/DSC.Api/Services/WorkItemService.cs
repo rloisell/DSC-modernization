@@ -1,3 +1,14 @@
+/*
+ * WorkItemService.cs
+ * Ryan Loiselle — Developer / Architect
+ * GitHub Copilot — AI pair programmer / code generation
+ * February 2026
+ *
+ * AI-assisted: LINQ query patterns, budget-type branching logic, and
+ * ownership enforcement generated with GitHub Copilot;
+ * reviewed and directed by Ryan Loiselle.
+ */
+
 using DSC.Api.DTOs;
 using DSC.Api.Infrastructure;
 using DSC.Data;
@@ -10,6 +21,7 @@ public class WorkItemService(ApplicationDbContext db) : IWorkItemService
 {
     // ── Query ──────────────────────────────────────────────────────────────────
 
+    // returns all work items, optionally filtered to a single user, sorted newest first
     public async Task<WorkItemDto[]> GetAllAsync(Guid? userId)
     {
         IQueryable<WorkItem> query = db.WorkItems.AsNoTracking().Include(w => w.Budget);
@@ -45,6 +57,7 @@ public class WorkItemService(ApplicationDbContext db) : IWorkItemService
             .ToArrayAsync();
     }
 
+    // returns enriched work items with project name and budget; supports named period shortcuts or explicit date range
     public async Task<WorkItemDetailDto[]> GetDetailedAsync(
         Guid? userId, DateTime? startDate, DateTime? endDate, string? period)
     {
@@ -120,6 +133,7 @@ public class WorkItemService(ApplicationDbContext db) : IWorkItemService
             .ToArrayAsync();
     }
 
+    // fetches a single work item by id; throws NotFoundException (404) if not found
     public async Task<WorkItemDto> GetByIdAsync(Guid id)
     {
         var item = await db.WorkItems.AsNoTracking()
@@ -132,6 +146,7 @@ public class WorkItemService(ApplicationDbContext db) : IWorkItemService
 
     // ── Mutations ──────────────────────────────────────────────────────────────
 
+    // validates and persists a new work item; enforces project or expense field requirements based on budget type
     public async Task<WorkItemDto> CreateAsync(WorkItemCreateRequest request)
     {
         if (string.IsNullOrWhiteSpace(request.Title) || request.BudgetId == null || request.BudgetId == Guid.Empty)
@@ -199,6 +214,7 @@ public class WorkItemService(ApplicationDbContext db) : IWorkItemService
         return MapToDto(workItem, budgetDescription);
     }
 
+    // applies a partial update to an existing work item; requester must own the item or hold Admin/Manager role
     public async Task UpdateAsync(Guid id, WorkItemUpdateRequest request, Guid? requesterId)
     {
         var item = await db.WorkItems.FirstOrDefaultAsync(w => w.Id == id)
@@ -223,6 +239,7 @@ public class WorkItemService(ApplicationDbContext db) : IWorkItemService
         await db.SaveChangesAsync();
     }
 
+    // removes a work item by id; requester must own the item or hold Admin/Manager role
     public async Task DeleteAsync(Guid id, Guid? requesterId)
     {
         var item = await db.WorkItems.FirstOrDefaultAsync(w => w.Id == id)
@@ -234,6 +251,7 @@ public class WorkItemService(ApplicationDbContext db) : IWorkItemService
         await db.SaveChangesAsync();
     }
 
+    // returns cumulative hour usage vs. estimate for a project/user pair; RemainingHours is null when no estimate is set
     public async Task<RemainingHoursDto> GetProjectRemainingHoursAsync(Guid projectId, Guid requesterId)
     {
         var project = await db.Projects.FirstOrDefaultAsync(p => p.Id == projectId)
@@ -267,6 +285,7 @@ public class WorkItemService(ApplicationDbContext db) : IWorkItemService
 
     // ── Helpers ────────────────────────────────────────────────────────────────
 
+    // throws ForbiddenException (403) if the requester does not own the item and is not Admin or Manager
     private async Task EnforceOwnershipAsync(WorkItem item, Guid? requesterId)
     {
         if (requesterId == null || item.UserId == null || item.UserId == requesterId)
@@ -281,6 +300,7 @@ public class WorkItemService(ApplicationDbContext db) : IWorkItemService
             throw new ForbiddenException("You are not allowed to modify this work item");
     }
 
+    // returns true if the budget description contains "opex" or "expense" (case-insensitive)
     private static bool IsExpenseBudget(string? description)
     {
         if (string.IsNullOrWhiteSpace(description)) return false;
@@ -288,12 +308,14 @@ public class WorkItemService(ApplicationDbContext db) : IWorkItemService
         return n.Contains("opex") || n.Contains("expense");
     }
 
+    // returns estimated minus actual hours; null if no estimate is provided
     private static decimal? CalculateRemainingHours(decimal? estimatedHours, int? actualDuration)
     {
         if (!estimatedHours.HasValue) return null;
         return estimatedHours.Value - (actualDuration ?? 0);
     }
 
+    // maps a WorkItem entity to its DTO for API responses
     private static WorkItemDto MapToDto(WorkItem w, string? budgetDescription = null) => new()
     {
         Id              = w.Id,
@@ -317,4 +339,4 @@ public class WorkItemService(ApplicationDbContext db) : IWorkItemService
         EstimatedHours  = w.EstimatedHours,
         RemainingHours  = w.RemainingHours
     };
-}
+} // end WorkItemService

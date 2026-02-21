@@ -1,3 +1,13 @@
+/*
+ * ProjectService.cs
+ * Ryan Loiselle — Developer / Architect
+ * GitHub Copilot — AI pair programmer / code generation
+ * February 2026
+ *
+ * AI-assisted: role-based project visibility logic generated with
+ * GitHub Copilot; reviewed and directed by Ryan Loiselle.
+ */
+
 using DSC.Api.DTOs;
 using DSC.Data;
 using Microsoft.EntityFrameworkCore;
@@ -6,6 +16,7 @@ namespace DSC.Api.Services;
 
 public class ProjectService(ApplicationDbContext db) : IProjectService
 {
+    // returns all projects for Admin/Manager/Director; returns only assigned projects for regular users
     public async Task<IEnumerable<ProjectDto>> GetAllAsync(Guid? requesterId)
     {
         if (!requesterId.HasValue)
@@ -49,4 +60,4 @@ public class ProjectService(ApplicationDbContext db) : IProjectService
             })
             .ToListAsync();
     }
-}
+} // end ProjectService

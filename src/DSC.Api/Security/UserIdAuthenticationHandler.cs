@@ -1,3 +1,15 @@
+/*
+ * UserIdAuthenticationHandler.cs
+ * Ryan Loiselle — Developer / Architect
+ * GitHub Copilot — AI pair programmer / code generation
+ * February 2026
+ *
+ * Reads the X-User-Id header, validates the user against the database,
+ * and builds a ClaimsPrincipal for downstream role-based access control.
+ * AI-assisted: handler scaffolding generated with GitHub Copilot;
+ * reviewed and directed by Ryan Loiselle.
+ */
+
 using System.Security.Claims;
 using System.Text.Encodings.Web;
 using Microsoft.AspNetCore.Authentication;
@@ -21,6 +33,8 @@ public class UserIdAuthenticationHandler : AuthenticationHandler<AuthenticationS
         _db = db;
     }
 
+    // reads X-User-Id header, looks up the user in the database, and builds a ClaimsPrincipal
+    // returns NoResult if the header is absent or the user is not found
     protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
     {
         // First try to get userId from X-User-Id header (sent by frontend after login)

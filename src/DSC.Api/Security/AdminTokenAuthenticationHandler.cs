@@ -1,3 +1,15 @@
+/*
+ * AdminTokenAuthenticationHandler.cs
+ * Ryan Loiselle — Developer / Architect
+ * GitHub Copilot — AI pair programmer / code generation
+ * February 2026
+ *
+ * Validates the X-Admin-Token header against the configured secret.
+ * In development, the token requirement can be bypassed via appsettings.
+ * AI-assisted: handler scaffolding generated with GitHub Copilot;
+ * reviewed and directed by Ryan Loiselle.
+ */
+
 using System.Security.Claims;
 using System.Text.Encodings.Web;
 using Microsoft.AspNetCore.Authentication;
@@ -15,6 +27,8 @@ public class AdminTokenAuthenticationHandler : AuthenticationHandler<Authenticat
     {
     }
 
+    // validates the X-Admin-Token header against the configured secret
+    // dev environments may bypass token requirement via Admin:RequireToken = false in appsettings
     protected override Task<AuthenticateResult> HandleAuthenticateAsync()
     {
         var config = Context.RequestServices.GetRequiredService<IConfiguration>();
