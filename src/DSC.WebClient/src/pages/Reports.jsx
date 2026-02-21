@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   Button,
   ButtonGroup,
@@ -8,8 +8,9 @@ import {
   Text,
   TextField,
 } from '@bcgov/design-system-react-components';
-import { getReportSummary, exportToCSV } from '../api/ReportService';
-import { getProjects } from '../api/ProjectService';
+import { exportToCSV } from '../api/ReportService';
+import { useProjects } from '../hooks/useProjects';
+import { useReport } from '../hooks/useReport';
 
 const PERIOD_ITEMS = [
   { id: '__all_time__', label: 'All Time' },
@@ -48,47 +49,38 @@ export default function Reports() {
   const [period, setPeriod] = useState('month');
   const [customFrom, setCustomFrom] = useState('');
   const [customTo, setCustomTo] = useState('');
+  // For custom period we only refetch when the user explicitly clicks Run Report
+  const [appliedFrom, setAppliedFrom] = useState('');
+  const [appliedTo, setAppliedTo] = useState('');
   const [filterProjectId, setFilterProjectId] = useState('');
-  const [projects, setProjects] = useState([]);
-  const [report, setReport] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+
+  // Compute date params from current period selection
+  const dates = useMemo(() => {
+    if (period === 'custom')
+      return { from: appliedFrom || undefined, to: appliedTo || undefined };
+    if (period === '__all_time__' || !period)
+      return { from: undefined, to: undefined };
+    return getPeriodDates(period);
+  }, [period, appliedFrom, appliedTo]);
+
+  const { data: projects = [] } = useProjects();
+
+  const {
+    data: report,
+    isFetching: loading,
+    error: queryError,
+  } = useReport({
+    from: dates.from,
+    to: dates.to,
+    projectId: (filterProjectId && filterProjectId !== '__all__') ? filterProjectId : undefined,
+  });
+
+  const error = queryError ? (queryError.message || String(queryError)) : null;
 
   const projectItems = [
     { id: '__all__', label: 'All Projects' },
     ...projects.map(p => ({ id: p.id, label: p.projectNo ? `${p.projectNo} — ${p.name}` : p.name }))
   ];
-
-  useEffect(() => {
-    getProjects().then(setProjects).catch(() => {});
-  }, []);
-
-  useEffect(() => {
-    if (period !== 'custom') loadReport();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [period, filterProjectId]);
-
-  async function loadReport() {
-    setLoading(true);
-    setError(null);
-    try {
-      const dates = (period === 'custom')
-        ? { from: customFrom || undefined, to: customTo || undefined }
-        : (period === '__all_time__' || !period)
-          ? { from: undefined, to: undefined }
-          : getPeriodDates(period);
-      const data = await getReportSummary({
-        from: dates.from || undefined,
-        to: dates.to || undefined,
-        projectId: (filterProjectId && filterProjectId !== '__all__') ? filterProjectId : undefined,
-      });
-      setReport(data);
-    } catch (e) {
-      setError(e.message);
-    } finally {
-      setLoading(false);
-    }
-  }
 
   const overbudgetCount = report?.projectSummaries?.filter(p => p.isOverBudget).length ?? 0;
 
@@ -123,7 +115,7 @@ export default function Reports() {
               <TextField label="From" type="date" value={customFrom} onChange={setCustomFrom} />
               <TextField label="To" type="date" value={customTo} onChange={setCustomTo} />
               <div style={{ paddingTop: '1.5rem' }}>
-                <Button variant="primary" onPress={loadReport}>Run Report</Button>
+                <Button variant="primary" onPress={() => { setAppliedFrom(customFrom); setAppliedTo(customTo); }}>Run Report</Button>
               </div>
             </>
           )}

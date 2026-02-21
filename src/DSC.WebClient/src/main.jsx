@@ -2,6 +2,7 @@ import React from 'react'
 import axios from 'axios'
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import '@bcgov/bc-sans/css/BC_Sans.css'
 import '@bcgov/design-tokens/css/variables.css'
 import App from './App'
@@ -25,12 +26,25 @@ axios.interceptors.request.use(config => {
   return config
 })
 
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      // Retry once on network failure, then show error
+      retry: 1,
+      // Don't refetch in the background while a tab is hidden
+      refetchOnWindowFocus: false,
+    },
+  },
+})
+
 createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <BrowserRouter>
-      <App />
-    </BrowserRouter>
-  </React.StrictMode>
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter>
+        <App />
+      </BrowserRouter>
+    </QueryClientProvider>
+  </React.StrictMode>,
 )
 
 // Hide the fallback UI (if present) once React has mounted.

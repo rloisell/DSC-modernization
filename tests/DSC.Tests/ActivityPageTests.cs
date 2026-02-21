@@ -11,6 +11,7 @@ using DSC.Data.Models;
 using DSC.Api.Seeding;
 using DSC.Api.DTOs;
 using DSC.Api.Controllers;
+using DSC.Api.Services;
 
 namespace DSC.Tests
 {
@@ -332,7 +333,7 @@ namespace DSC.Tests
             context.WorkItems.Add(workItem);
             await context.SaveChangesAsync();
 
-            var controller = new ItemsController(context);
+            var controller = new ItemsController(new WorkItemService(context));
 
             // Act
             var result = await controller.GetAll();
@@ -359,7 +360,7 @@ namespace DSC.Tests
         {
             // Arrange
             var context = CreateDbContext();
-            var controller = new ItemsController(context);
+            var controller = new ItemsController(new WorkItemService(context));
 
             // Act
             var result = await controller.GetAll();

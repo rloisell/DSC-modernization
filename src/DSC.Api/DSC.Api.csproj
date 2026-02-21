@@ -27,8 +27,10 @@
     <Compile Include="Program.cs" />
     <Compile Include="Controllers/*.cs" />
     <Compile Include="DTOs/*.cs" />
+    <Compile Include="Infrastructure/*.cs" />
     <Compile Include="Security/*.cs" />
     <Compile Include="Seeding/*.cs" />
+    <Compile Include="Services/*.cs" />
     <Compile Include="Swagger/*.cs" />
     <Compile Include="Properties/*.cs" />
   </ItemGroup>

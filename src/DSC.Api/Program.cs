@@ -1,6 +1,8 @@
 using System.Threading.RateLimiting;
+using DSC.Api.Infrastructure;
 using DSC.Api.Security;
 using DSC.Api.Seeding;
+using DSC.Api.Services;
 using DSC.Data;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
@@ -33,6 +35,10 @@ builder.Services.AddSwaggerGen(options =>
     options.OperationFilter<DSC.Api.Swagger.WorkItemExamplesOperationFilter>();
 });
 
+// ─── Global exception handling / ProblemDetails ───────────────────────────────
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddProblemDetails();
+
 builder.Services.AddAuthentication("UserId")
     .AddScheme<AuthenticationSchemeOptions, UserIdAuthenticationHandler>("UserId", null)
     .AddScheme<AuthenticationSchemeOptions, AdminTokenAuthenticationHandler>("AdminToken", null);
@@ -42,6 +48,12 @@ builder.Services.AddAuthorization(options =>
 });
 builder.Services.AddScoped<IPasswordHasher<DSC.Data.Models.User>, PasswordHasher<DSC.Data.Models.User>>();
 builder.Services.AddScoped<TestDataSeeder>();
+
+// ─── Domain Services ─────────────────────────────────────────────────────────
+builder.Services.AddScoped<IWorkItemService, WorkItemService>();
+builder.Services.AddScoped<IReportService,   ReportService>();
+builder.Services.AddScoped<IProjectService,  ProjectService>();
+builder.Services.AddScoped<IAuthService,     AuthService>();
 
 builder.Services.AddRateLimiter(options =>
 {
@@ -55,6 +67,10 @@ builder.Services.AddRateLimiter(options =>
                 QueueLimit = 0
             }));
 });
+
+// ─── Health Checks ───────────────────────────────────────────────────────────
+builder.Services.AddHealthChecks()
+    .AddCheck<DatabaseHealthCheck>("database");
 
 // Register ApplicationDbContext - connection string from configuration
 var conn = builder.Configuration.GetConnectionString("DefaultConnection");
@@ -73,8 +89,10 @@ using (var scope = app.Services.CreateScope())
     var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
     try
     {
-        // EnsureCreated creates the database schema without using migrations
-        db.Database.EnsureCreated();
+        // Apply pending EF Core migrations automatically on startup.
+        // EnsureCreated() was replaced with Migrate() so incremental schema
+        // changes are applied without data loss.
+        db.Database.Migrate();
     }
     catch (Exception ex)
     {
@@ -89,6 +107,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+// Global exception handler must be first so it wraps everything
+app.UseExceptionHandler();
 
 app.UseRouting();
 app.UseCors(app.Environment.IsDevelopment() ? "DevCors" : "ProdCors");
@@ -111,6 +132,10 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+// Health check endpoints — consumed by OpenShift liveness / readiness probes
+app.MapHealthChecks("/health/live");
+app.MapHealthChecks("/health/ready");
 
 app.Run();
 

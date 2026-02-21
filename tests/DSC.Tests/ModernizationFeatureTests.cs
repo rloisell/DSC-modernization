@@ -9,6 +9,9 @@ using Xunit;
 using DSC.Data;
 using DSC.Data.Models;
 using DSC.Api.Controllers;
+using DSC.Api.DTOs;
+using DSC.Api.Infrastructure;
+using DSC.Api.Services;
 
 namespace DSC.Tests
 {
@@ -77,14 +80,12 @@ namespace DSC.Tests
             user.IsActive = false;
             await db.SaveChangesAsync();
 
-            var controller = new AuthController(db);
+            var service = new AuthService(db);
 
-            // Act
-            var result = await controller.Login(new LoginRequest { Username = "bob", Password = "bobpass" });
-
-            // Assert
-            var statusResult = result.Result as UnauthorizedObjectResult;
-            Assert.NotNull(statusResult);
+            // Act & Assert — service throws UnauthorizedException, which the
+            // global exception handler converts to HTTP 401 in production.
+            await Assert.ThrowsAsync<UnauthorizedException>(
+                () => service.AuthenticateAsync("bob", "bobpass"));
         }
 
         [Fact]
@@ -92,18 +93,14 @@ namespace DSC.Tests
         {
             // Arrange
             var (db, user, _) = await CreateActiveUser("carol", "carolpass");
-            var controller = new AuthController(db);
+            var service = new AuthService(db);
 
             // Act
-            var result = await controller.Login(new LoginRequest { Username = "carol", Password = "carolpass" });
+            var response = await service.AuthenticateAsync("carol", "carolpass");
 
             // Assert
-            var okResult = result.Result as OkObjectResult;
-            Assert.NotNull(okResult);
-
-            var response = okResult!.Value as LoginResponse;
             Assert.NotNull(response);
-            Assert.Equal("carol", response!.Username);
+            Assert.Equal("carol", response.Username);
         }
 
         [Fact]
@@ -111,14 +108,11 @@ namespace DSC.Tests
         {
             // Arrange
             var (db, _, _) = await CreateActiveUser("dave", "correctpass");
-            var controller = new AuthController(db);
+            var service = new AuthService(db);
 
-            // Act
-            var result = await controller.Login(new LoginRequest { Username = "dave", Password = "wrongpass" });
-
-            // Assert
-            var statusResult = result.Result as UnauthorizedObjectResult;
-            Assert.NotNull(statusResult);
+            // Act & Assert
+            await Assert.ThrowsAsync<UnauthorizedException>(
+                () => service.AuthenticateAsync("dave", "wrongpass"));
         }
 
         // ─── P4: User model IsActive default ─────────────────────────────────

@@ -1,36 +1,30 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import {
   Heading,
   InlineAlert,
   Text
 } from '@bcgov/design-system-react-components';
-import { getProjects } from '../api/ProjectService';
+import { useProjects } from '../hooks/useProjects';
 import axios from 'axios';
 
 export default function Project() {
-  const [projects, setProjects] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const { data: projects = [], isLoading: loading, error: projectsError } = useProjects();
   const [selectedProject, setSelectedProject] = useState(null);
   const [projectOptions, setProjectOptions] = useState(null);
   const [loadingOptions, setLoadingOptions] = useState(false);
+  const [optionsError, setOptionsError] = useState(null);
 
-  useEffect(() => {
-    getProjects()
-      .then(setProjects)
-      .catch(e => setError(e.message))
-      .finally(() => setLoading(false));
-  }, []);
+  const error = projectsError ? (projectsError.message || String(projectsError)) : optionsError;
 
   async function handleSelectProject(project) {
     setSelectedProject(project);
     setLoadingOptions(true);
-    setError(null);
+    setOptionsError(null);
     try {
       const response = await axios.get(`/api/catalog/project-options/${project.id}`);
       setProjectOptions(response.data);
     } catch (e) {
-      setError(e.message);
+      setOptionsError(e.message);
       setProjectOptions(null);
     } finally {
       setLoadingOptions(false);
