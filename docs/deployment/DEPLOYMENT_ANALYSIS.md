@@ -252,18 +252,21 @@ On Emerald (Protected C), pods must carry data classification labels. Based on
 
 ```yaml
 podLabels:
-  DataClass: "Medium"   # or "High" / "Critical" depending on actual classification
+  DataClass: "Low"
 ```
 
 And route annotations:
 ```yaml
 route:
   annotations:
-    aviinfrasetting.ako.vmware.com/name: "dataclass-medium"
+    aviinfrasetting.ako.vmware.com/name: "dataclass-low"
 ```
 
-**DSC data classification must be confirmed** with the Information Security team before
-choosing the `DataClass` value.
+**DSC data classification is confirmed as `Low`.** The application handles internal
+staff time-entry records only — no sensitive personal information, no Protected B/C data.
+All DSC Helm values files (`charts/dsc-app/values.yaml`, `deploy/dsc-dev_values.yaml`,
+`deploy/dsc-test_values.yaml`, `deploy/dsc-prod_values.yaml`) use `DataClass: "Low"` and
+the `dataclass-low` AVI infrasetting annotation.
 
 ---
 
@@ -405,28 +408,42 @@ The recommended sequence for implementation (building nothing ahead of its depen
 This section records what was actually built as the first deployment preparation sprint.
 The implementation decisions are documented here for traceability.
 
-### 13.1 Decision — Shared GitOps Repo (Not a New Repo)
+### 13.1 Decision — Standalone ArgoCD Application (Not Umbrella Sub-chart)
 
-The pre-deployment analysis assumed DSC would get its own GitOps repo (`dsc-gitops`).
-After reviewing `tenant-gitops-be808f`, DSC is integrated as a **sub-chart of the
-existing umbrella chart**. This matches the pattern already established in the namespace
-and avoids platform team changes to provision an additional ArgoCD Application CRD.
+**Initial approach (superseded):** DSC was first integrated as a sub-chart dependency
+inside the shared `charts/gitops/` umbrella chart in `tenant-gitops-be808f`. This was
+reverted after identifying a critical collision risk: `be808f-app-prod` (the co-tenant's
+production Application) watches the `main` branch of that repo. Any broken Helm
+dependency would immediately break the co-tenant's live workloads (emerald-app + telnet).
 
-DSC is added as a conditionally-enabled sub-chart alongside `emerald-app`:
+**Confirmed architecture:** DSC is deployed via **three standalone ArgoCD Application
+CRDs**, one per environment. Each Application:
+- points directly at `charts/dsc-app/` (not at the shared umbrella)
+- uses its own values file (`deploy/dsc-dev_values.yaml`, etc.)
+- has an independent sync policy and lifecycle
+- will not interfere with `be808f-app-dev/test/prod` in any way
 
 ```
 tenant-gitops-be808f/
   charts/
-    gitops/             ← umbrella chart (ArgoCD watches this)
-      Chart.yaml        ← dsc-app added as dependency
-      values.yaml       ← dsc-app.enabled: false (default)
-    emerald-app/        ← existing service (untouched)
-    dsc-app/            ← NEW: DSC API + Frontend + MariaDB
+    gitops/             ← shared umbrella (NOT touched — be808f-app-* owns this)
+      Chart.yaml        ← emerald-app + telnet only
+    emerald-app/        ← co-tenant service (untouched)
+    dsc-app/            ← NEW: DSC API + Frontend + MariaDB (standalone chart)
   deploy/
-    dev_values.yaml     ← dsc-app enabled, dev routes, 1Gi DB
-    test_values.yaml    ← dsc-app disabled (enable when ready)
-    prod_values.yaml    ← dsc-app disabled (enable when ready)
+    dev_values.yaml     ← emerald-app + telnet (untouched by DSC)
+    dsc-dev_values.yaml ← NEW: DSC dev values (DataClass: "Low")
+    dsc-test_values.yaml← NEW: DSC test values
+    dsc-prod_values.yaml← NEW: DSC prod values
+  applications/argocd/
+    be808f-dsc-dev.yaml ← NEW: standalone ArgoCD Application CRD (auto-sync)
+    be808f-dsc-test.yaml← NEW: standalone ArgoCD Application CRD (manual sync)
+    be808f-dsc-prod.yaml← NEW: standalone ArgoCD Application CRD (manual sync)
 ```
+
+The platform team must register each `be808f-dsc-*.yaml` Application CRD with ArgoCD
+(or the files must be placed in the ArgoCD bootstrap path). This replaces the earlier
+assumption that being a sub-chart of an already-watched umbrella was sufficient.
 
 ### 13.2 Decision — Nginx Proxy (No config.json Injection)
 
@@ -454,12 +471,12 @@ injected at deploy time via the `{{ include "dsc-app.apiServiceName" . }}` helpe
 | `containerization/podman-compose.yml` | Full local dev stack (API + Frontend + MariaDB) |
 | `.github/workflows/build-and-push.yml` | Builds both images, pushes to Artifactory, updates gitops tags |
 
-**tenant-gitops-be808f repo (additions only — existing services untouched):**
+**tenant-gitops-be808f repo (additions only — existing services and umbrella chart untouched):**
 
 | File | Purpose |
 |------|---------|
 | `charts/dsc-app/Chart.yaml` | Helm chart descriptor |
-| `charts/dsc-app/values.yaml` | Default values (all envs) |
+| `charts/dsc-app/values.yaml` | Default values (all envs) — `DataClass: "Low"` |
 | `charts/dsc-app/templates/_helpers.tpl` | Named templates (fullname, labels, selectors) |
 | `charts/dsc-app/templates/api-deployment.yaml` | DSC.Api Deployment |
 | `charts/dsc-app/templates/api-service.yaml` | ClusterIP Service for API |
@@ -474,12 +491,13 @@ injected at deploy time via the `{{ include "dsc-app.apiServiceName" . }}` helpe
 | `charts/dsc-app/templates/networkpolicies.yaml` | Deny-all + 5 explicit allow rules |
 | `charts/dsc-app/templates/serviceaccount.yaml` | ServiceAccount (automount: false) |
 | `charts/dsc-app/templates/hpa.yaml` | HPA for API (enabled in prod only) |
-| `charts/gitops/Chart.yaml` | Added dsc-app dependency |
-| `charts/gitops/values.yaml` | Added dsc-app.enabled: false default |
-| `deploy/dev_values.yaml` | DSC dev config added (enabled: true) |
-| `deploy/test_values.yaml` | DSC test config added (enabled: false) |
-| `deploy/prod_values.yaml` | DSC prod config added (enabled: false) |
-| `.github/workflows/ci.yml` | Added dsc-app lint step + test template step |
+| `deploy/dsc-dev_values.yaml` | DSC dev values — `DataClass: "Low"`, enabled routes, 1Gi DB |
+| `deploy/dsc-test_values.yaml` | DSC test values — `DataClass: "Low"`, test routes |
+| `deploy/dsc-prod_values.yaml` | DSC prod values — `DataClass: "Low"`, prod routes, HPA enabled |
+| `applications/argocd/be808f-dsc-dev.yaml` | Standalone ArgoCD Application CRD (auto-sync to `be808f-dev`) |
+| `applications/argocd/be808f-dsc-test.yaml` | Standalone ArgoCD Application CRD (manual sync to `be808f-test`) |
+| `applications/argocd/be808f-dsc-prod.yaml` | Standalone ArgoCD Application CRD (manual sync to `be808f-prod`) |
+| `.github/workflows/ci.yml` | Added dsc-app standalone lint + template steps |
 
 ### 13.4 Health Check Endpoints
 
@@ -506,7 +524,7 @@ The following steps require a human operator and cannot be automated in this rep
 | 6 | Add `GITOPS_TOKEN` (PAT with write to tenant-gitops-be808f) as GitHub Secret | GitHub repo settings |
 | 7 | Onboard to Vault; create secret paths `secret/be808f/dev/dsc-db` and `secret/be808f/dev/dsc-admin` | Vault console |
 | 8 | Pre-create `dsc-db-secret` and `dsc-admin-secret` in `be808f-dev` namespace | `oc create secret` |
-| 9 | Confirm ArgoCD is watching `tenant-gitops-be808f` with access to the `charts/gitops` path | ArgoCD admin |
-| 10 | Confirm MariaDB base image is mirrored to Artifactory (`be808f-docker-local/mariadb:10.11`) | Artifactory |
-| 11 | Set `dsc-app.enabled: true` in `deploy/dev_values.yaml` and push to trigger first ArgoCD sync | GitOps PR |
+| 9 | Mirror MariaDB 10.11 image to Artifactory (`be808f-docker-local/mariadb:10.11`) | Artifactory |
+| 10 | Submit one of the following to platform team to register DSC Application CRDs with ArgoCD: push `applications/argocd/be808f-dsc-dev.yaml` to the ArgoCD bootstrap path, or request platform team to `oc apply` the file | ArgoCD admin |
+| 11 | Push to `develop` branch of DSC-modernization to trigger first image build; confirm images appear in Artifactory | GitHub Actions |
 

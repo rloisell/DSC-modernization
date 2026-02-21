@@ -1,3 +1,160 @@
+## 2026-02 — Data Classification Correction + Documentation (`<commit-pending>`)
+
+**Objective**: Correct DataClass from "Medium" to confirmed "Low" across all DSC Helm
+artefacts; update deployment documentation to reflect the standalone ArgoCD Application
+architecture and the confirmed data classification.
+
+### DataClass — Low (Confirmed)
+
+DSC handles internal staff time-entry records only. No sensitive personal information,
+no Protected B/C data. Classification confirmed as **Low** by product owner.
+
+Files updated (all `DataClass: "Medium"` → `DataClass: "Low"` and
+`dataclass-medium` → `dataclass-low` in AVI InfraSetting annotations):
+
+- `tenant-gitops-be808f/charts/dsc-app/values.yaml` (default values + 2 route annotations)
+- `tenant-gitops-be808f/deploy/dsc-dev_values.yaml` (podLabels + 2 route annotations)
+- `tenant-gitops-be808f/deploy/dsc-test_values.yaml` (podLabels + 2 route annotations)
+- `tenant-gitops-be808f/deploy/dsc-prod_values.yaml` (podLabels + 2 route annotations)
+
+### DEPLOYMENT_ANALYSIS.md Updates
+
+- **Section 7**: Updated DataClass example from "Medium" to "Low"; confirmed classification.
+- **Section 13.1**: Rewritten — documents the correct standalone ArgoCD Application
+  architecture and the reason the initial umbrella sub-chart approach was abandoned
+  (co-tenant collision risk in shared `be808f-*` namespace).
+- **Section 13.3**: File inventory updated to reflect actual artefacts committed:
+  3 ArgoCD Application CRDs + 3 DSC values files (replacing the umbrella chart stanzas
+  that were reverted).
+- **Section 13.5**: Provisioning checklist step 11 corrected — remove umbrella chart
+  instruction; add ArgoCD CRD registration step.
+
+### Build / Test
+- No code changes. Helm chart structural changes only.
+- `helm lint charts/dsc-app -f deploy/dsc-dev_values.yaml` should be clean.
+
+---
+
+## 2026-02 — Critical Fix: Standalone ArgoCD Applications (commit `f7ebdc0` in tenant-gitops-be808f; `a2e461d` in DSC-modernization)
+
+**Objective**: Revert a broken deployment architecture change that risked breaking
+co-tenant workloads in the shared `be808f-*` namespace, and replace it with the
+correct standalone ArgoCD Application pattern.
+
+### Problem Identified
+
+Commit `7ffd751` in `tenant-gitops-be808f` added `dsc-app` as a `file://` local
+dependency of the shared `charts/gitops/` umbrella chart. This was architecturally
+incorrect for three reasons:
+
+1. **`be808f-app-prod` watches `main`** — the co-tenant's production ArgoCD Application
+   monitors the umbrella chart on the `main` branch. A broken Helm dependency is
+   immediately live in production.
+2. **`file://` deps require committed tarballs** — ArgoCD cannot resolve `file://`
+   local dependencies on-the-fly. `helm dependency build` must be run and the
+   `charts/` tarball committed. This was not done.
+3. **Shared lifecycle** — if DSC Helm rendering fails for any reason, ArgoCD cannot
+   sync `emerald-app` or `telnet` either. A DSC bug could bring down co-tenant services.
+
+### Fix Applied
+
+**tenant-gitops-be808f `f7ebdc0`:**
+- Reverted `charts/gitops/Chart.yaml` to original (removed `dsc-app` dep)
+- Reverted `charts/gitops/values.yaml` to original (removed `dsc-app.enabled`)
+- Reverted `deploy/dev_values.yaml`, `deploy/test_values.yaml`, `deploy/prod_values.yaml`
+  to original (removed DSC stanzas)
+- Created `applications/argocd/be808f-dsc-dev.yaml` — standalone ArgoCD Application
+  (auto-sync: prune + selfHeal)
+- Created `applications/argocd/be808f-dsc-test.yaml` — standalone, manual sync
+- Created `applications/argocd/be808f-dsc-prod.yaml` — standalone, manual sync,
+  CreateNamespace=false
+- Created `deploy/dsc-dev_values.yaml`, `dsc-test_values.yaml`, `dsc-prod_values.yaml`
+  — isolated DSC values, no overlap with shared `deploy/dev_values.yaml`
+- Updated `.github/workflows/ci.yml` to lint `charts/dsc-app` directly with each DSC
+  values file (not as part of umbrella)
+
+**DSC-modernization `a2e461d`:**
+- Fixed `.github/workflows/build-and-push.yml` — corrected `yq` key paths from
+  `.image.tag` to `.api.image.tag` / `.frontend.image.tag`, and fixed values file
+  names to match the new `dsc-dev_values.yaml` convention.
+
+### Architecture Principle (Established)
+In a shared GitOps namespace, each application must have its own standalone ArgoCD
+Application CRD with independent sync lifecycle. Never add a new team's application
+as a sub-chart dependency of another team's ArgoCD-watched umbrella chart.
+
+### Build / Test
+- No code changes to DSC application. Helm chart and CI changes only.
+
+---
+
+## 2026-02 — Deployment Preparation Sprint (commit `d8c0323` in DSC-modernization; `7ffd751` in tenant-gitops-be808f, later corrected)
+
+**Objective**: Build all containerization, CI/CD pipeline, and Helm chart artefacts
+required to deploy DSC to the BC Gov Emerald hosting tier (`be808f-dev` namespace).
+Based on analysis in `docs/deployment/DEPLOYMENT_ANALYSIS.md`.
+
+### Reference Pattern
+Studied `bcgov-c/jag-network-tools` (similar .NET + React/Vite stack) and
+`bcgov-c/tenant-gitops-be808f` as authoritative references for Emerald deployment pattern.
+
+### DSC-modernization — Files Created
+
+**Containerization:**
+- `containerization/Containerfile.api` — .NET 10 multistage build
+  (`mcr.microsoft.com/dotnet/sdk:10.0` → `aspnet:10.0`); non-root `appuser`; port 8080;
+  `ASPNETCORE_URLS=http://+:8080`; `HEALTHCHECK` on `/health/live`
+- `containerization/Containerfile.frontend` — `node:22-alpine` build → `nginx:alpine`
+  runtime; non-root; port 8080; `API_SERVICE_HOST`/`API_SERVICE_PORT` env vars for
+  local use
+- `containerization/nginx.conf` — SPA `try_files`; `/api/` proxy to `${API_SERVICE_HOST}:
+  ${API_SERVICE_PORT}/api/`; security headers (X-Frame-Options, CSP, Referrer-Policy)
+- `containerization/podman-compose.yml` — three services: db (mariadb:10.11, port 3307),
+  dsc-api (port 5005), dsc-frontend (port 5173); `.env` driven; health checks on all three
+
+**GitHub Actions:**
+- `.github/workflows/build-and-push.yml` — triggers on push to `main`/`test`/`develop`
+  + tags `v*` + PRs; builds API + frontend via `docker/build-push-action@v5`; pushes to
+  Artifactory `artifacts.developer.gov.bc.ca/be808f-docker-local/`; `update-gitops` job
+  patches `dsc-dev_values.yaml`/`dsc-test_values.yaml` via `yq`
+
+**Secrets required:** `ARTIFACTORY_USERNAME`, `ARTIFACTORY_PASSWORD`, `GITOPS_TOKEN`
+
+### tenant-gitops-be808f — Helm Chart Created
+
+16-template Helm chart at `charts/dsc-app/`:
+
+| Template | Description |
+|---|---|
+| `Chart.yaml` | chart `dsc-app` v0.1.0 |
+| `values.yaml` | defaults; `DataClass: "Low"` |
+| `_helpers.tpl` | fullname, labels, selector, apiServiceName helpers |
+| `api-deployment.yaml` | reads `dsc-db-secret` + `dsc-admin-secret` |
+| `api-service.yaml` | ClusterIP port 8080 |
+| `api-route.yaml` | TLS edge, Redirect |
+| `frontend-configmap.yaml` | Helm-rendered nginx.conf; proxy target inlined |
+| `frontend-deployment.yaml` | ConfigMap-mounted nginx; emptyDir for nginx-cache/pid/tmp |
+| `frontend-service.yaml` | ClusterIP port 8080 |
+| `frontend-route.yaml` | TLS edge, Redirect |
+| `db-statefulset.yaml` | MariaDB 10.11; PVC via volumeClaimTemplates |
+| `db-service.yaml` | Headless ClusterIP for StatefulSet DNS |
+| `secret.yaml` | shape-only; guarded by `createSecretShapes` flag |
+| `networkpolicies.yaml` | deny-all + router→frontend + router→api + frontend→api + api→db + egress DNS |
+| `serviceaccount.yaml` | `automountServiceAccountToken: false` |
+| `hpa.yaml` | HPA on API; conditional on `api.autoscaling.enabled` |
+
+### Key Decision — Nginx Proxy (No VITE_API_URL)
+All `DSC.WebClient` API calls use relative paths. Nginx proxies `/api/` to the
+`dsc-api` ClusterIP Service. No `VITE_API_URL` build-time injection needed.
+One container image works across all environments.
+
+### Build / Test
+- Frontend: `npm run build` — clean build
+- Backend: `dotnet build` — 0 errors
+- Helm: `helm lint charts/dsc-app` — 0 errors, 0 warnings
+
+---
+
 ## 2026-02-20 — SVG Diagram Exports + Missing Diagram Coverage
 
 **Objective**: Export all Draw.io files to SVG for GitHub rendering; identify and fill diagram gaps for features implemented since the original diagram set.
