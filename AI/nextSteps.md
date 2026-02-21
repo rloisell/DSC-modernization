@@ -2,6 +2,14 @@
 
 ---
 
+## ✅ Bug Fix: Reports 400 on Project Filter Clear (`9522624` — 2026-02-20)
+
+| Item | Status | Detail |
+|------|--------|--------|
+| Reports page 400 when clearing project filter | ✅ Fixed | BCGOV Select (React Aria) requires non-empty item keys — replaced `id: ''` with `'__all__'` / `'__all_time__'` sentinels; stripped before API call |
+
+---
+
 ## ✅ BACKLOG COMPLETE — All 9 priorities shipped (session ending 2026-02-21+)
 
 | Priority | Feature | Status | Commit |
@@ -38,6 +46,119 @@
 - CI/CD pipeline (GitHub Actions: build → test → push Docker image)
 - Kubernetes / OpenShift deployment manifests (BC Gov Pathfinder platform)
 - Production DB migration from MariaDB to managed service
+
+---
+
+## 🏗️ Architecture Recommendations
+
+These are structural improvements that should be addressed before or during production deployment. They are ordered by impact / risk.
+
+---
+
+### 1. Replace `EnsureCreated()` with EF Core Migrations ⚠️ HIGH
+
+**Current state**: `Program.cs` calls `db.Database.EnsureCreated()` at startup, which creates tables from the model but never applies incremental changes.  
+**Risk**: Any schema change (new column, renamed FK) will silently not apply to an existing database. Data loss / runtime crashes in production.  
+**Fix**:
+```bash
+dotnet ef migrations add InitialCreate --project src/DSC.Api
+dotnet ef database update
+```
+Remove `EnsureCreated()` and replace with `db.Database.Migrate()` on startup.
+
+---
+
+### 2. Introduce a Service Layer between Controllers and DbContext ⚠️ HIGH
+
+**Current state**: Controllers (`ReportsController`, `ItemsController`, etc.) query `ApplicationDbContext` directly — business logic, LINQ queries, and authorization checks are all mixed into controller actions.  
+**Risk**: Difficult to test (requires full HTTP/EF stack), violates single-responsibility, and makes future OAuth/Keycloak migration harder (auth logic is tangled with query logic).  
+**Recommendation**: Extract an `IReportService`, `IWorkItemService`, etc. registered as scoped dependencies. Controllers become thin orchestrators; tests mock the service interface directly.
+
+---
+
+### 3. Add a Global Exception Handler / ProblemDetails Middleware ⚠️ HIGH
+
+**Current state**: No `app.UseExceptionHandler()` or `IProblemDetailsService`. Unhandled exceptions return ASP.NET's default 500 HTML or JSON depending on environment.  
+**Fix** (one line in `Program.cs`):
+```csharp
+app.UseExceptionHandler("/error");
+// or in .NET 8+:
+app.UseExceptionHandler(opts => opts.AddProduction());
+```
+Also configure `AddProblemDetails()` in services for a consistent RFC 7807 error shape.
+
+---
+
+### 4. Frontend: Replace raw `useState`/`useEffect` Data Fetching with TanStack Query ⚡ MEDIUM
+
+**Current state**: Every page component manually manages `loading`, `error`, and `data` state, calls the API in `useEffect`, and handles re-fetch manually. There is no caching, deduplication, or background revalidation.  
+**Recommended library**: `@tanstack/react-query` v5 (TanStack Query).  
+**Benefits**:
+- Auto-caching and background refetch on window focus
+- Single `useQuery` / `useMutation` replaces 15–30 lines of `useState` + `useEffect` per page
+- Optimistic updates for mutations (edit/delete work items)
+- Devtools for inspecting query state  
+
+**Migration is incremental** — introduce it for new queries; convert existing pages over time.
+
+---
+
+### 5. Add Health Check Endpoints ⚡ MEDIUM
+
+Required for OpenShift liveness/readiness probes and container orchestration.  
+```csharp
+builder.Services.AddHealthChecks()
+    .AddMySql(conn, name: "database");   // requires AspNetCore.HealthChecks.MySql
+
+app.MapHealthChecks("/health/live");
+app.MapHealthChecks("/health/ready");
+```
+
+---
+
+### 6. Migrate to TypeScript on the Frontend 💡 MEDIUM (long term)
+
+**Current state**: All React/Vite source files are `.jsx` (plain JavaScript).  
+**Risk**: No compile-time checking of API response shapes, prop types, or service function signatures. DTO changes in the API currently cause silent runtime failures.  
+**Recommendation**: Incrementally rename files to `.tsx`, add a `tsconfig.json`, and generate TypeScript types from the API's OpenAPI spec (via `openapi-typescript`). No need to convert everything at once.
+
+---
+
+### 7. Standardise API Response Shape 💡 MEDIUM
+
+**Current state**: Some endpoints return raw arrays, some return objects, some use `ActionResult<T>`. There is no consistent envelope or error body across the API.  
+**Recommendation**: Adopt RFC 7807 `ProblemDetails` for errors (covered by item 3) and for lists consider `{ items: T[], totalCount: int }` to support future pagination.
+
+---
+
+### 8. Add Structured / Centralised Logging 💡 LOW-MEDIUM
+
+**Current state**: Default `ILogger` with no sinks configured beyond console.  
+**Recommendation**: Add **Serilog** with:
+- Console sink (structured JSON, useful in container stdout)
+- Rolling file sink for local dev
+- Future: Seq or Splunk sink for BC Gov log aggregation
+
+```csharp
+builder.Host.UseSerilog((ctx, cfg) =>
+    cfg.ReadFrom.Configuration(ctx.Configuration)
+       .Enrich.FromLogContext()
+       .WriteTo.Console(new RenderedCompactJsonFormatter()));
+```
+
+---
+
+### 9. Frontend: Environment-based API URL 💡 LOW
+
+**Current state**: Some service files may have `localhost:5005` hardcoded or rely on Vite proxy config.  
+**Fix**: Consistently use `import.meta.env.VITE_API_URL` everywhere and define it in `.env.development` / `.env.production`. Vite's proxy (`vite.config.js`) should only be used in dev.
+
+---
+
+### 10. Add Audit Log Table 💡 LOW
+
+For a government application, auditing who changed what and when is typically a compliance requirement.  
+**Recommended approach**: Add an `AuditLog` table (`EntityType`, `EntityId`, `Action`, `ChangedBy`, `ChangedAt`, `OldValue`, `NewValue`) and a simple EF Core `SaveChangesInterceptor` to write entries automatically on every admin mutation.
 
 ---
 

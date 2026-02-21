@@ -1,3 +1,30 @@
+## 2026-02-20 — Bug Fix: Reports 400 Error on Project Filter Clear (`9522624`)
+
+**Objective**: Fix a 400 error thrown when resetting the Project filter on the Reports page back to "All Projects".
+
+### Root Cause
+BCGOV Design System Select (built on React Aria) silently falls back to the item's **numeric index** as a key when `id: ''` is supplied. Index `'0'` is a truthy string, so it passed through the `key ? String(key) : ''` guard and was stored in `filterProjectId`. The API then received `?projectId=0`, which ASP.NET Core cannot parse as `Guid?` → HTTP 400 `{"errors":{"projectId":["The value '0' is not valid."]}}`.
+
+Confirmed via curl:
+```
+curl "http://localhost:5005/api/reports/summary?projectId=0"  # → 400
+curl "http://localhost:5005/api/reports/summary"             # → 200
+```
+
+### Fix Applied (`src/DSC.WebClient/src/pages/Reports.jsx`)
+- `PERIOD_ITEMS` "All Time" entry: `id: ''` → `id: '__all_time__'`
+- `projectItems` "All Projects" entry: `id: ''` → `id: '__all__'`
+- `loadReport`: period dates branch changed to `(period === '__all_time__' || !period) ? { from: undefined, to: undefined } : getPeriodDates(period)`
+- `loadReport`: projectId guard changed to `(filterProjectId && filterProjectId !== '__all__') ? filterProjectId : undefined`
+- Period `Select.onSelectionChange`: fallback changed from `''` to `'month'`
+- Project `Select.selectedKey`: `filterProjectId || '__all__'` (always has a valid key)
+- Project `Select.onSelectionChange`: `key && key !== '__all__' ? String(key) : ''`
+
+### Rule for all future BCGOV Select "All / None" options
+> Never use `id: ''`. Always use a non-empty sentinel (`'__all__'`, `'__none__'`, etc.) and strip it before sending to the API.
+
+---
+
 ## Session: Modernization Backlog Sprint (P1–P9 — all priorities shipped)
 
 **Objective**: Deliver all 9 outstanding backlog priorities from `AI/nextSteps.md` in a single session.
