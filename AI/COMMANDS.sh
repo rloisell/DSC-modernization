@@ -133,3 +133,9 @@ gh pr create --base develop --head feature/seed-data-expansion --title "..."
 # Merge PR #19 after CI pass
 gh pr merge 19 --merge
 git checkout develop && git pull origin develop
+# 2026-02-22 — Session A continuation
+git checkout develop && git pull origin develop
+git add AI/nextSteps.md && git commit -m "docs: mark Todo #1 complete in nextSteps.md"
+git push origin develop
+gh pr create --base main --head develop --title "docs: mark Todo #1 complete in nextSteps.md"  # PR #21
+gh pr merge 21 --merge --admin  # merged 24aea17
