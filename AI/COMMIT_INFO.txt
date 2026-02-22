@@ -25,3 +25,10 @@ Other actions recorded in AI/CHANGES.csv
 - Commit: d28105c on main — "docs: update nextSteps.md — 5 locations marked complete for Todo #9"
 - Branch: main (documentation-only, no code changes)
 - Todo #9 status: ✅ COMPLETE
+
+2026-02-22 — Ruleset fix: required check contexts corrected
+- Old context: "build-and-test" (did not match any CI job)
+- New contexts: ".NET Build & Test", "Frontend Build & Test"
+- Updated via: gh api --method PUT repos/rloisell/DSC-modernization/rulesets/13091113
+- PR #17 merged to main via --admin override (ruleset checks already passing)
+- PR #17 commit: 49c4152 on main — merge commit "Merge pull request #17 from rloisell/develop"
