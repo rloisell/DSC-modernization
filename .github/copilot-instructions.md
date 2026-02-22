@@ -168,6 +168,41 @@ manifests for BC Gov projects, apply these standards:
 
 ---
 
+## `AI/nextSteps.md` — Document Maintenance
+
+### Required structure (always in this order)
+1. Title + metadata
+2. **MASTER TODO** — tier tables with Status column
+3. Todo Specifications — one section per pending item
+4. Session History — reverse chronological (newest first)
+
+### MASTER TODO tier table format
+Every tier table must have **Status as the first column**: `⬜` = pending, `✅` = done.
+Completed rows use ~~strikethrough~~ on item text and append **DONE YYYY-MM-DD**.
+Do not remove completed rows.
+
+### Session History entry format
+Prepend at the **top** of Session History:
+```markdown
+### YYYY-MM-DD — Session N: <objective>
+**Commits:** `<hash>` description
+**Files changed:** ...
+**Key decisions:** ...
+```
+
+### ALWAYS (document maintenance)
+- Mark completed todo rows `✅` + strikethrough immediately after merging to `main`
+- Prepend new session history entry at end of every session
+- Keep MASTER TODO tables as the first content in the document
+- Keep the document under ~600 lines — condense history; narrative lives in `AI/WORKLOG.md`
+
+### NEVER (document maintenance)
+- Delete session history entries
+- Let the file grow unbounded with verbose session notes (that belongs in WORKLOG.md)
+- Restructure the document order without explicit direction from Ryan Loiselle
+
+---
+
 ## Git Commit Format
 ```
 <type>: <short imperative description>
