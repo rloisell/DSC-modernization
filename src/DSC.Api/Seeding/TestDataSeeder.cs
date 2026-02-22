@@ -1049,12 +1049,12 @@ public record TestSeedResult(
                 // ── SW / TELECOM PROJECT WORK ITEMS ──────────────────────────────────────────
                 // AI-assisted: 36 variance work items for P3001–P3005 for reporting test data;
                 // reviewed and directed by Ryan Loiselle.
-                var swProjNos = new[] { "P3001", "P3002", "P3003", "P3004", "P3005" };
+                var swProjNos = new List<string> { "P3001", "P3002", "P3003", "P3004", "P3005" };
                 var swProjects = await _db.Projects
                     .Where(p => swProjNos.Contains(p.ProjectNo))
                     .ToListAsync(ct);
 
-                var swUsernameList = new[] { "jbennett", "tclarke", "mfields", "rchang", "swright", "pgarcia", "dkim", "kduma", "mammeter" };
+                var swUsernameList = new List<string> { "jbennett", "tclarke", "mfields", "rchang", "swright", "pgarcia", "dkim", "kduma", "mammeter" };
                 var swUsers = await _db.Users
                     .Where(u => swUsernameList.Contains(u.Username))
                     .ToListAsync(ct);
@@ -1143,12 +1143,13 @@ public record TestSeedResult(
             // Seed project assignments for User-role members on new SW/telecom projects
             // (Director/Manager roles see all projects via role-based visibility; only User-role
             // members need explicit assignments)
-            var newProjNos = new[] { "P3001", "P3002", "P3003", "P3004", "P3005" };
+            var newProjNos = new List<string> { "P3001", "P3002", "P3003", "P3004", "P3005" };
             var newProjList = await _db.Projects
                 .Where(p => newProjNos.Contains(p.ProjectNo))
                 .ToListAsync(ct);
+            var userRoleNewMemberNames = new List<string> { "swright", "pgarcia", "dkim", "kduma", "mammeter" };
             var userRoleNewMembers = await _db.Users
-                .Where(u => new[] { "swright", "pgarcia", "dkim", "kduma", "mammeter" }.Contains(u.Username))
+                .Where(u => userRoleNewMemberNames.Contains(u.Username))
                 .ToListAsync(ct);
 
             foreach (var mu in userRoleNewMembers)
