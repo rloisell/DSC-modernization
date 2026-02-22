@@ -48,4 +48,11 @@ Other actions recorded in AI/CHANGES.csv
 - commit: 441db59 — branch: develop — "docs: restructure nextSteps.md; add doc maintenance standard"
 - PR #23: develop → main — CI pass — merged --admin
 - merge commit: 2264206 — branch: main
+
+## Session D — 2026-02-22 (spec-kitty init + feature specs Todos #2-#9)
+- commit: 12ebe70 — branch: develop — "feat: initialize spec-kitty and add specs for Todos #2-#9"
+- 7 features spec'd: 002–008 (.kittify/, kitty-specs/, fixture files)
+- validate-tasks: 8 features, 0 mismatches
+- rl-project-template updated with spec-kitty guidance (Section 11 + copilot-instructions.md)
+
 - DSC Java repo: 20571f7 — master — same doc standard applied

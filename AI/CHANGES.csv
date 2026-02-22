@@ -38,3 +38,18 @@ AI/COMMANDS.sh,modified,Added Session A commands
 2026-02-22,AI/nextSteps.md,modified,docs,Full restructure: Master TODO first with Status column; session history reversed; condensed 3477→354 lines; Todo #9 added
 2026-02-22,CODING_STANDARDS.md,modified,docs,Added section 10 — nextSteps.md maintenance standard
 2026-02-22,.github/copilot-instructions.md,modified,docs,Added nextSteps.md document maintenance guardrails block
+2026-02-22,.kittify/config.yaml,created,spec-kitty project config (GitHub Copilot agent; Software Dev Kitty mission)
+2026-02-22,.kittify/metadata.yaml,created,spec-kitty metadata updated by init
+2026-02-22,.kittify/AGENTS.md,created,spec-kitty agent definitions
+2026-02-22,.gitignore,modified,Added __pycache__/ and *.pyc exclusions
+2026-02-22,kitty-specs/002-expense-category-parity/,created,spec.md + plan.md + 4 WP files + openapi/db fixtures
+2026-02-22,kitty-specs/003-task-deviation-report/,created,spec.md + plan.md + 4 WP files + openapi fixture
+2026-02-22,kitty-specs/004-activity-page-refactor/,created,spec.md + plan.md + 6 WP files (bundles Todo #4 and #6)
+2026-02-22,kitty-specs/005-reports-tabs/,created,spec.md + plan.md + 2 WP files
+2026-02-22,kitty-specs/006-weekly-summary/,created,spec.md + plan.md + 2 WP files + openapi fixture
+2026-02-22,kitty-specs/007-management-reports/,created,spec.md + plan.md + 3 WP files + openapi fixtures
+2026-02-22,kitty-specs/008-dept-roster-org-chart/,created,spec.md + plan.md + 6 WP files + openapi fixtures
+2026-02-22,AI/WORKLOG.md,modified,Prepended Session D entry (spec-kitty init + feature specs)
+2026-02-22,AI/CHANGES.csv,modified,Added Session D entries
+2026-02-22,AI/COMMANDS.sh,modified,Added Session D commands
+2026-02-22,AI/COMMIT_INFO.txt,modified,Added Session D commit hash

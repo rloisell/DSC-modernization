@@ -141,4 +141,21 @@ gh pr create --base main --head develop --title "docs: mark Todo #1 complete in 
 gh pr merge 21 --merge --admin  # merged 24aea17
 
 # 2026-02-22 — Session B (doc standard update)
-python3 /tmp/write_nextsteps.py  # rewrote AI/nextSteps.md locallyprintf python3gh pr merge 23 --merge --admin  # merged 2264206
+python3 /tmp/write_nextsteps.py  # rewrote AI/nextSteps.md locally
+gh pr merge 23 --merge --admin  # merged 2264206
+
+# 2026-02-22 — Session D (spec-kitty init + feature specs)
+spec-kitty init --here --ai copilot --non-interactive --no-git --force
+spec-kitty agent feature create-feature --id 002 --name "expense-category-parity"
+spec-kitty agent feature create-feature --id 003 --name "task-deviation-report"
+spec-kitty agent feature create-feature --id 004 --name "activity-page-refactor"
+spec-kitty agent feature create-feature --id 005 --name "reports-tabs"
+spec-kitty agent feature create-feature --id 006 --name "weekly-summary"
+spec-kitty agent feature create-feature --id 007 --name "management-reports"
+spec-kitty agent feature create-feature --id 008 --name "dept-roster-org-chart"
+python3 /tmp/write_specs.py  # wrote 35 spec/plan/WP files across 7 features
+spec-kitty validate-tasks --all  # 8 features, 0 mismatches
+git add .kittify/ .github/prompts/ .gitignore .vscode/settings.json kitty-specs/002-expense-category-parity/ kitty-specs/003-task-deviation-report/ kitty-specs/004-activity-page-refactor/ kitty-specs/005-reports-tabs/ kitty-specs/006-weekly-summary/ kitty-specs/007-management-reports/ kitty-specs/008-dept-roster-org-chart/
+git reset HEAD ".kittify/scripts/tasks/__pycache__/"
+git commit -m "feat: initialize spec-kitty and add specs for Todos #2-#9"  # 12ebe70
+git push origin develop

@@ -1,3 +1,50 @@
+## 2026-02-22 — Session D: spec-kitty Initialization + Feature Specs (Todos #2–#9)
+
+**Objective**: Initialize spec-kitty in DSC-modernization and build complete specs, implementation plans, and work packages for all planned Tier 1–2 features. Update rl-project-template with spec-kitty guidance for future projects.
+
+### Actions Taken
+
+- Ran `spec-kitty init --here --ai copilot --non-interactive --no-git --force` in project root → created `.kittify/` (config.yaml, metadata.yaml, AGENTS.md, scripts/)
+- Created 7 feature directories (002–008) via `spec-kitty agent feature create-feature`
+- Wrote full `spec.md` + `plan.md` + WP task files for all 7 features (35 files total):
+  - `002-expense-category-parity`: FK `ExpenseCategoryId` on WorkItem, EF migration, React Select (4 WPs)
+  - `003-task-deviation-report`: `GET /api/reports/task-deviation`, colour-coded frontend tab (4 WPs)
+  - `004-activity-page-refactor`: shared TabBar, CAPEX/OPEX auto, project synopsis, WorkItemTemplate entity+API+UI (6 WPs)
+  - `005-reports-tabs`: tabbed Reports page, role-gate Team tab (2 WPs; depends on 003, 004)
+  - `006-weekly-summary`: `/weekly` route, `?timePeriod=week` filter, progress bars, OVERBUDGET warning (2 WPs)
+  - `007-management-reports`: project effort + activity area deviation endpoints, Team Reports tab (3 WPs)
+  - `008-dept-roster-org-chart`: department roster + org chart API, role-based UI (6 WPs)
+- Ran `spec-kitty validate-tasks --all` → 8 features, 0 mismatches ✅
+- Created OpenAPI + DB fixture files for 002, 003, 006, 007, 008
+- Updated `.gitignore` to exclude `__pycache__/` and `*.pyc`
+- Committed all spec-kitty files: `12ebe70` on develop
+- Updated rl-project-template with spec-kitty guidance in `CODING_STANDARDS.md` and `.github/copilot-instructions.md`
+
+### Files Changed
+
+- `.kittify/` — new spec-kitty project config
+- `.github/prompts/spec-kitty.*.prompt.md` — renamed from `.md` by init
+- `.gitignore` — added `__pycache__/` and `*.pyc`
+- `kitty-specs/002–008/` — spec.md × 7, plan.md × 7, WP files × 27, fixture files × 9
+- `AI/WORKLOG.md`, `AI/CHANGES.csv`, `AI/COMMANDS.sh`, `AI/COMMIT_INFO.txt` — this session
+- `rl-project-template`: `CODING_STANDARDS.md` Section 11 (spec-kitty), `.github/copilot-instructions.md` spec-kitty workflow block
+
+### Key Decisions
+
+- Features 004 and 006 bundled into single spec (activity page refactor includes frequent templates)
+- spec-kitty WP files use `lane: "planned"` for all new work packages
+- All specs include EF Core note: use `List<string>` for LINQ collections (not `new[]`)
+- fixture files are OpenAPI request/response examples, not mock servers
+- Recommended implementation order: 002 → 003 → 006 → 004 → 005 → 007 → 008
+
+### Commits
+
+| Repo | Commit | Branch | Notes |
+|------|--------|--------|-------|
+| DSC-modernization | `12ebe70` | develop | spec-kitty init + all feature specs |
+
+---
+
 ## 2026-02-22 — Session B: Document Standard + Department Roster Feature
 
 **Objective**: Restructure `AI/nextSteps.md` to new standard format across DSC-modernization and DSC Java repos; add document maintenance standard to CODING_STANDARDS.md and copilot-instructions.md; add Todo #9 Department Roster & Org Chart.
