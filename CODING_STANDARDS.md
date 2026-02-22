@@ -614,3 +614,71 @@ Add method-level or section-level comments **only when the file contains applica
 #### Rationale
 
 Attribution headers ensure that AI-assisted contributions are visible in code review, audits, and onboarding. Method-level comments are reserved for files where the logic is genuinely non-obvious — adding them to generic CRUD code adds noise without value.
+
+---
+
+## 10. `AI/nextSteps.md` — Document Maintenance Standard
+
+### 10.1 Purpose
+
+`AI/nextSteps.md` is the **authoritative todo list** for all AI-assisted work sessions. It must be kept current and structured for immediate scanning at the start of any session. It is not a history dump — `AI/WORKLOG.md` owns the narrative history.
+
+### 10.2 Required Document Structure
+
+The document must always follow this order:
+
+1. **Title + metadata** (author, AI tool, updated date)
+2. **MASTER TODO** — first content section; contains all tier tables and the session sequence plan
+3. **Todo Specifications** — one sub-section per pending todo item, with file names and implementation steps
+4. **Session History** — reverse chronological (newest entry at top); one sub-section per session
+
+> This ordering ensures that a new session begins by reading the current state, not by scrolling past completed history.
+
+### 10.3 MASTER TODO Tier Table Format
+
+Every tier table **must** include a `Status` column as the first column:
+
+| Status | # | Item | Effort | Notes / Depends On | Branch |
+|--------|---|------|--------|--------------------|--------|
+| ✅ | ~~**1**~~ | ~~Completed item description~~ **DONE YYYY-MM-DD** | Low | — | ~~`branch-name`~~ |
+| ⬜ | **2** | Pending item description | Medium | Depends on #1 | `feature/branch-name` |
+
+**Rules:**
+- `Status` is always first column: `⬜` for pending, `✅` for done
+- Completed items: ~~strikethrough~~ on item text; append **DONE YYYY-MM-DD**
+- Every pending item must have a branch name assigned before work begins
+- Tiers are ordered 1 (highest priority) → 5 (lowest / future)
+- Do not remove completed rows — they provide quick context on what is done
+
+### 10.4 Session History Entry Format
+
+```markdown
+### YYYY-MM-DD — Session N: <objective>
+
+**Commits:**
+- `<hash>` description
+
+**Files changed:** list of files and what changed
+
+**Key decisions:**
+- Any architectural or product choice made this session
+
+**Problems encountered:**
+- Issue and resolution (if any)
+```
+
+Prepend each new entry at the **top** of the Session History section.
+
+### 10.5 AI Guardrails for `AI/nextSteps.md`
+
+**ALWAYS:**
+- Mark the completed todo row `✅` and add ~~strikethrough~~ immediately after merging to `main`
+- Prepend a new session history entry at the top of the Session History section at session end
+- Keep the MASTER TODO tables as the first content after the title block
+- Update the session sequence plan when adding new todos or completing milestones
+
+**NEVER:**
+- Delete old session history entries — they form the audit trail
+- Move session history to a separate file without explicit user direction
+- Restructure the document ordering without explicit user direction
+- Allow the document to grow past ~600 lines — condense history to key facts; details live in `AI/WORKLOG.md`
