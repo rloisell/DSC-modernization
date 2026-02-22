@@ -157,7 +157,7 @@ Patterns observed in `bcgov-c/JAG-JAM-CORNET`, `bcgov-c/JAG-LEA`, `bcgov-c/tenan
 | P3 — CodeQL SAST | ✅ Done — `codeql.yml` added (`ca9d5be`) |
 | P4 — OWASP Dependency Check | ⬜ Pending — optional; Trivy covers similar ground for containers |
 | P5 — OWASP ZAP DAST | ⬜ Pending — requires deployed app URL |
-| P6 — Branch protection rules | ⬜ Pending — human step in GitHub repo Settings |
+| P6 — Branch protection rules | ✅ Done — Ruleset `13091113` active on `main` (`2026-02-22`) |
 | P7 — Dependabot | ✅ Done — `dependabot.yml` added (`ca9d5be`) |
 | P8 — GitHub Copilot Code Review | ✅ Done — `copilot-review.yml` added (`99faaa2`) |
 
@@ -248,13 +248,20 @@ Requires the app to be deployed (run against `be808f-dev` URL once deployed):
 
 Best run as a nightly scheduled job after dev deployment, not on every PR.
 
-### P6 — Branch Protection Rules (Human step — no code required)
+### ✅ P6 — Branch Protection Rules — DONE (`2026-02-22`)
 
-Not a workflow, but required by ISB EA Option 2:
-- `rloisell/DSC-modernization`: Enable branch protection on `main` — require PR review before merge
-- `bcgov-c/tenant-gitops-be808f`: Enable branch protection on `main` — require PR review before merge
+Ruleset `13091113` is **active** on `rloisell/DSC-modernization` `main`.
 
-These are configured in GitHub repo Settings → Branches.
+Confirmed active rules via `gh api repos/rloisell/DSC-modernization/rulesets/13091113`:
+- `deletion` — branch cannot be deleted
+- `non_fast_forward` — no force pushes
+- `pull_request` — PR required before merging (0 required approvals; appropriate for solo dev)
+- `required_status_checks` — `build-and-test` job must pass
+- `copilot_code_review` — Copilot code review enabled on PRs
+- `bypass_actors: []` — nobody can bypass, including repo owner
+
+Note: `bcgov-c/tenant-gitops-be808f` branch protection is managed by the shared
+tenant admins and is outside the scope of this project to configure.
 
 ### P7 — Dependabot / Renovate for Automated Dependency Updates (LOW effort)
 
@@ -3226,8 +3233,8 @@ git push -u origin feature/<name>
 The `build-and-test.yml` CI workflow already triggers on `develop` (it was wired up in
 commit `ca9d5be`). Without the branch existing, those CI triggers never fire. Setting up
 `develop` in advance means every feature PR gets CI validation automatically — zero extra
-effort per session. Branch protection rules for `main` (Todo #9) should be applied
-immediately after `develop` is pushed.
+effort per session. Branch protection rules for `main` (Todo #9) have been applied —
+Ruleset `13091113` is active as of `2026-02-22`.
 
 ---
 
@@ -3386,7 +3393,7 @@ Add to `TestDataSeeder.cs`:
 
 | # | Item | Effort | Notes |
 |---|------|--------|-------|
-| **9** | Branch protection — require PR review on `main`; set `develop` as default merge target | **Trivial** | GitHub Settings UI; do immediately after `develop` is pushed |
+| ~~**9**~~ | ~~Branch protection — require PR review on `main`~~  ✅ **DONE** — Ruleset `13091113` active (`2026-02-22`); PR + `build-and-test` required; no bypass actors | ~~Trivial~~ | Completed |
 | **10** | Audit log table — `AuditLog` entity + EF migration + `SaveChangesInterceptor` | **Low** | Add as a standalone feature branch |
 | **11** | HTTPS enforcement — `UseHttpsRedirection()` + HSTS in `Program.cs` | **Low** | One-line; bundle into any feature branch |
 | **12** | `UserAuth` password migration — replace SHA-256 with `IPasswordHasher<User>` | **Low–Med** | Required before production |
@@ -3427,7 +3434,7 @@ Session A  ── Seed + Expense parity + `develop` branch setup
               Todo #1 (seed data) + Todo #2 (expense category)
               Branch: feature/seed-data-expansion → develop
                       feature/expense-category-parity → develop
-              Also: Todo #9 (branch protection, 2 min in GitHub Settings)
+              Also: Todo #9 (branch protection) ✅ ALREADY COMPLETE
 
 Session B  ── Deviation report + Reports tabs foundation
               Todo #3 (task deviation API + report section)
