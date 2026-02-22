@@ -1,3 +1,61 @@
+## 2026-02-22 — Session A: Seed Data Expansion Complete — Todo #1 (`feature/seed-data-expansion`, PR #19 → develop)
+
+**Objective**: Expand `TestDataSeeder.cs` with 7 new users, 5 SW/telecom projects, and 36 variance
+work items to enable role-based and deviation-reporting testing.
+
+### Actions Taken
+
+- Read full seeder (1266 lines) to understand UserSeed, UserAuthSeed, ProjectSeed, WorkItem,
+  and ProjectAssignment seeding patterns
+- Added 7 new users with correct roles:
+  - Directors: `jbennett` (Joan Bennett), `tclarke` (Thomas Clarke)
+  - Managers: `mfields` (Michelle Fields), `rchang` (Robert Chang)
+  - Users: `swright` (Sarah Wright), `pgarcia` (Patricia Garcia), `dkim` (David Kim)
+- Added UserAuth entries for all 7 new users (password: `test-password-updated`)
+- Found and fixed bug: `Director` role was seeded but never assigned to any user — added
+  explicit Director role assignment block
+- Refactored role assignment exclusion list from hardcoded `!= "rloisel1"` to expandable
+  `List<string> namedRoleUsernames`
+- Added 5 new SW/telecom projects P3001–P3005 (OSS Billing, Network Monitoring, Telecom
+  Infrastructure, Customer Portal, VoIP Platform) with EstimatedHours 140–220h
+- Added 36 targeted variance work items across all 5 new projects:
+  - Over-budget examples: API Development 40h planned / 48h actual (+20%)
+  - Under-budget examples: Integration Design 24h planned / 18h actual (-25%)
+  - On-budget examples: Project Sprint Planning 4h/4h
+  - Cross-project items from `kduma` and `mammeter` (5 items)
+- Added ProjectAssignment records for `swright`, `pgarcia`, `dkim`, `kduma`, `mammeter` on
+  all 5 new projects (User-role members need explicit assignments for visibility)
+- Fixed CI failure: `string[]` inline arrays in EF Core LINQ queries picked up
+  `ReadOnlySpan<string>` overload on x64 Linux — changed to `List<string>`
+- Local tests: 36/36 pass
+
+### Files Changed
+
+| File | Action |
+|------|--------|
+| `src/DSC.Api/Seeding/TestDataSeeder.cs` | Modified — 178 insertions, 15 deletions |
+| `AI/WORKLOG.md` | Modified — this entry |
+| `AI/CHANGES.csv` | Modified — session entries |
+| `AI/COMMIT_INFO.txt` | Modified — commit hashes added |
+| `AI/COMMANDS.sh` | Modified — session commands added |
+
+### Commits
+
+| Hash | Branch | Message |
+|------|--------|---------|
+| `573324b` | feature/seed-data-expansion | feat: expand seed data - 7 users, 5 SW/telecom projects, 36 variance work items |
+| `d7a9869` | feature/seed-data-expansion | fix: use List<string> for EF Core LINQ collections (ReadOnlySpan overload conflict on Linux) |
+| PR #19 | develop | merged via GitHub |
+
+### Build / Test
+- Local: 0 errors, 36/36 pass
+- CI (Ubuntu x64): `.NET Build & Test` pass, `Frontend Build & Test` pass after List<string> fix
+
+### Todo #1 Status
+✅ COMPLETE
+
+---
+
 ## 2026-02-22 — Branch Protection Activated: Todo #9 Complete (`no-commit — config only`)
 
 **Objective**: Confirm and activate branch protection ruleset on `main` for `rloisell/DSC-modernization`.

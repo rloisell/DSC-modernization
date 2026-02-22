@@ -29,3 +29,8 @@ AI/nextSteps.md,modified,"Appended MASTER TODO section — 25 items across 5 tie
 AI/nextSteps.md,modified,"Marked Todo #9 / P6 branch protection complete in 5 locations: DevOps table, P6 section (full ruleset details), branching strategy note, Tier 3 table, Session A plan"
 AI/WORKLOG.md,modified,Prepended 2026-02-22 entry for Todo #9 completion; corrected prior session note (ruleset was disabled not applied)
 AI/CHANGES.csv,modified,Added two completion entries for Todo #9
+src/DSC.Api/Seeding/TestDataSeeder.cs,modified,"Session A: 7 users (2 Director/2 Manager/3 User), UserAuth, 5 SW/telecom projects P3001-P3005, 36 variance work items, project assignments, directorRole fix — PR #19"
+AI/WORKLOG.md,modified,Prepended 2026-02-22 Session A entry
+AI/CHANGES.csv,modified,Added Session A entries
+AI/COMMIT_INFO.txt,modified,Added Session A commit hashes
+AI/COMMANDS.sh,modified,Added Session A commands
