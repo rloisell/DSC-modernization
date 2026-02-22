@@ -38,3 +38,8 @@ Other actions recorded in AI/CHANGES.csv
 - Commit: d7a9869 on feature/seed-data-expansion — "fix: use List<string> for EF Core LINQ collections (ReadOnlySpan overload conflict on Linux)"
 - PR #19 merged to develop: f8c08e6 on develop
 - Todo #1 status: COMPLETE
+
+## Session A — Continuation (2026-02-22)
+- commit: 6012594 — branch: develop — "docs: mark Todo #1 complete in nextSteps.md"
+- PR #21: develop → main — CI pass — merged --admin
+- merge commit: 24aea17 — branch: main
