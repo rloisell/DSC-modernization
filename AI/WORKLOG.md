@@ -30,8 +30,8 @@ Also set up the `develop` integration branch so CI triggers work correctly.
 | `AI/WORKLOG.md` | Modified — this entry |
 
 ### Commits
-- `docs: add master todo, branching plan, and 7-session execution map` — main (pre-develop)
-- `develop` branch created from this commit and pushed to origin
+- `21f453c` — `docs: add master todo, branching plan, and 7-session execution map` (main)
+- `develop` branch created from `21f453c` and pushed to origin
 
 ### Build / Test
 - No code changes. Documentation only.
