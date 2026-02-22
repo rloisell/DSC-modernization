@@ -7,3 +7,21 @@ Spec Kit subtree import:
 - Imported commit (short): 9f3adc7 from branch `main` (imported as subtree at `spec/spec-kit`)
 
 Other actions recorded in AI/CHANGES.csv
+
+---
+
+2026-02-21 — Session: AI tracking files committed
+- Commit: 21f453c on main — "docs: add master todo, branching plan, and 7-session execution map"
+- Commit: 43d100a on develop — synced AI tracking files to develop branch
+- develop branch created from main and pushed to origin/develop
+- 8 stale local feature branches deleted: feature/activity-calendar-models,
+  feature/activity-type-split, feature/cpc-code-model, feature/department-user-model,
+  feature/director-code-model, feature/reason-code-model, feature/union-model, hardening-security
+
+2026-02-22 — Session: Branch protection activated + documentation
+- Ruleset 13091113 activated: enforcement set to "active" via gh api
+- Commit: ad9b5dd on main — "docs: record Todo #9 completion — branch protection ruleset 13091113 active on main"
+- Commit: 8cf4559 on main — "chore: update COMMIT_INFO with ad9b5dd session details"
+- Commit: d28105c on main — "docs: update nextSteps.md — 5 locations marked complete for Todo #9"
+- Branch: main (documentation-only, no code changes)
+- Todo #9 status: ✅ COMPLETE

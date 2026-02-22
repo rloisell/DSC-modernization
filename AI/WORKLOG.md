@@ -1,3 +1,45 @@
+## 2026-02-22 — Branch Protection Activated: Todo #9 Complete (`no-commit — config only`)
+
+**Objective**: Confirm and activate branch protection ruleset on `main` for `rloisell/DSC-modernization`.
+
+### Actions Taken
+
+- Discovered via `gh api` that Ruleset `13091113` had been created correctly (with all required
+  rules) but left in `"enforcement": "disabled"` state from the previous session
+- Activated the ruleset via:
+  `gh api --method PUT repos/rloisell/DSC-modernization/rulesets/13091113 --field enforcement=active`
+- Confirmed final state via API read
+
+### Confirmed Ruleset State
+
+| Rule | Status |
+|------|--------|
+| Enforcement | ✅ active |
+| `deletion` — branch cannot be deleted | ✅ |
+| `non_fast_forward` — no force pushes | ✅ |
+| `pull_request` — PR required before merging | ✅ (0 required approvals — solo dev) |
+| `required_status_checks` — `build-and-test` must pass | ✅ |
+| `copilot_code_review` — Copilot review on PRs | ✅ |
+| `bypass_actors` — nobody can bypass | ✅ empty |
+
+### Documentation Updated
+
+| File | Change |
+|------|--------|
+| `AI/nextSteps.md` | P6 DevOps patterns table → marked ✅ Done |
+| `AI/nextSteps.md` | P6 section → replaced with completion note + full ruleset details |
+| `AI/nextSteps.md` | Branching strategy note → updated "should be applied" → "applied 2026-02-22" |
+| `AI/nextSteps.md` | Master Todo Tier 3 table row #9 → struck through and marked DONE |
+| `AI/nextSteps.md` | Session A plan → "Todo #9 ALREADY COMPLETE" |
+| `AI/WORKLOG.md` | Previous session entry corrected — ruleset was disabled, not fully applied |
+| `AI/WORKLOG.md` | This entry added |
+| `AI/CHANGES.csv` | Two entries added |
+
+### Build / Test
+- No code changes. Configuration and documentation only.
+
+---
+
 ## 2026-02-21 — Master Todo List + Git Strategy (`docs: add master todo and branching plan`)
 
 **Objective**: Consolidate all outstanding work into a single prioritized todo document with
@@ -18,7 +60,7 @@ Also set up the `develop` integration branch so CI triggers work correctly.
 - 7-session execution plan mapped (Session A–G)
 - Created `develop` branch from `main` and pushed to origin
 - Deleted 8 stale local feature branches (all abandoned / merged)
-- Applied branch protection on `main` via GitHub Settings (Todo #9 — human step)
+- Applied branch protection on `main` — ruleset created but left in `disabled` state (corrected `2026-02-22`)
 - Committed all AI tracking file changes
 
 ### Files Changed
@@ -30,8 +72,8 @@ Also set up the `develop` integration branch so CI triggers work correctly.
 | `AI/WORKLOG.md` | Modified — this entry |
 
 ### Commits
-- `docs: add master todo, branching plan, and 7-session execution map` — main (pre-develop)
-- `develop` branch created from this commit and pushed to origin
+- `21f453c` — `docs: add master todo, branching plan, and 7-session execution map` (main)
+- `develop` branch created from `21f453c` and pushed to origin
 
 ### Build / Test
 - No code changes. Documentation only.
