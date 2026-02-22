@@ -91,7 +91,15 @@ public record TestSeedResult(
                 new UserSeed(15298, "rloisel1", "ryan.loiselle@azonicnet.com", "Ryan", "Loiselle", "test-password-updated"),
                 new UserSeed(10101, "dmcgregor", "duncan.mcgregor@mtsallstream.com", "Duncan", "McGregor", null),
                 new UserSeed(15299, "kduma", "snipe_187@hotmail.com", "Keith", "Duma", "test-password-updated"),
-                new UserSeed(99901, "mammeter", "acs-39093-and-mts-project-2009@googlegroups.com", "Matthew", "Ammeter", "test-password-updated")
+                new UserSeed(99901, "mammeter", "acs-39093-and-mts-project-2009@googlegroups.com", "Matthew", "Ammeter", "test-password-updated"),
+                // Directors, Managers, and additional Users — variance/reporting test scenarios
+                new UserSeed(20001, "jbennett", "joan.bennett@test.dsc.local",     "Joan",     "Bennett", "test-password-updated"),
+                new UserSeed(20002, "tclarke",  "thomas.clarke@test.dsc.local",    "Thomas",   "Clarke",  "test-password-updated"),
+                new UserSeed(20003, "mfields",  "michelle.fields@test.dsc.local",  "Michelle", "Fields",  "test-password-updated"),
+                new UserSeed(20004, "rchang",   "robert.chang@test.dsc.local",     "Robert",   "Chang",   "test-password-updated"),
+                new UserSeed(20005, "swright",  "sarah.wright@test.dsc.local",     "Sarah",    "Wright",  "test-password-updated"),
+                new UserSeed(20006, "pgarcia",  "patricia.garcia@test.dsc.local",  "Patricia", "Garcia",  "test-password-updated"),
+                new UserSeed(20007, "dkim",     "david.kim@test.dsc.local",        "David",    "Kim",     "test-password-updated")
             };
 
             foreach (var seed in userSeeds)
@@ -150,8 +158,15 @@ public record TestSeedResult(
             var userAuthSeeds = new[]
             {
                 new UserAuthSeed("rloisel1", 15298, "test-password-updated", true),
-                new UserAuthSeed("kduma", 15299, "test-password-updated", true),
-                new UserAuthSeed("mammeter", 99901, "test-password-updated", true)
+                new UserAuthSeed("kduma",    15299, "test-password-updated", true),
+                new UserAuthSeed("mammeter", 99901, "test-password-updated", true),
+                new UserAuthSeed("jbennett", 20001, "test-password-updated", true),
+                new UserAuthSeed("tclarke",  20002, "test-password-updated", true),
+                new UserAuthSeed("mfields",  20003, "test-password-updated", true),
+                new UserAuthSeed("rchang",   20004, "test-password-updated", true),
+                new UserAuthSeed("swright",  20005, "test-password-updated", true),
+                new UserAuthSeed("pgarcia",  20006, "test-password-updated", true),
+                new UserAuthSeed("dkim",     20007, "test-password-updated", true)
             };
 
             foreach (var seed in userAuthSeeds)
@@ -209,7 +224,13 @@ public record TestSeedResult(
                 new ProjectSeed("P1004", "Cloud Infrastructure", "Move on-premises workloads to AWS", 150.0m),
                 new ProjectSeed("P1005", "Security Hardening", "Implement security best practices", 90.0m),
                 new ProjectSeed("P2001", "API Gateway Implementation", "Build unified API gateway for microservices", 160.0m),
-                new ProjectSeed("P2002", "Analytics Platform", "Implement real-time analytics dashboard", 140.0m)
+                new ProjectSeed("P2002", "Analytics Platform", "Implement real-time analytics dashboard", 140.0m),
+                // SW / Telecom projects — variance reporting test scenarios
+                new ProjectSeed("P3001", "OSS Billing Integration",        "Integrate OSS platform with production billing system",             180.0m),
+                new ProjectSeed("P3002", "Network Monitoring Dashboard",   "Build unified real-time network monitoring and alerting dashboard", 140.0m),
+                new ProjectSeed("P3003", "Telecom Infrastructure Upgrade", "Fibre network expansion into new service areas",                    220.0m),
+                new ProjectSeed("P3004", "Customer Portal Migration",      "Migrate customer self-serve portal to modern stack",               160.0m),
+                new ProjectSeed("P3005", "VoIP Platform Modernization",    "Upgrade legacy VoIP infrastructure to cloud-based solution",       200.0m)
             };
 
             foreach (var seed in projectSeeds)
@@ -319,34 +340,51 @@ public record TestSeedResult(
             await _db.SaveChangesAsync(ct);
 
             // Assign roles to users
-            var adminRole = await _db.Roles.FirstOrDefaultAsync(r => r.Name == "Admin", ct);
-            var managerRole = await _db.Roles.FirstOrDefaultAsync(r => r.Name == "Manager", ct);
-            var userRole = await _db.Roles.FirstOrDefaultAsync(r => r.Name == "User", ct);
+            // AI-assisted: directorRole lookup and multi-username assignment loops;
+            // reviewed and directed by Ryan Loiselle.
+            var adminRole   = await _db.Roles.FirstOrDefaultAsync(r => r.Name == "Admin",    ct);
+            var managerRole = await _db.Roles.FirstOrDefaultAsync(r => r.Name == "Manager",  ct);
+            var directorRole = await _db.Roles.FirstOrDefaultAsync(r => r.Name == "Director", ct);
+            var userRole    = await _db.Roles.FirstOrDefaultAsync(r => r.Name == "User",     ct);
 
+            // Admin: rloisel1
             if (adminRole != null)
             {
                 var adminUser = await _db.Users.FirstOrDefaultAsync(u => u.Username == "rloisel1", ct);
                 if (adminUser != null && adminUser.RoleId == null)
-                {
                     adminUser.RoleId = adminRole.Id;
-                }
             }
 
+            // Managers: dmcgregor (original), mfields, rchang
             if (managerRole != null)
             {
-                var managerUser = await _db.Users.FirstOrDefaultAsync(u => u.Username == "dmcgregor", ct);
-                if (managerUser != null && managerUser.RoleId == null)
+                foreach (var mgUsername in new[] { "dmcgregor", "mfields", "rchang" })
                 {
-                    managerUser.RoleId = managerRole.Id;
+                    var mgUser = await _db.Users.FirstOrDefaultAsync(u => u.Username == mgUsername, ct);
+                    if (mgUser != null && mgUser.RoleId == null)
+                        mgUser.RoleId = managerRole.Id;
                 }
             }
 
+            // Directors: jbennett (Joan Bennett), tclarke (Thomas Clarke)
+            if (directorRole != null)
+            {
+                foreach (var dirUsername in new[] { "jbennett", "tclarke" })
+                {
+                    var dirUser = await _db.Users.FirstOrDefaultAsync(u => u.Username == dirUsername, ct);
+                    if (dirUser != null && dirUser.RoleId == null)
+                        dirUser.RoleId = directorRole.Id;
+                }
+            }
+
+            // User role: all remaining (excludes all explicitly-assigned usernames above)
+            var namedRoleUsernames = new List<string> { "rloisel1", "dmcgregor", "mfields", "rchang", "jbennett", "tclarke" };
             if (userRole != null)
             {
                 var regularUsers = await _db.Users
-                    .Where(u => u.RoleId == null && u.Username != "rloisel1" && u.Username != "dmcgregor")
+                    .Where(u => u.RoleId == null && !namedRoleUsernames.Contains(u.Username))
                     .ToListAsync(ct);
-                
+
                 foreach (var user in regularUsers)
                 {
                     user.RoleId = userRole.Id;
@@ -1005,6 +1043,130 @@ public record TestSeedResult(
                                 workItemsCreated++;
                             }
                         }
+                    }
+                }
+
+                // ── SW / TELECOM PROJECT WORK ITEMS ──────────────────────────────────────────
+                // AI-assisted: 36 variance work items for P3001–P3005 for reporting test data;
+                // reviewed and directed by Ryan Loiselle.
+                var swProjNos = new[] { "P3001", "P3002", "P3003", "P3004", "P3005" };
+                var swProjects = await _db.Projects
+                    .Where(p => swProjNos.Contains(p.ProjectNo))
+                    .ToListAsync(ct);
+
+                var swUsernameList = new[] { "jbennett", "tclarke", "mfields", "rchang", "swright", "pgarcia", "dkim", "kduma", "mammeter" };
+                var swUsers = await _db.Users
+                    .Where(u => swUsernameList.Contains(u.Username))
+                    .ToListAsync(ct);
+
+                var varWorkItemSeeds = new (string Username, string ProjectNo, string Title, string Description, string ActivityCode, double PlannedHours, int ActualHours, int DaysAgo)[]
+                {
+                    // P3001 — OSS Billing Integration
+                    ("jbennett", "P3001", "Requirements Analysis",      "Gather and document billing integration requirements",     "DOC",   16.0, 20, 18),
+                    ("tclarke",  "P3001", "Integration Design",          "Design OSS-billing API integration architecture",          "ARCH",  24.0, 18, 16),
+                    ("mfields",  "P3001", "Project Sprint Planning",     "Sprint planning and backlog grooming",                     "MEET",   4.0,  4, 14),
+                    ("swright",  "P3001", "API Development",             "Implement billing integration REST endpoints",             "DEV",   40.0, 48, 10),
+                    ("rchang",   "P3001", "Code Review - Billing",       "Peer review of billing API implementation",                "REV",    8.0,  6,  8),
+                    ("pgarcia",  "P3001", "Integration Testing",         "End-to-end testing of OSS billing integration",           "TEST",  20.0, 24,  5),
+                    ("dkim",     "P3001", "API Documentation",           "Document billing integration endpoints and contracts",     "DOC",    8.0,  8,  3),
+                    // P3002 — Network Monitoring Dashboard
+                    ("tclarke",  "P3002", "Dashboard Architecture",      "Design monitoring dashboard component architecture",       "ARCH",  12.0, 10, 20),
+                    ("mfields",  "P3002", "Stakeholder Alignment",       "Align dashboard requirements with operations team",        "MEET",   6.0,  8, 18),
+                    ("swright",  "P3002", "Frontend Development",        "Build React dashboard components and charts",              "DEV",   32.0, 28, 12),
+                    ("jbennett", "P3002", "Director Review - Dashboard", "Executive review and sign-off on dashboard scope",         "MEET",   4.0,  6,  9),
+                    ("dkim",     "P3002", "Backend API - Monitoring",    "Develop network data aggregation API",                     "DEV",   24.0, 30,  7),
+                    ("pgarcia",  "P3002", "Dashboard QA Testing",        "Functional and performance testing of dashboard",          "TEST",  16.0, 12,  4),
+                    // P3003 — Telecom Infrastructure Upgrade
+                    ("jbennett", "P3003", "Vendor Evaluation",           "Evaluate and select network equipment vendors",            "DOC",   20.0, 24, 22),
+                    ("rchang",   "P3003", "Site Survey - North Zone",    "Physical site survey for fibre route planning",            "ADMIN", 32.0, 28, 19),
+                    ("swright",  "P3003", "Network Design",              "Design expanded fibre network topology",                   "ARCH",  40.0, 50, 14),
+                    ("tclarke",  "P3003", "Risk Assessment",             "Identify and document upgrade risks and mitigations",      "DOC",   12.0, 10, 11),
+                    ("pgarcia",  "P3003", "Installation Oversight",      "Coordinate vendor installation activities",                "ADMIN", 24.0, 20,  8),
+                    ("dkim",     "P3003", "Config & Commissioning",      "Configure and commission upgraded network segments",       "DEV",   30.0, 36,  4),
+                    // P3004 — Customer Portal Migration
+                    ("mfields",  "P3004", "Migration Project Plan",      "Detailed migration schedule and resource plan",            "DOC",    8.0,  8, 16),
+                    ("swright",  "P3004", "Frontend Migration",          "Re-implement portal UI in React",                         "DEV",   48.0, 56, 10),
+                    ("dkim",     "P3004", "Backend Service Migration",   "Migrate portal backend services to .NET",                  "DEV",   40.0, 36,  8),
+                    ("rchang",   "P3004", "Database Migration",          "Migrate customer data to new schema",                      "DEV",   24.0, 30,  6),
+                    ("pgarcia",  "P3004", "UAT Coordination",            "Coordinate user acceptance testing sessions",              "TEST",  16.0, 12,  3),
+                    ("jbennett", "P3004", "Executive Briefing - Portal", "Migration progress briefing to executive team",            "MEET",   4.0,  4,  2),
+                    // P3005 — VoIP Platform Modernization
+                    ("tclarke",  "P3005", "Technical Specification",     "Author VoIP modernization technical spec",                 "DOC",   16.0, 20, 17),
+                    ("rchang",   "P3005", "Infrastructure Setup",        "Provision cloud VoIP infrastructure",                     "DEV",   40.0, 36, 13),
+                    ("swright",  "P3005", "VoIP Integration Dev",        "Develop SIP/RTP integration layer",                       "DEV",   40.0, 44,  9),
+                    ("mfields",  "P3005", "Change Management",           "Prepare staff communication and training plan",            "DOC",   12.0, 16,  6),
+                    ("dkim",     "P3005", "Performance Testing",         "Load and failover testing of VoIP platform",               "TEST",  24.0, 20,  3),
+                    ("pgarcia",  "P3005", "Training Materials",          "Develop end-user training guides",                        "DOC",   12.0, 12,  1),
+                    // Cross-project contributions by existing users (kduma, mammeter)
+                    ("kduma",    "P3001", "Cross-team API Support",      "Support OSS billing team with API questions",              "DEV",    8.0,  6, 12),
+                    ("mammeter", "P3001", "QA Strategy - Billing",       "Review billing integration test strategy",                 "TEST",   6.0,  8,  9),
+                    ("kduma",    "P3002", "Support Consultation",        "Advise on monitoring data export requirements",            "MEET",   6.0,  5,  7),
+                    ("mammeter", "P3003", "Quality Audit",               "Quality audit of infrastructure upgrade work",             "TEST",   8.0, 10,  5),
+                    ("kduma",    "P3004", "Legacy Data Analysis",        "Analyse legacy customer data for migration",               "DOC",   10.0, 12,  4),
+                };
+
+                if (capex != null)
+                {
+                    var defaultNetworkNum = networkNumbers.FirstOrDefault()?.Number.ToString() ?? "99";
+                    foreach (var seed in varWorkItemSeeds)
+                    {
+                        var wUser    = swUsers.FirstOrDefault(u => u.Username == seed.Username);
+                        var wProject = swProjects.FirstOrDefault(p => p.ProjectNo == seed.ProjectNo);
+                        if (wUser == null || wProject == null) continue;
+
+                        var exists = await _db.WorkItems.AnyAsync(
+                            w => w.UserId == wUser.Id && w.ProjectId == wProject.Id && w.Title == seed.Title, ct);
+                        if (exists) continue;
+
+                        _db.WorkItems.Add(new WorkItem
+                        {
+                            Id             = Guid.NewGuid(),
+                            UserId         = wUser.Id,
+                            ProjectId      = wProject.Id,
+                            BudgetId       = capex.Id,
+                            Title          = seed.Title,
+                            Description    = seed.Description,
+                            Date           = DateTime.UtcNow.AddDays(-seed.DaysAgo),
+                            ActivityType   = "Project",
+                            ActivityCode   = seed.ActivityCode,
+                            NetworkNumber  = defaultNetworkNum,
+                            PlannedDuration = TimeSpan.FromHours(seed.PlannedHours),
+                            ActualDuration  = seed.ActualHours
+                        });
+                        workItemsCreated++;
+                    }
+                }
+            } // end if (users.Any()...)
+
+            await _db.SaveChangesAsync(ct);
+
+            // Seed project assignments for User-role members on new SW/telecom projects
+            // (Director/Manager roles see all projects via role-based visibility; only User-role
+            // members need explicit assignments)
+            var newProjNos = new[] { "P3001", "P3002", "P3003", "P3004", "P3005" };
+            var newProjList = await _db.Projects
+                .Where(p => newProjNos.Contains(p.ProjectNo))
+                .ToListAsync(ct);
+            var userRoleNewMembers = await _db.Users
+                .Where(u => new[] { "swright", "pgarcia", "dkim", "kduma", "mammeter" }.Contains(u.Username))
+                .ToListAsync(ct);
+
+            foreach (var mu in userRoleNewMembers)
+            {
+                foreach (var np in newProjList)
+                {
+                    var assignmentExists = await _db.ProjectAssignments.AnyAsync(
+                        pa => pa.ProjectId == np.Id && pa.UserId == mu.Id, ct);
+                    if (!assignmentExists)
+                    {
+                        _db.ProjectAssignments.Add(new ProjectAssignment
+                        {
+                            ProjectId      = np.Id,
+                            UserId         = mu.Id,
+                            Role           = "Contributor",
+                            EstimatedHours = 40m
+                        });
+                        projectAssignmentsCreated++;
                     }
                 }
             }
