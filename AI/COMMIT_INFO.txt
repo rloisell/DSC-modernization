@@ -51,8 +51,12 @@ Other actions recorded in AI/CHANGES.csv
 
 ## Session D — 2026-02-22 (spec-kitty init + feature specs Todos #2-#9)
 - commit: 12ebe70 — branch: develop — "feat: initialize spec-kitty and add specs for Todos #2-#9"
+- commit: c9441dd — branch: develop — "chore: update AI tracking files for Session D + add .claudeignore"
+- PR #24: develop → main — CI pass (.NET Build + Frontend) — merged --admin
+- merge commit: 7197f63 — branch: main
 - 7 features spec'd: 002–008 (.kittify/, kitty-specs/, fixture files)
 - validate-tasks: 8 features, 0 mismatches
 - rl-project-template updated with spec-kitty guidance (Section 11 + copilot-instructions.md)
+
 
 - DSC Java repo: 20571f7 — master — same doc standard applied
