@@ -1,3 +1,93 @@
+## 2026-02-21 — Master Todo List + Git Strategy (`docs: add master todo and branching plan`)
+
+**Objective**: Consolidate all outstanding work into a single prioritized todo document with
+full implementation notes per item, a git branching strategy, and a 7-session execution plan.
+Also set up the `develop` integration branch so CI triggers work correctly.
+
+### Actions Taken
+
+- Appended `MASTER TODO — Prioritized Work Plan` section to `AI/nextSteps.md`
+- 25 items documented across 5 tiers:
+  - Tier 1 (Todos #1–#7): immediate application value (seed, expense parity, reports, Activity refactor, templates, weekly summary)
+  - Tier 2 (Todo #8): management reports with role gating
+  - Tier 3 (Todos #9–#15): security and compliance
+  - Tier 4 (Todos #16–#19): architecture quality
+  - Tier 5 (Todos #20–#25): future/lower-priority
+- Each Tier 1/2 item documented with exact files, steps, and data structures
+- Git branching strategy documented (develop → feature/* → PR → develop → main)
+- 7-session execution plan mapped (Session A–G)
+- Created `develop` branch from `main` and pushed to origin
+- Deleted 8 stale local feature branches (all abandoned / merged)
+- Applied branch protection on `main` via GitHub Settings (Todo #9 — human step)
+- Committed all AI tracking file changes
+
+### Files Changed
+
+| File | Action |
+|------|--------|
+| `AI/nextSteps.md` | Modified — appended master todo (250+ lines) |
+| `AI/CHANGES.csv` | Modified — added two tracking entries |
+| `AI/WORKLOG.md` | Modified — this entry |
+
+### Commits
+- `docs: add master todo, branching plan, and 7-session execution map` — main (pre-develop)
+- `develop` branch created from this commit and pushed to origin
+
+### Build / Test
+- No code changes. Documentation only.
+
+---
+
+## 2026-02-21 — Design Changes Capture: Session Review (`no-commit — documentation only`)
+
+**Objective**: Capture feedback from live application testing session comparing DSC-modernization
+against the legacy DSC application. Document all design gaps, analysis, and prioritized next
+steps for future implementation sessions. No code was written; all output is in `AI/nextSteps.md`.
+
+### Actions Taken
+
+- Reviewed `Activity.jsx` (739 lines) for budget display, form structure, and missing features
+- Reviewed `Reports.jsx` and `ReportsController.cs` for reporting coverage gaps
+- Reviewed legacy `Expense_Activity.java`, `activity.jsp`, and `DDL` to determine parity gaps
+- Reviewed `Administrator.jsx` tab pattern and BC Gov design system for Tabs component research
+- Reviewed `TestDataSeeder.cs` for current user/project/task coverage
+- Identified 7 design change areas, documented as P1–P7 with analysis and recommended changes
+
+### Design Changes Documented (AI/nextSteps.md §"Design Changes — Session Review 2026-02-21")
+
+| # | Item | Priority |
+|---|------|----------|
+| P1 | Activity page: tabbed layout (New Entry / History / Templates), hide budget field, project synopsis, frequent-task templates | 4th |
+| P2 | Expense category field parity — add `ExpenseCategoryId` to form, DTO, and `WorkItem` model | 2nd |
+| P3 | Personal task deviation report: per-task planned vs actual with colour coding | 3rd |
+| P4 | Expanded seed data: 7 new users (Director/Manager/User), 5 new projects, realistic task variance | 1st |
+| P5 | Management reports: project effort summary + activity area deviation (role-gated) | 6th |
+| P6 | Weekly summary page Phase 1 (standalone); Phase 2 Outlook; Phase 3 Jira | 7th/8th |
+| P7 | Reports page: tabbed layout using shared `TabBar` component | 5th |
+
+### Key Findings
+
+- BC Gov Design System does **not** ship a Tabs component; the custom pattern in
+  `Administrator.jsx` is the correct approach — extract to `TabBar.jsx` and reuse
+- Legacy `Expense_Activity` schema had only Director/Reason/CPC codes — no amount/receipt fields;
+  the modernized app already has parity on those 3 codes; missing piece is Expense Category
+- `PlannedDuration` and `ActualDuration` are collected on every `WorkItem` but not yet surfaced
+  in any report — a high-value low-effort addition
+- Current seed has only `User`-role accounts; Manager/Director roles are defined but untested
+
+### Files Changed
+
+| File | Action |
+|------|--------|
+| `AI/nextSteps.md` | Modified — appended P1–P7 design change sections (331 lines) |
+| `AI/CHANGES.csv` | Modified — added tracking entry |
+| `AI/WORKLOG.md` | Modified — this entry |
+
+### Build / Test
+- No code changes this session. Documentation only.
+
+---
+
 ## 2026-02 — Data Classification Correction + Documentation (`<commit-pending>`)
 
 **Objective**: Correct DataClass from "Medium" to confirmed "Low" across all DSC Helm

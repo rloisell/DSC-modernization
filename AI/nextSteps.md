@@ -2842,3 +2842,627 @@ mysql -h 127.0.0.1 -P 3306 -u dsc_local -pdsc_password dsc_dev < spec/fixtures/d
 If you'd like, I can try the Docker path now (will pull an image and start a container), create the `dsc_local` user, apply migrations, and seed the DB.
 
 
+
+
+---
+
+## 🗂️ Design Changes — Session Review 2026-02-21
+
+> Captured from a live comparison of DSC-modernization against the legacy DSC application and
+> original product intent. Items are **prioritized** — P1 is highest value / lowest complexity.
+> No code is written here; each section documents the gap, the analysis, and the exact changes
+> required in a future session.
+
+---
+
+### P1 — Activity Page: Tabbed Layout, Budget Display, and Frequent-Task Templates
+
+**Covers feedback items: 3, 4, 5, 7**
+
+#### Gap Analysis
+
+The Activity page (`Activity.jsx`) currently presents the new-entry form, a time-period selector,
+and a flat historical activity list with per-project remaining-hours summaries. As features grow
+the page scrolls extensively. Budget type (CAPEX / OPEX) is visible to the user in both the
+entry form and the history table, though it is a system-level classification the user does not
+need to see — it should be set automatically based on activity mode (project → CAPEX,
+expense → OPEX) and hidden from display.
+
+There is currently no Frequent Tasks feature anywhere in the application.
+There is no way to click a project in the history and get a synopsis of personal activity on it.
+
+#### BC Gov Design System — Tabs
+
+The BC Gov Design System React components package (`@bcgov/design-system-react-components`)
+**does not ship a native Tabs component** in the current version used by this project.
+The existing `Administrator.jsx` already implements a fully WCAG 2.1 AA-compliant custom tab bar
+using inline styles that match the BCDS colour palette (`#003366` active underline,
+`#595959` inactive text), with `role="tab"`, `aria-selected`, and `role="tabpanel"` markup.
+This pattern is visually indistinguishable from a design-system tab component and is the
+**correct approach** for BC Gov applications until a native Tabs component ships.
+
+#### Recommended Changes
+
+**A — Extract `TabBar` shared component**
+- Create `src/DSC.WebClient/src/components/TabBar.jsx`
+- Accepts `tabs` array (`{ id, label }`) and `activeTab` / `onChange` props
+- Mirror the `role="tab"` / `aria-selected` / `role="tabpanel"` markup from `Administrator.jsx`
+- Replace the inline tab markup in `Administrator.jsx` with `<TabBar />`
+
+**B — Restructure `Activity.jsx` with three tabs**
+
+| Tab | Label | Content |
+|-----|-------|---------|
+| 1 | New Entry | Existing project/expense activity form (budget field hidden — see C) |
+| 2 | History | Time-period selector + activity list + per-project remaining hours; clicking a project card expands a project synopsis panel |
+| 3 | Templates | Frequent-task template list + save-as-template from recent submissions |
+
+**C — Remove budget field display; auto-set from activity mode**
+- When `activityMode === 'project'`, automatically resolve the CAPEX budget ID and POST it
+- When `activityMode === 'expense'`, automatically resolve the OPEX budget ID
+- Remove the `BudgetId` select from the visible form
+- Remove `Budget Description` column from the history table
+
+**D — Project synopsis on History tab**
+- Clicking a project card opens a collapsible panel showing:
+  - Project name, project number, estimated hours
+  - Sum of user's `PlannedDuration` on that project
+  - Sum of user's `ActualDuration` on that project
+  - Deviation: `((actual − planned) / planned) × 100`
+  - Paginated list of the user's work items on that project (date, title, planned, actual)
+- API: add `/api/items/project/{id}/synopsis` returning the above aggregates for the calling user
+  (or extend the existing `/api/items/project/{id}/remaining-hours` endpoint)
+
+**E — Frequent Task Templates**
+- New data model: `WorkItemTemplate` table
+  - Columns: `Id` (Guid), `UserId` (Guid FK), `Title`, `ProjectId` (Guid? FK),
+    `ActivityCode`, `NetworkNumber`, `DirectorCode`, `ReasonCode`, `CpcCode`,
+    `PlannedDuration`, `ActivityType`
+  - Templates capture setup fields only — no start/end times or actual duration
+- New API endpoints:
+  - `GET /api/templates` — returns the calling user's templates
+  - `POST /api/templates` — creates a template
+  - `DELETE /api/templates/{id}` — removes a template
+- Frontend (Templates tab):
+  - List of saved templates with a **Use** button that pre-fills the New Entry form
+  - **Save as Template** button on the New Entry form
+  - Optional: **Quick Submit** button on each template — creates a work item for today and
+    prompts only for actual duration before submitting
+- EF Core migration required for the new `WorkItemTemplates` table
+
+---
+
+### P2 — Expense Activity: Expense Category Field Parity with Legacy
+
+**Covers feedback item: 6**
+
+#### Gap Analysis
+
+The legacy `activity.jsp` renders a **Category** dropdown for all activity types, drawn from the
+`categories` session attribute. Director Code, Reason Code, and CPC Code selects were shown
+additionally when Expense budget type was selected.
+
+In DSC-modernization:
+- Director Code, Reason Code, and CPC Code are already in `WorkItemDto` and rendered in
+  `Activity.jsx` expense mode — ✅ parity exists on all three code fields
+- The **Expense Category** select is absent from the expense form, even though `ExpenseCategory`
+  and `ExpenseOption` lookup tables are maintained in the Admin section (`AdminExpense.jsx`)
+  and exposed by the catalog API
+
+The legacy `Expense_Activity` table contained only the three FK code columns (director, reason,
+CPC). There are no `amount`, `quantity`, or `receipt` columns in the legacy schema.
+The category was stored as a FK on the base `Activity` table, not in `Expense_Activity`.
+The modernized schema should mirror this by linking `ExpenseCategoryId` on `WorkItem`.
+
+#### Recommended Changes
+
+**A — Add Expense Category to the expense-mode form in `Activity.jsx`**
+- Load `expenseCategories` from `/api/catalog/expense-categories`
+- When `activityMode === 'expense'`, render a required `<Select>` for Expense Category
+- Include `expenseCategoryId` in the POST payload
+
+**B — Add `ExpenseCategoryId` to DTOs and service layer**
+- Add `Guid? ExpenseCategoryId` to `WorkItemCreateRequest`, `WorkItemDto`, `WorkItemDetailDto`
+- Update `WorkItemService` to persist and project the field
+- Add `ExpenseCategoryName` string to `WorkItemDetailDto` for display in history
+
+**C — Add `ExpenseCategoryId` FK to `WorkItem` EF Core model**
+- Add navigation property `ExpenseCategory? ExpenseCategory` and FK column
+- Generate and apply EF Core migration
+
+**D — Verify Expense Option parity**
+- Run the legacy app at `http://localhost:8080/DSC/jsp/activity.jsp` and select Expense radio
+  to confirm whether an `ExpenseOption` sub-select appears
+- If yes, add a cascading `<Select>` for `ExpenseOptionId` that filters on selected category;
+  add `ExpenseOptionId` FK to `WorkItem` model with a corresponding migration
+
+---
+
+### P3 — Personal Reporting: Per-Task Planned vs Actual Deviation
+
+**Covers feedback item: 1 (personal reporting layer)**
+
+#### Gap Analysis
+
+The Reports page shows per-project totals; there is no per-task view. A user cannot see that
+their "Software Update" task was planned at 12 hours but took 72. The data is collected
+(`PlannedDuration`, `ActualDuration` on every `WorkItem`) but never surfaced in a report.
+
+#### Recommended Changes
+
+**A — Task Deviation section on Reports page (Tab 2 — see P7)**
+- Table columns: Date, Project, Task Title, Planned (hrs), Actual (hrs), Deviation (hrs),
+  Deviation (%)
+- Row colour coding: green ≤ 10% over; amber 11–50% over; red > 50% over; blue = under-run
+- Filterable by project and time period using existing filter controls
+
+**B — New API endpoint**
+- `GET /api/reports/task-deviation` with `?from=&to=&projectId=&userId=` params
+- Returns `TaskDeviationDto[]`: `{ workItemId, title, projectId, projectName, date,
+  plannedDurationHours, actualDurationHours, deviationHours, deviationPercent }`
+- `User` role sees only personal data; `Manager` / `Director` / `Admin` may pass `userId`
+
+**C — New `TaskDeviationDto` in `ReportDtos.cs` and new action in `ReportsController`**
+
+---
+
+### P4 — Expanded Seed Data: Realistic Teams for Software Dev and Telecom Infra Projects
+
+**Covers feedback item: 1 (seed data / team structure)**
+
+#### Gap Analysis
+
+Current seed has 4 users (all effectively `User` role), 7 projects, 4 departments.
+This is not enough to test Manager/Director report gating or cross-user deviation analysis.
+
+#### Recommended Changes
+
+**A — Add users with Manager and Director roles**
+
+| Username | Name | Role | Department |
+|----------|------|------|------------|
+| `jmurphy` | Julie Murphy | Director | Engineering |
+| `tbrown` | Tom Brown | Manager | Engineering |
+| `slee` | Sandra Lee | Manager | OSS Operations |
+| `aproctor` | Alex Proctor | User | Engineering |
+| `cmontoya` | Carlos Montoya | User | Engineering |
+| `nsingh` | Navdeep Singh | User | OSS Operations |
+| `echen` | Emily Chen | User | Quality Assurance |
+
+All passwords: `test-password-updated`.
+Add `UserRole` records: `jmurphy` → Director; `tbrown` / `slee` → Manager.
+
+**B — Add software development and telecom infrastructure projects**
+
+| Project No | Name | Estimated Hours |
+|-----------|------|-----------------|
+| P3001 | DSC System Modernization | 1200.0 |
+| P3002 | OSS Mediation Platform Upgrade | 800.0 |
+| P3003 | Network Automation (NETCONF/YANG) | 400.0 |
+| P3004 | BSS Integration Layer | 600.0 |
+| P3005 | Customer Portal Rewrite | 500.0 |
+
+**C — Work items with intentional planned vs actual variance**
+
+Seed 6–10 work items per assigned user per project to exercise the deviation report:
+
+| Task type | Planned | Actual | Rationale |
+|-----------|---------|--------|-----------|
+| Requirements gathering | 8 h | 10 h | Minor overrun |
+| Architecture / design | 16 h | 24 h | Moderate scope creep |
+| Core implementation sprint | 80 h | 120 h | Significant under-estimate |
+| Infrastructure provisioning | 12 h | 72 h | Severe overrun (mirrors the SW-update example) |
+| Testing / QC | 24 h | 18 h | Under-run — exercises green/blue coding |
+| Documentation | 8 h | 6 h | Slight under-run |
+
+Ensure activity codes `DSGN`, `DEV`, `TST`, `OPS`, `DOC`, `MGMT`, `INFRA` are seeded.
+
+**D — Add `ProjectAssignment` records for all new users (2–3 projects each)**
+
+---
+
+### P5 — Management Reports: Project Estimate vs Actual Effort + Activity Deviation by Role
+
+**Covers feedback item: 1 (management / director layer)**
+
+**Depends on P3 and P4.**
+
+#### Gap Analysis
+
+Manager and Director roles see no views beyond what a User sees. There is no report answering:
+"For P3002, how does total team actual effort compare to the project estimate, and which activity
+areas had the worst deviation from plan?"
+
+#### Recommended Changes
+
+**A — Role-gated management report section**
+- Show client-side only when `user.role` (from `AuthContext`) is `Manager`, `Director`, or `Admin`
+- Server-side: decorate new endpoints with `[Authorize(Roles = "Admin,Manager,Director")]`
+- Verify that `AuthController.cs` includes the `role` claim in the issued token; add it if not
+
+**B — Project Effort Summary report**
+- Table: Project No, Name, Estimated Hours, Total Planned (all users), Total Actual (all users),
+  Estimate vs Actual %, Planned vs Actual %
+- Filters: date range, project, user (Manager scoped to team; Director sees all)
+
+**C — Activity Area Deviation report**
+- Groups work items by `ActivityCode` within a project
+- Columns: Activity Code, Description, Total Planned hrs, Total Actual hrs, Deviation hrs, %
+- Highlights the top 3 most-deviated codes in amber/red
+- Example insight: "INFRA tasks in P3002 ran 500% over plan"
+
+**D — New API endpoints**
+- `GET /api/reports/project-effort-summary` — Admin/Manager/Director only; returns new DTO
+- `GET /api/reports/activity-area-deviation` — Admin/Manager/Director only; returns new DTO
+- Both accept `?from=&to=&projectId=` and return DTOs to be added to `ReportDtos.cs`
+
+---
+
+### P6 — Weekly Summary: Standalone Feature (with Future Integration Hooks)
+
+**Covers feedback item: 2**
+
+#### Gap Analysis
+
+The original DSC intent included a personal weekly summary — a consolidated view of work logged
+this week plus what is upcoming. This was never built in the modernization. Outlook and Jira
+integrations introduce OAuth complexity; ship Phase 1 standalone first.
+
+#### Recommended Changes
+
+**Phase 1 — Standalone weekly summary page (implement next)**
+- New route `/weekly` and page `src/DSC.WebClient/src/pages/WeeklySummary.jsx`
+- Sections:
+  - **This Week's Activities** — date, project, task, planned, actual
+    (`/api/items?timePeriod=week` — no new endpoint required)
+  - **Project Progress** — progress bars: % of estimated hours consumed per active project
+  - **Outstanding Tasks** — static placeholder "No task integrations connected"
+- Add **Weekly Summary** to the navigation sidebar
+
+**Phase 2 — Microsoft Graph / Outlook integration (future)**
+- Register app in Azure AD (OAuth 2.0 authorization code + PKCE)
+- Fetch `GET /me/calendarview` for current week via MSAL.js (client-side, no server tokens)
+- BC Gov constraint: confirm with Platform Services that external OAuth consent is allowed
+  for tenant users before implementing
+
+**Phase 3 — Jira integration (future)**
+- Jira Cloud REST API v3 with OAuth 2.0 (3LO) or per-user API token
+- Fetch assigned issues: `GET /rest/api/3/search?jql=assignee=currentUser()`
+- New `UserIntegration` table: `{ Id, UserId, Provider (enum), BaseUrl, TokenEncrypted }`
+- Tokens encrypted at rest with ASP.NET Data Protection API — never store plaintext
+- EF Core migration required
+
+---
+
+### P7 — Reports Page: Tabbed Layout
+
+**Covers feedback item: 4 (Reports page scrolling)**
+
+#### Recommended Changes
+
+- Refactor `Reports.jsx` to use `<TabBar />` once P1-A is complete
+
+  | Tab | Visible To | Content |
+  |-----|-----------|---------|
+  | My Summary | All users | Per-project totals, remaining hours (current content) |
+  | Task Deviation | All users | P3 per-task planned vs actual table |
+  | Team Reports | Manager / Director / Admin | P5 project effort + activity area deviation |
+
+- **Team Reports** tab renders a "Insufficient permissions" notice for `User` role;
+  API calls still return 403 as a second defence layer
+
+---
+
+### Prioritized Work Order
+
+| Priority | Item | Effort | Value | Dependencies |
+|---------|------|--------|-------|--------------|
+| **1** | P4 — Expanded seed data (users, projects, tasks with variance) | Low | High | — |
+| **2** | P2 — Expense category field parity | Low | Medium | — |
+| **3** | P3 — Personal task deviation report | Low | High | P4 (for rich test data) |
+| **4** | P1 — Activity page: tabs, budget cleanup, project synopsis, templates | Medium | High | — |
+| **5** | P7 — Reports page tabbed layout | Low | Medium | P3 |
+| **6** | P5 — Management reports (project effort + activity area deviation) | Medium | High | P3, P4 |
+| **7** | P6 Phase 1 — Weekly summary standalone page | Low | Medium | — |
+| **8** | P6 Phase 2/3 — Outlook / Jira integrations | High | Medium | P6 Phase 1 |
+
+> Seed data first so every subsequent feature has realistic variance data to validate against.
+> Expense parity (P2) and personal deviation (P3) are low-effort wins before the larger Activity
+> refactor (P1). Weekly summary Phase 1 can be parallelized with any other item.
+
+---
+
+*Captured: 2026-02-21 — source: live application testing session with Ryan Loiselle.*
+
+---
+
+## 📋 MASTER TODO — Prioritized Work Plan (2026-02-21)
+
+> Single source of truth for all remaining work. Updated this session to incorporate the
+> session-review design changes (P1–P8 above). Items are ordered by execution priority;
+> each tier should be completed before beginning the next unless marked as parallelizable.
+
+---
+
+### Git Branching Strategy
+
+All feature work flows through a `develop` integration branch. **This is pre-work — set up
+before the next coding session.**
+
+```
+main          ← production-ready; protected; PRs only from develop
+  └─ develop  ← integration branch; CI runs on every push
+        ├─ feature/seed-data-expansion        (Todo #1)
+        ├─ feature/expense-category-parity    (Todo #2)
+        ├─ feature/task-deviation-report      (Todo #3)
+        ├─ feature/activity-page-refactor     (Todo #4 + #6)
+        ├─ feature/reports-tabs               (Todo #5)
+        ├─ feature/weekly-summary             (Todo #7)
+        └─ feature/management-reports         (Todo #8)
+```
+
+**Pre-session git setup (do once, now):**
+```bash
+# Create develop from current main
+git checkout main && git pull
+git checkout -b develop
+git push -u origin develop
+
+# Clean up stale local feature branches (all were merged or abandoned)
+git branch -d feature/activity-calendar-models feature/activity-type-split   feature/cpc-code-model feature/department-user-model   feature/director-code-model feature/reason-code-model   feature/union-model hardening-security
+```
+
+**Per-session workflow:**
+```bash
+git checkout develop && git pull
+git checkout -b feature/<name>
+# ... do work, commit incrementally ...
+git push -u origin feature/<name>
+# Open PR → develop in GitHub; Copilot code review runs automatically
+# After merge, delete branch: git branch -d feature/<name>
+```
+
+**Why do this now vs just-in-time?**
+The `build-and-test.yml` CI workflow already triggers on `develop` (it was wired up in
+commit `ca9d5be`). Without the branch existing, those CI triggers never fire. Setting up
+`develop` in advance means every feature PR gets CI validation automatically — zero extra
+effort per session. Branch protection rules for `main` (Todo #9) should be applied
+immediately after `develop` is pushed.
+
+---
+
+### 🟥 Tier 1 — Immediate Application Value (Next 2–3 Sessions)
+
+| # | Item | Effort | Parallelizable | Branch Name |
+|---|------|--------|----------------|-------------|
+| **1** | [Seed data expansion](#todo-1) — 7 new users (Director/Manager/User), 5 SW/telecom projects, work items with realistic planned vs actual variance | **Low** | ✅ Yes — do first as it unblocks testing for everything below | `feature/seed-data-expansion` |
+| **2** | [Expense category parity](#todo-2) — add Expense Category `<Select>` to expense form; `ExpenseCategoryId` FK on `WorkItem` + EF migration | **Low** | ✅ Yes — independent of all other items | `feature/expense-category-parity` |
+| **3** | [Personal task deviation report](#todo-3) — `GET /api/reports/task-deviation`; deviation tab on Reports page with colour-coded rows | **Low** | ✅ After #1 | `feature/task-deviation-report` |
+| **4** | [Activity page refactor](#todo-4) — extract `TabBar` component; 3 tabs (New Entry / History / Templates); auto-set + hide budget; project synopsis | **Medium** | ✅ After #1 for meaningful testing | `feature/activity-page-refactor` |
+| **5** | [Reports page tabbed layout](#todo-5) — My Summary / Task Deviation / Team Reports using shared `TabBar` | **Low** | ✅ After #3 and #4 (`TabBar` available) | `feature/reports-tabs` |
+| **6** | [Frequent task templates](#todo-6) — `WorkItemTemplate` table + migration; `GET/POST/DELETE /api/templates`; Templates tab on Activity page | **Medium** | Bundled with #4 (same branch) | (part of #4 branch) |
+| **7** | [Weekly summary Phase 1](#todo-7) — `/weekly` route, `WeeklySummary.jsx`, this-week activities + project progress bars; nav link | **Low** | ✅ Fully independent — can be done any session | `feature/weekly-summary` |
+
+---
+
+#### Todo #1 — Seed Data Expansion
+**File:** `src/DSC.Api/Seeding/TestDataSeeder.cs`
+
+Add to `TestDataSeeder.cs`:
+- **Users** (with `UserAuth` and `UserRole` records):
+  - `jmurphy` / Julie Murphy → Director role
+  - `tbrown` / Tom Brown → Manager role
+  - `slee` / Sandra Lee → Manager role
+  - `aproctor` / Alex Proctor → User role
+  - `cmontoya` / Carlos Montoya → User role
+  - `nsingh` / Navdeep Singh → User role
+  - `echen` / Emily Chen → User role
+  - All passwords: `test-password-updated`
+- **Departments:** add `Quality Assurance` if not present; assign new users appropriately
+- **Projects** (add to `projectSeeds` array):
+  - `P3001` — DSC System Modernization — 1200.0 h
+  - `P3002` — OSS Mediation Platform Upgrade — 800.0 h
+  - `P3003` — Network Automation (NETCONF/YANG) — 400.0 h
+  - `P3004` — BSS Integration Layer — 600.0 h
+  - `P3005` — Customer Portal Rewrite — 500.0 h
+- **Activity codes** (add if not already seeded): `DSGN`, `DEV`, `TST`, `OPS`, `DOC`, `MGMT`, `INFRA`
+- **Work items** per project per user with intentional variance:
+
+  | Task Type | Planned (min) | Actual (min) | Activity Code |
+  |-----------|-------------|-------------|---------------|
+  | Requirements gathering | 480 | 600 | DSGN |
+  | Architecture / design | 960 | 1440 | DSGN |
+  | Core implementation | 4800 | 7200 | DEV |
+  | Infrastructure provisioning | 720 | 4320 | INFRA |
+  | Testing / QC | 1440 | 1080 | TST |
+  | Documentation | 480 | 360 | DOC |
+
+- **ProjectAssignment** records: assign each new user to 2–3 projects
+
+---
+
+#### Todo #2 — Expense Category Parity
+**Files:** `WorkItem.cs` (model), `WorkItemDto.cs`, `WorkItemService.cs`, `Activity.jsx`, migration
+
+1. Add `Guid? ExpenseCategoryId` + `ExpenseCategory? ExpenseCategory` navigation to `WorkItem`
+2. Generate EF Core migration: `dotnet ef migrations add AddExpenseCategoryToWorkItem`
+3. Add `ExpenseCategoryId` and `ExpenseCategoryName` to `WorkItemCreateRequest`, `WorkItemDto`, `WorkItemDetailDto`
+4. Update `WorkItemService` — persist on create, project in queries
+5. In `Activity.jsx`: load `expenseCategories` from `/api/catalog/expense-categories`; render required `<Select>` when `activityMode === 'expense'`
+6. Verify whether `ExpenseOptionId` was selectable in legacy app (run `http://localhost:8080/DSC/jsp/activity.jsp`); add cascading select if yes
+
+---
+
+#### Todo #3 — Personal Task Deviation Report
+**Files:** `ReportDtos.cs`, `IReportService.cs`, `ReportService.cs`, `ReportsController.cs`, `Reports.jsx`
+
+1. Add `TaskDeviationDto` record to `ReportDtos.cs`: `{ WorkItemId, Title, ProjectId, ProjectName, Date, PlannedDurationHours, ActualDurationHours, DeviationHours, DeviationPercent }`
+2. Add `GetTaskDeviationAsync(DateTime? from, DateTime? to, Guid? projectId, Guid? callerId)` to `IReportService`
+3. Implement in `ReportService` — LINQ over `WorkItems`, compute deviation, honour caller identity (User sees own; Manager/Director may pass `userId`)
+4. Add `GET /api/reports/task-deviation` action to `ReportsController`
+5. In `Reports.jsx`: add deviation table with colour-coded rows (see P7 for tab integration)
+
+---
+
+#### Todo #4 + #6 — Activity Page Refactor + Frequent Task Templates
+**Files:** New `TabBar.jsx`, `Activity.jsx`, new `WorkItemTemplate` model + migration, new `TemplatesController.cs` (or endpoint on `ItemsController`), new `TemplateService.cs`
+
+**Part A — Shared `TabBar` component** (do first — also used by #5)
+- Create `src/DSC.WebClient/src/components/TabBar.jsx`
+- Props: `tabs: { id, label }[]`, `activeTab: string`, `onChange: (id) => void`
+- Copy ARIA markup from `Administrator.jsx`; extract inline styles to props or CSS module
+- Replace tab markup in `Administrator.jsx` with `<TabBar />`
+
+**Part B — Restructure `Activity.jsx`**
+- Wrap page content in 3-tab structure: New Entry | History | Templates
+- New Entry tab: existing form minus the Budget `<Select>`; auto-resolve budget ID from `activityMode`
+- History tab: existing time-period selector + activity list; add clickable project synopsis panel
+- Templates tab: see Part D
+
+**Part C — Budget auto-set**
+- On page load, find CAPEX and OPEX budget IDs from the `budgets` catalog (already loaded)
+- When `activityMode === 'project'`, silently set `budgetId = capexId`
+- When `activityMode === 'expense'`, silently set `budgetId = opexId`
+- Remove `BudgetId` from the visible form; remove `Budget Description` column from history table
+
+**Part D — `WorkItemTemplate` data model and Templates tab**
+- Model: `WorkItemTemplate { Id, UserId, Title, ProjectId?, ActivityCode, NetworkNumber, DirectorCode, ReasonCode, CpcCode, PlannedDuration, ActivityType }`
+- EF migration: `dotnet ef migrations add AddWorkItemTemplates`
+- API: `GET /api/templates`, `POST /api/templates`, `DELETE /api/templates/{id}` (all scoped to calling user)
+- Templates tab: list with **Use** (pre-fills New Entry form) and **Delete** buttons; **Save as Template** button on New Entry form after successful submission
+
+**Part E — Project synopsis panel (History tab)**
+- Add API endpoint `GET /api/items/project/{id}/synopsis` returning:
+  `{ projectId, projectNo, projectName, estimatedHours, totalPlannedHours, totalActualHours, deviationPercent, workItems: WorkItemDetailDto[] }`
+- In History tab: clicking a project summary card expands/collapses the synopsis panel
+
+---
+
+#### Todo #5 — Reports Page Tabbed Layout
+**File:** `Reports.jsx`
+
+- Import `<TabBar />` from `../components/TabBar`
+- Tabs: My Summary | Task Deviation | Team Reports
+- My Summary tab: existing report content (project totals, activity breakdowns)
+- Task Deviation tab: deviation table from Todo #3
+- Team Reports tab: renders only when `user.role` is `Manager`, `Director`, or `Admin`; shows "Insufficient permissions" placeholder for User role; full content added in Todo #8
+
+---
+
+#### Todo #7 — Weekly Summary (Phase 1 Standalone)
+**Files:** New `WeeklySummary.jsx`, `App.jsx` (route), sidebar nav component
+
+1. Create `src/DSC.WebClient/src/pages/WeeklySummary.jsx`
+2. Sections:
+   - **This Week's Activities** — fetch `/api/items?timePeriod=week`; table of date, project, task, planned, actual
+   - **Project Progress** — for each project in week's activities, show a progress bar: `(totalActualHours / estimatedHours) × 100`
+   - **Outstanding Tasks** — static placeholder "No task integration connected"
+3. Add route `/weekly` in `App.jsx`
+4. Add **Weekly Summary** link in sidebar/nav
+
+---
+
+### 🟧 Tier 2 — Management Features (After Tier 1 Complete)
+
+| # | Item | Effort | Depends On |
+|---|------|--------|------------|
+| **8** | [Management reports](#todo-8) — project effort summary (estimate vs actual all-team); activity area deviation; role-gated to Manager/Director/Admin | **Medium** | #1, #3 |
+
+---
+
+#### Todo #8 — Management Reports
+**Files:** `ReportDtos.cs`, `IReportService.cs`, `ReportService.cs`, `ReportsController.cs`, `Reports.jsx` (Team Reports tab)
+
+1. Verify role claims — check `AuthController.cs` issues a `role` claim in the token; add it if missing
+2. Add `ProjectEffortSummaryDto`: `{ ProjectId, ProjectNo, ProjectName, EstimatedHours, TotalPlannedHours, TotalActualHours, EstimateVsActualPct, PlannedVsActualPct }`
+3. Add `ActivityAreaDeviationDto`: `{ ActivityCode, ActivityDescription, TotalPlannedHours, TotalActualHours, DeviationHours, DeviationPct }`
+4. Implement `GetProjectEffortSummaryAsync` and `GetActivityAreaDeviationAsync` in `ReportService` — aggregate across all users, scoped by Manager's team or Director's full view
+5. Add `GET /api/reports/project-effort-summary` and `GET /api/reports/activity-area-deviation` to `ReportsController` with `[Authorize(Roles = "Admin,Manager,Director")]`
+6. Populate the Team Reports tab in `Reports.jsx` (wired up as placeholder in Todo #5)
+
+---
+
+### 🟨 Tier 3 — Security & Compliance (Interleaved — Low Effort Items First)
+
+| # | Item | Effort | Notes |
+|---|------|--------|-------|
+| **9** | Branch protection — require PR review on `main`; set `develop` as default merge target | **Trivial** | GitHub Settings UI; do immediately after `develop` is pushed |
+| **10** | Audit log table — `AuditLog` entity + EF migration + `SaveChangesInterceptor` | **Low** | Add as a standalone feature branch |
+| **11** | HTTPS enforcement — `UseHttpsRedirection()` + HSTS in `Program.cs` | **Low** | One-line; bundle into any feature branch |
+| **12** | `UserAuth` password migration — replace SHA-256 with `IPasswordHasher<User>` | **Low–Med** | Required before production |
+| **13** | OWASP Dependency Check — GitHub Actions workflow | **Medium** | Slow first run (~15 min NVD download); add as chore PR |
+| **14** | OWASP ZAP DAST scan — nightly scheduled scan against `be808f-dev` | **Medium** | Requires deployed app URL; schedule after first deployment |
+| **15** | JWT / OIDC migration (Keycloak) — replace `X-User-Id` with bearer tokens | **High** | See `AI/securityNextSteps.md`; most critical long-term security item |
+
+---
+
+### 🟦 Tier 4 — Architecture Quality (Ongoing Hygiene)
+
+| # | Item | Effort | Notes |
+|---|------|--------|-------|
+| **16** | Verify `VITE_API_URL` / `window.__env__` consistency — no hardcoded `localhost` in service files | **Low** | Quick audit; bundle into any PR |
+| **17** | Structured logging (Serilog) — JSON console sink + rolling file | **Low–Med** | Required for BC Gov log aggregation |
+| **18** | Standardise API response shape — `{ items, totalCount }` envelope for lists | **Medium** | Breaking change; coordinate with frontend |
+| **19** | Migrate frontend to TypeScript — `.jsx` → `.tsx`; generate types from OpenAPI spec | **High** | Long-term; start with service files |
+
+---
+
+### 🔲 Tier 5 — Future / Lower Priority
+
+| # | Item | Effort | Notes |
+|---|------|--------|-------|
+| **20** | Weekly summary Phase 2 — Outlook calendar (MSAL.js OAuth) | **High** | Confirm BC Gov tenant OAuth consent policy first |
+| **21** | Weekly summary Phase 3 — Jira integration (OAuth 2.0; `UserIntegration` table; encrypted tokens) | **High** | Depends on #20 |
+| **22** | Trend charts — burn-down / hours-over-time in reporting dashboard | **Medium** | Needs chart library decision (recharts / visx) |
+| **23** | Email notifications — on project assignment or deactivation | **Medium** | Requires SMTP / MS Graph mail config |
+| **24** | Mobile-responsive layout improvements | **Medium** | BC Gov DS components partially responsive; layout work |
+| **25** | Production DB migration to managed Emerald database service | **High** | Requires Platform Services provisioning |
+
+---
+
+### Plan of Attack — Session Sequence
+
+```
+Session A  ── Seed + Expense parity + `develop` branch setup
+              Todo #1 (seed data) + Todo #2 (expense category)
+              Branch: feature/seed-data-expansion → develop
+                      feature/expense-category-parity → develop
+              Also: Todo #9 (branch protection, 2 min in GitHub Settings)
+
+Session B  ── Deviation report + Reports tabs foundation
+              Todo #3 (task deviation API + report section)
+              Branch: feature/task-deviation-report → develop
+
+Session C  ── Activity page refactor (largest single item)
+              Todo #4 + #6: TabBar component, Activity tabs, budget auto-set,
+              project synopsis, WorkItemTemplate model + API + Templates tab
+              Branch: feature/activity-page-refactor → develop
+
+Session D  ── Reports polish + Weekly summary
+              Todo #5 (Reports tabs — uses TabBar from Session C)
+              Todo #7 (Weekly summary Phase 1 — standalone, can start early)
+              Branch: feature/reports-tabs → develop
+                      feature/weekly-summary → develop
+
+Session E  ── Management reports + role verification
+              Todo #8 (management report endpoints + Team Reports tab)
+              Branch: feature/management-reports → develop
+
+Session F  ── Security hardening sprint
+              Todo #10–#12 (audit log, HTTPS, password migration)
+              Bundle as feature/security-hardening → develop
+
+Session G  ── DevSecOps
+              Todo #13–#14 (OWASP dependency check + ZAP)
+              Todo #15 (JWT/OIDC) — this is a full session on its own
+```
+
+> Todo #7 (weekly summary) is fully independent and can slot into any session
+> that has spare capacity, or run in parallel if you have two working windows.
+> Tier 4 architecture items (#16–#19) can each be bundled as a small cleanup
+> commit at the end of any session that touches the relevant file.
+
+---
+
+*Updated: 2026-02-21 — replaces the scattered priority notes above; this section is
+the authoritative todo list going forward.*

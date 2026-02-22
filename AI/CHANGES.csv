@@ -24,3 +24,5 @@ docs/local-development/README.md,modified,Added Markdown attribution block after
 CODING_STANDARDS.md,modified,Added Markdown attribution format to section 1; docs/data-model to section 3
 .github/copilot-instructions.md,modified,Added Markdown docs attribution format block
 diagrams/README.md,modified,Added PNG links for entries 14-18 and section-level PNG-folder notes
+AI/nextSteps.md,modified,"Appended Design Changes Session Review 2026-02-21: 7 items (P1–P7) covering Activity page tabs/templates/budget, expense category parity, task deviation reporting, expanded seed data, management reports, weekly summary, and Reports page tabs — with analysis and prioritized work order"
+AI/nextSteps.md,modified,"Appended MASTER TODO section — 25 items across 5 tiers, detailed per-item implementation notes, git branching strategy, and 7-session plan of attack"
