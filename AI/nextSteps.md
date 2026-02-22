@@ -3199,7 +3199,7 @@ before the next coding session.**
 ```
 main          ← production-ready; protected; PRs only from develop
   └─ develop  ← integration branch; CI runs on every push
-        ├─ feature/seed-data-expansion        (Todo #1)
+        ├─ feature/seed-data-expansion        (Todo #1) ✅ MERGED 2026-02-22
         ├─ feature/expense-category-parity    (Todo #2)
         ├─ feature/task-deviation-report      (Todo #3)
         ├─ feature/activity-page-refactor     (Todo #4 + #6)
@@ -3242,7 +3242,7 @@ Ruleset `13091113` is active as of `2026-02-22`.
 
 | # | Item | Effort | Parallelizable | Branch Name |
 |---|------|--------|----------------|-------------|
-| **1** | [Seed data expansion](#todo-1) — 7 new users (Director/Manager/User), 5 SW/telecom projects, work items with realistic planned vs actual variance | **Low** | ✅ Yes — do first as it unblocks testing for everything below | `feature/seed-data-expansion` |
+| **~~1~~** | ~~[Seed data expansion](#todo-1) — 7 new users (Director/Manager/User), 5 SW/telecom projects, work items with realistic planned vs actual variance~~ | **Low** | ✅ DONE — PR #19 / `d7a9869`, merged to `main` (`265f435`) 2026-02-22 | ~~`feature/seed-data-expansion`~~ |
 | **2** | [Expense category parity](#todo-2) — add Expense Category `<Select>` to expense form; `ExpenseCategoryId` FK on `WorkItem` + EF migration | **Low** | ✅ Yes — independent of all other items | `feature/expense-category-parity` |
 | **3** | [Personal task deviation report](#todo-3) — `GET /api/reports/task-deviation`; deviation tab on Reports page with colour-coded rows | **Low** | ✅ After #1 | `feature/task-deviation-report` |
 | **4** | [Activity page refactor](#todo-4) — extract `TabBar` component; 3 tabs (New Entry / History / Templates); auto-set + hide budget; project synopsis | **Medium** | ✅ After #1 for meaningful testing | `feature/activity-page-refactor` |
@@ -3431,9 +3431,10 @@ Add to `TestDataSeeder.cs`:
 
 ```
 Session A  ── Seed + Expense parity + `develop` branch setup
-              Todo #1 (seed data) + Todo #2 (expense category)
-              Branch: feature/seed-data-expansion → develop
-                      feature/expense-category-parity → develop
+              Todo #1 (seed data) ✅ COMPLETE — PR #19, main 265f435 (2026-02-22)
+              Todo #2 (expense category) ⏳ NOT YET STARTED
+              Branch: feature/seed-data-expansion → develop ✅ merged
+                      feature/expense-category-parity → develop (next)
               Also: Todo #9 (branch protection) ✅ ALREADY COMPLETE
 
 Session B  ── Deviation report + Reports tabs foundation
