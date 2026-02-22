@@ -37,3 +37,11 @@ src/DSC.WebClient/node_modules/
 
 # Vite build output
 src/DSC.WebClient/dist/
+
+# Added by Spec Kitty CLI (auto-managed)
+.kittify/.dashboard
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo

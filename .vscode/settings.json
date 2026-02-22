@@ -1,5 +1,13 @@
 {
+    "chat.promptFilesRecommendations": {
+        "spec-kitty.constitution": true,
+        "spec-kitty.specify": true,
+        "spec-kitty.plan": true,
+        "spec-kitty.tasks": true,
+        "spec-kitty.implement": true
+    },
     "chat.tools.terminal.autoApprove": {
-        "launchctl": true
+        ".kittify/scripts/bash/": true,
+        ".kittify/scripts/ps/": true
     }
 }

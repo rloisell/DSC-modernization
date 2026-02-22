@@ -1,0 +1,41 @@
+{
+  "request": {
+    "GET": "/api/reports/task-deviation?from=2026-02-01&to=2026-02-28"
+  },
+  "response_200": [
+    {
+      "workItemId": "a1b2c3d4-0000-0000-0000-000000000001",
+      "title": "Sprint planning",
+      "projectId": "b1b2b3b4-0000-0000-0000-000000000002",
+      "projectName": "SW Modernization P3001",
+      "date": "2026-02-10",
+      "plannedDurationHours": 2.0,
+      "actualDurationHours": 3.5,
+      "deviationHours": 1.5,
+      "deviationPercent": 75.0
+    },
+    {
+      "workItemId": "a1b2c3d4-0000-0000-0000-000000000002",
+      "title": "Code review",
+      "projectId": "b1b2b3b4-0000-0000-0000-000000000002",
+      "projectName": "SW Modernization P3001",
+      "date": "2026-02-12",
+      "plannedDurationHours": 1.5,
+      "actualDurationHours": 1.0,
+      "deviationHours": -0.5,
+      "deviationPercent": -33.3
+    },
+    {
+      "workItemId": "a1b2c3d4-0000-0000-0000-000000000003",
+      "title": "Documentation",
+      "projectId": null,
+      "projectName": null,
+      "date": "2026-02-15",
+      "plannedDurationHours": 0,
+      "actualDurationHours": 2.0,
+      "deviationHours": null,
+      "deviationPercent": null,
+      "_note": "deviationPercent is null when plannedDurationHours == 0"
+    }
+  ]
+}

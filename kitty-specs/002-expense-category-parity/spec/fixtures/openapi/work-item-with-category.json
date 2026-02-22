@@ -1,0 +1,30 @@
+{
+  "request": {
+    "POST": "/api/items",
+    "headers": {
+      "X-User-Id": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+    },
+    "body": {
+      "activityCode": "TELCO-01",
+      "networkNumber": "N-1001",
+      "projectId": null,
+      "expenseCategoryId": "c1b3d4e5-1234-5678-abcd-ef0123456789",
+      "plannedDurationHours": 2.5,
+      "actualDurationHours": 3.0,
+      "activityMode": "expense",
+      "budgetType": "OPEX",
+      "notes": "Monthly telecom expense review"
+    }
+  },
+  "response_201": {
+    "id": "a1b2c3d4-0000-0000-0000-000000000001",
+    "activityCode": "TELCO-01",
+    "expenseCategoryId": "c1b3d4e5-1234-5678-abcd-ef0123456789",
+    "expenseCategoryName": "Telecommunications",
+    "plannedDurationHours": 2.5,
+    "actualDurationHours": 3.0,
+    "budgetType": "OPEX",
+    "notes": "Monthly telecom expense review",
+    "createdAt": "2026-02-22T10:00:00Z"
+  }
+}
