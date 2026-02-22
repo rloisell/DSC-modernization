@@ -32,3 +32,9 @@ Other actions recorded in AI/CHANGES.csv
 - Updated via: gh api --method PUT repos/rloisell/DSC-modernization/rulesets/13091113
 - PR #17 merged to main via --admin override (ruleset checks already passing)
 - PR #17 commit: 49c4152 on main — merge commit "Merge pull request #17 from rloisell/develop"
+
+2026-02-22 — Session A: Seed Data Expansion (Todo #1)
+- Commit: 573324b on feature/seed-data-expansion — "feat: expand seed data - 7 users, 5 SW/telecom projects, 36 variance work items"
+- Commit: d7a9869 on feature/seed-data-expansion — "fix: use List<string> for EF Core LINQ collections (ReadOnlySpan overload conflict on Linux)"
+- PR #19 merged to develop: f8c08e6 on develop
+- Todo #1 status: COMPLETE

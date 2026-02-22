@@ -104,3 +104,32 @@ gh pr merge 17 --merge --admin
 # Sync local main
 git checkout main
 git pull origin main
+
+## 2026-02-22 — Session A: Seed Data Expansion (Todo #1)
+
+# Create feature branch from develop
+git checkout develop && git pull origin develop
+git checkout -b feature/seed-data-expansion
+git push -u origin feature/seed-data-expansion
+
+# Build and test locally
+dotnet build src/DSC.Api/DSC.Api.csproj --no-restore
+dotnet test tests/DSC.Tests/DSC.Tests.csproj --no-build
+
+# Commit seed data changes
+git add src/DSC.Api/Seeding/TestDataSeeder.cs
+git commit -m "feat: expand seed data - 7 users (Director/Manager/User), 5 SW/telecom projects, 36 variance work items"
+git push origin feature/seed-data-expansion
+
+# Fix EF Core ReadOnlySpan<string> overload issue on CI (x64 Linux) — use List<string>
+git add src/DSC.Api/Seeding/TestDataSeeder.cs
+git commit -m "fix: use List<string> for EF Core LINQ collections (ReadOnlySpan overload conflict on Linux)"
+git push origin feature/seed-data-expansion
+
+# Create PR #19 feature/seed-data-expansion -> develop
+# (Used gh via Python subprocess to handle special characters in title/body)
+gh pr create --base develop --head feature/seed-data-expansion --title "..."
+
+# Merge PR #19 after CI pass
+gh pr merge 19 --merge
+git checkout develop && git pull origin develop
