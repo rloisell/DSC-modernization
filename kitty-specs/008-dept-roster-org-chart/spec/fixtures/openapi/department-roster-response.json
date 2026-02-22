@@ -1,0 +1,35 @@
+{
+  "request": {
+    "GET": "/api/departments/d1d2d3d4-0000-0000-0000-000000000001/members"
+  },
+  "response_200": {
+    "departmentId": "d1d2d3d4-0000-0000-0000-000000000001",
+    "departmentName": "Software Development",
+    "manager": {
+      "userId": "u1u2u3u4-0000-0000-0000-000000000001",
+      "fullName": "Mike Fields",
+      "username": "mfields",
+      "position": "Development Manager",
+      "role": "Manager",
+      "isActive": true
+    },
+    "members": [
+      {
+        "userId": "u1u2u3u4-0000-0000-0000-000000000002",
+        "fullName": "Sarah Wright",
+        "username": "swright",
+        "position": "Software Developer",
+        "role": "User",
+        "isActive": true
+      },
+      {
+        "userId": "u1u2u3u4-0000-0000-0000-000000000003",
+        "fullName": "Peter Garcia",
+        "username": "pgarcia",
+        "position": "Software Developer",
+        "role": "User",
+        "isActive": false
+      }
+    ]
+  }
+}

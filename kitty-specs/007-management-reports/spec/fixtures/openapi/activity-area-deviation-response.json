@@ -1,0 +1,31 @@
+{
+  "request": {
+    "GET": "/api/reports/activity-area-deviation"
+  },
+  "response_200": [
+    {
+      "activityCode": "DEV-01",
+      "activityDescription": "Development",
+      "totalPlannedHours": 120.0,
+      "totalActualHours": 135.0,
+      "deviationHours": 15.0,
+      "deviationPct": 12.5
+    },
+    {
+      "activityCode": "MEET-01",
+      "activityDescription": "Meetings",
+      "totalPlannedHours": 30.0,
+      "totalActualHours": 25.0,
+      "deviationHours": -5.0,
+      "deviationPct": -16.7
+    },
+    {
+      "activityCode": "TELCO-01",
+      "activityDescription": "Telecommunications",
+      "totalPlannedHours": 50.0,
+      "totalActualHours": 50.0,
+      "deviationHours": 0.0,
+      "deviationPct": 0.0
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "request": {
+    "GET": "/api/reports/project-effort-summary"
+  },
+  "response_200": [
+    {
+      "projectId": "b1b2b3b4-0000-0000-0000-000000000001",
+      "projectNo": "P1001",
+      "projectName": "Network Upgrade P1001",
+      "estimatedHours": 200.0,
+      "totalPlannedHours": 175.0,
+      "totalActualHours": 190.0,
+      "estimateVsActualPct": 95.0,
+      "plannedVsActualPct": 108.6
+    },
+    {
+      "projectId": "b1b2b3b4-0000-0000-0000-000000000002",
+      "projectNo": "P3001",
+      "projectName": "SW Modernization P3001",
+      "estimatedHours": 500.0,
+      "totalPlannedHours": 480.0,
+      "totalActualHours": 460.0,
+      "estimateVsActualPct": 92.0,
+      "plannedVsActualPct": 95.8
+    }
+  ]
+}

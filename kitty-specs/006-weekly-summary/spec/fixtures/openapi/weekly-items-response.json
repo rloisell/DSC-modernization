@@ -1,0 +1,35 @@
+{
+  "request": {
+    "GET": "/api/items?timePeriod=week"
+  },
+  "response_200": [
+    {
+      "id": "a1b2c3d4-0000-0000-0000-000000000001",
+      "activityCode": "DEV-01",
+      "projectId": "b1b2b3b4-0000-0000-0000-000000000001",
+      "projectName": "Network Upgrade P1001",
+      "date": "2026-02-17",
+      "plannedDurationHours": 4.0,
+      "actualDurationHours": 4.5
+    },
+    {
+      "id": "a1b2c3d4-0000-0000-0000-000000000002",
+      "activityCode": "MEET-01",
+      "projectId": "b1b2b3b4-0000-0000-0000-000000000001",
+      "projectName": "Network Upgrade P1001",
+      "date": "2026-02-18",
+      "plannedDurationHours": 1.0,
+      "actualDurationHours": 1.0
+    },
+    {
+      "id": "a1b2c3d4-0000-0000-0000-000000000003",
+      "activityCode": "DEV-02",
+      "projectId": "b1b2b3b4-0000-0000-0000-000000000002",
+      "projectName": "SW Modernization P3001",
+      "date": "2026-02-19",
+      "plannedDurationHours": 6.0,
+      "actualDurationHours": 7.5,
+      "_note": "totalActual > budget triggers OVERBUDGET warning on WeeklySummary page"
+    }
+  ]
+}

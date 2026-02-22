@@ -1,3 +1,93 @@
+## 2026-02-22 — Session D: spec-kitty Initialization + Feature Specs (Todos #2–#9)
+
+**Objective**: Initialize spec-kitty in DSC-modernization and build complete specs, implementation plans, and work packages for all planned Tier 1–2 features. Update rl-project-template with spec-kitty guidance for future projects.
+
+### Actions Taken
+
+- Ran `spec-kitty init --here --ai copilot --non-interactive --no-git --force` in project root → created `.kittify/` (config.yaml, metadata.yaml, AGENTS.md, scripts/)
+- Created 7 feature directories (002–008) via `spec-kitty agent feature create-feature`
+- Wrote full `spec.md` + `plan.md` + WP task files for all 7 features (35 files total):
+  - `002-expense-category-parity`: FK `ExpenseCategoryId` on WorkItem, EF migration, React Select (4 WPs)
+  - `003-task-deviation-report`: `GET /api/reports/task-deviation`, colour-coded frontend tab (4 WPs)
+  - `004-activity-page-refactor`: shared TabBar, CAPEX/OPEX auto, project synopsis, WorkItemTemplate entity+API+UI (6 WPs)
+  - `005-reports-tabs`: tabbed Reports page, role-gate Team tab (2 WPs; depends on 003, 004)
+  - `006-weekly-summary`: `/weekly` route, `?timePeriod=week` filter, progress bars, OVERBUDGET warning (2 WPs)
+  - `007-management-reports`: project effort + activity area deviation endpoints, Team Reports tab (3 WPs)
+  - `008-dept-roster-org-chart`: department roster + org chart API, role-based UI (6 WPs)
+- Ran `spec-kitty validate-tasks --all` → 8 features, 0 mismatches ✅
+- Created OpenAPI + DB fixture files for 002, 003, 006, 007, 008
+- Updated `.gitignore` to exclude `__pycache__/` and `*.pyc`
+- Committed all spec-kitty files: `12ebe70` on develop
+- Updated rl-project-template with spec-kitty guidance in `CODING_STANDARDS.md` and `.github/copilot-instructions.md`
+
+### Files Changed
+
+- `.kittify/` — new spec-kitty project config
+- `.github/prompts/spec-kitty.*.prompt.md` — renamed from `.md` by init
+- `.gitignore` — added `__pycache__/` and `*.pyc`
+- `kitty-specs/002–008/` — spec.md × 7, plan.md × 7, WP files × 27, fixture files × 9
+- `AI/WORKLOG.md`, `AI/CHANGES.csv`, `AI/COMMANDS.sh`, `AI/COMMIT_INFO.txt` — this session
+- `rl-project-template`: `CODING_STANDARDS.md` Section 11 (spec-kitty), `.github/copilot-instructions.md` spec-kitty workflow block
+
+### Key Decisions
+
+- Features 004 and 006 bundled into single spec (activity page refactor includes frequent templates)
+- spec-kitty WP files use `lane: "planned"` for all new work packages
+- All specs include EF Core note: use `List<string>` for LINQ collections (not `new[]`)
+- fixture files are OpenAPI request/response examples, not mock servers
+- Recommended implementation order: 002 → 003 → 006 → 004 → 005 → 007 → 008
+
+### Commits
+
+| Repo | Commit | Branch | Notes |
+|------|--------|--------|-------|
+| DSC-modernization | `12ebe70` | develop | spec-kitty init + all feature specs |
+
+---
+
+## 2026-02-22 — Session B: Document Standard + Department Roster Feature
+
+**Objective**: Restructure `AI/nextSteps.md` to new standard format across DSC-modernization and DSC Java repos; add document maintenance standard to CODING_STANDARDS.md and copilot-instructions.md; add Todo #9 Department Roster & Org Chart.
+
+### Actions Taken
+
+- Answered deployment question: seed data deploys automatically via `TestDataSeeder` on startup
+- Wrote Todo #9 — Department Roster & Org Chart full specification (role-based views, API endpoints, DTOs, frontend components)
+- Restructured `AI/nextSteps.md` from 3477 lines to 354 lines: Master TODO first (Tier 1–5 tables with Status column ⬜/✅), Todo Specifications, Session History newest-first
+- Added Section 10 (`AI/nextSteps.md` Maintenance Standard) to `CODING_STANDARDS.md` — §10.1–10.5
+- Added doc maintenance guardrails block to `.github/copilot-instructions.md`
+- Applied same three changes to DSC Java repo (`/Users/rloisell/Documents/developer/DSC/`):
+  - `AI/nextSteps.md` restructured (95 → 124 lines, T01–T33 tiered)
+  - `CODING_STANDARDS.md` Section 10 appended
+  - `.github/copilot-instructions.md` doc maintenance block added
+- Committed and pushed DSC Java: `20571f7` on master
+- Committed DSC-modernization: `441db59` on develop; PR #23 → main; CI pass; merged `--admin`; merge commit `2264206`
+- Advanced submodule `src/DSC.WebClient/external/DSC-java` pointer to `20571f7`
+
+### Files Changed
+
+- `AI/nextSteps.md` — full restructure (3477 → 354 lines)
+- `CODING_STANDARDS.md` — Section 10 added (~68 lines)
+- `.github/copilot-instructions.md` — doc maintenance guardrails added
+- `AI/COMMIT_INFO.txt`, `AI/CHANGES.csv`, `AI/COMMANDS.sh` — tracking records updated
+- `src/DSC.WebClient/external/DSC-java` — submodule pointer advanced
+
+### Key Decisions
+
+- New document structure: Status column first in all tier tables; completed rows use ~~strikethrough~~ + DONE date; ~600 line cap
+- Session history always prepended (newest at top)
+- Section 10 codified in CODING_STANDARDS.md and surfaced in copilot-instructions.md for live AI guardrails
+
+### Commits
+
+| Repo | Commit | Branch | Notes |
+|------|--------|--------|-------|
+| DSC-modernization | `441db59` | develop | doc standard + Todo #9 |
+| DSC-modernization | `2264206` | main | Merge PR #23 |
+| DSC Java | `20571f7` | master | same doc standard |
+
+---
+
 ## 2026-02-22 — Session A: Seed Data Expansion Complete — Todo #1 (`feature/seed-data-expansion`, PR #19 → develop)
 
 **Objective**: Expand `TestDataSeeder.cs` with 7 new users, 5 SW/telecom projects, and 36 variance
