@@ -1,3 +1,46 @@
+## 2026-02-22 — Session B: Document Standard + Department Roster Feature
+
+**Objective**: Restructure `AI/nextSteps.md` to new standard format across DSC-modernization and DSC Java repos; add document maintenance standard to CODING_STANDARDS.md and copilot-instructions.md; add Todo #9 Department Roster & Org Chart.
+
+### Actions Taken
+
+- Answered deployment question: seed data deploys automatically via `TestDataSeeder` on startup
+- Wrote Todo #9 — Department Roster & Org Chart full specification (role-based views, API endpoints, DTOs, frontend components)
+- Restructured `AI/nextSteps.md` from 3477 lines to 354 lines: Master TODO first (Tier 1–5 tables with Status column ⬜/✅), Todo Specifications, Session History newest-first
+- Added Section 10 (`AI/nextSteps.md` Maintenance Standard) to `CODING_STANDARDS.md` — §10.1–10.5
+- Added doc maintenance guardrails block to `.github/copilot-instructions.md`
+- Applied same three changes to DSC Java repo (`/Users/rloisell/Documents/developer/DSC/`):
+  - `AI/nextSteps.md` restructured (95 → 124 lines, T01–T33 tiered)
+  - `CODING_STANDARDS.md` Section 10 appended
+  - `.github/copilot-instructions.md` doc maintenance block added
+- Committed and pushed DSC Java: `20571f7` on master
+- Committed DSC-modernization: `441db59` on develop; PR #23 → main; CI pass; merged `--admin`; merge commit `2264206`
+- Advanced submodule `src/DSC.WebClient/external/DSC-java` pointer to `20571f7`
+
+### Files Changed
+
+- `AI/nextSteps.md` — full restructure (3477 → 354 lines)
+- `CODING_STANDARDS.md` — Section 10 added (~68 lines)
+- `.github/copilot-instructions.md` — doc maintenance guardrails added
+- `AI/COMMIT_INFO.txt`, `AI/CHANGES.csv`, `AI/COMMANDS.sh` — tracking records updated
+- `src/DSC.WebClient/external/DSC-java` — submodule pointer advanced
+
+### Key Decisions
+
+- New document structure: Status column first in all tier tables; completed rows use ~~strikethrough~~ + DONE date; ~600 line cap
+- Session history always prepended (newest at top)
+- Section 10 codified in CODING_STANDARDS.md and surfaced in copilot-instructions.md for live AI guardrails
+
+### Commits
+
+| Repo | Commit | Branch | Notes |
+|------|--------|--------|-------|
+| DSC-modernization | `441db59` | develop | doc standard + Todo #9 |
+| DSC-modernization | `2264206` | main | Merge PR #23 |
+| DSC Java | `20571f7` | master | same doc standard |
+
+---
+
 ## 2026-02-22 — Session A: Seed Data Expansion Complete — Todo #1 (`feature/seed-data-expansion`, PR #19 → develop)
 
 **Objective**: Expand `TestDataSeeder.cs` with 7 new users, 5 SW/telecom projects, and 36 variance

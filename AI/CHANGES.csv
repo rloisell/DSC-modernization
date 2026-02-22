@@ -35,3 +35,6 @@ AI/CHANGES.csv,modified,Added Session A entries
 AI/COMMIT_INFO.txt,modified,Added Session A commit hashes
 AI/COMMANDS.sh,modified,Added Session A commands
 2026-02-22,AI/nextSteps.md,modified,docs,Mark Todo #1 complete in all 3 locations (table + Session A plan + branching tree)
+2026-02-22,AI/nextSteps.md,modified,docs,Full restructure: Master TODO first with Status column; session history reversed; condensed 3477→354 lines; Todo #9 added
+2026-02-22,CODING_STANDARDS.md,modified,docs,Added section 10 — nextSteps.md maintenance standard
+2026-02-22,.github/copilot-instructions.md,modified,docs,Added nextSteps.md document maintenance guardrails block

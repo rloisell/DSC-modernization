@@ -43,3 +43,9 @@ Other actions recorded in AI/CHANGES.csv
 - commit: 6012594 — branch: develop — "docs: mark Todo #1 complete in nextSteps.md"
 - PR #21: develop → main — CI pass — merged --admin
 - merge commit: 24aea17 — branch: main
+
+## Session B — 2026-02-22 (doc standard + dept roster feature)
+- commit: 441db59 — branch: develop — "docs: restructure nextSteps.md; add doc maintenance standard"
+- PR #23: develop → main — CI pass — merged --admin
+- merge commit: 2264206 — branch: main
+- DSC Java repo: 20571f7 — master — same doc standard applied

@@ -139,3 +139,6 @@ git add AI/nextSteps.md && git commit -m "docs: mark Todo #1 complete in nextSte
 git push origin develop
 gh pr create --base main --head develop --title "docs: mark Todo #1 complete in nextSteps.md"  # PR #21
 gh pr merge 21 --merge --admin  # merged 24aea17
+
+# 2026-02-22 — Session B (doc standard update)
+python3 /tmp/write_nextsteps.py  # rewrote AI/nextSteps.md locallyprintf python3gh pr merge 23 --merge --admin  # merged 2264206
