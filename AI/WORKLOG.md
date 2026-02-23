@@ -1,3 +1,50 @@
+## 2026-02-23 — Session J: Migration Conflict Resolution — Login Working
+
+**Objective**: Fix all EF Core migration conflicts so the app can seed and login can work.
+
+### Root Cause Chain
+
+After auth scheme fix (`b70933e` — AdminOnly policy missing `.AddAuthenticationSchemes("AdminToken")`) was deployed, the seed endpoint still returned 500.
+
+**Problem:** `MapJavaModel` (migration #2, applied early) created the full legacy-aligned MySQL schema including all join tables, lookup tables, and WorkItems columns. Migrations #12–21 were written assuming a clean incremental schema but tried to re-add objects that `MapJavaModel` already created, causing `Duplicate table / column` errors. EF Core's migration runner aborts on the first failure, so `AddUserIsActive` (migration #21) never ran, leaving `Users.IsActive` missing. Every Users query in the seeder threw `Unknown column 'u.IsActive'`.
+
+### DB Schema Analysis
+
+Queried `INFORMATION_SCHEMA.COLUMNS`, `STATISTICS`, and `TABLE_CONSTRAINTS` to map every existing table, column, index, and FK against the pending migrations. Key findings:
+- Tables already in DB from MapJavaModel: `Union`, `Department_User`, `User_Position`, `User_User`, `Project_Activity`, `Expense_Activity`, `Calendar`, `Calendar_Category`, `Category`, `CPC_Code`, `Director_Code`, `Reason_Code`
+- WorkItems already had: `UserId`, `ActivityType`, `CpcCode`, `DirectorCode`, `ReasonCode`
+- Indexes/FKs already present: `IX_WorkItems_UserId`, `FK_WorkItems_Users_UserId`, `IX_Calendar_*`, `FK_Calendar_*`
+- Only truly missing: `ProjectAssignments.EstimatedHours` and `Users.IsActive`
+
+### Migrations Fixed
+
+| Migration | Fix |
+|-----------|-----|
+| `AddExpenseActivityFields` (c5f9da2b) | Removed duplicate CreateTable for CPC/Director/Reason_Code |
+| `AddUnionModel` | Made no-op (Union already in DB) |
+| `AddUserIdToWorkItem` | Made no-op (UserId column, index, FK all in DB) |
+| `AddDepartmentUserModel` | Made no-op (Department_User in DB) |
+| `AddUserPositionModel` | Made no-op (User_Position in DB) |
+| `AddUserUserModel` | Made no-op (User_User in DB) |
+| `AddProjectActivityModel` | Made no-op (Expense_Activity, Project_Activity in DB) |
+| `AddEstimatedHoursToProjectAssignment` | Stripped to only: AlterColumn(ProjectId nullable) + AddColumn(EstimatedHours); removed all duplicate CreateTable/AddColumn/Index/FK |
+
+### Commits
+
+- `b70933e` — DSC-modernization `develop` — fix: AddAuthenticationSchemes AdminToken to AdminOnly policy
+- `5f9da2b` — DSC-modernization `develop` — fix: AddExpenseActivityFields duplicate CreateTable CPC/Director/Reason (partial fix)
+- `cb8b937` — DSC-modernization `develop` — fix: neutralize 7 migration conflicts from MapJavaModel legacy schema
+
+### Outcome
+
+- All 21 migrations applied on pod startup
+- `Users.IsActive` column created by `AddUserIsActive`
+- `POST /api/admin/seed/test-data` → 200: 11 users, 28 work items, 157 project assignments, 45 time entries, etc.
+- `POST /api/auth/login` with `rloisel1` / `test-password-updated` → 200: user profile returned ✅
+- App fully functional on `https://dsc-be808f-dev.apps.emerald.devops.gov.bc.ca/`
+
+---
+
 ## 2026-02-23 — Session I: Route Accessibility — DataClass + AVI VIP Investigation
 
 **Objective**: Diagnose and fix `ERR_EMPTY_RESPONSE` on DSC frontend route after all pods were `1/1 Running`.

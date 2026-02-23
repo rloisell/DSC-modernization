@@ -262,3 +262,25 @@ oc annotate route be808f-dsc-dev-dsc-app-api -n be808f-dev "aviinfrasetting.ako.
 # Commit: restore annotation + update guidan2026-02-23,.github/copilot-instructions.md,modified,Updated Helm charts section: AVIf
 2026-02-23,docs/deployment/EmeraldDeploymentAnalysis.md,modified,Expanded Data Classification section with SDN model AVI VIP / Internet-Ingress / DNS tables
 2026-02d 2026-02-23,AI/WORKLOG.md,modified,Appended Session H continued: SDN model findings and route investigation
+
+# Session J — Migration conflict resolution (2026-02-23)
+# Queried DB to map all existing tables/columns/indexes/FKs
+oc exec -n be808f-dev be808f-dsc-dev-dsc-app-db-0 -- bash -c 'mysql -u root -pRootDev2026! dsc_dev -e "SELECT TABLE_NAME, COLUMN_NAME FROM information_schema.COLUMNS WHERE TABLE_SCHEMA='\''dsc_dev'\'' ORDER BY TABLE_NAME, ORDINAL_POSITION;" 2>/dev/null'
+oc exec -n be808f-dev be808f-dsc-dev-dsc-app-db-0 -- bash -c 'mysql -u root -pRootDev2026! dsc_dev -e "SELECT TABLE_NAME, INDEX_NAME, COLUMN_NAME FROM information_schema.STATISTICS WHERE TABLE_SCHEMA='\''dsc_dev'\'' AND TABLE_NAME IN ('"'"'WorkItems'"'"','"'"'Calendar'"'"','"'"'ProjectAssignments'"'"') ORDER BY TABLE_NAME, INDEX_NAME;" 2>/dev/null'
+
+# Build + commit fixes
+dotnet build src/DSC.Api/DSC.Api.csproj --nologo  # Build succeeded, 0 errors
+python3 /tmp/git_commit.py  # Staged + committed cb8b937
+git push origin develop  # cb8b937 pushed
+
+# Watch pipeline
+gh run list --branch develop --limit 3  # All 3 workflows succeeded
+
+# Seed data after migrations applied
+curl -s -X POST https://dsc-api-be808f-dev.apps.emerald.devops.gov.bc.ca/api/admin/seed/test-data \
+  -H "X-Admin-Token: dsc-dev-admin-2026-be808f" | python3 -m json.tool  # 200 OK, full dataset
+
+# Verify login
+curl -s -X POST https://dsc-api-be808f-dev.apps.emerald.devops.gov.bc.ca/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"username":"rloisel1","password":"test-password-updated"}' | python3 -m json.tool  # 200 OK ✅

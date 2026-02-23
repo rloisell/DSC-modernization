@@ -88,3 +88,10 @@ Other actions recorded in AI/CHANGES.csv
 - commit: 5c98f54 — tenant-gitops-be808f `main` — fix: change dsc dev routes from dataclass-low to dataclass-medium
 - commit: a78cd56 — tenant-gitops-be808f `main` — fix: change pod DataClass from Low to Medium on dev
 - Outcome: Route https://dsc-be808f-dev.apps.emerald.devops.gov.bc.ca/ now accessible from VPN ✅
+
+## 2026-02-23 — Session J: Migration Conflict Resolution + Login Fix
+- commit: b70933e — DSC-modernization `develop` — fix: AdminOnly policy .AddAuthenticationSchemes(AdminToken)
+- commit: 5f9da2b — DSC-modernization `develop` — fix: AddExpenseActivityFields duplicate CreateTable (partial)
+- commit: cb8b937 — DSC-modernization `develop` — fix: neutralize 7 migration conflicts from MapJavaModel legacy schema
+- Outcome: All 21 migrations applied; seed endpoint seeded full dataset; login with rloisel1/test-password-updated returns 200 ✅
+

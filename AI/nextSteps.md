@@ -299,6 +299,24 @@ public record OrgChartDto(DepartmentRosterDto[] Departments);
 
 ---
 
+### 2026-02-23 — Session J: Migration Conflict Resolution — Login Working
+
+**Commits (app):** `b70933e` — fix: AdminOnly policy auth scheme; `5f9da2b` — fix: AddExpenseActivityFields duplicate CreateTable; `cb8b937` — fix: neutralize 7 migration conflicts from MapJavaModel
+
+**Root cause chain:**
+1. `ASPNETCORE_ENVIRONMENT=Dev` (not `Development`) → `appsettings.Development.json` never loaded in pod
+2. `AdminOnly` policy missing `.AddAuthenticationSchemes("AdminToken")` → 401 on seed endpoint (fixed `b70933e`)
+3. `MapJavaModel` migration created full legacy schema; 10 subsequent migrations tried to re-create same tables/columns → DB aborted at first conflict → `AddUserIsActive` never ran → `Users.IsActive` missing → every Users query 500'd → login unusable
+4. Fixed in 3 commits: `AddExpenseActivityFields` (removed 3 duplicate CreateTable), then 7 more migrations (6 made no-op, `AddEstimatedHoursToProjectAssignment` stripped to only EstimatedHours + AlterColumn)
+
+**Result:** All 21 migrations applied; seed endpoint returns full dataset (11 users, 28 work items, 157 project assignments, etc.); login with `rloisel1` / `test-password-updated` works ✅
+
+**Key decisions:**
+- Strategy: remove duplicate operations from migrations rather than wrapping in IF NOT EXISTS SQL — simpler and safer given we own the schema history
+- `AddEstimatedHoursToProjectAssignment` was the most complex: contained duplicates of ALL objects created by MapJavaModel; only net-new items were EstimatedHours column and AlterColumn(ProjectId nullable)
+
+---
+
 ### 2026-02-23 — Session I: Route Accessibility — DataClass + AVI VIP Investigation
 
 **Commits (gitops):** `5c98f54` — fix: dataclass-low → dataclass-medium; `a78cd56` — fix: DataClass Low → Medium pod label
