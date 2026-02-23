@@ -47,64 +47,15 @@ namespace DSC.Data.Migrations
 
             // Columns already exist in the legacy-aligned schema; keep migration idempotent.
 
-            migrationBuilder.CreateTable(
-                name: "CPC_Code",
-                columns: table => new
-                {
-                    cpcCode = table.Column<string>(type: "varchar(255)", nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    description = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: true)
-                        .Annotation("MySql:CharSet", "utf8mb4")
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_CPC_Code", x => x.cpcCode);
-                })
-                .Annotation("MySql:CharSet", "utf8mb4");
-
-            migrationBuilder.CreateTable(
-                name: "Director_Code",
-                columns: table => new
-                {
-                    directorCode = table.Column<string>(type: "varchar(255)", nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    description = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: true)
-                        .Annotation("MySql:CharSet", "utf8mb4")
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Director_Code", x => x.directorCode);
-                })
-                .Annotation("MySql:CharSet", "utf8mb4");
-
-            migrationBuilder.CreateTable(
-                name: "Reason_Code",
-                columns: table => new
-                {
-                    reasonCode = table.Column<string>(type: "varchar(255)", nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    description = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: true)
-                        .Annotation("MySql:CharSet", "utf8mb4")
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Reason_Code", x => x.reasonCode);
-                })
-                .Annotation("MySql:CharSet", "utf8mb4");
-
+            // NOTE: CPC_Code, Director_Code, and Reason_Code tables were already created
+            // by AddCpcCodeModel, AddDirectorCodeModel, and AddReasonCodeModel migrations.
+            // CreateTable calls removed to fix "Table already exists" error.
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
-                name: "CPC_Code");
-
-            migrationBuilder.DropTable(
-                name: "Director_Code");
-
-            migrationBuilder.DropTable(
-                name: "Reason_Code");
+            // NOTE: corresponding DropTable calls removed — tables belong to earlier migrations.
 
             // Columns already exist in the legacy-aligned schema; no-op on down.
 
