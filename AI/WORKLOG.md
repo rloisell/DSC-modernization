@@ -1,3 +1,53 @@
+## 2026-02-23 — Session H: First Successful Emerald Deployment
+
+**Objective**: Get DSC API, frontend, and DB running in be808f-dev on Emerald.
+
+### Actions Taken
+
+- Monitored `Build and Push` pipeline — failed run `22320230140` with `unknown instruction: /*` on line 1 of Containerfile
+- Fixed both Containerfiles: converted `/* */` block-comment headers to `#` comments (Docker syntax requirement)
+- Updated `copilot-instructions.md` with explicit Containerfile exception rule and current Artifactory state
+- Pushed `7a38753` to `develop` — triggered new pipeline run (`22320346759`)
+- Pipeline: `Build and Push` succeeded — images published:
+  - `artifacts.developer.gov.bc.ca/dbe8-docker-local/dsc-api:7a38753`
+  - `artifacts.developer.gov.bc.ca/dbe8-docker-local/dsc-frontend:7a38753`
+- Pipeline `Update GitOps Values` step failed — `GITOPS_TOKEN` PAT wasn't SSO-authorized for `bcgov-c` org
+- Ryan authorized the PAT for bcgov-c SSO; re-ran the failed job → `dsc-dev_values.yaml` updated
+- Fixed gitops values file: CI had committed `be808f-docker-local` (wrong prefix); corrected to `dbe8-docker-local`
+- ArgoCD Application `be808f-dsc-dev` was already registered in `be808f-tools` — auto-detected and synced
+- Pods came up: frontend `1/1 Running`; DB `ImagePullBackOff` (stale pod using old wrong image repo)
+- Recycled DB pod → respawned with correct `docker-remote/mariadb:10.11` image → `1/1 Running`
+- API `CrashLoopBackOff`: TCP connect timeout to DB — traced to missing egress NetworkPolicy
+- **Root cause**: Emerald default-deny blocks both Ingress AND Egress. `api-to-db` only allowed Ingress to DB; the API pod's Egress to port 3306 was silently blocked
+- Added `api-egress-to-db` (TCP 3306) and `frontend-egress-to-api` (TCP 8080) NetworkPolicies to chart
+- Pushed `4da0f2c` to gitops `main` → ArgoCD applied new policies
+- Recycled API pod → `1/1 Running`; health check `curl localhost:8080/health/ready` → `Healthy` ✅
+- Documented NetworkPolicy lesson in `copilot-instructions.md` and `EmeraldDeploymentAnalysis.md §10`
+
+### Key Lessons Learned
+
+1. **Containerfiles must use `#` comments** — Docker/Buildx rejects `/*` on line 1 as an unknown instruction
+2. **GITOPS_TOKEN PAT must be SSO-authorized** for `bcgov-c` org (private repo) before the pipeline can push gitops commit
+3. **Emerald NetworkPolicy blocks both directions**: defining only the Ingress policy on the receiver is not enough — the sender also needs an explicit Egress policy matching the same port/destination. Missing Egress causes TCP connect timeout, not a 403 or DNS error
+
+### Commits
+
+- `7a38753` — DSC-modernization `develop` — fix: convert Containerfile headers from /* */ to # comments
+- `ac99bee` — tenant-gitops-be808f `main` — fix(dsc-dev): correct Artifactory repo prefix be808f → dbe8-docker-local
+- `4da0f2c` — tenant-gitops-be808f `main` — fix(netpol): add missing egress rules for API→DB and frontend→API
+- `5e88123` — DSC-modernization `develop` — docs: document Emerald NetworkPolicy egress lesson learned
+
+### Files Changed
+
+- `containerization/Containerfile.api` — header fix
+- `containerization/Containerfile.frontend` — header fix
+- `.github/copilot-instructions.md` — Containerfile exception, Artifactory state, NetworkPolicy paired-policy guidance
+- `tenant-gitops-be808f/deploy/dsc-dev_values.yaml` — dbe8-docker-local prefix + tag 7a38753
+- `tenant-gitops-be808f/charts/dsc-app/templates/networkpolicies.yaml` — api-egress-to-db + frontend-egress-to-api
+- `docs/deployment/EmeraldDeploymentAnalysis.md` — §10 NetworkPolicies updated with Egress column + lesson callout
+
+---
+
 ## 2026-02-23 — Session G: Artifactory Guidance Propagation + Session Startup Protocol
 
 **Objective**: Propagate all learned Artifactory approval-flow knowledge to rl-project-template, DSC-modernization, and DSC Java repos; add Session Startup Protocol to all three copilot-instructions.md so future AI sessions are self-briefing.

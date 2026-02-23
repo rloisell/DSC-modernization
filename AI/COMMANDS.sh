@@ -219,3 +219,37 @@ cd /Users/rloisell/Documents/developer/DSC
 git add .github/copilot-instructions.md CODING_STANDARDS.md
 git commit -m "docs: add session startup protocol and Artifactory approval flow guidance"
 git push origin master  # d21b981 → origin/master
+
+# ── SESSION H — 2026-02-23 ─────────────────────────────────────────────────
+# Fix Containerfile /* */ headers — Docker parse error "unknown instruction: /*"
+cd /Users/rloisell/Documents/developer/DSC-modernization
+git add containerization/Containerfile.api containerization/Containerfile.frontend .github/copilot-instructions.md
+git commit -m "fix: convert Containerfile headers from /* */ to # comments"
+git push origin develop  # 7a38753 → origin/develop
+
+# Pipeline succeeded — images pushed:
+#   artifacts.developer.gov.bc.ca/dbe8-docker-local/dsc-api:7a38753
+#   artifacts.developer.gov.bc.ca/dbe8-docker-local/dsc-frontend:7a38753
+
+# Rerun failed gitops update job (after GITOPS_TOKEN PAT SSO-authorized for bcgov-c)
+gh run rerun 22320346759 --repo rloisell/DSC-modernization --failed
+# → dsc-dev_values.yaml updated: tag 7a38753, repo dbe8-docker-local (fixed prefix)
+
+# Recycle stale DB pod (still pulling from wrong be808f-docker-local)
+oc delete pod be808f-dsc-dev-dsc-app-db-0 -n be808f-dev
+
+# Add missing egress NetworkPolicies — api-egress-to-db + frontend-egress-to-api
+cd /Users/rloisell/Documents/developer/DSC-modernization/tenant-gitops-be808f
+git add charts/dsc-app/templates/networkpolicies.yaml
+git commit -m "fix(netpol): add missing egress rules for API→DB and frontend→API"
+git push origin main  # 4da0f2c → origin/main
+
+# Force API pod restart after egress policies applied
+oc delete pod be808f-dsc-dev-dsc-app-api-55f4b97cb4-qb9qb -n be808f-dev
+# Verify API health: oc exec → curl http://localhost:8080/health/ready → "Healthy" ✅
+
+# Document NetworkPolicy lesson in guidance files
+cd /Users/rloisell/Documents/developer/DSC-modernization
+git add .github/copilot-instructions.md docs/deployment/EmeraldDeploymentAnalysis.md
+git commit -m "docs: document Emerald NetworkPolicy egress lesson learned"
+git push origin develop  # 5e88123 → origin/develop

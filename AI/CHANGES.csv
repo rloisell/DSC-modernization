@@ -67,3 +67,11 @@ AI/COMMANDS.sh,modified,Added Session A commands
 2026-02-23,AI/CHANGES.csv,modified,Added Session G entries
 2026-02-23,AI/COMMANDS.sh,modified,Added Session G git commands
 2026-02-23,AI/COMMIT_INFO.txt,modified,Added Session G commit hashes
+2026-02-23,containerization/Containerfile.api,modified,Converted /* */ header to # comments (Docker parse fix)
+2026-02-23,containerization/Containerfile.frontend,modified,Converted /* */ header to # comments (Docker parse fix)
+2026-02-23,.github/copilot-instructions.md,modified,Updated hardcoded context block (Artifactory approved); added Containerfile exception rule; expanded NetworkPolicy paired-policy guidance
+2026-02-23,tenant-gitops-be808f/deploy/dsc-dev_values.yaml,modified,Fixed Artifactory repo prefix be808f-docker-local → dbe8-docker-local; tag 7a38753
+2026-02-23,tenant-gitops-be808f/charts/dsc-app/templates/networkpolicies.yaml,modified,Added api-egress-to-db and frontend-egress-to-api egress NetworkPolicies
+2026-02-23,docs/deployment/EmeraldDeploymentAnalysis.md,modified,Updated §10 NetworkPolicies table with Egress column and dated lesson-learned callout
+2026-02-23,AI/COMMANDS.sh,modified,Added Session H commands
+2026-02-23,AI/CHANGES.csv,modified,Added Session H entries

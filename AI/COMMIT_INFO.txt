@@ -67,3 +67,13 @@ Other actions recorded in AI/CHANGES.csv
 - commit: d21b981 — DSC `master` — docs: add session startup protocol and Artifactory approval flow guidance
 - Files touched: copilot-instructions.md (all 3), CODING_STANDARDS.md (template + DSC Java),
   STANDARDS.md (template), EmeraldDeploymentAnalysis.md (template), DEPLOYMENT_NEXT_STEPS.md (modernization)
+
+## Session H — 2026-02-23 (First successful Emerald deployment)
+- commit: 7a38753 — DSC-modernization `develop` — fix: convert Containerfile headers from /* */ to # comments
+  (Docker/Buildx rejected /* on line 1 — unknown instruction parse error)
+- commit: ac99bee — tenant-gitops-be808f `main` — fix(dsc-dev): correct Artifactory repo prefix be808f → dbe8-docker-local
+  (gitops pipeline CI had committed wrong prefix; fixed tag to 7a38753)
+- commit: 4da0f2c — tenant-gitops-be808f `main` — fix(netpol): add missing egress rules for API→DB and frontend→API
+  (Emerald default-deny blocks both Ingress AND Egress; api-egress-to-db was missing — TCP connect timeout)
+- commit: 5e88123 — DSC-modernization `develop` — docs: document Emerald NetworkPolicy egress lesson learned
+- Outcome: all 3 DSC pods Running in be808f-dev; API health → "Healthy" ✅
