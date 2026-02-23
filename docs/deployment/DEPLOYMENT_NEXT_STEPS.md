@@ -105,9 +105,9 @@ a new one is needed.
 
 | Action | Notes |
 |---|---|
-| Confirm `be808f-docker-local` Docker repository exists | Images push to `artifacts.developer.gov.bc.ca/be808f-docker-local/dsc-api:<tag>` and `dsc-frontend:<tag>` |
-| Confirm push rights for the service account | The service account credentials in Step 2.1 must have push permission on this repo |
-| Confirm `mariadb:10.11` is available in Artifactory | The `db-statefulset.yaml` template pulls the MariaDB base image. Emerald pods cannot pull from Docker Hub directly — the image must be in Artifactory or a remote-cached Artifactory virtual repo |
+| Create `dbe8-docker-local` Docker repo inside the `be808f-dsc` Artifactory project | Artifactory UI → project dropdown `be808f-dsc` → gear icon → Repositories → Add → Local → Docker → name `docker-local` (auto-prefixed to `dbe8-docker-local`) |
+| Add service account to project | gear icon → Identity and Access → Members → search `be808f` → select `default-be808f-qpijiy` → Developer role |
+| Confirm MariaDB pulls via `docker-remote` remote cache | Changed in commit `1f21deb` — now `artifacts.developer.gov.bc.ca/docker-remote/mariadb:10.11`; no private repo needed |
 
 ### 2.3 — First Image Build (Developer Action)
 

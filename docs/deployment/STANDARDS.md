@@ -20,7 +20,7 @@ The table below tracks the DSC-modernization progress against each setup step.
 | Step | Status | Notes |
 |------|--------|-------|
 | Platform provisioning — license plate | ✅ | `be808f` |
-| Artifactory project + Docker repo | ✅ | `be808f-docker-local` |
+| Artifactory project + Docker repo | ✅ | `be808f-dsc` (project), `dbe8-docker-local` (repo), key `dbe8` — `ArtifactoryProject/dsc` created 2026-02-23 |
 | Artifactory credentials as GitHub Secrets | ⬜ | `ARTIFACTORY_USERNAME`, `ARTIFACTORY_PASSWORD` needed |
 | `GITOPS_TOKEN` as GitHub Secret | ⬜ | PAT with write scope on tenant-gitops-be808f |
 | Containerfile.api | ✅ | `containerization/Containerfile.api` |

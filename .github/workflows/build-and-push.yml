@@ -2,7 +2,7 @@
 # February 2026, AI-assisted.
 #
 # Builds the DSC API and Frontend container images and pushes them to the
-# BC Gov Artifactory Docker registry (be808f-docker-local).
+# BC Gov Artifactory Docker registry (dbe8-docker-local, project be808f-dsc).
 #
 # Per EA Option 2 (ISB preferred GitOps pattern for Emerald):
 #   develop branch → direct commit to dsc-dev_values.yaml   (ArgoCD auto-sync)
@@ -42,7 +42,7 @@ permissions:
 
 env:
   REGISTRY:    artifacts.developer.gov.bc.ca
-  NAMESPACE:   be808f-docker-local
+  NAMESPACE:   dbe8-docker-local
   API_IMAGE:   dsc-api
   WEB_IMAGE:   dsc-frontend
   GITOPS_REPO: bcgov-c/tenant-gitops-be808f
