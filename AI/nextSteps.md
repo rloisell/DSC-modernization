@@ -53,11 +53,12 @@ git push -u origin feature/<name>
 | ✅ | ~~Post in `#devops-artifactory` Rocket.Chat requesting `ArtifactoryProject/dsc` approval~~ **DONE 2026-02-23** | Status still `pending` at end of session — awaiting Platform Services response |
 | ✅ | ~~**[MANUAL — Ryan]** Create `GITOPS_TOKEN` GitHub PAT (fine-grained, `bcgov-c/tenant-gitops-be808f` Contents R+W)~~ **DONE 2026-02-23** | Fine-grained PAT created |
 | ✅ | ~~**[MANUAL — Ryan]** Add 3 GitHub Secrets to `rloisell/DSC-modernization`~~ **DONE 2026-02-23** | Confirmed via `gh secret list` — all 3 present |
-| ⬜ | **[BLOCKED — awaiting Artifactory approval]** Create `dbe8-docker-local` Docker local repo in Artifactory UI | `artifacts.developer.gov.bc.ca` → dropdown All → `be808f-dsc` → gear → Repositories → Add Local → Docker |
-| ⬜ | **[BLOCKED — awaiting Artifactory approval]** Add service account `default-be808f-qpijiy` as Developer on `dbe8-docker-local` | Artifactory UI → Identity and Access → Members |
-| ⬜ | Trigger pipeline — push to `develop` branch | After Artifactory UI steps above complete |
-| ⬜ | Apply ArgoCD Application CRD (`be808f-dsc-dev.yaml`) to Emerald ArgoCD | `oc apply -f applications/argocd/be808f-dsc-dev.yaml -n be808f-gitops-dev` or via ArgoCD UI |
-| ⬜ | Verify first deployment — ArgoCD sync + hit `/health/ready` | ArgoCD UI or `curl https://dsc-api-be808f-dev.apps.emerald.devops.gov.bc.ca/health/ready` |
+| ✅ | ~~**[BLOCKED — awaiting Artifactory approval]** Create `dbe8-docker-local` Docker local repo in Artifactory UI~~ **DONE 2026-02-23** | — |
+| ✅ | ~~**[BLOCKED — awaiting Artifactory approval]** Add service account `default-be808f-qpijiy` as Developer on `dbe8-docker-local`~~ **DONE 2026-02-23** | — |
+| ✅ | ~~Trigger pipeline — push to `develop` branch~~ **DONE 2026-02-23** | Images `dsc-api:47fd7d0` + `dsc-frontend:47fd7d0` in `dbe8-docker-local` |
+| ✅ | ~~Apply ArgoCD Application CRD (`be808f-dsc-dev.yaml`) to Emerald ArgoCD~~ **DONE 2026-02-23** | Already existed in `be808f-tools` — auto-detected |
+| ✅ | ~~Verify first deployment — ArgoCD sync + hit `/health/ready`~~ **DONE 2026-02-23** | All 3 pods `1/1 Running`; API `/health/ready` returns `Healthy` |
+| ✅ | ~~Route accessible from VPN~~ **DONE 2026-02-23** | Fixed `dataclass-low` → `dataclass-medium` (no VIP registered for low); fixed `DataClass: Low` → `Medium` pod label (SDN enforces pod label must match VIP class) |
 
 ---
 
@@ -295,6 +296,24 @@ public record OrgChartDto(DepartmentRosterDto[] Departments);
 ---
 
 ## 📅 Session History (most recent first)
+
+---
+
+### 2026-02-23 — Session I: Route Accessibility — DataClass + AVI VIP Investigation
+
+**Commits (gitops):** `5c98f54` — fix: dataclass-low → dataclass-medium; `a78cd56` — fix: DataClass Low → Medium pod label
+**Commits (app):** `bdedd5d`, `f033bbd` guidance docs
+
+**Root cause chain discovered:**
+1. `dataclass-low` annotation — no registered VIP on Emerald; DNS times out on VPN. Changed to `dataclass-medium` (`10.99.10.8`).
+2. `DataClass: Low` pod label + `dataclass-medium` VIP — SDN silently drops traffic (`close_notify`, `ERR_EMPTY_RESPONSE`). Changed to `DataClass: Medium`.
+
+**Key decisions / Learnings:**
+- All observed working apps on Emerald dev use `dataclass-medium` (NOT `dataclass-low`)
+- Pod `DataClass` label MUST match the `aviinfrasetting` annotation suffix — SDN enforces at VIP layer
+- NetworkPolicy was NOT the cause (confirmed by adding universal allow-all NP which made no difference)
+- AVI VIP presents the OCP platform wildcard cert; TLS handshake succeeds but SDN drops backend traffic when DataClass mismatch exists
+- Updated both `EmeraldDeploymentAnalysis.md` and `copilot-instructions.md` with this guardrail
 
 ---
 

@@ -78,3 +78,9 @@ AI/COMMANDS.sh,modified,Added Session A commands
 2026-02-23,.github/copilot-instructions.md,modified,Updated Helm charts section: AVI VIP types / Internet-Ingress label / DNS split-tunneling from SDN Security Model
 2026-02-23,docs/deployment/EmeraldDeploymentAnalysis.md,modified,Expanded Data Classification section with SDN model AVI VIP / Internet-Ingress / DNS tables
 2026-02-23,AI/WORKLOG.md,modified,Appended Session H continued: SDN model findings and route investigation
+2026-02-23,tenant-gitops-be808f/deploy/dsc-dev_values.yaml,modified,Changed route annotations dataclass-low → dataclass-medium (commit 5c98f54)
+2026-02-23,tenant-gitops-be808f/deploy/dsc-dev_values.yaml,modified,Changed podLabels.DataClass Low → Medium (commit a78cd56)
+2026-02-23,docs/deployment/EmeraldDeploymentAnalysis.md,modified,Updated AVI VIP table + added critical DataClass matching rule
+2026-02-23,.github/copilot-instructions.md,modified,Updated DataClass guardrail block; dataclass-low marked DO NOT USE
+2026-02-23,AI/WORKLOG.md,modified,Prepended Session I: route accessibility investigation
+2026-02-23,AI/nextSteps.md,modified,Marked all Tier 0 deployment items done; prepended Session I history

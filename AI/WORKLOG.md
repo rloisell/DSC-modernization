@@ -1,3 +1,38 @@
+## 2026-02-23 — Session I: Route Accessibility — DataClass + AVI VIP Investigation
+
+**Objective**: Diagnose and fix `ERR_EMPTY_RESPONSE` on DSC frontend route after all pods were `1/1 Running`.
+
+### Root Cause Chain
+
+Two issues compounded:
+
+1. **`dataclass-low` annotation has no VIP on Emerald.** VPN DNS times out querying the route hostname when `dataclass-low` is set. All other observed apps in `be808f-dev` and other namespaces use `dataclass-medium` (VIP `10.99.10.8`). Fix: changed both DSC routes to `dataclass-medium`.
+
+2. **Pod `DataClass: Low` label incompatible with `dataclass-medium` VIP.** After the annotation fix, HTTP gave a 302 redirect and TLS handshaked with the platform wildcard cert — but HTTPS returned `close_notify` (empty response). Confirmed NOT a NetworkPolicy issue (tested with universal allow-all NP — no change). Root cause: the SDN enforces that pod `DataClass` label must match the route annotation suffix. `DataClass: Low` pods behind a `dataclass-medium` VIP: traffic is silently dropped at the SDN layer. Fix: changed `podLabels.DataClass` from `"Low"` to `"Medium"`.
+
+### Diagnostic Process
+
+- Compared AVI annotations across all accessible dev namespaces — every working app used `dataclass-medium`
+- Confirmed HTTP port 80 gave 302 redirect; HTTPS port 443 connected to VIP but sent `close_notify` after HTTP request
+- Pod exec confirmed nginx serving correctly on localhost:8080
+- Service endpoints healthy (`10.91.110.4:8080`)
+- Tested with `0.0.0.0/0` ipBlock NP and universal allow-all NP — neither helped (ruled out NP)
+- Compared `DataClass` labels: working `emerald-app` pod had `DataClass: Medium`; DSC pods had `DataClass: Low`
+
+### Commits
+
+- `bcgov-c/tenant-gitops-be808f` @ `5c98f54`: fix: dataclass-low → dataclass-medium on route annotations
+- `bcgov-c/tenant-gitops-be808f` @ `a78cd56`: fix: DataClass Low → Medium pod label
+- `rloisell/DSC-modernization` @ `bdedd5d`, `f033bbd`: guidance doc updates (SDN model)
+- `rloisell/DSC-modernization` (this session): docs: update EmeraldDeploymentAnalysis + copilot-instructions with DataClass matching rule
+
+### Learnings Documented
+
+- `EmeraldDeploymentAnalysis.md`: AVI VIP table updated; critical DataClass matching rule added
+- `copilot-instructions.md`: DataClass guardrail block updated; `dataclass-low` marked DO NOT USE
+
+---
+
 ## 2026-02-23 — Session H: First Successful Emerald Deployment
 
 **Objective**: Get DSC API, frontend, and DB running in be808f-dev on Emerald.

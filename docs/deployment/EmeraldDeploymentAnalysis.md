@@ -76,25 +76,34 @@ InfraSetting routing annotations.
 > information it can access. Web servers, APIs, and frontends that store no
 > sensitive data = **Low**. Databases storing Protected A/B = **Medium/High**.
 
+> ⚠️ **CRITICAL — Pod `DataClass` label MUST match the route `aviinfrasetting` annotation.**
+> The SDN enforces this at the VIP layer. If the pod label is `DataClass: Low` but the
+> route annotation is `dataclass-medium`, the VIP will silently drop all traffic (TLS
+> `close_notify` — browser shows `ERR_EMPTY_RESPONSE`). Verified through live debugging
+> on Emerald (Feb 2026).
+
 ```yaml
 podLabels:
-  DataClass: "Low"   # or Medium / High — confirm with InfoSec
+  DataClass: "Medium"   # MUST match the aviinfrasetting annotation value below
 
 route:
   annotations:
-    # dataclass-low  → private VIP (VPN-accessible; default for most workloads)
+    # dataclass-medium → private VIP (VPN-accessible; used by all observed apps on Emerald dev)
     # dataclass-public → public internet VIP (internet-facing routes only)
-    aviinfrasetting.ako.vmware.com/name: "dataclass-low"
+    # NOTE: dataclass-low is NOT registered on Emerald — it has no VIP and DNS will
+    #       either time out or not resolve. Use dataclass-medium for internal workloads.
+    aviinfrasetting.ako.vmware.com/name: "dataclass-medium"
 ```
 
 #### AVI VIP types
 
-| Annotation value | VIP type | Reachable from |
-|---|---|---|
-| `dataclass-low` | **Private VIP** | BC Gov VPN only |
-| `dataclass-public` | **Public VIP** | Public internet |
+| Annotation value | VIP type | Reachable from | Notes |
+|---|---|---|---|
+| `dataclass-medium` | **Private VIP** (`10.99.10.8`) | BC Gov VPN only | ✅ Registered and working on Emerald. Used by all observed dev/test apps. |
+| `dataclass-public` | **Public VIP** | Public internet | Only for truly internet-facing routes. |
+| `dataclass-low` | ??? | Not reachable | ⚠️ No registered VIP observed on Emerald — DNS timeout on VPN. **Do not use.** |
 
-> **AKO enforces this annotation** — the AVI controller will re-add it within
+> **AKO enforces the annotation** — the AVI controller will re-add it within
 > seconds if removed. Always include it in Helm values to prevent ArgoCD drift.
 
 #### Internet-Ingress pod label

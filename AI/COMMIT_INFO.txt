@@ -83,3 +83,8 @@ Other actions recorded in AI/CHANGES.csv
 - commit: bc1d413 — tenant-gitops-be808f `main` — fix: restore dataclass-low AVI annotation (confirmed private VIP)
 - commit: bdedd5d — DSC-modernization `develop` — docs: update guidance with SDN Security Model findings
 - Outcome: dataclass-low = private VIP confirmed; Internet-Ingress: DENY correct; DNS split-tunneling = root cause of VPN access issue
+
+## 2026-02-23 — Session I: Route Accessibility Fix
+- commit: 5c98f54 — tenant-gitops-be808f `main` — fix: change dsc dev routes from dataclass-low to dataclass-medium
+- commit: a78cd56 — tenant-gitops-be808f `main` — fix: change pod DataClass from Low to Medium on dev
+- Outcome: Route https://dsc-be808f-dev.apps.emerald.devops.gov.bc.ca/ now accessible from VPN ✅

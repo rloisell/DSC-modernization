@@ -198,9 +198,14 @@ manifests for BC Gov projects, apply these standards:
 ### Helm charts (GitOps repo)
 - Always include `podLabels.DataClass: "<classification>"` on all Emerald pods — value must be confirmed with InfoSec
 - **AVI InfraSettings — route annotation** (controls which VIP pool handles the route):
-  - `aviinfrasetting.ako.vmware.com/name: "dataclass-low"` → **private VIP** (VPN-accessible; correct for most workloads)
+  - `aviinfrasetting.ako.vmware.com/name: "dataclass-medium"` → **private VIP** (`10.99.10.8`, VPN-accessible; correct for all internal workloads)
   - `aviinfrasetting.ako.vmware.com/name: "dataclass-public"` → **public internet VIP** (internet-facing routes only)
+  - `aviinfrasetting.ako.vmware.com/name: "dataclass-low"` → ⚠️ **DO NOT USE** — no registered VIP on Emerald; DNS times out on VPN. Observed Feb 2026.
   - AKO (the AVI controller) enforces and re-adds this annotation — always include it in values to avoid ArgoCD drift
+- **Pod `DataClass` label MUST match the route annotation value** — the SDN enforces this at the VIP layer:
+  - Pod `DataClass: Medium` + route `dataclass-medium` → ✅ traffic flows
+  - Pod `DataClass: Low` + route `dataclass-medium` → ❌ SDN silently drops traffic (`ERR_EMPTY_RESPONSE`)
+  - Rule: set `podLabels.DataClass` to match the annotation suffix (e.g. `"Medium"` for `dataclass-medium`)
 - **Internet-Ingress pod label** (controls whether the Public VIP can forward to a pod — SDN guardrail):
   - `Internet-Ingress: DENY` — correct default; pod is NOT reachable via a Public VIP. VPN users can still reach it via the private VIP route.
   - `Internet-Ingress: ALLOW` — only set this if the workload must be reachable from the public internet via a Public VIP
