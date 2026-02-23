@@ -1,16 +1,21 @@
-/* Containerfile.api, Ryan Loisell, GitHub Copilot, February 2026,
-   AI-assisted. Multistage build based on the jag-network-tools pattern.
-   Produces a non-root, port-8080 .NET 10 API image suitable for
-   BC Gov Emerald OpenShift (be808f-dev / be808f-test / be808f-prod).
-
-   Build:
-     podman build -f containerization/Containerfile.api -t dsc-api .
-
-   Required env vars at runtime (inject via OpenShift Secret / Helm):
-     ConnectionStrings__DefaultConnection  MariaDB connection string
-     Admin__Token                          Admin bearer token
-     ASPNETCORE_ENVIRONMENT                Production | Test
-*/
+# Containerfile.api
+# Ryan Loiselle — Developer / Architect
+# GitHub Copilot — AI pair programmer / code generation
+# February 2026
+#
+# AI-assisted: multistage build based on the jag-network-tools pattern;
+# reviewed and directed by Ryan Loiselle.
+#
+# Produces a non-root, port-8080 .NET 10 API image suitable for
+# BC Gov Emerald OpenShift (be808f-dev / be808f-test / be808f-prod).
+#
+# Build:
+#   podman build -f containerization/Containerfile.api -t dsc-api .
+#
+# Required env vars at runtime (inject via OpenShift Secret / Helm):
+#   ConnectionStrings__DefaultConnection  MariaDB connection string
+#   Admin__Token                          Admin bearer token
+#   ASPNETCORE_ENVIRONMENT                Production | Test
 
 # ── BUILD STAGE ──────────────────────────────────────────────────────────────
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build

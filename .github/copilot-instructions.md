@@ -32,15 +32,15 @@ Registry      : artifacts.developer.gov.bc.ca/dbe8-docker-local/
 ArgoCD URL    : https://gitops-shared.apps.emerald.devops.gov.bc.ca/
 
 Artifactory project key : dbe8
-Approval status         : pending  ← check with:
-                          oc describe artproj dsc -n be808f-tools | grep approval_status
-UI steps still needed   : create dbe8-docker-local repo + add default-be808f-qpijiy as Developer
+Approval status         : nothing-to-approve ✅
+UI steps complete       : dbe8-docker-local repo created ✅; default-be808f-qpijiy added as Developer ✅
 
 GitHub secrets (app repo) : ✅ ARTIFACTORY_USERNAME  ✅ ARTIFACTORY_PASSWORD  ✅ GITOPS_TOKEN
 K8s secrets (be808f-dev)  : ✅ artifactory-pull-secret  ✅ dsc-db-secret  ✅ dsc-admin-secret
 
-⚠ DO NOT push to develop to trigger the pipeline until both UI steps above are complete.
-  The pipeline logs in to Artifactory as its first step — it will fail immediately at login.
+Pipeline : build-and-push.yml triggers on push to develop
+         : Containerfile headers were /* */ — fixed to # comments (fix.b on develop)
+         : Next: confirm images in dbe8-docker-local → apply ArgoCD CRD → pods green
 ```
 
 ---
@@ -66,6 +66,9 @@ When creating a **new file**, always open with this header block:
 ```
 
 Use `#` block comments for Perl; `//` block or `/* */` for C-family languages.
+**Exception — Containerfiles / Dockerfiles**: These only support `#` comments.
+Never start a Containerfile or Dockerfile with `/*` — Docker's parser will reject it.
+Use `#` lines for the file header in all Containerfile/Dockerfile variants.
 Omit student IDs, course names, and academic metadata — this is professional work.
 
 For **Markdown documentation files** (`.md`), place immediately below the `# Title`:
