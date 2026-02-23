@@ -24,7 +24,7 @@ namespace DSC.Api.Controllers
 {
     [ApiController]
     [Route("api/admin/reason-codes")]
-    [Authorize(Policy = "AdminOnly")]
+    [Authorize(Policy = "AdminRole")]
     [EnableRateLimiting("Admin")]
     public class AdminReasonCodesController : ControllerBase
     {

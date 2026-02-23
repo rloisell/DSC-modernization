@@ -60,9 +60,16 @@ builder.Services.AddAuthentication("UserId")
     .AddScheme<AuthenticationSchemeOptions, AdminTokenAuthenticationHandler>("AdminToken", null);
 builder.Services.AddAuthorization(options =>
 {
+    // AdminOnly: used only by AdminSeedController — requires the static X-Admin-Token header
     options.AddPolicy("AdminOnly", policy => policy
         .AddAuthenticationSchemes("AdminToken")
         .RequireAuthenticatedUser());
+
+    // AdminRole: used by all admin CRUD controllers — requires a logged-in user with role=Admin
+    options.AddPolicy("AdminRole", policy => policy
+        .AddAuthenticationSchemes("UserId")
+        .RequireAuthenticatedUser()
+        .RequireClaim("role", "Admin"));
 });
 builder.Services.AddScoped<IPasswordHasher<DSC.Data.Models.User>, PasswordHasher<DSC.Data.Models.User>>();
 builder.Services.AddScoped<TestDataSeeder>();

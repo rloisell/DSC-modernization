@@ -24,7 +24,7 @@ namespace DSC.Api.Controllers
 {
     [ApiController]
     [Route("api/admin/unions")]
-    [Authorize(Policy = "AdminOnly")]
+    [Authorize(Policy = "AdminRole")]
     [EnableRateLimiting("Admin")]
     public class AdminUnionsController : ControllerBase
     {

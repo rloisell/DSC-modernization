@@ -25,7 +25,7 @@ namespace DSC.Api.Controllers
 {
     [ApiController]
     [Route("api/admin/network-numbers")]
-    [Authorize(Policy = "AdminOnly")]
+    [Authorize(Policy = "AdminRole")]
     [EnableRateLimiting("Admin")]
     public class AdminNetworkNumbersController : ControllerBase
     {

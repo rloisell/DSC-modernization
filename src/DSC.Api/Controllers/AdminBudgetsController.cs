@@ -25,7 +25,7 @@ namespace DSC.Api.Controllers
 {
     [ApiController]
     [Route("api/admin/budgets")]
-    [Authorize(Policy = "AdminOnly")]
+    [Authorize(Policy = "AdminRole")]
     [EnableRateLimiting("Admin")]
     public class AdminBudgetsController : ControllerBase
     {

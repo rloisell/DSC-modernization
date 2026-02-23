@@ -24,7 +24,7 @@ namespace DSC.Api.Controllers
 {
     [ApiController]
     [Route("api/admin/activity-categories")]
-    [Authorize(Policy = "AdminOnly")]
+    [Authorize(Policy = "AdminRole")]
     [EnableRateLimiting("Admin")]
     public class AdminActivityCategoriesController : ControllerBase
     {

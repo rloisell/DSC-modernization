@@ -26,7 +26,7 @@ namespace DSC.Api.Controllers
 {
     [ApiController]
     [Route("api/admin/users")]
-    [Authorize(Policy = "AdminOnly")]
+    [Authorize(Policy = "AdminRole")]
     [EnableRateLimiting("Admin")]
     public class AdminUsersController : ControllerBase
     {

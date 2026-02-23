@@ -25,7 +25,7 @@ namespace DSC.Api.Controllers
 {
     [ApiController]
     [Route("api/admin/expense-categories")]
-    [Authorize(Policy = "AdminOnly")]
+    [Authorize(Policy = "AdminRole")]
     [EnableRateLimiting("Admin")]
     public class AdminExpenseCategoriesController : ControllerBase
     {
