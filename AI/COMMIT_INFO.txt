@@ -99,3 +99,8 @@ Other actions recorded in AI/CHANGES.csv
 - commit: 4dac9ff — DSC-modernization `develop` — fix: admin CRUD endpoints use AdminRole policy (UserId scheme + role=Admin)
 - Outcome: Admin pages load data for logged-in Admin users ✅
 
+## 2026-02-23 — Session L: Post-Deployment Documentation
+- commit: 754b9e0 — DSC-modernization `develop` — docs: post-deployment documentation update
+- commit: 041d555 — rl-project-template `main` — docs: add Emerald deployment learnings from DSC project (2026-02-23)
+- Outcome: README, DEPLOYMENT_NEXT_STEPS, EmeraldDeploymentAnalysis all updated with live deployment details and Session A–K learnings; rl-project-template updated with generic reusable patterns ✅
+
