@@ -95,3 +95,8 @@ AI/COMMANDS.sh,modified,Added Session A commands
 2026-02-23,src/DSC.Data/Migrations/20260220213648_AddEstimatedHoursToProjectAssignment.cs,modified,Stripped to AlterColumn(ProjectId)+AddColumn(EstimatedHours) only — all other ops already in DB (commit cb8b937)
 2026-02-23,AI/WORKLOG.md,modified,Prepended Session J: migration conflict resolution and login fix
 2026-02-23,AI/nextSteps.md,modified,Prepended Session J: migration conflict resolution session history
+2026-02-23,src/DSC.Api/Program.cs,modified,Added AdminRole policy (UserId scheme + RequireClaim role=Admin) alongside AdminOnly (commit 4dac9ff)
+2026-02-23,src/DSC.Api/Controllers/Admin*Controller.cs (17 files),modified,Changed [Authorize(Policy = AdminOnly)] to AdminRole on all CRUD controllers (commit 4dac9ff)
+2026-02-23,AI/WORKLOG.md,modified,Prepended Session K: admin pages 401 fix
+2026-02-23,AI/nextSteps.md,modified,Prepended Session K history
+2026-02-23,AI/COMMIT_INFO.txt,modified,Added Session K entry

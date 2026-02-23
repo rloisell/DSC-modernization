@@ -95,3 +95,7 @@ Other actions recorded in AI/CHANGES.csv
 - commit: cb8b937 — DSC-modernization `develop` — fix: neutralize 7 migration conflicts from MapJavaModel legacy schema
 - Outcome: All 21 migrations applied; seed endpoint seeded full dataset; login with rloisel1/test-password-updated returns 200 ✅
 
+## 2026-02-23 — Session K: Admin Pages 401 Fix
+- commit: 4dac9ff — DSC-modernization `develop` — fix: admin CRUD endpoints use AdminRole policy (UserId scheme + role=Admin)
+- Outcome: Admin pages load data for logged-in Admin users ✅
+

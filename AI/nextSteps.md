@@ -299,6 +299,18 @@ public record OrgChartDto(DepartmentRosterDto[] Departments);
 
 ---
 
+### 2026-02-23 — Session K: Admin Pages 401 Fix
+
+**Commit:** `4dac9ff` — fix: admin CRUD endpoints use AdminRole policy (UserId scheme + role=Admin)
+
+**Root cause:** All 17 admin CRUD controllers used `[Authorize(Policy = "AdminOnly")]` which requires the `AdminToken` scheme (static seed token header). Logged-in users authenticate via `UserId` scheme — wrong scheme was never evaluated.
+
+**Fix:** Added `AdminRole` policy (UserId scheme + RequireClaim role=Admin); updated all 17 CRUD controllers; seed controller kept `AdminOnly`.
+
+**Result:** Admin pages load data for logged-in Admin users ✅
+
+---
+
 ### 2026-02-23 — Session J: Migration Conflict Resolution — Login Working
 
 **Commits (app):** `b70933e` — fix: AdminOnly policy auth scheme; `5f9da2b` — fix: AddExpenseActivityFields duplicate CreateTable; `cb8b937` — fix: neutralize 7 migration conflicts from MapJavaModel

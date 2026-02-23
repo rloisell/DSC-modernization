@@ -1,3 +1,27 @@
+## 2026-02-23 — Session K: Admin Pages 401 Fix
+
+**Objective**: Fix 401 errors on all admin CRUD pages for logged-in Admin users.
+
+### Root Cause
+
+All 17 admin CRUD controllers used `[Authorize(Policy = "AdminOnly")]`. That policy was configured with `.AddAuthenticationSchemes("AdminToken")` — the static `X-Admin-Token` header scheme used only for the seed endpoint. Regular logged-in users authenticate via `X-User-Id` (the `UserId` scheme), which `AdminOnly` never evaluated, so every admin page returned 401.
+
+### Fix
+
+- Added `AdminRole` policy to `Program.cs`: `UserId` scheme + `RequireClaim("role", "Admin")`
+- Updated all 17 admin CRUD controllers from `AdminOnly` → `AdminRole`
+- `AdminSeedController` kept `AdminOnly` (still requires static token)
+
+### Commits
+
+- `4dac9ff` — DSC-modernization `develop` — fix: admin CRUD endpoints use AdminRole policy (UserId scheme + role=Admin)
+
+### Outcome
+
+Admin pages load data for `rloisel1` (Admin role) ✅
+
+---
+
 ## 2026-02-23 — Session J: Migration Conflict Resolution — Login Working
 
 **Objective**: Fix all EF Core migration conflicts so the app can seed and login can work.
