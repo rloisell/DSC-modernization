@@ -10,26 +10,13 @@ namespace DSC.Data.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.CreateTable(
-                name: "Union",
-                columns: table => new
-                {
-                    unionId = table.Column<int>(type: "int", nullable: false),
-                    unionName = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: true)
-                        .Annotation("MySql:CharSet", "utf8mb4")
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Union", x => x.unionId);
-                })
-                .Annotation("MySql:CharSet", "utf8mb4");
+            // Union table already exists in DB from MapJavaModel migration — no-op.
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
-                name: "Union");
+            // No-op: table was not created by this migration.
         }
     }
 }
