@@ -60,7 +60,9 @@ builder.Services.AddAuthentication("UserId")
     .AddScheme<AuthenticationSchemeOptions, AdminTokenAuthenticationHandler>("AdminToken", null);
 builder.Services.AddAuthorization(options =>
 {
-    options.AddPolicy("AdminOnly", policy => policy.RequireAuthenticatedUser());
+    options.AddPolicy("AdminOnly", policy => policy
+        .AddAuthenticationSchemes("AdminToken")
+        .RequireAuthenticatedUser());
 });
 builder.Services.AddScoped<IPasswordHasher<DSC.Data.Models.User>, PasswordHasher<DSC.Data.Models.User>>();
 builder.Services.AddScoped<TestDataSeeder>();
