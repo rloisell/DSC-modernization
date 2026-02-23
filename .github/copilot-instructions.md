@@ -8,6 +8,43 @@ For the full human-readable version of these standards, see `CODING_STANDARDS.md
 
 ---
 
+## Session Startup Protocol
+
+**At the start of every session, read the following files before responding to anything.**
+Ryan does not paste these in manually — they are your standing briefing documents.
+
+| Order | File | Why |
+|-------|------|-----|
+| 1 | `AI/nextSteps.md` | Primary orientation — MASTER TODO, what is in progress, what is blocked |
+| 2 | `docs/deployment/DEPLOYMENT_NEXT_STEPS.md` | Ordered remaining steps to first Emerald deployment; current Artifactory blocker status |
+| 3 | `docs/deployment/EmeraldDeploymentAnalysis.md` | Canonical Emerald platform reference — Artifactory approval flow, CI/CD patterns, full checklist |
+| 4 | `AI/WORKLOG.md` | Last 1–2 session entries only — recent context, not full history |
+
+After reading, open with a one-sentence status summary (e.g. "Artifactory approval still pending — nothing to push yet"), then proceed.
+
+### Hardcoded deployment context (update this block when state changes)
+
+```
+License plate : be808f
+App repo      : rloisell/DSC-modernization  (branch: develop)
+GitOps repo   : bcgov-c/tenant-gitops-be808f
+Registry      : artifacts.developer.gov.bc.ca/dbe8-docker-local/
+ArgoCD URL    : https://gitops-shared.apps.emerald.devops.gov.bc.ca/
+
+Artifactory project key : dbe8
+Approval status         : pending  ← check with:
+                          oc describe artproj dsc -n be808f-tools | grep approval_status
+UI steps still needed   : create dbe8-docker-local repo + add default-be808f-qpijiy as Developer
+
+GitHub secrets (app repo) : ✅ ARTIFACTORY_USERNAME  ✅ ARTIFACTORY_PASSWORD  ✅ GITOPS_TOKEN
+K8s secrets (be808f-dev)  : ✅ artifactory-pull-secret  ✅ dsc-db-secret  ✅ dsc-admin-secret
+
+⚠ DO NOT push to develop to trigger the pipeline until both UI steps above are complete.
+  The pipeline logs in to Artifactory as its first step — it will fail immediately at login.
+```
+
+---
+
 ## Identity & Attribution
 
 - **Developer / Architect**: Ryan Loiselle — makes all structural and business-logic decisions
@@ -145,8 +182,15 @@ manifests for BC Gov projects, apply these standards:
 - This allows one image to run in dev, test, and prod with different API URLs
 
 ### Image registry
-- Push images to Artifactory: `artifacts.developer.gov.bc.ca/<project>/<image>:<git-sha>`
+- Push images to Artifactory: `artifacts.developer.gov.bc.ca/<key>-docker-local/<image>:<git-sha>`
+  (e.g. `artifacts.developer.gov.bc.ca/dbe8-docker-local/dsc-api:a3f9c2d`)
 - Never reference Docker Hub or GHCR for images that will run on Emerald
+- **Artifactory projects are not self-serve.** Before pushing: (1) apply `ArtifactoryProject` CRD
+  in `<license>-tools`, (2) post in `#devops-artifactory` on Rocket.Chat for approval,
+  (3) wait for `approval_status: nothing-to-approve`, (4) create `docker-local` repo in UI,
+  (5) add `default-<license>-<sa-hash>` service account as Developer in UI.
+  The pipeline logs in to Artifactory as step 1 — it fails immediately at login if steps 4–5
+  are not complete.
 
 ### Helm charts (GitOps repo)
 - Always include `podLabels.DataClass: "Medium"` (or higher) for Emerald pods

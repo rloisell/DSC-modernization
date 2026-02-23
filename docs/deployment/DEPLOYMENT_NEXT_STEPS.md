@@ -103,11 +103,28 @@ a new one is needed.
 
 ### 2.2 — Artifactory Setup (Platform Team / Developer)
 
+> **Status as of 2026-02-23:**
+> - ✅ `ArtifactoryProject/dsc` applied to `be808f-tools` (key: `dbe8`, quota: 5 Gi)
+> - ✅ Rocket.Chat message posted in `#devops-artifactory` requesting approval
+> - ⏳ BLOCKED — waiting for Platform Services approval (`approval_status: pending`)
+>
+> Check status:
+> ```bash
+> oc describe artproj dsc -n be808f-tools 2>&1 | grep approval_status
+> # Waiting for: approval_status: nothing-to-approve
+> ```
+
+Once approved, complete the following UI steps **before pushing to trigger the pipeline**:
+
 | Action | Notes |
 |---|---|
-| Create `dbe8-docker-local` Docker repo inside the `be808f-dsc` Artifactory project | Artifactory UI → project dropdown `be808f-dsc` → gear icon → Repositories → Add → Local → Docker → name `docker-local` (auto-prefixed to `dbe8-docker-local`) |
-| Add service account to project | gear icon → Identity and Access → Members → search `be808f` → select `default-be808f-qpijiy` → Developer role |
+| Create `dbe8-docker-local` Docker repo inside the `be808f-dsc` Artifactory project | Artifactory UI → project dropdown `be808f-dsc` → gear icon → Repositories → Add → Local → Docker → name `docker-local` (auto-prefixed to `dbe8-docker-local`); enable Xray → Save |
+| Add service account to project | gear icon → Identity and Access → Members → search `be808f` → select `default-be808f-qpijiy` → Developer role → Save |
 | Confirm MariaDB pulls via `docker-remote` remote cache | Changed in commit `1f21deb` — now `artifacts.developer.gov.bc.ca/docker-remote/mariadb:10.11`; no private repo needed |
+
+> ⚠️ `build-and-push.yml` logs in to Artifactory as its **first step**. Pushing before
+> the Docker local repo exists and the service account is added will fail immediately
+> at the login step. Complete both UI steps first.
 
 ### 2.3 — First Image Build (Developer Action)
 
