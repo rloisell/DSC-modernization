@@ -59,7 +59,7 @@ jobs:
 
     steps:
       - name: Checkout source
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       # Image tag strategy (per ISB EA Option 2 guidance):
       #   v* semver tag  → use the tag name as-is (e.g. v1.0.1)
@@ -142,7 +142,7 @@ jobs:
 
     steps:
       - name: Checkout gitops repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           repository: ${{ env.GITOPS_REPO }}
           token:      ${{ secrets.GITOPS_TOKEN }}
@@ -194,7 +194,7 @@ jobs:
 
     steps:
       - name: Checkout gitops repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           repository: ${{ env.GITOPS_REPO }}
           token:      ${{ secrets.GITOPS_TOKEN }}
