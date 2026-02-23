@@ -185,9 +185,44 @@ dotnet test tests/DSC.Tests/DSC.Tests.csproj
 The current implementation uses lightweight header-based authentication suitable for local/dev use:
 
 - **User auth**: `X-User-Id: <userId>` header — validated against the database, sets `ClaimsPrincipal` for role-based filtering
-- **Admin auth**: `X-Admin-Token: local-admin-token` header — grants access to admin seed and management endpoints
+- **Admin auth**: `X-Admin-Token: local-admin-token` (local) / `dsc-dev-admin-2026-be808f` (Emerald dev) — grants access to admin seed and management endpoints
+
+Two named auth policies are in use: `AdminRole` (UserId scheme + role=Admin, all CRUD controllers) and `AdminOnly` (AdminToken scheme, seed/bootstrap endpoints only). Each policy explicitly names its scheme via `.AddAuthenticationSchemes()`.
 
 The **target architecture** replaces this with OpenID Connect via Keycloak. A migration path (ExternalIdentity table, OIDC middleware, Keycloak configuration) is documented in [AI/securityNextSteps.md](AI/securityNextSteps.md).
+
+---
+
+## Deployed Environment — Emerald Dev
+
+The application is live on the BC Gov Private Cloud PaaS (Emerald tier). Access requires BC Gov VPN.
+
+| | |
+|---|---|
+| **Frontend URL** | https://dsc-be808f-dev.apps.emerald.devops.gov.bc.ca/ |
+| **API URL** | https://dsc-api-be808f-dev.apps.emerald.devops.gov.bc.ca/ |
+| **Platform** | BC Gov Emerald OpenShift — `be808f-dev` namespace |
+| **Access** | BC Gov VPN required (private VIP, `dataclass-medium`) |
+| **ArgoCD** | https://gitops-shared.apps.emerald.devops.gov.bc.ca/ |
+| **First deployed** | 2026-02-23 |
+
+### Seeding (first deployment or after DB reset)
+
+```bash
+curl -X POST https://dsc-api-be808f-dev.apps.emerald.devops.gov.bc.ca/api/admin/seed/test-data \
+  -H "X-Admin-Token: dsc-dev-admin-2026-be808f"
+```
+
+Seeding is **not automatic** — it must be called once after each new deployment or DB reset. The same test accounts as local development are created.
+
+### Deployment Docs
+
+| Document | Contents |
+|---|---|
+| [docs/deployment/EmeraldDeploymentAnalysis.md](docs/deployment/EmeraldDeploymentAnalysis.md) | Comprehensive Emerald platform guide — DataClass, AVI VIP, network policies, CI/CD, auth patterns, EF Core migration patterns |
+| [docs/deployment/DEPLOYMENT_NEXT_STEPS.md](docs/deployment/DEPLOYMENT_NEXT_STEPS.md) | First deployment ordered checklist — all items complete as of 2026-02-23 |
+| [tenant-gitops-be808f/](tenant-gitops-be808f/) | Helm chart, ArgoCD Application CRDs, per-env values |
+| [containerization/](containerization/) | Containerfiles (API + frontend), nginx.conf, podman-compose |
 
 ---
 
@@ -197,6 +232,8 @@ The **target architecture** replaces this with OpenID Connect via Keycloak. A mi
 |---|---|
 | [docs/local-development/README.md](docs/local-development/README.md) | Environment setup, LaunchAgent config, MariaDB, ports, known issues |
 | [docs/data-model/README.md](docs/data-model/README.md) | .NET vs Java data model compare/contrast |
+| [docs/deployment/EmeraldDeploymentAnalysis.md](docs/deployment/EmeraldDeploymentAnalysis.md) | Comprehensive Emerald platform guide — DataClass/AVI, network policies, auth patterns, CI/CD |
+| [docs/deployment/DEPLOYMENT_NEXT_STEPS.md](docs/deployment/DEPLOYMENT_NEXT_STEPS.md) | Ordered deployment checklist (all complete as of 2026-02-23) |
 | [diagrams/README.md](diagrams/README.md) | Full diagram index; how to edit and regenerate SVG/PNG exports |
 | [AI/securityNextSteps.md](AI/securityNextSteps.md) | Security hardening plan and Keycloak migration path |
 | [AI/nextSteps.md](AI/nextSteps.md) | Feature backlog, completion status, future roadmap |

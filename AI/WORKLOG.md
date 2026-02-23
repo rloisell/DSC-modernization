@@ -1,3 +1,31 @@
+## 2026-02-23 — Session L: Post-Deployment Documentation
+
+**Objective**: Update README and docs with live Emerald deployment details; propagate all deployment learnings to `rl-project-template`.
+
+### Files Changed — DSC-modernization
+
+- **README.md**: Added `## Deployed Environment — Emerald Dev` section with live URLs, VPN access note, seed command, and deployment doc links. Updated Authentication section to document two named auth policies. Added deployment docs to Documentation table.
+- **docs/deployment/DEPLOYMENT_NEXT_STEPS.md**: Updated status header to `COMPLETE — 2026-02-23`. Fixed `DataClass: "Low"` → `"Medium"` in artefact table (×3). Updated §2 header to show all blocking steps done. Replaced fast-path checklist `[ ]` → `[x]` with outcome notes. Added seed and login verification as items 11–12.
+- **docs/deployment/EmeraldDeploymentAnalysis.md**: Added 7 new rows to §15 troubleshooting table (DataClass mismatch, dataclass-low no VIP, ASPNETCORE_ENVIRONMENT, auth policy scheme, EF Core conflicts, seed manual). Added new `§16 DSC Deployment Learnings — 2026-02-23` with five sub-sections (DataClass/AVI, ASPNETCORE_ENVIRONMENT, two auth policies, EF Core migration patterns, seed endpoint). Renumbered Reference URLs to §17.
+
+### Files Changed — rl-project-template (commit `041d555`, pushed to `main`)
+
+- **docs/deployment/EmeraldDeploymentAnalysis.md**: Fixed DataClass `"Low"` YAML example → `"<classification>"` placeholder with critical `dataclass-low` no-VIP warning. Added 5 new troubleshooting rows. Added new `§16 Application Deployment Patterns` (ASPNETCORE_ENVIRONMENT, two named auth policies, EF Core migrations, seed endpoints). Renumbered Reference URLs to §17.
+- **CODING_STANDARDS.md §9.8**: Added explicit `dataclass-low` DO NOT USE warning after the code block example.
+- **.github/copilot-instructions.md**: Expanded Helm charts section with AVI InfraSettings table (medium vs low vs public), DataClass label matching rule, and Ingress+Egress dual NetworkPolicy note.
+
+### Key Decisions
+
+- All learnings from Sessions A–K documented in both DSC-specific (§16) and template (§16 generic patterns) places
+- Session L is documentation-only — no code changes, no deployment changes
+- The `rl-project-template` changes are reusable across all future BC Gov Emerald projects
+
+### Commits (DSC-modernization)
+
+- See next commit in this session
+
+---
+
 ## 2026-02-23 — Session K: Admin Pages 401 Fix
 
 **Objective**: Fix 401 errors on all admin CRUD pages for logged-in Admin users.

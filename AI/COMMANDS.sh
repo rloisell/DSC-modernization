@@ -284,3 +284,8 @@ curl -s -X POST https://dsc-api-be808f-dev.apps.emerald.devops.gov.bc.ca/api/adm
 curl -s -X POST https://dsc-api-be808f-dev.apps.emerald.devops.gov.bc.ca/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{"username":"rloisel1","password":"test-password-updated"}' | python3 -m json.tool  # 200 OK ✅
+
+# Session L — Documentation update 2026-02-23
+# (No new build/deploy commands — documentation-only session)
+# rl-project-template updates committed and pushed:
+# cd ~/Documents/developer/rl-project-template && git commit -m "docs: add Emerald deployment le# cd ~/Documents/developer/rl-project-tempn d# cd ~/Documents/develEPLOYMENT_NEXT_STEPS, EmeraldDeploymentAnalysis)

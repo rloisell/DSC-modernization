@@ -299,6 +299,19 @@ public record OrgChartDto(DepartmentRosterDto[] Departments);
 
 ---
 
+### 2026-02-23 — Session L: Post-Deployment Documentation
+
+**Commits (DSC-modernization):** see below
+**Commits (rl-project-template):** `041d555` — docs: add Emerald deployment learnings from DSC project (2026-02-23)
+
+**What was done:**
+- README.md: Added `Deployed Environment — Emerald Dev` section with live URLs, VPN access note, seed command, deployment doc links. Updated Authentication section to document two named auth policies (`AdminRole` + `AdminOnly`).
+- DEPLOYMENT_NEXT_STEPS.md: Marked complete (2026-02-23); fixed DataClass Low→Medium (×3); fast-path checklist all checked; added items 11 (seed) + 12 (login verify).
+- EmeraldDeploymentAnalysis.md: Added 7 new troubleshooting rows; added §16 DSC Deployment Learnings (DataClass/AVI, ASPNETCORE_ENVIRONMENT, two auth policies, EF Core migration patterns, seed manual invoke); renumbered Reference URLs to §17.
+- **rl-project-template** (pushed): Fixed DataClass "Low" example in §2; added `dataclass-low` DO NOT USE warning; added 5 troubleshooting rows; added §16 Application Deployment Patterns (4 sub-sections); updated CODING_STANDARDS.md §9.8 and copilot-instructions.md Helm chart section.
+
+---
+
 ### 2026-02-23 — Session K: Admin Pages 401 Fix
 
 **Commit:** `4dac9ff` — fix: admin CRUD endpoints use AdminRole policy (UserId scheme + role=Admin)

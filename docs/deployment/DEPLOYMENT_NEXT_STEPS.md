@@ -3,17 +3,20 @@
 
 ## Purpose
 
-This document captures the remaining steps required to complete the first deployment
-of DSC to the **BC Gov Private Cloud PaaS — Emerald Hosting Tier** (`be808f-dev`
-namespace). All code artefacts are committed and pushed. What remains is platform
-provisioning and secret creation.
+This document was written pre-deployment as an ordered checklist for the first DSC deployment
+to the **BC Gov Private Cloud PaaS — Emerald Hosting Tier** (`be808f-dev` namespace).
 
-**Current state as of 2026-02-21:**
+> **STATUS: COMPLETE — First Emerald dev deployment live as of 2026-02-23.**
+> Frontend: https://dsc-be808f-dev.apps.emerald.devops.gov.bc.ca/
+> API: https://dsc-api-be808f-dev.apps.emerald.devops.gov.bc.ca/
 
-| Repo | Branch | HEAD |
-|------|--------|------|
-| `rloisell/DSC-modernization` | `main` | `3af4c97` |
-| `bcgov-c/tenant-gitops-be808f` | `main` | `4272d83` |
+All blocking steps in Sections 2–3 are done. Remaining items (Section 1 C1–C5) are
+pre-production code quality improvements, not deployment blockers.
+
+| Repo | Branch | Deployed commit |
+|------|--------|----------------|
+| `rloisell/DSC-modernization` | `develop` | `4dac9ff` |
+| `bcgov-c/tenant-gitops-be808f` | `main` | see below |
 
 ---
 
@@ -30,9 +33,9 @@ first deployment to dev.
 | Podman Compose (local dev) | `containerization/podman-compose.yml` | ✅ committed |
 | GitHub Actions build pipeline | `.github/workflows/build-and-push.yml` | ✅ committed |
 | Helm chart (16 templates) | `tenant-gitops-be808f/charts/dsc-app/` | ✅ committed |
-| DSC dev values | `tenant-gitops-be808f/deploy/dsc-dev_values.yaml` | ✅ committed — `DataClass: "Low"` |
-| DSC test values | `tenant-gitops-be808f/deploy/dsc-test_values.yaml` | ✅ committed — `DataClass: "Low"` |
-| DSC prod values | `tenant-gitops-be808f/deploy/dsc-prod_values.yaml` | ✅ committed — `DataClass: "Low"` |
+| DSC dev values | `tenant-gitops-be808f/deploy/dsc-dev_values.yaml` | ✅ committed — `DataClass: "Medium"` (updated 2026-02-23) |
+| DSC test values | `tenant-gitops-be808f/deploy/dsc-test_values.yaml` | ✅ committed — `DataClass: "Medium"` (update before test deployment) |
+| DSC prod values | `tenant-gitops-be808f/deploy/dsc-prod_values.yaml` | ✅ committed — `DataClass: "Medium"` (update before prod deployment) |
 | ArgoCD Application CRD — dev | `tenant-gitops-be808f/applications/argocd/be808f-dsc-dev.yaml` | ✅ committed — auto-sync |
 | ArgoCD Application CRD — test | `tenant-gitops-be808f/applications/argocd/be808f-dsc-test.yaml` | ✅ committed — manual sync |
 | ArgoCD Application CRD — prod | `tenant-gitops-be808f/applications/argocd/be808f-dsc-prod.yaml` | ✅ committed — manual sync |
@@ -79,10 +82,9 @@ Replace the large stale Datree comment block with a 3-line pointer to `policy-en
 
 ---
 
-## 2. Blocking Steps — Must Complete Before First Sync
+## 2. Blocking Steps — ✅ ALL COMPLETE (2026-02-23)
 
-These steps must all be done before ArgoCD can successfully sync DSC to `be808f-dev`.
-They are grouped by who performs them.
+These steps were required before ArgoCD could successfully sync DSC to `be808f-dev`.
 
 ### 2.1 — GitHub Secrets (Developer Action)
 
@@ -213,21 +215,22 @@ Once applied, ArgoCD will immediately attempt to sync `charts/dsc-app` against
 
 ---
 
-## 3. Fast Path — Ordered Checklist
+## 3. Fast Path — Ordered Checklist (✅ ALL COMPLETE — 2026-02-23)
 
-If the namespace and Artifactory are already provisioned by the co-tenant, this is the
-minimal sequence:
+All steps below were completed in sessions A–K on 2026-02-23. The dev environment is live.
 
-- [ ] **1.** Add `ARTIFACTORY_USERNAME`, `ARTIFACTORY_PASSWORD`, `GITOPS_TOKEN` to GitHub Secrets in `DSC-modernization`
-- [ ] **2.** Push `develop` branch → confirm `build-and-push.yml` green → confirm images appear in Artifactory
-- [ ] **3.** Confirm `dsc-dev_values.yaml` in gitops repo has been updated with a real image tag
-- [ ] **4.** `oc create secret docker-registry artifactory-pull-secret` in `be808f-dev`
-- [ ] **5.** `oc create secret generic dsc-db-secret` in `be808f-dev`
-- [ ] **6.** `oc create secret generic dsc-admin-secret` in `be808f-dev`
-- [ ] **7.** Apply or register `be808f-dsc-dev.yaml` with ArgoCD
-- [ ] **8.** Watch ArgoCD sync — all resources in `be808f-dev` should go green
-- [ ] **9.** Visit the frontend route: `https://dsc-frontend-be808f-dev.apps.emerald.devops.gov.bc.ca`
-- [ ] **10.** Hit `https://dsc-api-be808f-dev.apps.emerald.devops.gov.bc.ca/health/ready` — expect `{"status":"Healthy"}`
+- [x] **1.** Add `ARTIFACTORY_USERNAME`, `ARTIFACTORY_PASSWORD`, `GITOPS_TOKEN` to GitHub Secrets in `DSC-modernization`
+- [x] **2.** Push `develop` branch → confirm `build-and-push.yml` green → confirm images appear in Artifactory
+- [x] **3.** Confirm `dsc-dev_values.yaml` in gitops repo has been updated with a real image tag
+- [x] **4.** `oc create secret docker-registry artifactory-pull-secret` in `be808f-dev`
+- [x] **5.** `oc create secret generic dsc-db-secret` in `be808f-dev`
+- [x] **6.** `oc create secret generic dsc-admin-secret` in `be808f-dev`
+- [x] **7.** Apply or register `be808f-dsc-dev.yaml` with ArgoCD
+- [x] **8.** Watch ArgoCD sync — all resources in `be808f-dev` green ✅
+- [x] **9.** Visit the frontend route: https://dsc-be808f-dev.apps.emerald.devops.gov.bc.ca ✅
+- [x] **10.** Hit `https://dsc-api-be808f-dev.apps.emerald.devops.gov.bc.ca/health/ready` — `{"status":"Healthy"}` ✅
+- [x] **11.** Call seed endpoint: `POST /api/admin/seed/test-data` with `X-Admin-Token` header ✅
+- [x] **12.** Verify login with `rloisel1` / `test-password-updated` (Admin role, all CRUD pages working) ✅
 
 ---
 

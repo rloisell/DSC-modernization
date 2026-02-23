@@ -668,10 +668,105 @@ pre-launch checklist for any new Emerald project:
 | Route returns 503 | Pod readiness probe failing | `oc logs <pod>` — DB likely not healthy yet |
 | DB PVC in `Pending` | Storage class name wrong or unavailable | `oc get sc` — confirm `netapp-file-standard` exists |
 | Datree CI step failing | Helm chart fails policy check | Read Datree output — most common: missing `DataClass` label |
+| Route accessible but `ERR_EMPTY_RESPONSE` / TLS `close_notify` | `DataClass` pod label does not match `aviinfrasetting` annotation suffix | Set both pod label and annotation to the same class (e.g. both `Medium` + `dataclass-medium`) |
+| Route DNS times out on VPN | Using `dataclass-low` annotation — no VIP registered on Emerald | Change annotation to `dataclass-medium`; `dataclass-low` has no VIP |
+| `appsettings.Development.json` settings ignored in pod | `ASPNETCORE_ENVIRONMENT` is not `Development` — in pod it is `Dev` | Move all config to `appsettings.json` or set explicit env vars; never rely on `appsettings.Development.json` in Emerald pods |
+| Controller endpoints return 401 but auth policy seems correct | Auth policy does not call `.AddAuthenticationSchemes()` — default scheme does not auto-run for named policies | Add `.AddAuthenticationSchemes("SchemeName")` to every `.AddPolicy()` call |
+| EF Core migrations fail with `Table already exists` | Subsequent migration duplicates objects already created by an earlier mega-migration | Make the migration no-op: remove the duplicate `CreateTable`/`AddColumn`/`AddForeignKey` calls, keeping only the net-new changes |
+| App appears healthy but seed data missing | Seed endpoint is not called automatically on deployment | Call `POST /api/admin/seed/test-data` with `X-Admin-Token` header after every fresh deployment or DB reset |
 
 ---
 
-## 16. Reference URLs
+## 16. DSC Deployment Learnings — 2026-02-23
+
+Empirical findings from the first DSC deployment to Emerald dev. These complement the
+platform knowledge in earlier sections with project- and stack-specific patterns.
+
+### 16.1 — DataClass and AVI VIP (Critical)
+
+`dataclass-low` has **no registered VIP** on Emerald. Routes with
+`aviinfrasetting.ako.vmware.com/name: "dataclass-low"` produce a DNS timeout when
+accessed over VPN — the hostname resolves but the VIP is absent. The symptom is
+`ERR_EMPTY_RESPONSE` or TLS `close_notify` in the browser.
+
+**Fix applied:** All DSC values files updated to `DataClass: "Medium"` (pod label) and
+`aviinfrasetting.ako.vmware.com/name: "dataclass-medium"` (route annotation). This
+routes traffic through the private VIP at `10.99.10.8`, reachable over BC Gov VPN.
+
+> The SDN enforces that pod `DataClass` label matches the route annotation suffix.
+> `DataClass: Medium` + `dataclass-medium` = ✅. Any mismatch = silent traffic drop.
+> AKO re-adds the annotation within ~15s if removed — always keep it in Helm values.
+
+### 16.2 — `ASPNETCORE_ENVIRONMENT` in Pods
+
+The Emerald pod env is `ASPNETCORE_ENVIRONMENT=Dev`, **not** `Development`. As a result:
+- `appsettings.Development.json` is **never loaded** in the OpenShift pod
+- All production/platform settings (connection strings, admin token, CORS) must be in
+  `appsettings.json` or injected as explicit environment variables via the Helm secret
+
+**DSC resolution:** All settings were moved out of `appsettings.Development.json` into
+pod env variables (from Kubernetes Secrets). Connection string, admin token, and
+`ASPNETCORE_URLS` are all injected by Helm at deploy time.
+
+### 16.3 — Two Named Auth Policies (.NET ASP.NET Core)
+
+DSC uses two authentication schemes side by side:
+
+| Policy | Scheme | Used on | Identifies |
+|---|---|---|---|
+| `AdminRole` | `UserId` | All CRUD controllers | Logged-in users via `X-User-Id` header; requires `role=Admin` claim |
+| `AdminOnly` | `AdminToken` | Seed/bootstrap endpoints only | Static `X-Admin-Token` header |
+
+**Critical pattern:** Each policy must explicitly name its scheme via
+`.AddAuthenticationSchemes()`. The default authentication scheme does **not** run
+automatically for additional named policies. Without it, all requests return 401.
+
+```csharp
+// Program.cs — correct pattern
+options.AddPolicy("AdminRole", policy =>
+    policy.AddAuthenticationSchemes("UserId")
+          .RequireAuthenticatedUser()
+          .RequireClaim("role", "Admin"));
+
+options.AddPolicy("AdminOnly", policy =>
+    policy.AddAuthenticationSchemes("AdminToken")
+          .RequireAuthenticatedUser());
+```
+
+The claim key is `"role"` (lowercase, custom), **not** `ClaimTypes.Role`. Use
+`RequireClaim("role", "Admin")` to match what `UserIdAuthenticationHandler` sets.
+
+### 16.4 — EF Core Migrations with a Legacy Mega-Migration
+
+DSC has a `MapJavaModel` migration that creates the **entire legacy schema** in one go.
+All subsequent migrations that add to the same schema must be made **no-op** for any
+objects that `MapJavaModel` already created.
+
+**Symptom:** `Table 'tablename' already exists` causing the entire migration run to abort.
+
+**Fix strategy:** In each conflicting migration, remove the duplicate
+`CreateTable` / `AddColumn` / `CreateIndex` / `AddForeignKey` calls from `Up()`.
+Keep only the net-new operations (columns or tables not present in `MapJavaModel`).
+Leave `Down()` intact (or make it a no-op as well).
+
+> ⚠️ EF Core migration runner **aborts on the first failure** — one conflict blocks
+> all subsequent migrations. Fix each conflict one by one; test with `dotnet ef database update`.
+
+### 16.5 — Seed Endpoint is Not Automatic
+
+The admin seed endpoint (`POST /api/admin/seed/test-data`) is not called automatically
+on deployment. It must be invoked manually after each fresh deployment or DB reset:
+
+```bash
+curl -X POST https://dsc-api-be808f-dev.apps.emerald.devops.gov.bc.ca/api/admin/seed/test-data \
+  -H "X-Admin-Token: dsc-dev-admin-2026-be808f"
+```
+
+Expected response: `{"message":"Test data seeded successfully"}` with HTTP 200.
+
+---
+
+## 17. Reference URLs
 
 | Resource | URL |
 |---|---|
