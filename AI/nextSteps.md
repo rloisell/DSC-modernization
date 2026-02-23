@@ -40,7 +40,26 @@ git push -u origin feature/<name>
 
 ---
 
-### 🟥 Tier 1 — Immediate Application Value (Next 2–3 Sessions)
+### � Tier 0 — Emerald Deployment (Unblocking Infrastructure)
+
+| Status | Item | Notes |
+|--------|------|-------|
+| ✅ | ~~Install `oc` CLI 4.21.1 (`brew install openshift-cli`)~~ **DONE 2026-02-23** | — |
+| ✅ | ~~Extract Artifactory service account credentials (`default-be808f-qpijiy`)~~ **DONE 2026-02-23** | Secret `artifacts-default-lkjwcc` in `be808f-tools` |
+| ✅ | ~~Fix MariaDB image → `docker-remote/mariadb:10.11` (was `be808f-docker-local`)~~ **DONE 2026-02-23** | commit `1f21deb` on `bcgov-c/tenant-gitops-be808f` |
+| ✅ | ~~Create `artifactory-pull-secret` in `be808f-dev`~~ **DONE 2026-02-23** | `oc create secret docker-registry` |
+| ✅ | ~~Create `dsc-db-secret` in `be808f-dev`~~ **DONE 2026-02-23** | Keys: `db-password`, `db-root-password`, `connection-string` |
+| ✅ | ~~Create `dsc-admin-secret` in `be808f-dev`~~ **DONE 2026-02-23** | Key: `admin-token` |
+| ⬜ | **[MANUAL — Ryan]** Create `be808f-docker-local` Docker local repo in Artifactory UI | `artifacts.developer.gov.bc.ca` → Admin → Repositories → New Local |
+| ⬜ | **[MANUAL — Ryan]** Create `GITOPS_TOKEN` GitHub PAT (fine-grained, `bcgov-c/tenant-gitops-be808f` Contents R+W) | GitHub → Settings → Dev settings → Fine-grained PAT |
+| ⬜ | **[MANUAL — Ryan]** Add 3 GitHub Secrets to `rloisell/DSC-modernization` | `ARTIFACTORY_USERNAME`, `ARTIFACTORY_PASSWORD`, `GITOPS_TOKEN` |
+| ⬜ | Trigger pipeline — push to `develop` branch | After all manual steps above |
+| ⬜ | Apply ArgoCD Application CRD (`be808f-dsc-dev.yaml`) to Emerald ArgoCD | `oc apply -f applications/argocd/be808f-dsc-dev.yaml -n be808f-gitops-dev` or via ArgoCD UI |
+| ⬜ | Verify first deployment — ArgoCD sync + hit `/health/ready` | ArgoCD UI or `curl https://dsc-api-be808f-dev.apps.emerald.devops.gov.bc.ca/health/ready` |
+
+---
+
+### �🟥 Tier 1 — Immediate Application Value (Next 2–3 Sessions)
 
 | Status | # | Item | Effort | Parallelizable | Branch |
 |--------|---|------|--------|----------------|--------|
@@ -274,6 +293,32 @@ public record OrgChartDto(DepartmentRosterDto[] Departments);
 ---
 
 ## 📅 Session History (most recent first)
+
+---
+
+### 2026-02-23 — Session E: Emerald Deployment Infrastructure
+
+**Commits:** `1f21deb` (bcgov-c/tenant-gitops-be808f) — fix: route MariaDB image through Artifactory docker-remote cache
+
+**Files changed:** `tenant-gitops-be808f/charts/dsc-app/values.yaml` (MariaDB image URL), `AI/nextSteps.md`, `AI/WORKLOG.md`, `AI/CHANGES.csv`, `AI/COMMANDS.sh`
+
+**OpenShift resources created in `be808f-dev`:**
+- `secret/artifactory-pull-secret` (docker-registry type; linked to `default` + `builder` SA)
+- `secret/dsc-db-secret` (db-password, db-root-password, connection-string)
+- `secret/dsc-admin-secret` (admin-token)
+
+**Key decisions:**
+- MariaDB must use `docker-remote/mariadb` (Artifactory remote cache proxy to Docker Hub), not `be808f-docker-local` — clusters can't pull Docker Hub directly; cluster-wide pull secret handles `docker-remote` auth automatically
+- `be808f-docker-local` repo still needed for `dsc-api` and `dsc-frontend` custom images — **not yet created** (Ryan manual step)
+- DB service hostname confirmed as `be808f-dsc-dev-dsc-app-db` (based on ArgoCD release name `be808f-dsc-dev` + chart `dsc-app`)
+- Dev credentials stored in-cluster only (not committed); not suitable for prod
+
+**Remaining blockers (all manual / browser):**
+1. Create `be808f-docker-local` repo in Artifactory UI
+2. Create `GITOPS_TOKEN` GitHub PAT
+3. Add `ARTIFACTORY_USERNAME`, `ARTIFACTORY_PASSWORD`, `GITOPS_TOKEN` to GitHub Secrets
+4. Push to `develop` to trigger pipeline
+5. Apply ArgoCD Application CRD
 
 ---
 

@@ -1,3 +1,56 @@
+## 2026-02-23 — Session E: Emerald Deployment Infrastructure
+
+**Objective**: Unblock the Emerald dev deployment by creating required OpenShift secrets, correcting a critical MariaDB image URL bug, and identifying remaining manual steps for Ryan.
+
+### Actions Taken
+
+- Read BC Gov Artifactory pull documentation — confirmed two paths: cluster-wide pull secret for remote/public images; service account pull secret for private `be808f-docker-local` images
+- Discovered critical bug: `charts/dsc-app/values.yaml` had MariaDB pointing to `be808f-docker-local/mariadb` — this repo does not exist; public images must use `docker-remote` proxy
+- Fixed `db.image.repository` → `artifacts.developer.gov.bc.ca/docker-remote/mariadb:10.11`; committed to `bcgov-c/tenant-gitops-be808f` (`1f21deb`)
+- Confirmed `oc` session active in `be808f-dev` (user: ryan.loiselle@gov.bc.ca)
+- Created `secret/artifactory-pull-secret` (docker-registry type) in `be808f-dev` using credentials extracted in prior session (`default-be808f-qpijiy`)
+- Linked `artifactory-pull-secret` to `default` and `builder` service accounts in `be808f-dev`
+- Created `secret/dsc-db-secret` with keys: `db-password`, `db-root-password`, `connection-string` (MariaDB connection string pointing to `be808f-dsc-dev-dsc-app-db`)
+- Created `secret/dsc-admin-secret` with key: `admin-token`
+- Updated `AI/nextSteps.md` — added Tier 0 Deployment section with all items tracked; prepended session history
+
+### Files Changed
+
+- `tenant-gitops-be808f/charts/dsc-app/values.yaml` — MariaDB image URL fixed
+- `AI/nextSteps.md` — Tier 0 deployment section added; session history entry prepended
+- `AI/WORKLOG.md`, `AI/CHANGES.csv`, `AI/COMMANDS.sh` — this session
+
+### OpenShift Resources Created (be808f-dev)
+
+| Resource | Type | Notes |
+|----------|------|-------|
+| `artifactory-pull-secret` | kubernetes.io/dockerconfigjson | Linked to default + builder SA |
+| `dsc-db-secret` | Opaque | db-password, db-root-password, connection-string |
+| `dsc-admin-secret` | Opaque | admin-token |
+
+### Key Decisions
+
+- MariaDB uses `docker-remote` (Artifactory proxy for Docker Hub) — cluster-wide pull secret handles auth; no private pull secret needed for public images
+- `be808f-docker-local` is still required for the two custom images (`dsc-api`, `dsc-frontend`) — this repo does not yet exist and must be created manually in the Artifactory UI
+- DB connection string hostname `be808f-dsc-dev-dsc-app-db` confirmed from the existing `be808f-dsc-dev-dsc-app-dockercfg-bcgfs` SA secret present in the namespace (47h old at time of session)
+- Dev credentials (db-password: DscDev2026!, admin-token: dsc-dev-admin-2026-be808f) are in-cluster only; not suitable for production
+
+### Commits
+
+```
+1f21deb  fix: route MariaDB image through Artifactory docker-remote cache  [bcgov-c/tenant-gitops-be808f main]
+```
+
+### Remaining Blockers (manual steps for Ryan)
+
+1. Create `be808f-docker-local` Docker local repo in Artifactory UI (`artifacts.developer.gov.bc.ca`)
+2. Create `GITOPS_TOKEN` GitHub PAT (fine-grained; `bcgov-c/tenant-gitops-be808f`; Contents: R+W)
+3. Add `ARTIFACTORY_USERNAME`, `ARTIFACTORY_PASSWORD`, `GITOPS_TOKEN` to GitHub Secrets in `rloisell/DSC-modernization`
+4. Push any commit to `develop` to trigger the build pipeline
+5. Apply ArgoCD Application CRD (`applications/argocd/be808f-dsc-dev.yaml`) to Emerald
+
+---
+
 ## 2026-02-22 — Session D: spec-kitty Initialization + Feature Specs (Todos #2–#9)
 
 **Objective**: Initialize spec-kitty in DSC-modernization and build complete specs, implementation plans, and work packages for all planned Tier 1–2 features. Update rl-project-template with spec-kitty guidance for future projects.

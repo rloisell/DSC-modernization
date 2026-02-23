@@ -159,3 +159,24 @@ git add .kittify/ .github/prompts/ .gitignore .vscode/settings.json kitty-specs/
 git reset HEAD ".kittify/scripts/tasks/__pycache__/"
 git commit -m "feat: initialize spec-kitty and add specs for Todos #2-#9"  # 12ebe70
 git push origin develop
+
+## 2026-02-23 — Session E: Emerald Deployment Infrastructure
+
+# oc whoami && oc project be808f-dev
+# oc create secret docker-registry artifactory-pull-secret \
+#     --docker-server=artifacts.developer.gov.bc.ca \
+#     --docker-username=default-be808f-qpijiy \
+#     --docker-password=2ylIg0tKI6ZRovRNiEZHKyKy \
+#     --docker-email=default-be808f-qpijiy@be808f-dev.local \
+#     -n be808f-dev
+# oc secrets link default artifactory-pull-secret -n be808f-dev
+# oc secrets link builder artifactory-pull-secret -n be808f-dev
+# oc create secret generic dsc-db-secret \
+#     --from-literal=db-password='DscDev2026!' \
+#     --from-literal=db-root-password='RootDev2026!' \
+#     --from-literal=connection-string='Server=be808f-dsc-dev-dsc-app-db;Database=dsc_dev;User=dsc_user;Password=DscDev2026!;Port=3306;' \
+#     -n be808f-dev
+# oc create secret generic dsc-admin-secret \
+#     --from-literal=admin-token='dsc-dev-admin-2026-be808f' \
+#     -n be808f-dev
+# -- gitops commit 1f21deb: fix MariaDB image to docker-remote/mariadb:10.11
