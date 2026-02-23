@@ -77,3 +77,9 @@ Other actions recorded in AI/CHANGES.csv
   (Emerald default-deny blocks both Ingress AND Egress; api-egress-to-db was missing — TCP connect timeout)
 - commit: 5e88123 — DSC-modernization `develop` — docs: document Emerald NetworkPolicy egress lesson learned
 - Outcome: all 3 DSC pods Running in be808f-dev; API health → "Healthy" ✅
+
+## Session H continued — 2026-02-23 (SDN model / route investigation)
+- commit: 043005b — tenant-gitops-be808f `main` — fix: remove dataclass-low AVI annotation (investigation; reverted)
+- commit: bc1d413 — tenant-gitops-be808f `main` — fix: restore dataclass-low AVI annotation (confirmed private VIP)
+- commit: bdedd5d — DSC-modernization `develop` — docs: update guidance with SDN Security Model findings
+- Outcome: dataclass-low = private VIP confirmed; Internet-Ingress: DENY correct; DNS split-tunneling = root cause of VPN access issue
