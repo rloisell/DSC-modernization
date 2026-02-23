@@ -60,3 +60,10 @@ Other actions recorded in AI/CHANGES.csv
 
 
 - DSC Java repo: 20571f7 — master — same doc standard applied
+
+## Session G — 2026-02-23 (Artifactory guidance propagation + Session Startup Protocol)
+- commit: cefcefa — rl-project-template `main` — docs: add session startup protocol and Artifactory approval flow guidance
+- commit: 4fb54c8 — DSC-modernization `develop` — docs: add session startup protocol and Artifactory approval flow guidance
+- commit: d21b981 — DSC `master` — docs: add session startup protocol and Artifactory approval flow guidance
+- Files touched: copilot-instructions.md (all 3), CODING_STANDARDS.md (template + DSC Java),
+  STANDARDS.md (template), EmeraldDeploymentAnalysis.md (template), DEPLOYMENT_NEXT_STEPS.md (modernization)

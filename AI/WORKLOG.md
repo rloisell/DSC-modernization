@@ -1,3 +1,76 @@
+## 2026-02-23 — Session G: Artifactory Guidance Propagation + Session Startup Protocol
+
+**Objective**: Propagate all learned Artifactory approval-flow knowledge to rl-project-template, DSC-modernization, and DSC Java repos; add Session Startup Protocol to all three copilot-instructions.md so future AI sessions are self-briefing.
+
+### Actions Taken
+
+- Read current state of all deployment docs across rl-project-template, DSC-modernization, and DSC (Java)
+- Added **Session Startup Protocol** section to all three `copilot-instructions.md` files — ordered read table so AI opens the right docs automatically before every session
+- DSC-modernization copilot-instructions.md includes a hardcoded deployment context block (approval status, secrets status, UI steps still needed, push warning)
+- Updated `CODING_STANDARDS.md §9.3` in both rl-project-template and DSC Java with full 5-step Artifactory approval flow blockquote
+- Updated `CODING_STANDARDS.md §9.11` in rl-project-template with explicit CRD + Rocket.Chat + UI steps
+- Updated `docs/deployment/STANDARDS.md` Step 1 in rl-project-template with ordered Artifactory steps and pipeline-ordering warning
+- Updated `docs/deployment/EmeraldDeploymentAnalysis.md §14` Platform Provisioning in rl-project-template with `oc` check command, UI step detail, and push-ordering warning
+- Updated `docs/deployment/DEPLOYMENT_NEXT_STEPS.md §2.2` in DSC-modernization with current status (pending), `oc describe artproj` command, ordered UI steps, explicit push warning
+- Fixed image path convention in all three Image registry sections (`<key>-docker-local/` not `<project>/`)
+- Committed and pushed all three repos
+
+### Commits
+
+- `cefcefa` — rl-project-template `main` — docs: add session startup protocol and Artifactory approval flow guidance
+- `4fb54c8` — DSC-modernization `develop` — docs: add session startup protocol and Artifactory approval flow guidance  
+- `d21b981` — DSC `master` — docs: add session startup protocol and Artifactory approval flow guidance
+
+### Files Changed
+
+- `.github/copilot-instructions.md` — all three repos: Session Startup Protocol + Artifactory approval note + image path fix
+- `CODING_STANDARDS.md §9.3 + §9.11` — rl-project-template + DSC Java
+- `docs/deployment/STANDARDS.md` Step 1 — rl-project-template
+- `docs/deployment/EmeraldDeploymentAnalysis.md §14` — rl-project-template
+- `docs/deployment/DEPLOYMENT_NEXT_STEPS.md §2.2` — DSC-modernization
+
+### Key Decisions
+
+- Session Startup Protocol goes at the very top of copilot-instructions.md (before Identity section) so it is the first thing read
+- DSC-modernization copilot-instructions.md includes a `Hardcoded deployment context` block with live state — this block must be updated whenever state changes (approval received, UI steps done, etc.)
+- Image path corrected everywhere: `<key>-docker-local/` is the Artifactory convention; `<project>/` was wrong
+
+---
+
+## 2026-02-23 — Session F: Deployment Validation & Secret Configuration
+
+**Objective**: Research jag-network-tools for Emerald deployment patterns, confirm Ryan's manual steps are complete, and validate GitHub secrets are correctly configured.
+
+### Actions Taken
+
+- Searched `bcgov-c/jag-network-tools` repo for Artifactory/CI/CD patterns — found no GitHub Actions workflow; repo has no build pipeline, confirms no useful reference pattern available
+- Checked `containerization/openshift/` manifests — private repo, raw URLs returned 404; semantic search returned only application code
+- Ryan posted in `#devops-artifactory` on Rocket.Chat requesting approval of `ArtifactoryProject/dsc` in `be808f-tools`
+- Ryan created fine-grained GitHub PAT (`GITOPS_TOKEN`) with Contents R+W on `bcgov-c/tenant-gitops-be808f`
+- Ryan added all 3 repository secrets to `rloisell/DSC-modernization`: `ARTIFACTORY_USERNAME`, `ARTIFACTORY_PASSWORD`, `GITOPS_TOKEN`
+- Authenticated `gh` CLI (`gh auth login`) and validated secrets via `gh secret list --repo rloisell/DSC-modernization` — all 3 confirmed present
+- Confirmed pipeline should NOT be triggered until Artifactory approval received and `dbe8-docker-local` repo created in UI (login step would fail immediately)
+- `ArtifactoryProject/dsc` still `approval_status: pending` at end of session
+
+### Files Changed
+
+- `AI/nextSteps.md` — Marked Rocket.Chat post, GITOPS_TOKEN PAT, and GitHub Secrets as done; added Artifactory UI steps with BLOCKED status
+- `AI/WORKLOG.md`, `AI/CHANGES.csv`, `AI/COMMANDS.sh` — this session
+
+### Key Decisions
+
+- Do not push to `develop` until Artifactory project is approved AND `dbe8-docker-local` repo exists in UI — the docker login step is the first build step and will fail hard without it
+- Two Artifactory UI steps remain after approval: create local Docker repo, then add service account as Developer
+
+### Remaining Blockers
+
+1. Platform Services must approve `ArtifactoryProject/dsc` in `be808f-tools` (watching `#devops-artifactory`)
+2. After approval: create `dbe8-docker-local` repo in Artifactory UI
+3. After repo created: add `default-be808f-qpijiy` as Developer member
+4. Then: push to `develop` to trigger pipeline
+
+---
+
 ## 2026-02-23 — Session E: Emerald Deployment Infrastructure
 
 **Objective**: Unblock the Emerald dev deployment by creating required OpenShift secrets, correcting a critical MariaDB image URL bug, and identifying remaining manual steps for Ryan.

@@ -50,10 +50,12 @@ git push -u origin feature/<name>
 | ✅ | ~~Create `artifactory-pull-secret` in `be808f-dev`~~ **DONE 2026-02-23** | `oc create secret docker-registry` |
 | ✅ | ~~Create `dsc-db-secret` in `be808f-dev`~~ **DONE 2026-02-23** | Keys: `db-password`, `db-root-password`, `connection-string` |
 | ✅ | ~~Create `dsc-admin-secret` in `be808f-dev`~~ **DONE 2026-02-23** | Key: `admin-token` |
-| ⬜ | **[MANUAL — Ryan]** Create `be808f-docker-local` Docker local repo in Artifactory UI | `artifacts.developer.gov.bc.ca` → Admin → Repositories → New Local |
-| ⬜ | **[MANUAL — Ryan]** Create `GITOPS_TOKEN` GitHub PAT (fine-grained, `bcgov-c/tenant-gitops-be808f` Contents R+W) | GitHub → Settings → Dev settings → Fine-grained PAT |
-| ⬜ | **[MANUAL — Ryan]** Add 3 GitHub Secrets to `rloisell/DSC-modernization` | `ARTIFACTORY_USERNAME`, `ARTIFACTORY_PASSWORD`, `GITOPS_TOKEN` |
-| ⬜ | Trigger pipeline — push to `develop` branch | After all manual steps above |
+| ✅ | ~~Post in `#devops-artifactory` Rocket.Chat requesting `ArtifactoryProject/dsc` approval~~ **DONE 2026-02-23** | Status still `pending` at end of session — awaiting Platform Services response |
+| ✅ | ~~**[MANUAL — Ryan]** Create `GITOPS_TOKEN` GitHub PAT (fine-grained, `bcgov-c/tenant-gitops-be808f` Contents R+W)~~ **DONE 2026-02-23** | Fine-grained PAT created |
+| ✅ | ~~**[MANUAL — Ryan]** Add 3 GitHub Secrets to `rloisell/DSC-modernization`~~ **DONE 2026-02-23** | Confirmed via `gh secret list` — all 3 present |
+| ⬜ | **[BLOCKED — awaiting Artifactory approval]** Create `dbe8-docker-local` Docker local repo in Artifactory UI | `artifacts.developer.gov.bc.ca` → dropdown All → `be808f-dsc` → gear → Repositories → Add Local → Docker |
+| ⬜ | **[BLOCKED — awaiting Artifactory approval]** Add service account `default-be808f-qpijiy` as Developer on `dbe8-docker-local` | Artifactory UI → Identity and Access → Members |
+| ⬜ | Trigger pipeline — push to `develop` branch | After Artifactory UI steps above complete |
 | ⬜ | Apply ArgoCD Application CRD (`be808f-dsc-dev.yaml`) to Emerald ArgoCD | `oc apply -f applications/argocd/be808f-dsc-dev.yaml -n be808f-gitops-dev` or via ArgoCD UI |
 | ⬜ | Verify first deployment — ArgoCD sync + hit `/health/ready` | ArgoCD UI or `curl https://dsc-api-be808f-dev.apps.emerald.devops.gov.bc.ca/health/ready` |
 

@@ -58,3 +58,12 @@ AI/COMMANDS.sh,modified,Added Session A commands
 2026-02-23,AI/WORKLOG.md,modified,Prepended Session E entry (Emerald deployment infrastructure)
 2026-02-23,AI/CHANGES.csv,modified,Added Session E entries
 2026-02-23,AI/COMMANDS.sh,modified,Added Session E oc commands
+2026-02-23,AI/nextSteps.md,modified,Marked Rocket.Chat post + PAT + GitHub Secrets as done; added Artifactory UI steps with BLOCKED status
+2026-02-23,AI/WORKLOG.md,modified,Prepended Session F entry
+2026-02-23,AI/CHANGES.csv,modified,Added Session F gh commands
+2026-02-23,.github/copilot-instructions.md,modified,Added Session Startup Protocol + Artifactory approval note + image path fix
+2026-02-23,docs/deployment/DEPLOYMENT_NEXT_STEPS.md,modified,Updated §2.2 with current status, oc check command, UI steps, push warning
+2026-02-23,AI/WORKLOG.md,modified,Prepended Session G entry
+2026-02-23,AI/CHANGES.csv,modified,Added Session G entries
+2026-02-23,AI/COMMANDS.sh,modified,Added Session G git commands
+2026-02-23,AI/COMMIT_INFO.txt,modified,Added Session G commit hashes

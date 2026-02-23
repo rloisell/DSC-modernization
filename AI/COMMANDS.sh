@@ -180,3 +180,42 @@ git push origin develop
 #     --from-literal=admin-token='dsc-dev-admin-2026-be808f' \
 #     -n be808f-dev
 # -- gitops commit 1f21deb: fix MariaDB image to docker-remote/mariadb:10.11
+
+## 2026-02-23 — Session F: Deployment Validation & Secret Configuration
+
+# Authenticate gh CLI
+gh auth login
+
+# Validate all 3 repository secrets are set
+gh secret list --repo rloisell/DSC-modernization
+# Output confirmed:
+#   ARTIFACTORY_PASSWORD  about 8 minutes ago
+#   ARTIFACTORY_USERNAME  about 8 minutes ago
+#   GITOPS_TOKEN          about 7 minutes ago
+
+# Check Artifactory project approval status (still pending at end of session)
+oc describe artproj dsc -n be808f-tools 2>&1 | grep approval_status
+
+# Next session — after Artifactory approved and dbe8-docker-local repo created in UI:
+# git checkout develop && git commit --allow-empty -m "chore: trigger build pipeline" && git push
+
+# ── SESSION G — 2026-02-23 ─────────────────────────────────────────────────
+# Propagated Artifactory approval-flow guidance + Session Startup Protocol to all three repos
+
+# rl-project-template
+cd /Users/rloisell/Documents/developer/rl-project-template
+git add .github/copilot-instructions.md CODING_STANDARDS.md docs/deployment/EmeraldDeploymentAnalysis.md docs/deployment/STANDARDS.md
+git commit -m "docs: add session startup protocol and Artifactory approval flow guidance"
+git push  # cefcefa → origin/main
+
+# DSC-modernization
+cd /Users/rloisell/Documents/developer/DSC-modernization
+git add .github/copilot-instructions.md docs/deployment/DEPLOYMENT_NEXT_STEPS.md
+git commit -m "docs: add session startup protocol and Artifactory approval flow guidance"
+git push origin develop  # 4fb54c8 → origin/develop
+
+# DSC Java
+cd /Users/rloisell/Documents/developer/DSC
+git add .github/copilot-instructions.md CODING_STANDARDS.md
+git commit -m "docs: add session startup protocol and Artifactory approval flow guidance"
+git push origin master  # d21b981 → origin/master
