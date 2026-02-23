@@ -484,18 +484,22 @@ For production, secrets should be migrated to HashiCorp Vault:
 
 ## 10. Network Policies
 
-Emerald enforces default-deny. The following policies are required for every project:
+Emerald enforces default-deny on **both Ingress and Egress**. Every traffic flow requires **two** policies: one Ingress on the receiving pod and one Egress on the sending pod. Defining only the Ingress side causes TCP connect timeouts — the sender's egress is silently dropped.
 
-| Policy name | Rule |
-|---|---|
-| `deny-all` | Default deny all ingress and egress |
-| `allow-router-to-frontend` | Ingress from `ingress` namespace to Frontend port 8080 |
-| `allow-router-to-api` | Ingress from `ingress` namespace to API port 8080 |
-| `allow-frontend-to-api` | Ingress to API from pods matching frontend selector |
-| `allow-api-to-db` | Ingress to DB from pods matching API selector (port 3306/5432) |
-| `allow-egress-dns` | Egress UDP/TCP port 53 for DNS resolution |
+| Policy name | Type | Rule |
+|---|---|---|
+| `deny-all` | Ingress + Egress | Default deny everything for all DSC pods |
+| `router-to-frontend` | Ingress | From `openshift-ingress` namespace → Frontend port 8080 |
+| `router-to-api` | Ingress | From `openshift-ingress` namespace → API port 8080 |
+| `frontend-to-api` | Ingress | From frontend pods → API port 8080 |
+| `frontend-egress-to-api` | **Egress** | From frontend pods → API port 8080 |
+| `api-to-db` | Ingress | From API pods → DB port 3306 |
+| `api-egress-to-db` | **Egress** | From API pods → DB port 3306 |
+| `egress-dns` | Egress | All DSC pods → UDP/TCP port 53 (DNS) |
 
-Add `allow-egress-https` if the API needs to reach Vault or an external service.
+> **Lesson learned (2026-02-23):** Defining only `api-to-db` (Ingress on DB) without the matching `api-egress-to-db` (Egress from API) causes the .NET API to crash at startup with a TCP connect timeout against MariaDB, even when the DB pod is fully `Running`. Always define both sides.
+
+Add `egress-https` (TCP 443) if the API needs to reach Vault or an external service.
 
 ---
 

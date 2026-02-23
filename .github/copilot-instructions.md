@@ -199,7 +199,14 @@ manifests for BC Gov projects, apply these standards:
 - Always include `podLabels.DataClass: "Medium"` (or higher) for Emerald pods
 - Always include `route.annotations.aviinfrasetting.ako.vmware.com/name: "dataclass-medium"`
 - Use `storageClassName: netapp-file-standard` for PersistentVolumeClaims
-- Include `NetworkPolicy` objects — default-deny; explicitly allow ingress/egress per pod
+- Include `NetworkPolicy` objects — Emerald default-deny blocks **both Ingress AND Egress**
+- Every traffic flow requires **two** policies: one Ingress on the receiver AND one Egress on the sender
+  - Router → frontend: `router-to-frontend` (Ingress on frontend)
+  - Router → API: `router-to-api` (Ingress on API)
+  - Frontend → API: `frontend-to-api` (Ingress on API) + `frontend-egress-to-api` (Egress from frontend)
+  - API → DB: `api-to-db` (Ingress on DB) + `api-egress-to-db` (Egress from API, port 3306)
+  - All pods → DNS: `egress-dns` (Egress UDP/TCP 53)
+- **Common mistake**: defining only `api-to-db` Ingress but forgetting the API Egress rule → TCP connect timeout at startup
 - Use `ClusterIP` services; expose via OpenShift `Route` with TLS edge termination
 - Resource requests and limits are required on every container
 
