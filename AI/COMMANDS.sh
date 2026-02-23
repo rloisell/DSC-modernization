@@ -253,3 +253,12 @@ cd /Users/rloisell/Documents/developer/DSC-modernization
 git add .github/copilot-instructions.md docs/deployment/EmeraldDeploymentAnalysis.md
 git commit -m "docs: document Emerald NetworkPolicy egress lesson learned"
 git push origin develop  # 5e88123 → origin/develop
+
+# Session H continued — SDN model / DNS investigation
+oc annotate route be808f-dsc-dev-dsc-app-frontend -n be808f-dev "aviinfrasetting.ako.vmware.com/name-" --overwrite
+oc annotate route be808f-dsc-dev-dsc-app-api -n be808f-dev "aviinfrasetting.ako.vmware.com/name-" --overwrite
+# Confirmed AKO re-adds annotation within 15s (platform enforced) → reverted values file
+
+# Commit: restore annotation + update guidan2026-02-23,.github/copilot-instructions.md,modified,Updated Helm charts section: AVIf
+2026-02-23,docs/deployment/EmeraldDeploymentAnalysis.md,modified,Expanded Data Classification section with SDN model AVI VIP / Internet-Ingress / DNS tables
+2026-02d 2026-02-23,AI/WORKLOG.md,modified,Appended Session H continued: SDN model findings and route investigation

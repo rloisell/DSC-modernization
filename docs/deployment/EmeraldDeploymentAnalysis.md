@@ -69,16 +69,56 @@ projects that diverge from it should note the differences in their own
 
 The `DataClass` label must be confirmed with Information Security before any
 workload is deployed to Emerald. The value drives both pod labels and AVI
-InfraSetting routing annotations:
+InfraSetting routing annotations.
+
+> **SDN Security Model (June 2022)**: Security classification is based on the
+> information a workload is **responsible for storing**, not the sensitivity of
+> information it can access. Web servers, APIs, and frontends that store no
+> sensitive data = **Low**. Databases storing Protected A/B = **Medium/High**.
 
 ```yaml
 podLabels:
-  DataClass: "Low"   # or Medium / High / Critical
+  DataClass: "Low"   # or Medium / High — confirm with InfoSec
 
 route:
   annotations:
+    # dataclass-low  → private VIP (VPN-accessible; default for most workloads)
+    # dataclass-public → public internet VIP (internet-facing routes only)
     aviinfrasetting.ako.vmware.com/name: "dataclass-low"
 ```
+
+#### AVI VIP types
+
+| Annotation value | VIP type | Reachable from |
+|---|---|---|
+| `dataclass-low` | **Private VIP** | BC Gov VPN only |
+| `dataclass-public` | **Public VIP** | Public internet |
+
+> **AKO enforces this annotation** — the AVI controller will re-add it within
+> seconds if removed. Always include it in Helm values to prevent ArgoCD drift.
+
+#### Internet-Ingress pod label
+
+The `Internet-Ingress` label is enforced by the SDN guardrail layer and controls
+whether a **Public VIP** (`dataclass-public`) can forward traffic to a pod:
+
+| Label value | Effect |
+|---|---|
+| `Internet-Ingress: DENY` | Pod is **not** reachable via a Public VIP. Correct default for all private workloads. VPN access via private VIP still works. |
+| `Internet-Ingress: ALLOW` | Pod **can** receive traffic from a Public VIP. Only needed for truly internet-facing workloads. |
+
+> The SDN guardrail blocks Public VIPs from forwarding to Medium/High pods
+> regardless of this label — `ALLOW` only applies to Low security workloads.
+
+#### DNS split-tunneling
+
+Route hostnames (`*.apps.emerald.devops.gov.bc.ca`) resolve to **private IPs**
+and are only present in the BC Gov VPN DNS. Local/home DNS returns `NXDOMAIN`.
+
+- VPN users must have `apps.emerald.devops.gov.bc.ca` in their VPN split-DNS
+  search domains, otherwise the app URL will not resolve even when on VPN.
+- The OpenShift console URL uses the same wildcard — if the console resolves but
+  the app URL does not, the VPN split-DNS is misconfigured for the tenant namespace.
 
 ---
 

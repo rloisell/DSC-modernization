@@ -75,3 +75,6 @@ AI/COMMANDS.sh,modified,Added Session A commands
 2026-02-23,docs/deployment/EmeraldDeploymentAnalysis.md,modified,Updated §10 NetworkPolicies table with Egress column and dated lesson-learned callout
 2026-02-23,AI/COMMANDS.sh,modified,Added Session H commands
 2026-02-23,AI/CHANGES.csv,modified,Added Session H entries
+2026-02-23,.github/copilot-instructions.md,modified,Updated Helm charts section: AVI VIP types / Internet-Ingress label / DNS split-tunneling from SDN Security Model
+2026-02-23,docs/deployment/EmeraldDeploymentAnalysis.md,modified,Expanded Data Classification section with SDN model AVI VIP / Internet-Ingress / DNS tables
+2026-02-23,AI/WORKLOG.md,modified,Appended Session H continued: SDN model findings and route investigation

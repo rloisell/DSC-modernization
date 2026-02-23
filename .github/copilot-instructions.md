@@ -196,8 +196,16 @@ manifests for BC Gov projects, apply these standards:
   are not complete.
 
 ### Helm charts (GitOps repo)
-- Always include `podLabels.DataClass: "Medium"` (or higher) for Emerald pods
-- Always include `route.annotations.aviinfrasetting.ako.vmware.com/name: "dataclass-medium"`
+- Always include `podLabels.DataClass: "<classification>"` on all Emerald pods — value must be confirmed with InfoSec
+- **AVI InfraSettings — route annotation** (controls which VIP pool handles the route):
+  - `aviinfrasetting.ako.vmware.com/name: "dataclass-low"` → **private VIP** (VPN-accessible; correct for most workloads)
+  - `aviinfrasetting.ako.vmware.com/name: "dataclass-public"` → **public internet VIP** (internet-facing routes only)
+  - AKO (the AVI controller) enforces and re-adds this annotation — always include it in values to avoid ArgoCD drift
+- **Internet-Ingress pod label** (controls whether the Public VIP can forward to a pod — SDN guardrail):
+  - `Internet-Ingress: DENY` — correct default; pod is NOT reachable via a Public VIP. VPN users can still reach it via the private VIP route.
+  - `Internet-Ingress: ALLOW` — only set this if the workload must be reachable from the public internet via a Public VIP
+  - **Do NOT set `Internet-Ingress: ALLOW` on databases or internal services** — guardrails block Public VIP → Medium/High workloads regardless
+- **DNS split-tunneling**: route hostnames (`*.apps.emerald.devops.gov.bc.ca`) resolve only via BC Gov VPN DNS (private IP). Ensure VPN client routes this domain through the VPN DNS server. Local/home DNS will return NXDOMAIN.
 - Use `storageClassName: netapp-file-standard` for PersistentVolumeClaims
 - Include `NetworkPolicy` objects — Emerald default-deny blocks **both Ingress AND Egress**
 - Every traffic flow requires **two** policies: one Ingress on the receiver AND one Egress on the sender
@@ -207,7 +215,7 @@ manifests for BC Gov projects, apply these standards:
   - API → DB: `api-to-db` (Ingress on DB) + `api-egress-to-db` (Egress from API, port 3306)
   - All pods → DNS: `egress-dns` (Egress UDP/TCP 53)
 - **Common mistake**: defining only `api-to-db` Ingress but forgetting the API Egress rule → TCP connect timeout at startup
-- Use `ClusterIP` services; expose via OpenShift `Route` with TLS edge termination
+- Use `ClusterIP` services; expose via OpenShift `Route` with TLS edge termination (platform wildcard cert handles HTTPS — no cert setup needed)
 - Resource requests and limits are required on every container
 
 ### Secrets

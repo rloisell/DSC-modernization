@@ -46,6 +46,44 @@
 - `tenant-gitops-be808f/charts/dsc-app/templates/networkpolicies.yaml` — api-egress-to-db + frontend-egress-to-api
 - `docs/deployment/EmeraldDeploymentAnalysis.md` — §10 NetworkPolicies updated with Egress column + lesson callout
 
+### Session H (continued) — SDN Security Model + Route Accessibility Investigation
+
+**Objective**: Diagnose why frontend route was not reachable from BC Gov VPN.
+
+#### Actions Taken
+
+- Investigated `Internet-Ingress: DENY` label on pods — confirmed it is correct and does NOT block VPN access
+- Read BC Gov SDN Security Classification Model v1.0 (June 2022) — key findings:
+  - `Internet-Ingress: DENY` controls Public VIP (internet) forwarding only; VPN (Zone C) traffic is always Allowable to Low workloads regardless of this label
+  - `dataclass-low` AVI InfraSettings annotation → **private VIP** (VPN-accessible)
+  - `dataclass-public` AVI InfraSettings annotation → **public internet VIP**
+  - Security classification based on data the workload **stores** (not what it accesses): APIs/frontends/web servers = Low; databases storing Protected A/B = Medium/High
+- Attempted to remove `aviinfrasetting.ako.vmware.com/name: dataclass-low` from routes — AKO controller re-added it within 15 seconds (platform enforced; correct behavior)
+- Reverted values file to restore `dataclass-low` annotation on both routes (prevents ArgoCD/AKO drift)
+- DNS investigation: `dsc-be808f-dev.apps.emerald.devops.gov.bc.ca` returns NXDOMAIN from local/home DNS
+  - Route hostnames resolve to private IPs, only in BC Gov VPN DNS
+  - VPN split-DNS must route `*.apps.emerald.devops.gov.bc.ca` through VPN DNS server — if not configured, app URL won't resolve even when on VPN
+- Updated both guidance docs with SDN model knowledge
+
+#### Key Lessons Learned
+
+4. **`Internet-Ingress: DENY` is correct for VPN-accessible workloads** — this label only blocks Public (internet) VIPs. Zone C / VPN traffic is Allowable to Low security workloads per the SDN guardrail spec.
+5. **`dataclass-low` = private VIP, `dataclass-public` = public internet VIP** — AKO enforces the annotation; always include it in Helm values.
+6. **DNS split-tunneling required**: `*.apps.emerald.devops.gov.bc.ca` is private DNS only. VPN client must route this domain through BC Gov VPN DNS server (`142.34.239.5`). Local DNS returns NXDOMAIN.
+7. **Edge TLS is platform-managed**: `termination: edge` on OpenShift Route uses the platform wildcard cert for `*.apps.emerald.devops.gov.bc.ca`. No cert setup needed by the tenant.
+
+#### Additional Commits
+
+- `043005b` — tenant-gitops-be808f `main` — fix: remove dataclass-low AVI annotation (was wrong; reverted)
+- `bc1d413` — tenant-gitops-be808f `main` — fix: restore dataclass-low AVI annotation (confirmed private VIP)
+- `<pending>` — DSC-modernization `develop` — docs: update guidance with SDN Security Model findings
+
+#### Additional Files Changed
+
+- `.github/copilot-instructions.md` — full AVI VIP / Internet-Ingress / DNS split-tunneling guidance block
+- `docs/deployment/EmeraldDeploymentAnalysis.md` — Data Classification section expanded with SDN model tables for AVI VIP types, Internet-Ingress label, and DNS split-tunneling
+- `tenant-gitops-be808f/deploy/dsc-dev_values.yaml` — annotation removed and restored (net no change)
+
 ---
 
 ## 2026-02-23 — Session G: Artifactory Guidance Propagation + Session Startup Protocol
