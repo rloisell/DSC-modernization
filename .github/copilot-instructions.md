@@ -22,6 +22,15 @@ Ryan does not paste these in manually — they are your standing briefing docume
 
 After reading, open with a one-sentence status summary (e.g. "Artifactory approval still pending — nothing to push yet"), then proceed.
 
+### Dependabot PR Check
+
+At the start of each session, check for open Dependabot PRs:
+```bash
+gh pr list --state open --author app/dependabot --json number,title
+```
+If new PRs exist that are not yet in the MASTER TODO (Tier 4), add them.
+PR review strategy: GitHub Actions bumps first (low risk) → NuGet minor/patch → npm minor/patch → major version bumps last (React, router, Vite — require manual testing).
+
 ### Hardcoded deployment context (update this block when state changes)
 
 ```

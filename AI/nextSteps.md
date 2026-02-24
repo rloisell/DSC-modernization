@@ -98,6 +98,42 @@ git push -u origin feature/<name>
 
 ---
 
+### 🔵 Tier 4 — Dependabot PRs (Review & Merge)
+
+Opened 2026-02-21. Review each carefully — several are **major version bumps** with breaking changes.
+Merge strategy: start with GitHub Actions (low risk), then NuGet, then npm major bumps last.
+
+#### GitHub Actions (low-risk — merge first)
+
+| Status | PR | Bump | Risk |
+|--------|----|------|------|
+| ⬜ | [#3](https://github.com/rloisell/DSC-modernization/pull/3) | `docker/build-push-action` 5 → 6 | Low |
+| ⬜ | [#4](https://github.com/rloisell/DSC-modernization/pull/4) | `github/codeql-action` 3 → 4 | Low |
+| ⬜ | [#5](https://github.com/rloisell/DSC-modernization/pull/5) | `actions/setup-dotnet` 4 → 5 | Low |
+| ⬜ | [#6](https://github.com/rloisell/DSC-modernization/pull/6) | `actions/checkout` 4 → 6 | Low |
+| ⬜ | [#7](https://github.com/rloisell/DSC-modernization/pull/7) | `actions/github-script` 7 → 8 | Low |
+
+#### NuGet (review — verify .NET 10 compatibility)
+
+| Status | PR | Bump | Risk | Notes |
+|--------|----|------|------|-------|
+| ⬜ | [#12](https://github.com/rloisell/DSC-modernization/pull/12) | `Microsoft.AspNetCore.OpenApi` 8.0.24 → 10.0.3 | Low | Matches target runtime |
+| ⬜ | [#14](https://github.com/rloisell/DSC-modernization/pull/14) | `Microsoft.EntityFrameworkCore` 9.0.0 → 10.0.3 | Med | Check EF Core 10 breaking changes |
+| ⬜ | [#15](https://github.com/rloisell/DSC-modernization/pull/15) | `Microsoft.EntityFrameworkCore.Design` 9.0.0 → 10.0.3 | Med | Pair with #14 |
+| ⬜ | [#16](https://github.com/rloisell/DSC-modernization/pull/16) | `Swashbuckle.AspNetCore` 6.6.2 → 10.1.4 | Med | .NET 10 now has built-in OpenAPI — may prefer dropping Swashbuckle entirely |
+
+#### npm (major version bumps — review breaking changes)
+
+| Status | PR | Bump | Risk | Notes |
+|--------|----|------|------|-------|
+| ⬜ | [#8](https://github.com/rloisell/DSC-modernization/pull/8) | `jsdom` 26.1.0 → 28.1.0 | Low | Dev dep only |
+| ⬜ | [#9](https://github.com/rloisell/DSC-modernization/pull/9) | `react` 18.2.0 → 19.2.4 | **High** | React 19 has breaking changes — review carefully |
+| ⬜ | [#10](https://github.com/rloisell/DSC-modernization/pull/10) | `react-router-dom` 6.14.1 → 7.13.0 | **High** | RRD v7 has breaking API changes; test all routes |
+| ⬜ | [#11](https://github.com/rloisell/DSC-modernization/pull/11) | `vite` 5.1.0 → 7.3.1 | **High** | Major version jump; verify config compatibility |
+| ⬜ | [#13](https://github.com/rloisell/DSC-modernization/pull/13) | `react-dom` 18.2.0 → 19.2.4 | **High** | Pair with #9 — merge together |
+
+---
+
 ### 🟦 Tier 4 — Architecture Quality (Ongoing Hygiene)
 
 | Status | # | Item | Effort | Notes |
