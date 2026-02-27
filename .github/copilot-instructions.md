@@ -54,6 +54,68 @@ Pipeline : build-and-push.yml triggers on push to develop
 
 ---
 
+## Branch & PR Workflow
+
+`main` is **always protected**. No direct commits. Every change goes through a PR.
+
+### Branch Naming
+```
+feat/<slug>       new feature
+fix/<slug>        bug fix
+chore/<slug>      maintenance, tooling, config
+docs/<slug>       documentation only
+refactor/<slug>   restructuring without behaviour change
+test/<slug>       test additions
+```
+
+### PR Lifecycle
+```bash
+# 1. Create branch
+git checkout -b feat/my-feature
+
+# 2. Commit (conventional format)
+git commit -m "feat: short description
+
+- detail 1
+- detail 2"
+
+# 3. Push and open PR
+git push origin feat/my-feature
+gh pr create --title "feat: short description" --base main
+
+# 4. Monitor CI
+gh pr checks <number> --watch
+
+# 5. Merge when all checks pass
+gh pr merge <number> --squash --delete-branch
+git checkout main && git pull origin main
+```
+
+### Required Status Checks
+Every PR to `main` must pass all CI checks registered in the branch ruleset.
+Status check context names must **exactly match** the `name:` field of each
+workflow job (not the job ID). Mismatches silently block PRs.
+
+### CI Failure Diagnosis
+```bash
+# Get most recent run ID
+gh run list --workflow build-and-test.yml --limit 1 --json databaseId --jq '.[0].databaseId'
+
+# View failure logs
+gh run view <run-id> --log-failed 2>&1 | tail -50
+```
+
+### Common CI Failures
+| Symptom | Cause | Fix |
+|---------|-------|-----|
+| `Top-level await not available` | Vite build target too old | `build.target: 'esnext'` in vite.config.js |
+| Status check required but not found | Job `name:` ≠ ruleset context | Match `name:` in workflow YAML to ruleset string |
+| Ruleset not enforcing | Private repo on free plan | Make repo public: `gh repo edit --visibility public` |
+
+See `.github/agents/github-workflow.agent.md` for the full reference.
+
+---
+
 ## Identity & Attribution
 
 - **Developer / Architect**: Ryan Loiselle — makes all structural and business-logic decisions
