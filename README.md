@@ -1,12 +1,16 @@
 # DSC Modernization
 
-A modernization of the legacy Java *Daily Status & Charges* (DSC) time-tracking system, rewritten as a .NET 10 API with a React/Vite frontend backed by MariaDB.
+A modernization of the legacy Java *Daily Schedule Control* (DSC) time-tracking system, rewritten as a .NET 10 API with a React/Vite frontend backed by MariaDB.
 
 ---
 
 ## What is DSC?
 
-DSC (Daily Status & Charges) is an internal workforce management application used to track employee time entries against projects and expense budgets. The original implementation was a Java / Hibernate application. This repository is a ground-up rewrite targeting:
+DSC (Daily Schedule Control) is an internal workforce management application used to track employee time entries against projects and expense budgets.
+
+The original application was developed in 2009 while working in the Telecom industry at MTS Allstream. The codebase also served as coursework for a 3rd year Advanced Internet Programming course in the Applied Computer Science program at the University of Winnipeg. Further development was completed within the company after the initial submission, filling out many of the features that were incomplete at that time. The original Java implementation is preserved in the [DSC repository](https://github.com/rloisell/DSC).
+
+This repository is a ground-up rewrite targeting:
 
 - **Modern runtime**: .NET 10 (ASP.NET Core 9) API
 - **Modern frontend**: React 18 + Vite with the [B.C. Government Design System](https://design.gov.bc.ca/)

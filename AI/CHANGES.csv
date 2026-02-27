@@ -106,3 +106,4 @@ AI/COMMANDS.sh,modified,Added Session A commands
 2026-02-23,AI/COMMIT_INFO.txt,modified,Added Session L entry (754b9e0 + rl-project-template 041d555)
 2026-02-23,AI/nextSteps.md,modified,Added Tier 4 Dependabot PR table (13 PRs grouped by type — GitHub Actions/NuGet/npm with risk levels)
 2026-02-23,.github/copilot-instructions.md,modified,Added Dependabot PR Check step to Session Startup Protocol
+2026-02-26,README.md,modified,Corrected application name from 'Daily Status & Charges' to 'Daily Schedule Control'; added original development history (2009 MTS Allstream / U of Winnipeg ACS)
