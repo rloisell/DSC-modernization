@@ -289,3 +289,13 @@ curl -s -X POST https://dsc-api-be808f-dev.apps.emerald.devops.gov.bc.ca/api/aut
 # (No new build/deploy commands — documentation-only session)
 # rl-project-template updates committed and pushed:
 # cd ~/Documents/developer/rl-project-template && git commit -m "docs: add Emerald deployment le# cd ~/Documents/developer/rl-project-tempn d# cd ~/Documents/develEPLOYMENT_NEXT_STEPS, EmeraldDeploymentAnalysis)
+
+# Session M — Security scanning 2026-02-26
+brew install trivy
+cd ~/Documents/developer/DSC-modernization/src/DSC.WebClient && npm audit
+cd ~/Documents/developer/DSC-modernization/src/DSC.WebClient && npm audit fix
+cd ~/Documents/developer/DSC-modernization/src/DSC.WebClient && npm audit fix --force
+cd ~/Documents/developer/DSC-modernization/src/DSC.WebClient && npm run build
+cd ~/Documents/developer/DSC-modernization && dotnet list package --vulnerable --include-transitive
+trivy fs --scanners vuln,secret ~/Documents/developer/DSC-modernization
+trivy fs --scanners vuln,secret ~/Documents/developer/DSC

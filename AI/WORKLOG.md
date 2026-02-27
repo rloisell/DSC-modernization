@@ -1,3 +1,48 @@
+## 2026-02-26 — Session M: Security Scanning
+
+**Objective**: Run dependency and filesystem vulnerability scans across both DSC and DSC-modernization; resolve all actionable npm vulnerabilities in the frontend.
+
+### Actions Taken
+
+**npm vulnerability scan (DSC-modernization frontend)**
+- `npm audit` revealed 6 vulnerabilities: 4 high (react-router-dom XSS via open redirect, rollup path traversal), 2 moderate (esbuild/vite dev-server exposure)
+- `npm audit fix` resolved rollup (1 vuln)
+- `npm audit fix --force` upgraded `react-router-dom` → `6.30.3` and `vite` → `5.4.21`; resolved 4 more vulns
+- 2 moderate remain: esbuild ≤0.24.2 via vite 5.x — would require vite 7.x (breaking major version); deferred pending Ryan approval
+- `npm run build` confirmed clean production build after upgrades (vite v5.4.21, 165 modules)
+
+**NuGet vulnerability scan (DSC-modernization .NET)**
+- `dotnet list package --vulnerable --include-transitive` — all 4 projects clean (0 vulnerabilities)
+
+**Trivy filesystem scan — DSC-modernization**
+- All .NET packages: 0 vulnerabilities ✅
+- npm (post-fix): 0 vulnerabilities ✅
+- 8 CVEs found in `src/DSC.WebClient/external/DSC-java/` (reference copy of legacy Java codebase) — all `mysql-connector-java` 5.1.x; these are not part of the modernization runtime
+- No secrets detected ✅
+
+**Trivy filesystem scan — DSC (Java legacy)**
+- 8 CVEs in `lib/mysql-connector-java-5.1.7` and `WebContent/WEB-INF/lib/mysql-connector-java-5.1.45`
+- All same mysql-connector-java CVEs: CVE-2017-3523 (HIGH), CVE-2018-3258 (HIGH), CVE-2023-22102 (HIGH), CVE-2015-2575 (MEDIUM), CVE-2017-3586 (MEDIUM), CVE-2019-2692 (MEDIUM), CVE-2022-21363 (MEDIUM), CVE-2017-3589 (LOW)
+- This is expected for a 2009-era legacy codebase; already captured in modernization plan (T01–T08)
+- No secrets detected ✅
+
+### Files Changed — DSC-modernization
+- `src/DSC.WebClient/package.json` — `react-router-dom` bumped to `^6.30.3`, `vite` to `^5.4.21`
+- `src/DSC.WebClient/package-lock.json` — updated lock file
+
+### Files Changed — DSC (Java legacy)
+- No code changes; scan artefact only
+
+### Key Decisions
+- vite 7.x upgrade deferred — major breaking change; needs Ryan's direction before proceeding
+- mysql-connector-java CVEs in DSC are expected and pre-existing; addressed by the modernization project itself
+
+### Commits
+- DSC-modernization `develop`: `chore: fix npm vulnerabilities — upgrade react-router-dom and vite`
+- DSC `master`: `chore: security scan — no code changes (trivy scan results logged)`
+
+---
+
 ## 2026-02-23 — Session L: Post-Deployment Documentation
 
 **Objective**: Update README and docs with live Emerald deployment details; propagate all deployment learnings to `rl-project-template`.

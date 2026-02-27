@@ -107,3 +107,7 @@ AI/COMMANDS.sh,modified,Added Session A commands
 2026-02-23,AI/nextSteps.md,modified,Added Tier 4 Dependabot PR table (13 PRs grouped by type — GitHub Actions/NuGet/npm with risk levels)
 2026-02-23,.github/copilot-instructions.md,modified,Added Dependabot PR Check step to Session Startup Protocol
 2026-02-26,README.md,modified,Corrected application name from 'Daily Status & Charges' to 'Daily Schedule Control'; added original development history (2009 MTS Allstream / U of Winnipeg ACS)
+2026-02-26,src/DSC.WebClient/package.json,modified,Bumped react-router-dom to ^6.30.3 and vite to ^5.4.21 via npm audit fix (XSS + path traversal CVEs resolved)
+2026-02-26,src/DSC.WebClient/package-lock.json,modified,Updated lock file after npm audit fix --force
+2026-02-26,AI/COMMANDS.sh,modified,Session M commands appended (security scanning)
+2026-02-26,AI/WORKLOG.md,modified,Session M entry prepended
