@@ -16,7 +16,7 @@ Skills are **progressively disclosed**:
 
 ---
 
-## Agent Team (9 skills)
+## Agent Team (13 skills)
 
 | Directory | Scope |
 |-----------|-------|
@@ -29,10 +29,14 @@ Skills are **progressively disclosed**:
 | `ef-core/` | Pomelo/MariaDB patterns, migration workflow, startup Migrate(), Linux LINQ gotcha, service layer |
 | `bc-gov-devops/` | Emerald OpenShift, Artifactory, Helm, health checks, Common SSO, oc commands, ArgoCD |
 | `agent-evolution/` | Self-learning — monitors sessions, updates KNOWLEDGE sections, promotes shared skills |
+| `security-architect/` | OWASP Top 10, SAST/DAST toolchain, input validation, audit logging, container security, STRA/PIA, session management |
+| `bc-gov-iam/` | DIAM/Keycloak OIDC PKCE, realm selection, React oidc-client-ts, token lifecycle, backchannel logout |
+| `observability/` | Serilog structured logging, health checks, Prometheus pod annotations, OpenTelemetry .NET SDK |
+| `api-design/` | _(future)_ OpenAPI/Swagger, versioning, pagination, RFC 7807 ProblemDetails |
 
 ---
 
-## Shared Skills (4 skills)
+## Shared Skills (5 skills)
 
 Reusable skills referenced by multiple agents. VS Code discovers all directories automatically.
 
@@ -42,6 +46,7 @@ Reusable skills referenced by multiple agents. VS Code discovers all directories
 | `git-conventions/` | session-workflow, github-workflow, ci-cd-pipeline |
 | `bc-gov-emerald/` | bc-gov-devops, ci-cd-pipeline |
 | `containerfile-standards/` | bc-gov-devops, ci-cd-pipeline |
+| `vault-secrets/` | security-architect, bc-gov-devops, ci-cd-pipeline |
 
 ---
 
@@ -73,9 +78,17 @@ Reusable skills referenced by multiple agents. VS Code discovers all directories
   │     ├── SKILL.md
   │     └── references/
   │           └── evolution-log.md
+  ├── security-architect/
+  │     └── SKILL.md
+  ├── bc-gov-iam/
+  │     └── SKILL.md
+  ├── observability/
+  │     └── SKILL.md
   ├── ai-session-files/        ← shared skill
   │     └── SKILL.md
   ├── git-conventions/         ← shared skill
+  │     └── SKILL.md
+  ├── vault-secrets/           ← shared skill
   │     └── SKILL.md
   ├── bc-gov-emerald/          ← shared skill
   │     └── SKILL.md
