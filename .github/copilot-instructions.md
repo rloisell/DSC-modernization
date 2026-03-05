@@ -6,6 +6,11 @@ by Ryan Loiselle across his development projects.
 
 For the full human-readable version of these standards, see `CODING_STANDARDS.md`.
 
+> **Agents & Skills**: All persona agents and reusable skills are in `.github/agents/`
+> which is a git submodule of [`rl-agents-n-skills`](https://github.com/rloisell/rl-agents-n-skills).
+> VS Code discovers them automatically. Claude Code loads them as a plugin via `.claude/settings.json`.
+> To update: `cd .github/agents && git pull origin main && cd ../.. && git add .github/agents && git commit -m "chore: update rl-agents-n-skills submodule"`
+
 ---
 
 ## Identity & Attribution
