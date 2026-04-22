@@ -47,3 +47,4 @@ __pycache__/
 *.pyo
 .dev-env
 src/DSC.WebClient/external/DSC-java
+tenant-gitops-be808f
