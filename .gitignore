@@ -45,3 +45,4 @@ src/DSC.WebClient/dist/
 __pycache__/
 *.pyc
 *.pyo
+.dev-env
