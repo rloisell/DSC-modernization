@@ -1,3 +1,85 @@
+## 2026-04-14 — Session: Local Dev Environment Stability Fixes
+
+**Objective**: Fix two local dev breakages (EF Core migration crash + Vite 500 errors)
+and implement prevention measures to stop recurrence.
+
+### Issues Fixed
+
+**Issue #2 — EF Core startup crash ("Table 'projects' already exists")**
+- Root cause: `__EFMigrationsHistory` was empty (Java-created schema); EF tried to
+  re-run `InitialCreate`, crashing on existing tables.
+- Fix: Inserted all 21 migration IDs directly into `__EFMigrationsHistory`.
+- Prevention: Created `scripts/baseline-migrations.sh` (idempotent; exits if history
+  already has rows).
+
+**Issue #3 — All frontend /api/* calls returned 500**
+- Root cause: `vite.config.js` proxy target was `http://localhost:5005` (stale);
+  API runs on port `5115`.
+- Fix: Updated proxy target in `vite.config.js` to `5115`.
+- Prevention: Refactored `vite.config.js` to use Vite's `loadEnv` — reads
+  `VITE_API_URL` from `.env.local` with fallback to `http://localhost:5115`.
+  Added `.env.local.example` as committed template.
+
+### Files Changed
+- `scripts/baseline-migrations.sh` — new; baseline EF migration history tool
+- `src/DSC.WebClient/vite.config.js` — reads `VITE_API_URL` from `.env.local`
+- `src/DSC.WebClient/.env.local.example` — new; `.env.local` template
+- `docs/local-development/README.md` — fixed port 5005→5115; added canonical port
+  table + recovery section
+- `docs/local-development/ISSUES_LOG.md` — documented Issue #2 and Issue #3
+
+### Verified Working
+- API: port 5115, health endpoint 200 Healthy
+- Login: `rloisel1 / test-password-updated` confirmed via direct curl
+- Vite dev server: restarted with corrected config
+
+---
+
+## 2026-04-14 — Session: Deployment State Verification + Document Correction
+
+**Objective**: Verify live deployment state in Emerald via `oc` CLI; correct all documents
+that referenced `be808f-docker-local` (actual registry is `dbe8-docker-local`); mark all
+blocking deployment steps as complete; audit agents/skills for Artifactory content.
+
+### Confirmed Live State (via `oc` CLI, be808f-dev)
+
+| Resource | Detail |
+|---|---|
+| API pod | `be808f-dsc-dev-dsc-app-api-*` — 1/1 Running, 5 restarts, age 35+ days |
+| Frontend pod | `be808f-dsc-dev-dsc-app-frontend-*` — 1/1 Running |
+| DB pod | `be808f-dsc-dev-dsc-app-db-0` — 1/1 Running (StatefulSet) |
+| Frontend route | `dsc-be808f-dev.apps.emerald.devops.gov.bc.ca` |
+| API route | `dsc-api-be808f-dev.apps.emerald.devops.gov.bc.ca` |
+| Deployment created | 2026-02-21T08:19:03Z |
+| Secrets created | 2026-02-23 (`artifactory-pull-secret`, `dsc-db-secret`, `dsc-admin-secret`) |
+| PVC | `db-data-be808f-dsc-dev-dsc-app-db-0` — 1Gi `netapp-file-standard` — age 51+ days |
+| Current images | `artifacts.developer.gov.bc.ca/dbe8-docker-local/dsc-api:9444112` |
+|  | `artifacts.developer.gov.bc.ca/dbe8-docker-local/dsc-frontend:9444112` |
+
+### Key Correction
+
+**Artifactory repository name**: All prior documents referenced `be808f-docker-local`.
+The actual deployed repository is **`dbe8-docker-local`**. Fixed in:
+- `.github/workflows/build-and-push.yml` (NAMESPACE env var)
+- `docs/deployment/DEPLOYMENT_ANALYSIS.md` §13.5 and §14.1
+- `docs/deployment/DEPLOYMENT_NEXT_STEPS.md` §2.2 and §3
+
+### Files Changed
+
+- `docs/deployment/DEPLOYMENT_NEXT_STEPS.md` — purpose updated to "completed"; §2.1–2.5 marked ✅ with real dates; §3 checklist all checked; registry path corrected
+- `docs/deployment/DEPLOYMENT_ANALYSIS.md` — §13.5 rewritten as completed table; registry corrected in §14.1
+- `.github/workflows/build-and-push.yml` — `NAMESPACE` corrected from `be808f-docker-local` to `dbe8-docker-local`
+- `AI/WORKLOG.md`, `AI/CHANGES.csv` — this session
+
+### Agents/Skills Artifactory Notes
+
+- `bc-gov-devops/SKILL.md` + `agents/bc-gov-devops.md`: Artifactory setup docs + approval process
+- `ci-cd-pipeline/SKILL.md`: `ARTIFACTORY_URL`, `ARTIFACTORY_SERVICE_ACCOUNT`, `ARTIFACTORY_SERVICE_ACCOUNT_TOKEN` (note: the live pipeline uses `ARTIFACTORY_USERNAME`/`ARTIFACTORY_PASSWORD` — slightly different naming)
+- `bc-gov-devops.md` agent: "Approval required before first push — post `#devops-artifactory`, wait for approval, create `docker-local` repo, add SA as Developer"
+- `vault-secrets/SKILL.md`: Vault path convention `secret/be808f/<env>/<key>`; Vault migration still pending for dev secrets
+
+---
+
 ## 2026-02-22 — Session D: spec-kitty Initialization + Feature Specs (Todos #2–#9)
 
 **Objective**: Initialize spec-kitty in DSC-modernization and build complete specs, implementation plans, and work packages for all planned Tier 1–2 features. Update rl-project-template with spec-kitty guidance for future projects.

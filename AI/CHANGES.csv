@@ -1,4 +1,13 @@
 path,action,notes
+2026-04-14,scripts/baseline-migrations.sh,created,new script to baseline EF Core __EFMigrationsHistory from empty (Java-created schema) — inserts all 21 migration IDs; idempotent
+2026-04-14,src/DSC.WebClient/vite.config.js,modified,refactored to loadEnv function form; proxy target reads VITE_API_URL from .env.local with fallback to localhost:5115 — eliminates proxy port drift
+2026-04-14,src/DSC.WebClient/.env.local.example,created,template for .env.local; documents VITE_API_URL override
+2026-04-14,docs/local-development/README.md,modified,fixed stale port 5005→5115 in seeding curl and verify commands; added canonical port table + recovery section for both issues
+2026-04-14,docs/local-development/ISSUES_LOG.md,modified,documented Issue #2 (EF migration crash) and Issue #3 (Vite proxy port mismatch) with root cause and prevention
+2026-04-14,AI/WORKLOG.md,modified,prepended 2026-04-14 session entry — local dev stability fixes
+2026-04-14,docs/deployment/DEPLOYMENT_NEXT_STEPS.md,modified,deployment. Marked all blocking steps complete with real dates; corrected Artifactory repo to dbe8-docker-local; purpose updated to reflect completed deployment
+2026-04-14,docs/deployment/DEPLOYMENT_ANALYSIS.md,modified,deployment. §13.5 rewritten as completed table; §14.1 registry path corrected to dbe8-docker-local
+2026-04-14,.github/workflows/build-and-push.yml,modified,fix. NAMESPACE env var corrected from be808f-docker-local to dbe8-docker-local
 AI/WORKLOG.md,added,initial worklog for repo bootstrap
 README.md,added,project description
 .gitignore,added,ignore .NET artifacts

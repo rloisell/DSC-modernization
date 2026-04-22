@@ -1,7 +1,14 @@
-import { defineConfig } from 'vite'
+import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
 
-export default defineConfig({
+// Use function form so we can read .env.local before defining the proxy target.
+// Set VITE_API_URL in .env.local if your API runs on a non-default port.
+// See .env.local.example for the template.
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, process.cwd(), '')
+  const apiTarget = env.VITE_API_URL || 'http://localhost:5115'
+
+  return {
   plugins: [react({ fastRefresh: false })],
   // Serve static assets from `public` while using the project root for index.html
   publicDir: 'public',
@@ -31,7 +38,7 @@ export default defineConfig({
     proxy: {
       // Proxy API calls to the backend during local development
       '/api': {
-        target: 'http://localhost:5005',
+        target: apiTarget,
         changeOrigin: true,
         secure: false,
       }
@@ -42,4 +49,5 @@ export default defineConfig({
     globals: true,
     setupFiles: './src/test-setup.js',
   },
+  }
 })

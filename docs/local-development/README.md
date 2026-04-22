@@ -7,11 +7,27 @@
 This guide documents how to run the DSC modernization stack locally, including
 dependencies, configuration, and persistent services that keep running when VS Code is closed.
 
+## dev-ctl — Quick Start
+
+This project is managed by `~/dev-tools/dev-ctl` alongside all other local projects.
+
+```bash
+dev-ctl start  dscmod   # start MariaDB (shared) + API + Frontend
+dev-ctl stop   dscmod   # stop API + Frontend (MariaDB left running)
+dev-ctl status          # health table — all projects at once
+dev-ctl install-monitor # cron every 5 min + macOS alert if down
+```
+
+See `.dev-env` in the project root for service declarations, and
+`rl-agents-n-skills/local-dev/SKILL.md` for the full reference.
+
+---
+
 ## What runs locally
 
-- API: ASP.NET Core (Kestrel) on http://localhost:5005
+- API: ASP.NET Core (Kestrel) on http://localhost:5115
 - WebClient: Vite dev server on http://localhost:5173
-- Database: MariaDB 10.11 on localhost:3306
+- Database: MariaDB 10.11 on localhost:3306 (shared with other projects)
 
 ## Dependencies
 
@@ -73,7 +89,7 @@ mysql -h 127.0.0.1 -P 3306 -u dsc_local -pdsc_password dsc_dev < spec/fixtures/d
 Seed legacy Java test data through the admin endpoint:
 
 ```bash
-curl -X POST http://localhost:5005/api/admin/seed/test-data \
+curl -X POST http://localhost:5115/api/admin/seed/test-data \
   -H "X-Admin-Token: local-admin-token"
 ```
 
@@ -103,7 +119,7 @@ Notes:
 API:
 
 ```bash
-dotnet run --project src/DSC.Api --urls http://localhost:5005
+dotnet run --project src/DSC.Api
 ```
 
 WebClient:
@@ -147,20 +163,62 @@ Logs:
 ## Verify services
 
 ```bash
-curl -sS http://localhost:5005/health || true
+curl -sS http://localhost:5115/health || true
 curl -sS http://localhost:5173/ | head -n 20
 ```
 
 ```bash
-lsof -nP -iTCP:5005 -sTCP:LISTEN | head -n 5
+lsof -nP -iTCP:5115 -sTCP:LISTEN | head -n 5
 lsof -nP -iTCP:5173 -sTCP:LISTEN | head -n 5
 ```
+
+## Canonical port assignments
+
+| Service  | Port  | Config location                                    |
+|----------|-------|----------------------------------------------------|
+| API      | 5115  | `src/DSC.Api/Properties/launchSettings.json`       |
+| Frontend | 5173  | `src/DSC.WebClient/vite.config.js`                 |
+| MariaDB  | 3306  | system (Homebrew)                                  |
+
+> If you need to change the API port, update **both** `launchSettings.json` and
+> `src/DSC.WebClient/.env.local` (`VITE_API_URL=http://localhost:<newport>`).
+
+## Recovering from a broken local environment
+
+### API fails on startup — "Table 'projects' already exists"
+
+This happens when the `dsc_dev` database schema was created by the legacy Java app
+(or restored from a backup) and `__EFMigrationsHistory` is empty. EF Core tries to
+re-run `InitialCreate` and crashes on the existing tables.
+
+**Fix** (safe to run any time — exits early if history already exists):
+
+```bash
+./scripts/baseline-migrations.sh
+```
+
+Then restart the API normally.
+
+### Frontend returns 500 for all `/api/*` calls
+
+This happens when the Vite proxy in `vite.config.js` points to a stale API port.
+Check `server.proxy['/api'].target` against the actual API port in `launchSettings.json`.
+
+To override without editing the committed config, add a `.env.local` file:
+
+```bash
+cp src/DSC.WebClient/.env.local.example src/DSC.WebClient/.env.local
+# edit VITE_API_URL if needed
+```
+
+Then restart the Vite dev server (`npm run dev`).
 
 ## Troubleshooting
 
 - Port already in use: stop the process or choose a new port.
 - Database connection errors: verify MariaDB is running and credentials match.
 - API admin endpoints: confirm Admin__RequireToken and X-Admin-Token settings.
+- Local credentials: `rloisel1 / test-password-updated` (seeded by TestDataSeeder on API start).
 
 ## References
 

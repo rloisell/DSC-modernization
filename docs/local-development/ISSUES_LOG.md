@@ -211,6 +211,87 @@ Since the .NET application (which is the production interface) works correctly, 
 
 ---
 
+## Issue #2: EF Core Startup Crash — "Table 'projects' already exists" (RESOLVED ✓)
+
+### Timeline
+- **Discovered**: 2026-04-14
+- **Status**: RESOLVED
+- **Severity**: HIGH
+- **Category**: Database / EF Core Migrations
+
+### Description
+The API failed to start after the local `dsc_dev` database was restored or initialized
+using the legacy Java DSC app. Startup log showed:
+
+```
+MySqlException: Table 'projects' already exists
+```
+
+### Root Cause Analysis
+The `dsc_dev` schema was created by the Java application, which does not use EF Core
+migrations. The `__EFMigrationsHistory` table existed but was **empty**. When the
+.NET API started, EF Core saw no history and tried to apply `20260219220242_InitialCreate`,
+which attempts to `CREATE TABLE projects` — failing because the table already exists.
+
+### Solution Implemented
+Inserted all 21 EF Core migration IDs directly into `__EFMigrationsHistory` with
+`ProductVersion='9.0.0'`, baselining the schema so EF treats it as fully migrated.
+
+**Permanent fix**: script `scripts/baseline-migrations.sh` added to the repository.
+Run it once after any restore from a Java-created backup:
+
+```bash
+./scripts/baseline-migrations.sh
+```
+
+### Files Modified
+- `scripts/baseline-migrations.sh` — new; automates the baseline operation
+- `docs/local-development/README.md` — added recovery section and canonical port table
+
+### Prevention / Notes
+- Always run `./scripts/baseline-migrations.sh` before first API start on a
+  Java-sourced database.
+- The script is idempotent — exits early if history already has rows.
+
+---
+
+## Issue #3: Frontend 500 on All API Calls — Vite Proxy Port Mismatch (RESOLVED ✓)
+
+### Timeline
+- **Discovered**: 2026-04-14
+- **Status**: RESOLVED
+- **Severity**: HIGH
+- **Category**: Frontend / Local Dev Configuration
+
+### Description
+All frontend requests to `/api/*` returned HTTP 500. The health check page showed
+"Request failed with status code 500 / Endpoint: /api/health/details". Direct `curl`
+calls to the API on port 5115 succeeded normally.
+
+### Root Cause Analysis
+`src/DSC.WebClient/vite.config.js` had the Vite dev-server proxy target hardcoded to
+`http://localhost:5005` — an old API port. The API's `launchSettings.json` specifies
+port `5115`. Every proxied request hit a dead port, returning 502/500.
+
+### Solution Implemented
+1. Corrected the proxy target in `vite.config.js` from `5005` → `5115`.
+2. Refactored `vite.config.js` to use Vite's `loadEnv` so the API URL is read from
+   `.env.local` at dev-server startup — eliminating future port drift.
+3. Added `src/DSC.WebClient/.env.local.example` as the template.
+
+### Files Modified
+- `src/DSC.WebClient/vite.config.js` — proxy reads `VITE_API_URL` from `.env.local`
+  with fallback to `http://localhost:5115`
+- `src/DSC.WebClient/.env.local.example` — new; committed template for local overrides
+- `docs/local-development/README.md` — added canonical port table + recovery section
+
+### Prevention / Notes
+- If the API port ever changes, update `launchSettings.json` **and** `.env.local`.
+- `.env.local` is gitignored; use `.env.local.example` as the source of truth.
+- Local test credentials: `rloisel1 / test-password-updated` (seeded on API start).
+
+---
+
 ## Contact & References
 
 For questions about this issue log, refer to:
@@ -221,5 +302,5 @@ For questions about this issue log, refer to:
 
 ---
 
-*Last Updated: 2026-02-20*  
+*Last Updated: 2026-04-14*  
 *Status: All issues RESOLVED*

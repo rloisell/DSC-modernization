@@ -42,7 +42,7 @@ permissions:
 
 env:
   REGISTRY:    artifacts.developer.gov.bc.ca
-  NAMESPACE:   be808f-docker-local
+  NAMESPACE:   dbe8-docker-local
   API_IMAGE:   dsc-api
   WEB_IMAGE:   dsc-frontend
   GITOPS_REPO: bcgov-c/tenant-gitops-be808f

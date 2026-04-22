@@ -1,14 +1,31 @@
 # DSC Modernization — Deployment Next Steps
 <!-- Author: Ryan Loiselle, Developer/Architect | GitHub Copilot | February 2026 -->
 
+## ✅ DEPLOYMENT COMPLETE — 2026-02-21
+
+**DSC is live on BC Gov Emerald (`be808f-dev`).** Confirmed via `oc` CLI on 2026-04-14.
+
+| Resource | Value |
+|---|---|
+| Frontend URL | `https://dsc-be808f-dev.apps.emerald.devops.gov.bc.ca` |
+| API URL | `https://dsc-api-be808f-dev.apps.emerald.devops.gov.bc.ca` |
+| Artifactory registry | `artifacts.developer.gov.bc.ca/dbe8-docker-local/` |
+| Current image tag | `9444112` (GitHub Actions run number) |
+| First ArgoCD sync | 2026-02-21 |
+| Secrets created | 2026-02-23 |
+| DB PVC | `db-data-be808f-dsc-dev-dsc-app-db-0` — 1Gi `netapp-file-standard` |
+
+> ⚠️ **Registry path correction**: All earlier docs referenced `be808f-docker-local` as the
+> Artifactory repository. The actual deployed repository is **`dbe8-docker-local`**.
+> Update any scripts, CI env vars, or Helm values that reference the old path.
+
 ## Purpose
 
-This document captures the remaining steps required to complete the first deployment
+This document captures the steps that were required to complete the first deployment
 of DSC to the **BC Gov Private Cloud PaaS — Emerald Hosting Tier** (`be808f-dev`
-namespace). All code artefacts are committed and pushed. What remains is platform
-provisioning and secret creation.
+namespace). All code artefacts and platform provisioning are now complete.
 
-**Current state as of 2026-02-21:**
+**State as of 2026-02-21 (first deployment):**
 
 | Repo | Branch | HEAD |
 |------|--------|------|
@@ -79,113 +96,62 @@ Replace the large stale Datree comment block with a 3-line pointer to `policy-en
 
 ---
 
-## 2. Blocking Steps — Must Complete Before First Sync
+## 2. Blocking Steps — ✅ ALL COMPLETE
 
-These steps must all be done before ArgoCD can successfully sync DSC to `be808f-dev`.
-They are grouped by who performs them.
+All platform provisioning steps were completed. Confirmed via `oc` CLI 2026-04-14.
 
-### 2.1 — GitHub Secrets (Developer Action)
+### 2.1 — GitHub Secrets ✅ DONE
 
-Three secrets must be added to `rloisell/DSC-modernization` → Settings → Secrets →
-Actions before the build pipeline can run.
+Three secrets confirmed set in `rloisell/DSC-modernization`:
 
-| Secret Name | Value | Purpose | Repo |
-|---|---|---|---|
-| `ARTIFACTORY_USERNAME` | Artifactory service account username | Log in to `artifacts.developer.gov.bc.ca` to push images | `DSC-modernization` |
-| `ARTIFACTORY_PASSWORD` | Artifactory service account password / API key | As above | `DSC-modernization` |
-| `GITOPS_TOKEN` | GitHub PAT with `repo` write scope on `bcgov-c/tenant-gitops-be808f` | `update-gitops` job patches image tags; `create-prod-pr` job opens prod PR | `DSC-modernization` |
+| Secret Name | Purpose | Status |
+|---|---|---|
+| `ARTIFACTORY_USERNAME` | Log in to `artifacts.developer.gov.bc.ca` | ✅ set |
+| `ARTIFACTORY_PASSWORD` | As above | ✅ set |
+| `GITOPS_TOKEN` | PAT with write scope on `bcgov-c/tenant-gitops-be808f` | ✅ set |
 
-> **No `DATREE_TOKEN` required.** The correct Datree implementation uses the Helm plugin in offline mode (`helm datree config set offline local`) — no token is needed. See `EmeraldDeploymentAnalysis.md` §7.2 for the full `policy-enforcement.yaml` template.
+> **No `DATREE_TOKEN` required.** The correct Datree implementation uses the Helm plugin in offline mode.
 
-**Confirm:** Does an Artifactory service account already exist for `be808f`? The
-co-tenant (`jag-network-tools`) already uses one — check if it can be shared or if
-a new one is needed.
+**Resolved:** Artifactory service account confirmed working — images deploying from `dbe8-docker-local`.
 
-### 2.2 — Artifactory Setup (Platform Team / Developer)
+### 2.2 — Artifactory Setup ✅ DONE (2026-02-23)
 
-| Action | Notes |
-|---|---|
-| Confirm `be808f-docker-local` Docker repository exists | Images push to `artifacts.developer.gov.bc.ca/be808f-docker-local/dsc-api:<tag>` and `dsc-frontend:<tag>` |
-| Confirm push rights for the service account | The service account credentials in Step 2.1 must have push permission on this repo |
-| Confirm `mariadb:10.11` is available in Artifactory | The `db-statefulset.yaml` template pulls the MariaDB base image. Emerald pods cannot pull from Docker Hub directly — the image must be in Artifactory or a remote-cached Artifactory virtual repo |
+| Action | Status | Actual Value |
+|---|---|---|
+| Docker repository exists | ✅ | **`dbe8-docker-local`** (NOT `be808f-docker-local` as originally documented) |
+| Service account credentials configured | ✅ | `artifactory-pull-secret` created in namespace 2026-02-23 |
+| `mariadb:10.11` available | ✅ | Confirmed — DB pod running 51+ days |
 
-### 2.3 — First Image Build (Developer Action)
+### 2.3 — First Image Build ✅ DONE (2026-02-21)
 
-Once the GitHub Secrets are set, trigger the build pipeline:
+Pipeline ran successfully. Both images pushed to Artifactory.
+Current deployed tag: `9444112` (GitHub Actions run number format — note this differs
+from the documented SHA strategy; the run number is what the pipeline actually produced).
 
-```bash
-# Push any commit to the develop branch to trigger build-and-push.yml
-git checkout -b develop
-git push -u origin develop
+```
+artifacts.developer.gov.bc.ca/dbe8-docker-local/dsc-api:9444112
+artifacts.developer.gov.bc.ca/dbe8-docker-local/dsc-frontend:9444112
 ```
 
-The pipeline will:
-1. Build `dsc-api` and `dsc-frontend` images
-2. Push them to Artifactory with the Git SHA as the tag
-3. Commit back to `tenant-gitops-be808f` to update the `api.image.tag` and
-   `frontend.image.tag` fields in `deploy/dsc-dev_values.yaml`
+### 2.4 — Kubernetes Secrets in `be808f-dev` ✅ DONE (2026-02-23)
 
-**Verify:** After the workflow completes, check that `dsc-dev_values.yaml` in the
-gitops repo has a real image tag (not the placeholder `TAG`).
+All three secrets confirmed present in namespace (via `oc get secrets -n be808f-dev`):
 
-### 2.4 — Kubernetes Secrets in `be808f-dev` (Developer Action — requires `oc` access)
+| Secret | Type | Created |
+|---|---|---|
+| `artifactory-pull-secret` | `kubernetes.io/dockerconfigjson` | 2026-02-23 |
+| `dsc-db-secret` | `Opaque` (3 keys) | 2026-02-23 |
+| `dsc-admin-secret` | `Opaque` (1 key) | 2026-02-23 |
 
-Two application secrets and one pull secret must exist in the namespace before pods
-will start. These are **not** in the GitOps repo (by design — secrets are never
-committed). Create them manually:
+### 2.5 — Register ArgoCD Application ✅ DONE (2026-02-21)
 
-#### Artifactory pull secret
-```bash
-oc -n be808f-dev create secret docker-registry artifactory-pull-secret \
-  --docker-server=artifacts.developer.gov.bc.ca \
-  --docker-username=<ARTIFACTORY_USERNAME> \
-  --docker-password=<ARTIFACTORY_PASSWORD>
-```
+`be808f-dsc-dev.yaml` applied and ArgoCD is managing the deployment.
+First sync timestamp confirmed: 2026-02-21T08:19:03Z (deployment creation timestamp from cluster).
 
-#### Database secret
-```bash
-oc -n be808f-dev create secret generic dsc-db-secret \
-  --from-literal=MARIADB_ROOT_PASSWORD=<choose-a-dev-root-password> \
-  --from-literal=MARIADB_USER=dscapp \
-  --from-literal=MARIADB_PASSWORD=<choose-a-dev-app-password> \
-  --from-literal=MARIADB_DATABASE=dscdb
-```
-
-The connection string injected into the API pod will be:
-```
-Server=dsc-db;Port=3306;Database=dscdb;Uid=dscapp;Pwd=<MARIADB_PASSWORD>;
-```
-
-#### Admin token secret
-```bash
-oc -n be808f-dev create secret generic dsc-admin-secret \
-  --from-literal=ADMIN_TOKEN=<choose-a-dev-admin-token>
-```
-
-This value is passed as `X-Admin-Token` header to seed/admin endpoints. A UUID is fine
-for dev.
-
-### 2.5 — Register ArgoCD Application (Platform Team or Developer)
-
-The ArgoCD Application CRD for dev is at:
-```
-tenant-gitops-be808f/applications/argocd/be808f-dsc-dev.yaml
-```
-
-ArgoCD must be told to watch this. Two possible paths:
-
-**Option A — Developer applies directly (if you have cluster access):**
-```bash
-oc apply -f tenant-gitops-be808f/applications/argocd/be808f-dsc-dev.yaml \
-  -n <argocd-namespace>
-```
-
-**Option B — Platform team bootstraps it:**
-Ask the platform team to apply `be808f-dsc-dev.yaml` into the ArgoCD namespace. Provide
-them the file from the gitops repo.
-
-Once applied, ArgoCD will immediately attempt to sync `charts/dsc-app` against
-`be808f-dev` using `deploy/dsc-dev_values.yaml`.
+All three pods running:
+- `be808f-dsc-dev-dsc-app-api-*` — 1/1 Running (35+ days)
+- `be808f-dsc-dev-dsc-app-db-0` — 1/1 Running (35+ days)
+- `be808f-dsc-dev-dsc-app-frontend-*` — 1/1 Running (35+ days)
 
 > **Production deployment note (ISB EA Option 2 requirement):** Do not push directly to
 > `main` or force-push prod values to the gitops repo. The `create-prod-pr` job in
@@ -196,21 +162,18 @@ Once applied, ArgoCD will immediately attempt to sync `charts/dsc-app` against
 
 ---
 
-## 3. Fast Path — Ordered Checklist
+## 3. Fast Path — Ordered Checklist ✅ ALL COMPLETE
 
-If the namespace and Artifactory are already provisioned by the co-tenant, this is the
-minimal sequence:
-
-- [ ] **1.** Add `ARTIFACTORY_USERNAME`, `ARTIFACTORY_PASSWORD`, `GITOPS_TOKEN` to GitHub Secrets in `DSC-modernization`
-- [ ] **2.** Push `develop` branch → confirm `build-and-push.yml` green → confirm images appear in Artifactory
-- [ ] **3.** Confirm `dsc-dev_values.yaml` in gitops repo has been updated with a real image tag
-- [ ] **4.** `oc create secret docker-registry artifactory-pull-secret` in `be808f-dev`
-- [ ] **5.** `oc create secret generic dsc-db-secret` in `be808f-dev`
-- [ ] **6.** `oc create secret generic dsc-admin-secret` in `be808f-dev`
-- [ ] **7.** Apply or register `be808f-dsc-dev.yaml` with ArgoCD
-- [ ] **8.** Watch ArgoCD sync — all resources in `be808f-dev` should go green
-- [ ] **9.** Visit the frontend route: `https://dsc-frontend-be808f-dev.apps.emerald.devops.gov.bc.ca`
-- [ ] **10.** Hit `https://dsc-api-be808f-dev.apps.emerald.devops.gov.bc.ca/health/ready` — expect `{"status":"Healthy"}`
+- [x] **1.** GitHub Secrets set ✅
+- [x] **2.** `develop` push → `build-and-push.yml` green → images in Artifactory ✅ (tag `9444112`)
+- [x] **3.** `dsc-dev_values.yaml` updated with real image tag ✅
+- [x] **4.** `artifactory-pull-secret` created in `be808f-dev` ✅ 2026-02-23
+- [x] **5.** `dsc-db-secret` created ✅ 2026-02-23
+- [x] **6.** `dsc-admin-secret` created ✅ 2026-02-23
+- [x] **7.** `be808f-dsc-dev.yaml` registered with ArgoCD ✅
+- [x] **8.** ArgoCD synced — all pods green ✅
+- [x] **9.** Frontend live: `https://dsc-be808f-dev.apps.emerald.devops.gov.bc.ca` ✅
+- [x] **10.** API health check: `https://dsc-api-be808f-dev.apps.emerald.devops.gov.bc.ca/health/ready` ✅
 
 ---
 

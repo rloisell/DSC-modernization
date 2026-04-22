@@ -518,24 +518,28 @@ injected at deploy time via the `{{ include "dsc-app.apiServiceName" . }}` helpe
 
 The Helm chart uses these paths for `livenessProbe` and `readinessProbe`.
 
-### 13.5 Remaining Platform Provisioning Steps (Human Actions Required)
+### 13.5 Platform Provisioning Steps — ✅ ALL COMPLETE
 
-The following steps require a human operator and cannot be automated in this repo:
+Confirmed via `oc` CLI on 2026-04-14. All steps completed around 2026-02-21 to 2026-02-23.
 
-| Step | Action | Where |
-|------|--------|--------|
-| 1 | Register DSC in BC Gov Platform Product Registry | https://registry.developer.gov.bc.ca |
-| 2 | Receive license plate (currently `be808f` shared namespace is used) | Platform Registry |
-| 3 | Create Artifactory Docker repository (`be808f-docker-local`) | Artifactory console |
-| 4 | Create Artifactory service account; create pull secret in namespace | CLI / Artifactory |
-| 5 | Add `ARTIFACTORY_USERNAME` + `ARTIFACTORY_PASSWORD` as GitHub Secrets | GitHub repo settings |
-| 6 | Add `GITOPS_TOKEN` (PAT with write to tenant-gitops-be808f) as GitHub Secret | GitHub repo settings |
-| 7 | ~~**Obtain `DATREE_TOKEN` from ISB**~~ — **Not required.** The correct Datree implementation uses the Helm plugin in offline mode (`helm datree config set offline local`), which does not need a `DATREE_TOKEN`. Implement via a separate `policy-enforcement.yaml` workflow (see §14.2 Gap 1 update and `EmeraldDeploymentAnalysis.md` §7.2 for exact content). | Developer |
-| 8 | Onboard to Vault; create secret paths `secret/be808f/dev/dsc-db` and `secret/be808f/dev/dsc-admin` | Vault console |
-| 9 | Pre-create `dsc-db-secret` and `dsc-admin-secret` in `be808f-dev` namespace | `oc create secret` |
-| 10 | Mirror MariaDB 10.11 image to Artifactory (`be808f-docker-local/mariadb:10.11`) | Artifactory |
-| 11 | Submit one of the following to platform team to register DSC Application CRDs with ArgoCD: push `applications/argocd/be808f-dsc-dev.yaml` to the ArgoCD bootstrap path, or request platform team to `oc apply` the file | ArgoCD admin |
-| 12 | Push to `develop` branch of DSC-modernization to trigger first image build; confirm images appear in Artifactory | GitHub Actions |
+> **⚠️ Registry name correction**: The actual Artifactory repository is **`dbe8-docker-local`**,
+> not `be808f-docker-local` as originally planned. All CI env vars and Helm values use the
+> correct path. Update any references to `be808f-docker-local` you see.
+
+| Step | Action | Status | Confirmed |
+|------|--------|--------|-----------|
+| 1 | Register DSC in BC Gov Platform Product Registry | ✅ Done | Shared `be808f` namespace |
+| 2 | License plate | ✅ Done | `be808f` (shared with co-tenant) |
+| 3 | Create Artifactory Docker repository | ✅ Done | `dbe8-docker-local` (not `be808f-docker-local`) |
+| 4 | Create Artifactory service account + pull secret in namespace | ✅ Done | `artifactory-pull-secret` created 2026-02-23 |
+| 5 | `ARTIFACTORY_USERNAME` + `ARTIFACTORY_PASSWORD` GitHub Secrets | ✅ Done | Images push successfully |
+| 6 | `GITOPS_TOKEN` GitHub Secret | ✅ Done | GitOps values updated on push |
+| 7 | ~~Obtain `DATREE_TOKEN`~~ — **Not required** | N/A | Helm plugin offline mode used |
+| 8 | Vault onboarding | ⚠️ Pending | Dev uses raw `oc` secrets; Vault migration is future work |
+| 9 | `dsc-db-secret` + `dsc-admin-secret` in `be808f-dev` | ✅ Done | Created 2026-02-23 |
+| 10 | Mirror MariaDB 10.11 to Artifactory | ✅ Done | DB pod running 35+ days |
+| 11 | Register ArgoCD Application CRDs | ✅ Done | First sync 2026-02-21T08:19:03Z |
+| 12 | First image build + push to Artifactory | ✅ Done | Current tag: `9444112` |
 
 ---
 
@@ -556,7 +560,7 @@ The following aspects of the DSC implementation already align with the EA patter
 |---|---|---|
 | Standalone ArgoCD Applications per environment | `applications/argocd/be808f-dsc-{dev,test,prod}.yaml` — three separate CRDs | ✅ Conforms |
 | GitOps folder structure | `charts/`, `deploy/`, `applications/argocd/` in tenant-gitops-be808f | ✅ Conforms |
-| Artifactory image registry | `artifacts.developer.gov.bc.ca/be808f-docker-local/<image>:<tag>` | ✅ Conforms |
+| Artifactory image registry | `artifacts.developer.gov.bc.ca/dbe8-docker-local/<image>:<tag>` (actual repo is `dbe8-docker-local`) | ✅ Conforms |
 | Artifactory pull secret in namespace | `imagePullSecrets: [name: artifactory-pull-secret]` in Helm chart | ✅ Conforms |
 | Vault for secret injection | `secret.yaml` shape-only; real values from Vault at runtime | ✅ Conforms |
 | NetworkPolicies | deny-all + 5 explicit allow rules in `networkpolicies.yaml` | ✅ Conforms |
