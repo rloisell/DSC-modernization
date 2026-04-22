@@ -46,3 +46,4 @@ __pycache__/
 *.pyc
 *.pyo
 .dev-env
+src/DSC.WebClient/external/DSC-java
