@@ -1,3 +1,80 @@
+## 2026-06-17 — Session: Commit/push seeded-data fix + set DSC deployment scope to Dev-only
+
+**Objective**: Finalize and push the seeding/schema-fix changes, and document that DSC
+is intentionally deployed only to `be808f-dev` in Emerald.
+
+### Actions Taken
+- Updated deployment docs to declare DSC as **Dev-only** workload.
+- Replaced active test/prod promotion instructions with historical/reference-only notes.
+- Prepared and pushed a scoped commit containing migration + logging + doc updates.
+
+### Files Changed
+- `docs/deployment/DEPLOYMENT_NEXT_STEPS.md` — added Dev-only scope statement; retired active test/prod rollout section
+- `docs/deployment/STANDARDS.md` — added DSC deployment scope policy (`be808f-dev` only)
+- `AI/WORKLOG.md`, `AI/CHANGES.csv`, `AI/COMMANDS.sh`, `AI/COMMIT_INFO.txt` — session tracking updates
+
+### Result
+- Repository now records DSC deployment intent as Dev-only.
+- Commit pushed to branch `feat/rl-agents-submodule`.
+
+---
+
+## 2026-06-16 — Session: Seed test data into Emerald be808f-dev + fix WorkItems schema drift
+
+**Objective**: Populate Emerald `be808f-dev` DSC database with all available test data,
+and permanently fix the WorkItems schema drift discovered along the way.
+
+### Findings
+- Only `be808f-dev` has DSC deployed (test/prod namespaces have no DSC pods).
+- `POST /api/admin/seed/test-data` on Emerald initially returned 500
+  `Unknown column 'w.ActivityType' in 'SELECT'`.
+- Root cause: WorkItems table on Emerald was missing 5 columns the model
+  snapshot requires — `ActivityType`, `CpcCode`, `DirectorCode`, `ReasonCode`,
+  `UserId`. `__EFMigrationsHistory` had all 21 migrations stamped (via
+  `scripts/baseline-migrations.sh`), so `Database.Migrate()` could not self-heal.
+- Worse, no existing migration emits DDL for ActivityType / CpcCode / DirectorCode /
+  ReasonCode — `AddExpenseActivityFields` comments "_columns already exist in the
+  legacy-aligned schema_" and skips them. Means a fresh deploy would also be broken.
+
+### Op-fix on Emerald (immediate)
+- Applied ALTER TABLE via `oc exec` against `be808f-dsc-dev-dsc-app-db`:
+  added `ActivityType` longtext NOT NULL, `CpcCode` / `DirectorCode` / `ReasonCode`
+  longtext NULL, `UserId` char(36) ascii_general_ci NULL, index `IX_WorkItems_UserId`,
+  and FK `FK_WorkItems_Users_UserId → Users(Id) ON DELETE SET NULL`.
+- Re-ran seed via the public route with `X-Admin-Token` from `dsc-admin-secret`.
+
+### Seed result (be808f-dev)
+Users 11, Projects 13, Departments 4, Roles 4, ActivityCodes 12, NetworkNumbers 12,
+Budgets 2, Positions 6, ExpenseCategories 7, WorkItems 157, ProjectAssignments 28,
+TimeEntries 10 (cumulative; seeder is idempotent). `/api/catalog/activity-codes`
+verified through the Route.
+
+### Permanent fix (commit)
+- New migration `20260616222833_AddMissingWorkItemColumns` with idempotent raw SQL
+  (`ADD COLUMN IF NOT EXISTS` / `DROP COLUMN IF EXISTS`) for the 4 phantom columns.
+  Safe to apply on Emerald (no-op) and on a fresh DB (adds the columns).
+- `UserId` is still owned by the existing `AddUserIdToWorkItem` migration — only
+  Emerald needed the manual add because that migration was stamped without running.
+
+### Files Changed
+- `src/DSC.Data/Migrations/20260616222833_AddMissingWorkItemColumns.cs` — new
+- `src/DSC.Data/Migrations/20260616222833_AddMissingWorkItemColumns.Designer.cs` — new
+- `AI/WORKLOG.md`, `AI/CHANGES.csv`, `AI/COMMANDS.sh` — session logs updated
+
+### Verified Working
+- `https://dsc-api-be808f-dev.apps.emerald.devops.gov.bc.ca/health/ready` → 200
+- Seed endpoint returns full count payload (workItemsCreated: 28, projectAssignmentsCreated: 157,
+  timeEntriesCreated: 45 on the run that succeeded).
+- DB row counts match expected seed shape (see SEED_DATA.md).
+
+### Open follow-ups (not part of this session)
+- Re-baseline plan: consider squashing migrations once Emerald image with
+  `AddMissingWorkItemColumns` is deployed and drift is gone everywhere.
+- Decide whether to deploy DSC to `be808f-test` / `be808f-prod` namespaces and
+  seed them; today those have no DSC pods.
+
+---
+
 ## 2026-04-14 — Session: Local Dev Environment Stability Fixes
 
 **Objective**: Fix two local dev breakages (EF Core migration crash + Vite 500 errors)

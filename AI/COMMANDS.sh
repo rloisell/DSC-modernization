@@ -159,3 +159,60 @@ git add .kittify/ .github/prompts/ .gitignore .vscode/settings.json kitty-specs/
 git reset HEAD ".kittify/scripts/tasks/__pycache__/"
 git commit -m "feat: initialize spec-kitty and add specs for Todos #2-#9"  # 12ebe70
 git push origin develop
+
+# ── 2026-06-16: Seed Emerald be808f-dev + fix WorkItems schema drift ──────────
+
+# Verify OC session and DSC pod presence
+oc whoami
+oc get pods -n be808f-dev -l app.kubernetes.io/component=api
+
+# Discover deployed image and route
+oc get pod -n be808f-dev -l app.kubernetes.io/component=api \
+  -o jsonpath='{.items[0].spec.containers[0].image}'
+oc get route -n be808f-dev be808f-dsc-dev-dsc-app-api
+
+# Inspect WorkItems schema drift
+oc exec -i -n be808f-dev statefulset/be808f-dsc-dev-dsc-app-db -- \
+  sh -lc 'mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -D dsc_dev -e "DESCRIBE WorkItems;"'
+
+# Op-fix: add 5 missing columns + UserId index + FK (run only on be808f-dev)
+oc exec -i -n be808f-dev statefulset/be808f-dsc-dev-dsc-app-db -- \
+  sh -lc 'mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -D dsc_dev' << 'SQL'
+ALTER TABLE WorkItems
+  ADD COLUMN ActivityType longtext NOT NULL,
+  ADD COLUMN CpcCode      longtext NULL,
+  ADD COLUMN DirectorCode longtext NULL,
+  ADD COLUMN ReasonCode   longtext NULL,
+  ADD COLUMN UserId       char(36) CHARACTER SET ascii COLLATE ascii_general_ci NULL;
+CREATE INDEX IX_WorkItems_UserId ON WorkItems(UserId);
+ALTER TABLE WorkItems
+  ADD CONSTRAINT FK_WorkItems_Users_UserId
+  FOREIGN KEY (UserId) REFERENCES Users(Id) ON DELETE SET NULL;
+SQL
+
+# Trigger seed endpoint
+API_HOST=https://dsc-api-be808f-dev.apps.emerald.devops.gov.bc.ca
+ADMIN_TOKEN=$(oc get secret dsc-admin-secret -n be808f-dev \
+  -o jsonpath='{.data.admin-token}' | base64 -d)
+curl -sS -X POST "$API_HOST/api/admin/seed/test-data" \
+  -H "X-Admin-Token: $ADMIN_TOKEN" -w "\nHTTP %{http_code}\n"
+
+# Generate the permanent fixup migration
+dotnet ef migrations add AddMissingWorkItemColumns \
+  --project src/DSC.Data --startup-project src/DSC.Api --no-build
+# (Up()/Down() then populated with idempotent ALTER TABLE ... IF NOT EXISTS SQL.)
+
+# ── 2026-06-17: Commit/push + document DSC Dev-only deployment scope ─────────
+
+# Confirm worktree and update deployment scope docs
+git status --short
+
+# Commit only migration + logs + deployment docs (exclude unrelated local changes)
+git add src/DSC.Data/Migrations/20260616222833_AddMissingWorkItemColumns.cs \
+  src/DSC.Data/Migrations/20260616222833_AddMissingWorkItemColumns.Designer.cs \
+  docs/deployment/DEPLOYMENT_NEXT_STEPS.md \
+  docs/deployment/STANDARDS.md \
+  AI/WORKLOG.md AI/CHANGES.csv AI/COMMANDS.sh
+
+git commit -m "fix: finalize seeding schema fix and mark dev-only deployment"
+git push origin feat/rl-agents-submodule

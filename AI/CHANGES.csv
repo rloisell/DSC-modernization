@@ -1,4 +1,9 @@
 path,action,notes
+2026-06-16,src/DSC.Data/Migrations/20260616222833_AddMissingWorkItemColumns.cs,created,idempotent migration that backfills WorkItems.ActivityType/CpcCode/DirectorCode/ReasonCode columns missing from earlier migrations; uses ADD COLUMN IF NOT EXISTS
+2026-06-16,src/DSC.Data/Migrations/20260616222833_AddMissingWorkItemColumns.Designer.cs,created,EF Core designer for AddMissingWorkItemColumns; model snapshot unchanged
+2026-06-16,AI/WORKLOG.md,modified,prepended 2026-06-16 session entry — Emerald be808f-dev seeding + WorkItems schema drift fix
+2026-06-16,AI/CHANGES.csv,modified,appended 2026-06-16 entries for new migration and ops actions on Emerald
+2026-06-16,AI/COMMANDS.sh,modified,appended commands used to diagnose schema drift, apply ALTER TABLE on Emerald, and call seed endpoint
 2026-04-14,scripts/baseline-migrations.sh,created,new script to baseline EF Core __EFMigrationsHistory from empty (Java-created schema) — inserts all 21 migration IDs; idempotent
 2026-04-14,src/DSC.WebClient/vite.config.js,modified,refactored to loadEnv function form; proxy target reads VITE_API_URL from .env.local with fallback to localhost:5115 — eliminates proxy port drift
 2026-04-14,src/DSC.WebClient/.env.local.example,created,template for .env.local; documents VITE_API_URL override
@@ -62,3 +67,7 @@ AI/COMMANDS.sh,modified,Added Session A commands
 2026-02-22,AI/CHANGES.csv,modified,Added Session D entries
 2026-02-22,AI/COMMANDS.sh,modified,Added Session D commands
 2026-02-22,AI/COMMIT_INFO.txt,modified,Added Session D commit hash
+2026-06-17,docs/deployment/DEPLOYMENT_NEXT_STEPS.md,modified,documented DSC Dev-only scope and retired active test/prod promotion instructions
+2026-06-17,docs/deployment/STANDARDS.md,modified,added DSC deployment scope policy specifying be808f-dev only
+2026-06-17,AI/WORKLOG.md,modified,prepended 2026-06-17 session entry for commit/push and Dev-only documentation decision
+2026-06-17,AI/CHANGES.csv,modified,appended 2026-06-17 records for deployment-scope documentation updates

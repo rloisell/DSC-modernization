@@ -15,6 +15,14 @@ For the full technical specification, see **Section 9** of [CODING_STANDARDS.md]
 
 ## DSC Project Status
 
+## DSC Deployment Scope Policy
+
+As of 2026-06-17, DSC is designated a Dev-only workload on Emerald.
+
+- Target namespace: `be808f-dev` only
+- `be808f-test` and `be808f-prod` are out of scope for this application
+- Any test/prod examples in this document are platform reference material, not DSC rollout intent
+
 The table below tracks the DSC-modernization progress against each setup step.
 
 | Step | Status | Notes |

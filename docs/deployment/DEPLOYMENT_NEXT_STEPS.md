@@ -5,6 +5,10 @@
 
 **DSC is live on BC Gov Emerald (`be808f-dev`).** Confirmed via `oc` CLI on 2026-04-14.
 
+> Scope decision (confirmed 2026-06-17): DSC is a Dev-only workload in Emerald.
+> This application is not planned for deployment to `be808f-test` or `be808f-prod`.
+> Any historical test/prod references below are retained for record only.
+
 | Resource | Value |
 |---|---|
 | Frontend URL | `https://dsc-be808f-dev.apps.emerald.devops.gov.bc.ca` |
@@ -48,11 +52,11 @@ first deployment to dev.
 | GitHub Actions build pipeline | `.github/workflows/build-and-push.yml` | ✅ committed |
 | Helm chart (16 templates) | `tenant-gitops-be808f/charts/dsc-app/` | ✅ committed |
 | DSC dev values | `tenant-gitops-be808f/deploy/dsc-dev_values.yaml` | ✅ committed — `DataClass: "Low"` |
-| DSC test values | `tenant-gitops-be808f/deploy/dsc-test_values.yaml` | ✅ committed — `DataClass: "Low"` |
-| DSC prod values | `tenant-gitops-be808f/deploy/dsc-prod_values.yaml` | ✅ committed — `DataClass: "Low"` |
+| DSC test values | `tenant-gitops-be808f/deploy/dsc-test_values.yaml` | 📘 historical only — not used (Dev-only scope) |
+| DSC prod values | `tenant-gitops-be808f/deploy/dsc-prod_values.yaml` | 📘 historical only — not used (Dev-only scope) |
 | ArgoCD Application CRD — dev | `tenant-gitops-be808f/applications/argocd/be808f-dsc-dev.yaml` | ✅ committed — auto-sync |
-| ArgoCD Application CRD — test | `tenant-gitops-be808f/applications/argocd/be808f-dsc-test.yaml` | ✅ committed — manual sync |
-| ArgoCD Application CRD — prod | `tenant-gitops-be808f/applications/argocd/be808f-dsc-prod.yaml` | ✅ committed — manual sync |
+| ArgoCD Application CRD — test | `tenant-gitops-be808f/applications/argocd/be808f-dsc-test.yaml` | 📘 historical only — not used (Dev-only scope) |
+| ArgoCD Application CRD — prod | `tenant-gitops-be808f/applications/argocd/be808f-dsc-prod.yaml` | 📘 historical only — not used (Dev-only scope) |
 | CI helm lint workflow | `tenant-gitops-be808f/.github/workflows/ci.yml` | ✅ committed |
 
 ### Pending Code Changes (Not Yet Committed)
@@ -197,19 +201,13 @@ After a successful ArgoCD sync, these resources will exist in the namespace:
 
 ---
 
-## 5. Subsequent Environments (Test / Prod)
+## 5. Environment Scope (Dev Only)
 
-The test and prod ArgoCD Application CRDs are committed but set to **manual sync only**.
-To promote to test or prod after a successful dev deployment:
+DSC deployment scope is intentionally limited to `be808f-dev`.
 
-1. Update `deploy/dsc-test_values.yaml` image tags (or let the pipeline update them
-   automatically when a `test` branch is pushed)
-2. Open a PR to `tenant-gitops-be808f` updating the tags
-3. Merge PR → trigger a manual ArgoCD sync for `be808f-dsc-test`
-4. Repeat for prod with appropriate approvals
-
-Do **not** enable `automated` sync on test or prod Applications without an additional
-approval gate in the pipeline.
+- No promotion workflow to `be808f-test` or `be808f-prod` is in active use.
+- Test/prod values and ArgoCD manifests remain in the repository as historical artefacts.
+- Operational support, seeding, and validation should target Dev only.
 
 ---
 
