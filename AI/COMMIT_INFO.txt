@@ -56,3 +56,9 @@ Other actions recorded in AI/CHANGES.csv
 - rl-project-template updated with spec-kitty guidance (Section 11 + copilot-instructions.md)
 
 - DSC Java repo: 20571f7 — master — same doc standard applied
+
+Date: 2026-06-17
+Branch: feat/rl-agents-submodule
+Commit: 75e4b95
+Summary: fix: finalize seeding schema fix and dev-only scope
+Outcome: Pushed to origin/feat/rl-agents-submodule successfully.
